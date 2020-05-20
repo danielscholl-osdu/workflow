@@ -28,7 +28,3 @@ analyze:
     type: mvn
     target: testing/workflow-test-core/pom.xml
     path: .
-  - name: workflow-ibm
-    type: mvn
-    target: pom.xml
-    path: provider/workflow-ibm
