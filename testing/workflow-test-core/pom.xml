@@ -43,23 +43,7 @@
       </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>${gitlab-server}</id>
-            <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
-        </repository>
-    </repositories>
 
-    <distributionManagement>
-        <repository>
-            <id>${gitlab-server}</id>
-            <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
-        </repository>
-        <snapshotRepository>
-            <id>${gitlab-server}</id>
-            <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
-        </snapshotRepository>
-    </distributionManagement>
   </dependencyManagement>
 
   <dependencies>
@@ -73,4 +57,22 @@
       <artifactId>junit-jupiter</artifactId>
     </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>${gitlab-server}</id>
+      <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>${gitlab-server}</id>
+      <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
+    </repository>
+    <snapshotRepository>
+      <id>${gitlab-server}</id>
+      <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
