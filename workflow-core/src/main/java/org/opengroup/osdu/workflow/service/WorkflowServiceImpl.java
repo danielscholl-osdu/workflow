@@ -16,6 +16,7 @@
 
 package org.opengroup.osdu.workflow.service;
 
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,10 @@ public class WorkflowServiceImpl implements IWorkflowService {
     String workflowId = UUID.randomUUID().toString();
     String airflowRunId = UUID.randomUUID().toString();
 
-    submitIngestService.submitIngest(strategyName, request.getContext());
+    Map<String, Object> context = request.getContext();
+    context.put("run_id", workflowId);
+
+    submitIngestService.submitIngest(strategyName, context);
 
     workflowStatusRepository.saveWorkflowStatus(WorkflowStatus.builder()
         .workflowId(workflowId)
