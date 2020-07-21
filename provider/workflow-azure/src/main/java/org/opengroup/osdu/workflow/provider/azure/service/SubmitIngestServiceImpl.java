@@ -40,6 +40,7 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
   private static Logger logger = Logger.getLogger(SubmitIngestServiceImpl.class.getName());
 
   private final static String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
+  private final static String RUN_ID_PARAMETER_NAME = "run_id";
 
   @Autowired
   @Named("AIRFLOW_URL")
@@ -55,7 +56,13 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
       dagName));
 
     String airflowApiUrl = String.format("%s/api/experimental/dags/%s/dag_runs", airflowURL, dagName);
-    JSONObject requestBody = new JSONObject(data);
+
+    String workflowId = data.get(RUN_ID_PARAMETER_NAME).toString();
+    data.remove(RUN_ID_PARAMETER_NAME);
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(RUN_ID_PARAMETER_NAME, workflowId);
+    requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, data);
 
     logger.log(Level.INFO, String.format("Airflow endpoint: {%s}", airflowApiUrl));
 
