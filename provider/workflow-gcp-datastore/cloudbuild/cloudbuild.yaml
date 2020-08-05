@@ -22,7 +22,7 @@ steps:
             '--build-arg', 'PORT=${_PORT}',
             '-t', 'gcr.io/$PROJECT_ID/os-workflow/workflow-${_PROVIDER_NAME}:${_SHORT_SHA}',
             '-t', 'gcr.io/$PROJECT_ID/os-workflow/workflow-${_PROVIDER_NAME}:latest',
-            '-f', 'provider/workflow-${_PROVIDER_NAME}/cloudbuild/Dockerfile.cloudbuild.os-workflow',
+            '-f', 'provider/workflow-${_PROVIDER_NAME}/cloudbuild/Dockerfile.cloudbuild'
             '.'
     ]
 images:
