@@ -24,12 +24,12 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <modelVersion>4.0.0</modelVersion>  
-  <artifactId>workflow-azure</artifactId>  
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>workflow-azure</artifactId>
   <description>Workflow service on Azure</description>
   <packaging>jar</packaging>
 
-  <properties> 
+  <properties>
     <azure.version>2.1.7</azure.version>
     <osdu.azurecore.version>0.0.6-SNAPSHOT</osdu.azurecore.version>
     <azure.appservice.resourcegroup></azure.appservice.resourcegroup>
@@ -83,8 +83,8 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.10.19</version>
+      <artifactId>mockito-core</artifactId>
+      <version>3.4.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -126,27 +126,27 @@
       <url>https://community.opengroup.org/api/v4/projects/44/packages/maven</url>
     </snapshotRepository>
   </distributionManagement>
-  <build> 
-    <plugins> 
-      <plugin> 
-        <groupId>org.springframework.boot</groupId>  
-        <artifactId>spring-boot-maven-plugin</artifactId>  
-        <executions> 
-          <execution> 
-            <goals> 
-              <goal>repackage</goal> 
-            </goals>  
-            <configuration> 
-              <classifier>spring-boot</classifier>  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <classifier>spring-boot</classifier>
               <mainClass>org.opengroup.osdu.workflow.provider.azure.WorkflowApplication</mainClass>
-            </configuration> 
-          </execution> 
-        </executions> 
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
-        <groupId>com.microsoft.azure</groupId>  
-        <artifactId>azure-webapp-maven-plugin</artifactId>  
-        <version>1.7.0</version>  
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>azure-webapp-maven-plugin</artifactId>
+        <version>1.7.0</version>
         <configuration>
           <schemaVersion>V2</schemaVersion>
           <authentication>
@@ -175,5 +175,5 @@
         </configuration>
       </plugin>
     </plugins>
-  </build> 
+  </build>
 </project>
