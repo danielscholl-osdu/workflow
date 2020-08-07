@@ -16,10 +16,9 @@
 
 package org.opengroup.osdu.workflow;
 
+import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayNameGenerator;
-
-import java.lang.reflect.Method;
 
 /**
  * JUnit display name generator. It replaces a "camelCase" name

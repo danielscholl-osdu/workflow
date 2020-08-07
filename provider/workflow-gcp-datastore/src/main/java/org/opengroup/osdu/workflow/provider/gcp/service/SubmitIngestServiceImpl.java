@@ -16,9 +16,15 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
 
+import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -27,13 +33,6 @@ import org.opengroup.osdu.workflow.exception.RuntimeException;
 import org.opengroup.osdu.workflow.provider.gcp.property.AirflowProperties;
 import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @RequiredArgsConstructor

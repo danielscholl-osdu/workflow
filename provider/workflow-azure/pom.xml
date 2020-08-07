@@ -109,35 +109,18 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>${gitlab-server}</id>
-      <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>${gitlab-server}</id>
-      <url>https://community.opengroup.org/api/v4/projects/44/packages/maven</url>
-    </repository>
-    <snapshotRepository>
-      <id>${gitlab-server}</id>
-      <url>https://community.opengroup.org/api/v4/projects/44/packages/maven</url>
-    </snapshotRepository>
-  </distributionManagement>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-            <configuration>
-              <classifier>spring-boot</classifier>
+  <build> 
+    <plugins> 
+      <plugin> 
+        <groupId>org.springframework.boot</groupId>  
+        <artifactId>spring-boot-maven-plugin</artifactId>  
+        <executions> 
+          <execution> 
+            <goals> 
+              <goal>repackage</goal> 
+            </goals>  
+            <configuration> 
+              <classifier>spring-boot</classifier>  
               <mainClass>org.opengroup.osdu.workflow.provider.azure.WorkflowApplication</mainClass>
             </configuration>
           </execution>
