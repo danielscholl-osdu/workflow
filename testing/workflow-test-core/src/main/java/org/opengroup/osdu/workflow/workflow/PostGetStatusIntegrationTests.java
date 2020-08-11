@@ -78,6 +78,7 @@ public abstract class PostGetStatusIntegrationTests extends TestBase {
 
 	@Test
 	public void should_returnBadRequest_when_givenEmptyWorkflowId() throws Exception {
+	  
 		ClientResponse response = client.send(
 				HttpMethod.POST,
 				GET_STATUS_URL,
