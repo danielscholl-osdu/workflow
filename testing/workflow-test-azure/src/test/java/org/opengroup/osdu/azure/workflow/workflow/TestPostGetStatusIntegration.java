@@ -17,20 +17,24 @@ import org.opengroup.osdu.workflow.workflow.PostGetStatusIntegrationTests;
 
 import javax.ws.rs.HttpMethod;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_STATUS_URL;
 
 public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests {
   protected static final DummyRecordsHelper RECORDS_HELPER = new DummyRecordsHelper();
+
 	@BeforeEach
 	@Override
-	public void setup() throws Exception {
+	public void setup() {
 		this.client = new HTTPClientAzure();
 		this.headers = client.getCommonHeader();
 	}
+
   @Test
   @Override
-  public void should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
+  public void should_returnUnauthorized_when_notGivenAccessToken()  {
     ClientResponse response = client.send(
         HttpMethod.POST,
         GET_STATUS_URL,
@@ -65,13 +69,13 @@ public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests 
     );
     Assert.assertEquals(HttpStatus.SC_BAD_REQUEST,response.getStatus());
     DummyRecordsHelper.BadRequestMock responseObject = RECORDS_HELPER.getRecordsMockFromBadRequestResponse(response);
-    Assert.assertEquals(responseObject.message,"JSON parse error: Unrecognized field \"Workflow\" (class org.opengroup.osdu.workflow.model.GetStatusRequest), not marked as ignorable; nested exception is com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field \"Workflow\" (class org.opengroup.osdu.workflow.model.GetStatusRequest), not marked as ignorable (one known property: \"WorkflowID\"])\n" +
-        " at [Source: (PushbackInputStream); line: 1, column: 14] (through reference chain: org.opengroup.osdu.workflow.model.GetStatusRequest[\"Workflow\"])");
+   String resp="Unrecognized field \"Workflow\"";
+    assertThat(responseObject.message,containsString(resp));
 
   }
 	@AfterEach
 	@Override
-	public void tearDown() throws Exception {
+	public void tearDown()  {
 		this.client = null;
 		this.headers = null;
 	}

@@ -21,12 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.*;
 
 public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegrationTests {
+
   @BeforeEach
   @Override
-  public void setup() throws Exception {
+  public void setup() {
     this.client = new HTTPClientAzure();
     this.headers = client.getCommonHeader();
   }
+
 	@Test
   @Override
 	public void should_returnSameWorkflowId_when_givenWorkflowId() throws Exception {
@@ -59,10 +61,8 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 
 
-
-
-	@Test
-@Override
+  @Test
+ @Override
 	public void should_returnBadRequest_when_givenCurrentWorkflowStatus() throws Exception {
   ClientResponse workflowStartedResponse = client.send(
       HttpMethod.POST,
@@ -104,6 +104,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 		assertTrue(error.contains(WORKFLOW_STATUS_NOT_ALLOWED_MESSAGE));
 	}
+
   @Test
   @Override
   public void should_returnBadRequest_when_givenFinishedWorkflowId() throws Exception {
@@ -122,7 +123,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 
 	@Test
-@Override
+  @Override
 	public void should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
 		ClientResponse response = client.send(
 				HttpMethod.POST,
@@ -137,7 +138,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 
 	@Test
-@Override
+  @Override
 	public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
 		ClientResponse response = client.send(
 				HttpMethod.POST,
@@ -149,9 +150,10 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 		assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
 	}
+
   @AfterEach
   @Override
-  public void tearDown() throws Exception {
+  public void tearDown()  {
     this.client = null;
     this.headers = null;
   }

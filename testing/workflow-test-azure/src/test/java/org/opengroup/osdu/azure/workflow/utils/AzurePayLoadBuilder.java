@@ -18,6 +18,7 @@ public class AzurePayLoadBuilder {
 
     return new Gson().toJson(payload);
   }
+
   public static String buildStartWorkflow(Map<String, Object> context, String type){
     Map<String, Object> payload = new HashMap<>();
 
@@ -27,9 +28,11 @@ public class AzurePayLoadBuilder {
 
     return new Gson().toJson(payload);
   }
+
   public static String getValidWorkflowPayload(){
     return PayloadBuilder.buildStartWorkflow(buildContext(), TestConstants.WORKFLOW_TYPE_INGEST);
   }
+
   public static String getInValidWorkflowPayload(){
     return AzurePayLoadBuilder.buildStartWorkflow(buildContext(), TestConstants.WORKFLOW_TYPE_INGEST);
   }

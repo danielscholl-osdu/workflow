@@ -27,12 +27,14 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.*;
 
 public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrationTests {
   protected static final DummyRecordsHelper RECORDS_HELPER = new DummyRecordsHelper();
+
 	@BeforeEach
 	@Override
-	public void setup() throws Exception {
+	public void setup()  {
 		this.client = new HTTPClientAzure();
 		this.headers = client.getCommonHeader();
 	}
+
   @Test
   @Override
   public void should_returnWorkflowId_when_givenValidRequest() throws Exception{
@@ -50,6 +52,7 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 
     assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_ID_FIELD).getAsString()));
   }
+
   @Test
   public void should_returnWorkflowId_when_givenValidRequest_for_datatype_wellLog() throws Exception{
 	  JsonObject dataJsonForWellLog = new JsonObject();
@@ -70,6 +73,7 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 
     assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_ID_FIELD).getAsString()));
   }
+
   @Test
   @Override
   public void should_returnSubmitted_when_givenNewlyCreatedWorkflowId() throws Exception {
@@ -99,9 +103,10 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 
     assertEquals(WORKFLOW_STATUS_TYPE_SUBMITTED, responseBody.get(STATUS_FIELD).getAsString());
   }
+
   @Test
   @Override
-  public void should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
+  public void should_returnUnauthorized_when_notGivenAccessToken() {
     ClientResponse response = client.send(
         HttpMethod.POST,
         START_WORKFLOW_URL,
@@ -112,6 +117,7 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 
     assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
   }
+
   @Test
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     ClientResponse response = client.send(
@@ -124,6 +130,7 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 
     assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
   }
+
   @Test
   public void should_return_400_bad_request_when_dag_Not_Found ()throws Exception
   {
@@ -138,7 +145,6 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
     DummyRecordsHelper.BadRequestMock responseObject = RECORDS_HELPER.getRecordsMockFromBadRequestResponse(response);
     Assert.assertEquals(responseObject.status,"400");
     String resp="Dag for Workflow type - INGEST, Data type - opaqueo and User id";
-    System.out.println(responseObject.message);
     assertThat(responseObject.message,containsString(resp));
 
   }
@@ -163,9 +169,10 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
     Assert.assertEquals(HttpStatus.SC_BAD_REQUEST,response.getStatus());
 
   }
+
 	@AfterEach
 	@Override
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		this.client = null;
 		this.headers = null;
 	}
