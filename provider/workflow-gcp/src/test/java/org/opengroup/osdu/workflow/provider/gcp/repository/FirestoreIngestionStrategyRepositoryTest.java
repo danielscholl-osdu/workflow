@@ -44,8 +44,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.model.WorkflowType;
-import org.opengroup.osdu.workflow.ReplaceCamelCase;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
+import org.opengroup.osdu.workflow.provider.gcp.ReplaceCamelCase;
 import org.opengroup.osdu.workflow.provider.gcp.exception.IngestionStrategyQueryException;
 import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
 
