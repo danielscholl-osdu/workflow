@@ -1,5 +1,7 @@
 package org.opengroup.osdu.workflow.consts;
 
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT;
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.TEST_DAG_NAME;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.WORKFLOW_HOST;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildContext;
@@ -16,6 +18,13 @@ public class TestConstants {
 	public static final String GET_STATUS_API_ENDPOINT = "/getStatus";
 	public static final String UPDATE_STATUS_API_ENDPOINT = "/updateStatus";
 
+	public static final String CREATE_WORKFLOW_API_ENDPOINT = "/v1/workflow";
+	public static final String CREATE_WORKFLOW_RUN_API_ENDPOINT =
+      CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun";
+	public static final String GET_DETAILS_WORKFLOW_RUN_API_ENDPOINT =
+      CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun/%s";
+	public static final String GET_ALL_WORKFLOW_PREFIX = "?prefix=";
+
 	public static final String WORKFLOW_TYPE_INGEST = "ingest";
 
 	public static final String WORKFLOW_ID_FIELD = "WorkflowID";
@@ -30,6 +39,15 @@ public class TestConstants {
 			getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_STATUS_API_ENDPOINT;
 	public static final String UPDATE_STATUS_URL =
 			getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + UPDATE_STATUS_API_ENDPOINT;
+  public static final String CREATE_WORKFLOW_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT;
+  public static final String CREATE_WORKFLOW_RUN_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_RUN_API_ENDPOINT;
+  public static final String GET_DETAILS_WORKFLOW_RUN_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_DETAILS_WORKFLOW_RUN_API_ENDPOINT;
+  public static final String GET_ALL_WORKFLOW_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT +
+          GET_ALL_WORKFLOW_PREFIX + getEnvironmentVariableOrDefaultKey(TEST_DAG_NAME);
 
 	public static final String NON_EXISTING_WORKFLOW_ID = "non-existing-workflow-id";
 
@@ -37,6 +55,9 @@ public class TestConstants {
 	public static final String WORKFLOW_TYPE_NOT_NULL_MESSAGE = "WorkflowType: must not be null";
 	public static final String WORKFLOW_ALREADY_HAS_STATUS_MESSAGE = "Workflow status for workflow id: %s already has status:%s and can not be updated";
 	public static final String WORKFLOW_STATUS_NOT_ALLOWED_MESSAGE = "Status: Not allowed workflow status type: SUBMITTED, Should be one of: [RUNNING, FINISHED, FAILED]";
+
+	public static final String CREATE_WORKFLOW_WORKFLOW_NAME = getEnvironmentVariableOrDefaultKey(TEST_DAG_NAME);
+	public static final String DATA_PARTITION_ID_TENANT = getEnvironmentVariableOrDefaultKey(DEFAULT_DATA_PARTITION_ID_TENANT);
 
 	public static String getValidWorkflowPayload(){
 		return buildStartWorkflow(buildContext(), WORKFLOW_TYPE_INGEST);

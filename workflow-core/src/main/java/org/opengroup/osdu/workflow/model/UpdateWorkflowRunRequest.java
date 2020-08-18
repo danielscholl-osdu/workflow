@@ -15,14 +15,20 @@
   limitations under the License.
 */
 
-package org.opengroup.osdu.gcp.workflow;
+package org.opengroup.osdu.workflow.model;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.SelectPackages;
-import org.junit.runner.RunWith;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 
-@RunWith(JUnitPlatform.class)
-@SelectPackages("org.opengroup.osdu.gcp.workflow")
-public class RunTests {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateWorkflowRunRequest {
+
+  @JsonProperty("status")
+  private WorkflowStatusType status;
 
 }

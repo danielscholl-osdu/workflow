@@ -26,11 +26,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.opengroup.osdu.workflow.model.jackson.ForceStringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class ObjectMapperConfig {
 
   @Bean
+  @Primary
   public ObjectMapper objectMapper() {
 
     SimpleModule module = new SimpleModule();

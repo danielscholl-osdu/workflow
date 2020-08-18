@@ -15,14 +15,25 @@
   limitations under the License.
 */
 
-package org.opengroup.osdu.gcp.workflow;
+package org.opengroup.osdu.workflow.provider.gcp.property;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.SelectPackages;
-import org.junit.runner.RunWith;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-@RunWith(JUnitPlatform.class)
-@SelectPackages("org.opengroup.osdu.gcp.workflow")
-public class RunTests {
+@Setter
+@Getter
+@ConfigurationProperties
+@Component
+public class WorkflowProperties {
+
+  private String workflowDatastoreNamespace;
+
+  private String workflowRunDatastoreNamespace;
+
+  private String workflowDatastoreKind;
+
+  private String workflowRunDatastoreKind;
 
 }

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.provider.gcp.config;
+package org.opengroup.osdu.workflow.provider.gcp;
 
-import org.opengroup.osdu.workflow.provider.gcp.IGcpPackageMarker;
-import org.springframework.cloud.gcp.data.datastore.repository.config.EnableDatastoreRepositories;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@Configuration
-@EnableDatastoreRepositories(basePackageClasses = IGcpPackageMarker.class)
-public class GcpConfiguration {
+@SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
+@ConfigurationPropertiesScan("org.opengroup.osdu.workflow.provider.gcp.config")
+public class WorkflowGcpDatastoreApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(WorkflowGcpDatastoreApplication.class, args);
+  }
 
 }
