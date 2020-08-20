@@ -89,12 +89,7 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>${gitlab-server}</id>
-            <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
-        </repository>
-    </repositories>
+
 
     <distributionManagement>
         <repository>
