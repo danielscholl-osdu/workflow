@@ -32,5 +32,5 @@ include:
     file: 'publishing/pages.yml'
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: 'osdu-gcp-cloudrun'
+    ref: 'master'
     file: 'cloud-providers/osdu-gcp-cloudrun.yml'
