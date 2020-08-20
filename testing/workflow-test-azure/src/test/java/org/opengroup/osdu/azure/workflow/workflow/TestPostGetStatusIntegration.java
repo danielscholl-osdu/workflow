@@ -35,7 +35,6 @@ public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests 
   @Test
   @Override
   public void should_returnUnauthorized_when_notGivenAccessToken()  {
-    System.out.println("Inside Tests");
     ClientResponse response = client.send(
         HttpMethod.POST,
         GET_STATUS_URL,
