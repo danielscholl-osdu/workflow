@@ -36,8 +36,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opengroup.osdu.workflow.ReplaceCamelCase;
 import org.opengroup.osdu.workflow.exception.RuntimeException;
+import org.opengroup.osdu.workflow.provider.gcp.ReplaceCamelCase;
 import org.opengroup.osdu.workflow.provider.gcp.property.AirflowProperties;
 import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 
