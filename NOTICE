@@ -69,8 +69,10 @@ The following software have components provided under the terms of this license:
 - Guava ListenableFuture only (from )
 - Guava: Google Core Libraries for Java (from https://github.com/google/guava.git)
 - Guava: Google Core Libraries for Java (from https://github.com/google/guava.git)
+- Guava: Google Core Libraries for Java (from https://github.com/google/guava.git)
 - HPPC Collections (from http://labs.carrotsearch.com)
 - Hibernate Validator Engine (from )
+- J2ObjC Annotations (from https://github.com/google/j2objc/)
 - J2ObjC Annotations (from https://github.com/google/j2objc/)
 - JBoss Logging 3 (from http://www.jboss.org)
 - JCIP Annotations under Apache License (from http://stephenc.github.com/jcip-annotations)
@@ -235,6 +237,7 @@ The following software have components provided under the terms of this license:
 - elasticsearch-core (from https://github.com/elastic/elasticsearch)
 - elasticsearch-core (from https://github.com/elastic/elasticsearch)
 - error-prone annotations (from )
+- error-prone annotations (from )
 - io.grpc:grpc-alts (from https://github.com/grpc/grpc-java)
 - io.grpc:grpc-api (from https://github.com/grpc/grpc-java)
 - io.grpc:grpc-auth (from https://github.com/grpc/grpc-java)
@@ -363,6 +366,13 @@ The following software have components provided under the terms of this license:
 - jakarta.xml.bind-api (from )
 
 ========================================================================
+CC-BY-2.5
+========================================================================
+The following software have components provided under the terms of this license:
+
+- Checker Qual (from https://checkerframework.org)
+
+========================================================================
 CC-BY-3.0
 ========================================================================
 The following software have components provided under the terms of this license:
@@ -476,6 +486,7 @@ GPL-2.0-with-classpath-exception
 The following software have components provided under the terms of this license:
 
 - Checker Qual (from https://checkerframework.org)
+- Checker Qual (from https://checkerframework.org)
 - JavaBeans Activation Framework (from )
 - JavaMail API (from )
 - jakarta.annotation-api (from https://projects.eclipse.org/projects/ee4j.ca)
@@ -539,10 +550,18 @@ The following software have components provided under the terms of this license:
 - Apache Log4j Core (from )
 
 ========================================================================
+LGPL-3.0-or-later
+========================================================================
+The following software have components provided under the terms of this license:
+
+- Checker Qual (from https://checkerframework.org)
+
+========================================================================
 MIT
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Animal Sniffer Annotations (from )
 - Animal Sniffer Annotations (from )
 - Azure AD Spring Security Integration Spring Boot Starter (from https://github.com/Microsoft/azure-spring-boot)
 - Azure Java Client Authentication Library for AutoRest (from https://github.com/Azure/autorest-clientruntime-for-java)
@@ -551,6 +570,7 @@ The following software have components provided under the terms of this license:
 - Azure Spring Boot AutoConfigure (from https://github.com/Microsoft/azure-spring-boot)
 - Azure Spring Boot Starter (from https://github.com/Microsoft/azure-spring-boot)
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html)
+- Checker Qual (from https://checkerframework.org)
 - Checker Qual (from https://checkerframework.org)
 - Checker Qual (from https://checkerframework.org)
 - Extensions on Apache Proton-J library (from https://github.com/Azure/qpid-proton-j-extensions)
@@ -622,6 +642,7 @@ Public-Domain
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Guava: Google Core Libraries for Java (from https://github.com/google/guava.git)
 - HdrHistogram (from http://hdrhistogram.github.io/HdrHistogram/)
 - LatencyUtils (from http://latencyutils.github.io/LatencyUtils/)
 
@@ -630,6 +651,7 @@ SPL-1.0
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Checker Qual (from https://checkerframework.org)
 - Checker Qual (from https://checkerframework.org)
 
 ========================================================================
