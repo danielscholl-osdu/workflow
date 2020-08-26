@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,10 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
 
     String airflowApiUrl = String.format("%s/api/experimental/dags/%s/dag_runs", airflowURL, dagName);
 
-    String workflowId = data.get(RUN_ID_PARAMETER_NAME).toString();
-    data.remove(RUN_ID_PARAMETER_NAME);
+/*    String workflowId = data.get(RUN_ID_PARAMETER_NAME).toString();
+    data.remove(RUN_ID_PARAMETER_NAME);*/
+    String workflowId = data.get(WorkflowStatus.Fields.WORKFLOW_ID).toString();
+    data.remove(WorkflowStatus.Fields.WORKFLOW_ID);
 
     JSONObject requestBody = new JSONObject();
     requestBody.put(RUN_ID_PARAMETER_NAME, workflowId);
