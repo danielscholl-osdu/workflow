@@ -28,6 +28,13 @@ import java.util.Map;
 
 @Slf4j
 public class AirflowClient  {
+  /**
+   * Sends a request to airflow by dag name
+   * @param airflowDagURL
+   * @param body
+   * @param dagName
+   * @throws IOException
+   */
     public void makeRequestToAirflow(String airflowDagURL, String body, String dagName) throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
@@ -44,6 +51,14 @@ public class AirflowClient  {
         }
     }
 
+  /**
+   * Basic helper function for http connections
+   * @param body
+   * @param headers
+   * @param targetURL
+   * @return
+   * @throws IOException
+   */
     private HttpURLConnection getConnection(String body, Map<String, String> headers, String targetURL) throws IOException {
         URL url = new URL(targetURL);
         HttpURLConnection connection =  (HttpURLConnection) url.openConnection();
@@ -60,6 +75,12 @@ public class AirflowClient  {
         return connection;
     }
 
+  /**
+   * Basic helper function for actually sending the request to airflow
+   * @param connection
+   * @param body
+   * @throws IOException
+   */
   public void sendRequest(HttpURLConnection connection, String body) throws IOException {
     DataOutputStream writer = new DataOutputStream (
         connection.getOutputStream());
@@ -67,6 +88,12 @@ public class AirflowClient  {
     writer.close();
   }
 
+  /**
+   * Basic helper function for reading the response back from airflow
+   * @param connection
+   * @return
+   * @throws IOException
+   */
   public StringBuilder getResponse(HttpURLConnection connection) throws IOException {
     StringBuilder response = new StringBuilder();
     InputStream is = connection.getInputStream();

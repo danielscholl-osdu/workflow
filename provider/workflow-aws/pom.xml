@@ -33,7 +33,6 @@
   <description>AWS implementation of Workflow service APIs</description>
 
   <properties>
-    <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
     <version.number>0.0.1-SNAPSHOT</version.number>
   </properties>
 
@@ -103,10 +102,17 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <classifier>spring-boot</classifier>
-          <mainClass>org.opengroup.osdu.workflow.WorkflowApplication</mainClass>
-        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <classifier>spring-boot</classifier>
+              <mainClass>org.opengroup.osdu.workflow.WorkflowApplication</mainClass>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>

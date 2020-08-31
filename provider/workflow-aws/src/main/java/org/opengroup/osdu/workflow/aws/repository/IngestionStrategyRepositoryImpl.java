@@ -26,7 +26,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 
-// TODO Will be moved to registry service
 @Repository
 @Slf4j
 @RequiredArgsConstructor
@@ -40,11 +39,21 @@ public class IngestionStrategyRepositoryImpl implements IIngestionStrategyReposi
   String dynamoDbEndpoint;
   private DynamoDBQueryHelper queryHelper;
 
+  /**
+   * Spring boot constructor that news up an object to interact with dynamo
+   */
   @PostConstruct
   public void init() {
     queryHelper = new DynamoDBQueryHelper(dynamoDbEndpoint, dynamoDbRegion, tablePrefix);
   }
 
+  /**
+   * Interacts with the ingestion strategy dynamo table to retrieve ingestion strategies
+   * @param workflowType type of workflow
+   * @param dataType     data type
+   * @param userId       user id
+   * @return
+   */
   @Override
   public IngestionStrategy findByWorkflowTypeAndDataTypeAndUserId(WorkflowType workflowType, String dataType, String userId) {
 

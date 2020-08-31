@@ -24,16 +24,13 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.workflow.aws.WorkflowAwsApplication;
-import org.opengroup.osdu.workflow.aws.util.DateTime;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowStatusDoc;
 import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.Date;
 
 import static org.mockito.MockitoAnnotations.initMocks;
-
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes={WorkflowAwsApplication.class})
@@ -43,13 +40,10 @@ public class WorkflowStatusRepositoryImplTest {
     WorkflowStatusRepositoryImpl CUT = new WorkflowStatusRepositoryImpl();
 
     @Mock
-    private DateTime dateTime;
-
-    @Mock
     private DynamoDBQueryHelper queryHelper;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         initMocks(this);
     }
 
@@ -92,20 +86,19 @@ public class WorkflowStatusRepositoryImplTest {
     public void saveWorkflowStatus()
     {
         // Arrange
+        Date d = new Date();
         WorkflowStatus expected = new WorkflowStatus();
         expected.setWorkflowId("TestWorkflowId");
         expected.setAirflowRunId("TestAirflowRunId");
         expected.setWorkflowStatusType(WorkflowStatusType.SUBMITTED);
-
-        Date testDate = new Date();
-        Mockito.when(dateTime.getCurrentDate()).thenReturn(testDate);
+        expected.setSubmittedAt(d);
 
         WorkflowStatusDoc expectedDoc = new WorkflowStatusDoc();
         expectedDoc.setWorkflowId(expected.getWorkflowId());
         expectedDoc.setAirflowRunId(expected.getAirflowRunId());
         expectedDoc.setWorkflowStatusType(expected.getWorkflowStatusType().toString());
         expectedDoc.setSubmittedBy(expected.getSubmittedBy());
-        expectedDoc.setSubmittedAt(testDate);
+        expectedDoc.setSubmittedAt(d);
 
         // Act
         WorkflowStatus actual = CUT.saveWorkflowStatus(expected);
@@ -121,7 +114,6 @@ public class WorkflowStatusRepositoryImplTest {
     String workflowId = "6893fab0-38eb-4aed-96e9-c667f1e771c8";
     WorkflowStatusType updatedWorkflowStatusType = WorkflowStatusType.FINISHED;
     Date testDate = new Date();
-    Mockito.when(dateTime.getCurrentDate()).thenReturn(testDate);
 
     WorkflowStatus original = new WorkflowStatus();
     original.setWorkflowId(workflowId);

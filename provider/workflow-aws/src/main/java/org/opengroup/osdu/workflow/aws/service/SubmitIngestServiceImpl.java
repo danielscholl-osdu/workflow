@@ -41,11 +41,21 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
 
   private final static String PARSE_ERROR_MSG = "Unable to parse data for dag kickoff";
 
+  /**
+   * Spring boot constructor newing up an airflow client
+   */
   @PostConstruct
   public void init(){
     airflowClient = new AirflowClient();
   }
 
+  /**
+   * This gets called by the core code, it's meant to kick off a dag on an
+   * airflow instance.
+   * @param dagName
+   * @param data
+   * @return
+   */
   @Override
   public boolean submitIngest(String dagName, Map<String, Object> data) {
     String serializedData = serializeData(data);
@@ -58,6 +68,11 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
     }
   }
 
+  /**
+   * Helper function that serializes a dictionary into a string to be sent to airflow
+   * @param data
+   * @return
+   */
   private String serializeData(Map<String, Object> data){
     String serializedData;
     try {
