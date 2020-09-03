@@ -40,6 +40,7 @@ import org.opengroup.osdu.workflow.model.GetStatusRequest;
 import org.opengroup.osdu.workflow.model.GetStatusResponse;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;
 import org.opengroup.osdu.workflow.model.UpdateStatusResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
@@ -102,7 +103,7 @@ public class WorkflowStatusMvcTest {
     given(workflowStatusRepository
         .findWorkflowStatus(eq(WORKFLOW_ID))).willReturn(status);
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -134,7 +135,7 @@ public class WorkflowStatusMvcTest {
     given(workflowStatusRepository
         .findWorkflowStatus(eq(WORKFLOW_ID))).willReturn(null);
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -158,7 +159,7 @@ public class WorkflowStatusMvcTest {
     // given
     HttpHeaders headers = new HttpHeaders();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -187,7 +188,7 @@ public class WorkflowStatusMvcTest {
 
     GetStatusRequest request = GetStatusRequest.builder().workflowId(WORKFLOW_ID).build();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willThrow(AppException.createUnauthorized("test: viewer"));
 
     // when
@@ -203,7 +204,7 @@ public class WorkflowStatusMvcTest {
         .andReturn();
 
     // then
-    verify(authorizationService).authorizeAny(any(), eq("service.storage.creator"));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
   }
 
 
@@ -236,7 +237,7 @@ public class WorkflowStatusMvcTest {
         .updateWorkflowStatus(eq(status.getWorkflowId()), eq(WorkflowStatusType.RUNNING)))
         .willReturn(updatedStatus);
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -266,7 +267,7 @@ public class WorkflowStatusMvcTest {
     // given
     HttpHeaders headers = new HttpHeaders();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -297,7 +298,7 @@ public class WorkflowStatusMvcTest {
         .workflowId(WORKFLOW_ID)
         .workflowStatusType(WorkflowStatusType.RUNNING).build();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willThrow(AppException.createUnauthorized("test: viewer"));
 
     // when
@@ -313,7 +314,7 @@ public class WorkflowStatusMvcTest {
         .andReturn();
 
     // then
-    verify(authorizationService).authorizeAny(any(), eq("service.storage.creator"));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
   }
 
   private HttpHeaders getHttpHeaders() {
