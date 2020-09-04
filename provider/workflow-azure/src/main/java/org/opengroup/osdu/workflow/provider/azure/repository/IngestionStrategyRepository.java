@@ -22,9 +22,12 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.opengroup.osdu.azure.CosmosFacade;
+import org.opengroup.osdu.azure.CosmosStore;
 import org.opengroup.osdu.core.common.model.WorkflowType;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureBootstrapConfig;
+import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.IngestionStrategyDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,20 +45,26 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
   private static Logger logger = Logger.getLogger(IngestionStrategyRepository.class.getName());
 
   @Autowired
-  @Named("INGESTION_STRATEGY_CONTAINER")
-  private CosmosContainer ingestionStrategyContainer;
+  private CosmosStore cosmosStore;
+
+  @Autowired
+  private DpsHeaders dpsHeaders;
+
+  @Autowired
+  private CosmosConfig cosmosConfig;
 
   @Override
   public IngestionStrategy findByWorkflowTypeAndDataTypeAndUserId(WorkflowType workflowType,
                                                                   String dataType, String userId) {
     logger.log(Level.INFO, String.format("Requesting dag selection. Workflow type: {%s}, Data type: {%s}, User id: {%s}",
       workflowType, dataType, userId));
-
-    Optional<IngestionStrategyDoc> document = CosmosFacade.findItem(
-      ingestionStrategyContainer,
-      String.format("%s-%s", workflowType.toString().toLowerCase(), dataType.toLowerCase()),
-      workflowType.toString().toLowerCase(),
-      IngestionStrategyDoc.class);
+    Optional<IngestionStrategyDoc> document = cosmosStore.findItem(
+        dpsHeaders.getPartitionId(),
+        cosmosConfig.getDatabase(),
+        cosmosConfig.getIngestionStrategyCollection(),
+        String.format("%s-%s", workflowType.toString().toLowerCase(), dataType.toLowerCase()),
+        workflowType.toString().toLowerCase(),
+        IngestionStrategyDoc.class);
 
     IngestionStrategyDoc ingestionStrategyDoc = !document.isPresent() ? null : document.get();
 
