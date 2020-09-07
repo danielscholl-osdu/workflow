@@ -41,7 +41,7 @@ In order to run the service locally, you will need to have the following environ
 
 | INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER | 
 | ---  | ---   |
-| users<br/>service.entitlements.user<br/>service.storage.admin<br/>service.storage.creator<br/>service.storage.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+| users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
 
 ### Configure Maven
 
