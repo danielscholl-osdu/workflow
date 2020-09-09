@@ -26,24 +26,17 @@ echo "$SCRIPT_SOURCE_DIR"
 # The following variables are automatically populated from the environment during integration testing
 # see os-deploy-aws/build-aws/integration-test-env-variables.py for an updated list
 
-# AWS_COGNITO_CLIENT_ID
-# ELASTIC_HOST
-# ELASTIC_PORT
-# FILE_URL
-# LEGAL_URL
-# SEARCH_URL
-# STORAGE_URL
-export OTHER_RELEVANT_DATA_COUNTRIES=US
-export DEPLOY_ENV=empty
-export LEGAL_TAG=opendes-public-usa-dataset-1
 export TENANT_NAME=int-test-workflow
 export AWS_COGNITO_AUTH_FLOW=USER_PASSWORD_AUTH
 export AWS_COGNITO_AUTH_PARAMS_PASSWORD=$ADMIN_PASSWORD
 export AWS_COGNITO_AUTH_PARAMS_USER=$ADMIN_USER
 export AWS_COGNITO_AUTH_PARAMS_USER_NO_ACCESS=$USER_NO_ACCESS
-export STORAGE_URL=$STORAGE_URL
+export WORKFLOW_HOST=$WORKFLOW_URL
 export DOMAIN=testing.com
-export LEGAL_URL=$LEGAL_URL
+export DYNAMO_DB_REGION=us-east-1
+export DYNAMO_DB_ENDPOINT=https://dynamodb.us-east-1.amazonaws.com
+export ENVIRONMENT=$RESOURCE_PREFIX
+export INT_TEST_DAG_NAME=my_first_dag
 
 #### RUN INTEGRATION TEST #########################################################################
 

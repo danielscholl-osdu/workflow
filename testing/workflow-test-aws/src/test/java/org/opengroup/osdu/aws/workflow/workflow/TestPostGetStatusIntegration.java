@@ -21,9 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opengroup.osdu.aws.workflow.util.HTTPClientAWS;
-import org.opengroup.osdu.aws.workflow.util.WorkflowStatusDoc;
-import org.opengroup.osdu.aws.workflow.util.WorkflowStatusUtil;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
+import org.opengroup.osdu.aws.workflow.util.DynamoSetupUtil;
 import org.opengroup.osdu.workflow.workflow.PostGetStatusIntegrationTests;
 
 import javax.ws.rs.HttpMethod;
@@ -38,7 +36,7 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildWorkflowIdPay
 
 public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests {
 
-  private WorkflowStatusUtil workflowStatusUtil;
+  private DynamoSetupUtil dynamoSetupUtil;
   String finishedWorkflowId;
 
 	@BeforeEach
@@ -51,8 +49,8 @@ public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests 
     // workflow. see integration test: should_returnFinished_when_givenFinishedWorkflowId
     // normally, it would use just endpoints but no delete endpoint exists so it all
     // needs to go directly against dynamo
-    workflowStatusUtil = new WorkflowStatusUtil();
-    finishedWorkflowId = workflowStatusUtil.insertWorkflowStatus();
+    dynamoSetupUtil = new DynamoSetupUtil();
+    finishedWorkflowId = dynamoSetupUtil.insertWorkflowStatus();
 	}
 
 	@Test
@@ -93,6 +91,6 @@ public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests 
 	public void tearDown() throws Exception {
 		this.client = null;
 		this.headers = null;
-		workflowStatusUtil.deleteWorkflow(finishedWorkflowId);
+		dynamoSetupUtil.deleteWorkflow(finishedWorkflowId);
 	}
 }

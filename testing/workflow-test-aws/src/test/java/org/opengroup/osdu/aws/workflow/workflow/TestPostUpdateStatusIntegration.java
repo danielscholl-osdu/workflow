@@ -20,7 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.aws.workflow.util.HTTPClientAWS;
-import org.opengroup.osdu.aws.workflow.util.WorkflowStatusUtil;
+import org.opengroup.osdu.aws.workflow.util.DynamoSetupUtil;
 import org.opengroup.osdu.workflow.workflow.PostUpdateStatusIntegrationTests;
 
 import javax.ws.rs.HttpMethod;
@@ -35,8 +35,9 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateStatus;
 
 public class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegrationTests {
 
-  private WorkflowStatusUtil workflowStatusUtil;
+  private DynamoSetupUtil dynamoSetupUtil;
   String finishedWorkflowId;
+  String strategyId;
 
 	@BeforeEach
 	@Override
@@ -48,8 +49,9 @@ public class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegration
     // workflow. see integration test: should_returnBadRequest_when_givenFinishedWorkflowId
     // normally, it would use just endpoints but no delete endpoint exists so it all
     // needs to go directly against dynamo
-    workflowStatusUtil = new WorkflowStatusUtil();
-    finishedWorkflowId = workflowStatusUtil.insertWorkflowStatus();
+    dynamoSetupUtil = new DynamoSetupUtil();
+    finishedWorkflowId = dynamoSetupUtil.insertWorkflowStatus();
+    strategyId = dynamoSetupUtil.insertIngestionStrategy();
 	}
 
 	@Test
@@ -92,7 +94,8 @@ public class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegration
 	public void tearDown() throws Exception {
 		this.client = null;
 		this.headers = null;
-		workflowStatusUtil.deleteWorkflow(finishedWorkflowId);
+		dynamoSetupUtil.deleteWorkflow(finishedWorkflowId);
+		dynamoSetupUtil.deleteStrategy(strategyId);
 	}
 
 }

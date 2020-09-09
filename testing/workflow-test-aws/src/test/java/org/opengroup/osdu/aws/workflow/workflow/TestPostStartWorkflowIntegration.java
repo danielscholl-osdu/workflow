@@ -19,6 +19,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opengroup.osdu.aws.workflow.util.DynamoSetupUtil;
 import org.opengroup.osdu.aws.workflow.util.HTTPClientAWS;
 import org.opengroup.osdu.workflow.workflow.PostStartWorkflowIntegrationTests;
 
@@ -30,11 +31,18 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.getValidWorkflowP
 
 public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrationTests {
 
-	@BeforeEach
+  private DynamoSetupUtil dynamoSetupUtil;
+  String strategyId;
+
+  @BeforeEach
 	@Override
 	public void setup() throws Exception {
 		this.client = new HTTPClientAWS();
 		this.headers = client.getCommonHeader();
+		dynamoSetupUtil = new DynamoSetupUtil();
+
+		// needs to insert ingestion strategy row
+    strategyId = dynamoSetupUtil.insertIngestionStrategy();
 	}
 
   @Test
@@ -56,5 +64,6 @@ public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrati
 	public void tearDown() throws Exception {
 		this.client = null;
 		this.headers = null;
+		dynamoSetupUtil.deleteStrategy(strategyId);
 	}
 }
