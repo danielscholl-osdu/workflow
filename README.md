@@ -254,6 +254,10 @@ development purposes because signing a blob is only available with the service a
 Remember to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. Follow the [instructions
 on the Google developer's portal][application-default-credentials].
 
+**Integration tests**
+
+Instructions for running the GCP integration tests can be found [here](./provider/workflow-gcp-datastore/README.md).
+
 ### Persistence layer
 
 The GCP implementation contains two mutually exclusive modules to work with the persistence layer.
