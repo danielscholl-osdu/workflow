@@ -36,6 +36,7 @@
   <modules>
     <module>workflow-test-core</module>
     <module>workflow-test-gcp</module>
+    <module>workflow-test-azure</module>
   </modules>
 
   <repositories>
