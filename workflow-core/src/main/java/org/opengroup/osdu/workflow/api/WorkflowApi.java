@@ -22,6 +22,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.storage.StorageRole;
 import org.opengroup.osdu.core.common.model.workflow.StartWorkflowRequest;
 import org.opengroup.osdu.core.common.model.workflow.StartWorkflowResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -41,7 +42,7 @@ public class WorkflowApi {
   final IWorkflowService workflowService;
 
   @PostMapping("/startWorkflow")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + StorageRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
   public StartWorkflowResponse startWorkflow(@RequestBody StartWorkflowRequest request) {
     log.debug("Start Workflow request received : {}", request);
     StartWorkflowResponse response = workflowService.startWorkflow(request, headers);

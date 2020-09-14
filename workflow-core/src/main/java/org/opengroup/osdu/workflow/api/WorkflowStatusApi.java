@@ -24,6 +24,7 @@ import org.opengroup.osdu.workflow.model.GetStatusRequest;
 import org.opengroup.osdu.workflow.model.GetStatusResponse;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;
 import org.opengroup.osdu.workflow.model.UpdateStatusResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowStatusService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +44,7 @@ public class WorkflowStatusApi {
   final IWorkflowStatusService workflowStatusService;
 
   @PostMapping("/getStatus")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + StorageRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
   public GetStatusResponse getWorkflowStatus(@RequestBody GetStatusRequest request) {
     log.debug("Get Workflow Status request received : {}", request);
     GetStatusResponse response = workflowStatusService.getWorkflowStatus(request, headers);
@@ -52,7 +53,7 @@ public class WorkflowStatusApi {
   }
 
   @PostMapping("/updateStatus")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + StorageRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
   public UpdateStatusResponse updateWorkflowStatus(@RequestBody UpdateStatusRequest request) {
     log.debug("Update Workflow status request received : {}", request);
     UpdateStatusResponse response = workflowStatusService.updateWorkflowStatus(request, headers);
