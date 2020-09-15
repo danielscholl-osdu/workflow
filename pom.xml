@@ -39,7 +39,7 @@
     <module>workflow-core</module>
     <module>provider/workflow-azure</module>
     <module>provider/workflow-gcp</module>
-<!--    <module>provider/workflow-ibm</module> Fix: Missing classes-->
+    <module>provider/workflow-ibm</module>
     <module>provider/workflow-gcp-datastore</module>
   </modules>
 
@@ -51,7 +51,7 @@
     <javax.inject.version>1</javax.inject.version>
     <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
-    <os-core-common.version>0.3.5</os-core-common.version>
+    <os-core-common.version>0.3.6</os-core-common.version>
     <springfox.version>2.9.2</springfox.version>
   </properties>
 
