@@ -10,6 +10,10 @@ variables:
   OSDU_GCP_ENV_VARS: SPRING_CLOUD_GCP_DATASTORE_NAMESPACE=$OSDU_GCP_NAMESPACE,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR 
   OSDU_GCP_ENVIRONMENT: dev
   OSDU_GCP_PORT: 8080
+  
+  IBM_BUILD_SUBDIR: provider/workflow-ibm
+  IBM_INT_TEST_SUBDIR: testing/workflow-test-ibm
+
   # integration tests variables
   WORKFLOW_HOST: https://os-workflow-attcrcktoa-uc.a.run.app
   FINISHED_WORKFLOW_ID: fad778da-fbc4-4261-8b3e-deb48be44969
@@ -39,3 +43,9 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: 'master'
     file: 'cloud-providers/osdu-gcp-cloudrun.yml'
+    
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: 'master'
+    file: 'cloud-providers/ibm.yml'
+    
+    
