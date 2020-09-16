@@ -87,6 +87,29 @@
             <version>29.0-jre</version>
             <scope>test</scope>
         </dependency>
+      <!-- Added dependency of core-lib-Azure to add Azure Service Principle class -->
+      <dependency>
+        <groupId>org.opengroup.osdu</groupId>
+        <artifactId>core-lib-azure</artifactId>
+        <version>0.0.28</version>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-all</artifactId>
+        <version>4.1.50.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opengroup.osdu</groupId>
+        <artifactId>os-core-common</artifactId>
+        <version>0.3.5</version>
+      </dependency>
     </dependencies>
 
 
