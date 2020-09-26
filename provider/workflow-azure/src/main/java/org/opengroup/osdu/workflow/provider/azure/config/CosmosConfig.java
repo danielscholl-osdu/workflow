@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("azure.cosmosdb")
+@ConfigurationProperties("osdu.azure.cosmosdb")
 @Configuration
 @Getter
 @Setter
