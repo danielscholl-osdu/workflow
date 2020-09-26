@@ -22,6 +22,7 @@ public class HTTPClientGCP extends HTTPClient {
 		if (noDataAccessToken == null || noDataAccessToken.isEmpty()) {
 			noDataAccessToken = new GoogleServiceAccount(getEnvironmentVariableOrDefaultKey(NO_DATA_ACCESS_TESTER))
 					.getAuthToken(getEnvironmentVariableOrDefaultKey(GOOGLE_AUDIENCE));
+
 		}
 		return "Bearer " + noDataAccessToken;
 	}

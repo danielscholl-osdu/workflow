@@ -44,6 +44,7 @@ import org.opengroup.osdu.core.common.model.workflow.StartWorkflowRequest;
 import org.opengroup.osdu.core.common.model.workflow.StartWorkflowResponse;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
+import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
@@ -116,7 +117,7 @@ public class WorkflowMvcTest {
 
     given(workflowStatusRepository.saveWorkflowStatus(workflowStatusCaptor.capture()))
         .will(returnsFirstArg());
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -150,7 +151,7 @@ public class WorkflowMvcTest {
     // given
     HttpHeaders headers = new HttpHeaders();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willReturn(AuthorizationResponse.builder()
             .user("user@mail.com")
             .build());
@@ -181,7 +182,7 @@ public class WorkflowMvcTest {
         .workflowType(WorkflowType.OSDU)
         .build();
 
-    given(authorizationService.authorizeAny(any(), eq("service.storage.creator")))
+    given(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR)))
         .willThrow(AppException.createUnauthorized("test: viewer"));
 
     // when
@@ -197,7 +198,7 @@ public class WorkflowMvcTest {
         .andReturn();
 
     // then
-    verify(authorizationService).authorizeAny(any(), eq("service.storage.creator"));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
   }
 
   private HttpHeaders getHttpHeaders() {
