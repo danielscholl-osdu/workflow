@@ -11,46 +11,52 @@ import org.mockito.Mock;
 
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.opengroup.osdu.azure.CosmosStore;
 import org.opengroup.osdu.core.common.model.WorkflowType;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
 import org.opengroup.osdu.workflow.provider.azure.WorkflowApplication;
+import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.IngestionStrategyDoc;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import javax.inject.Named;
 
 import java.io.IOException;
+import java.util.Optional;
 
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes = {WorkflowApplication.class})
 public class IngestionStrategyRepositoryTest {
-  @Mock
-  private CosmosItem cosmosItem;
+  private static final String DATABASE_NAME = "someDatabase";
+  private static final String INGESTION_STRATEGY_COLLECTION_NAME = "someIngestionStrategyName";
+  private static final String PARTITION_ID = "somePartition";
 
   @Mock
-  private CosmosItemResponse cosmosResponse;
+  private CosmosStore cosmosStore;
 
   @Mock
-  private CosmosItemProperties cosmosItemProperties;
+  private CosmosConfig cosmosConfig;
 
   @Mock
-  @Named("INGESTION_STRATEGY_CONTAINER")
-  private CosmosContainer ingestionStrategyContainer;
+  private DpsHeaders dpsHeaders;
 
   @InjectMocks
   private IngestionStrategyRepository repository;
 
   @Before
   public void initMocks() throws Exception {
-    doReturn(cosmosItem).when(ingestionStrategyContainer).getItem(any(), any());
-    doReturn(cosmosResponse).when(cosmosItem).read(any());
-    doReturn(cosmosItemProperties).when(cosmosResponse).getProperties();
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getIngestionStrategyCollection()).thenReturn(INGESTION_STRATEGY_COLLECTION_NAME);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
   }
 
   @Test
@@ -59,9 +65,13 @@ public class IngestionStrategyRepositoryTest {
     ingestionStrategyDoc.setDagName("osdu_python_sdk_well_log_ingestion");
     ingestionStrategyDoc.setDataType("well_log");
     ingestionStrategyDoc.setWorkflowType(WorkflowType.OSDU.name());
-    doReturn(ingestionStrategyDoc)
-        .when(cosmosItemProperties)
-        .getObject(any());
+    final String dataType = "well_log";
+    when(cosmosStore.findItem(eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(INGESTION_STRATEGY_COLLECTION_NAME),
+        eq(String.format("%s-%s", WorkflowType.OSDU.toString().toLowerCase(), dataType.toLowerCase())),
+        eq(WorkflowType.OSDU.toString().toLowerCase()),
+        eq(IngestionStrategyDoc.class))).thenReturn(Optional.of(ingestionStrategyDoc));
     IngestionStrategy ingestionStrategy = repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "well_log", "");
 
     Assert.assertNotNull(ingestionStrategy);
@@ -71,37 +81,18 @@ public class IngestionStrategyRepositoryTest {
 
   }
 
-  @Test(expected = NullPointerException.class)
-  public void shouldThrowExceptionWhenRecordNotFound() throws CosmosClientException {
-    doThrow(NullPointerException.class)
-        .when(cosmosItem)
-        .read(any());
-    repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "test", "");
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void shouldThrowExceptionWhenDataTypeAndWorkflowTypeNotFound() throws Throwable {
-    doThrow(NotFoundException.class)
-        .when(cosmosItem)
-        .read(any());
-    repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "well_log111", "opendes11");
-    Assert.assertFalse(throwException());
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void shouldThrowExceptionWhenDocumentisMalformed() throws IOException {
-    doThrow(IOException.class)
-        .when(cosmosItemProperties)
-        .getObject(any());
-    repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "well_log111", "opendes11");
-    Assert.assertFalse(throwException());
+  @Test
+  public void shouldReturnNullWhenRecordNotFound() throws CosmosClientException {
+    when(cosmosStore.findItem(any(), any(), any(), any(), any(), any()))
+        .thenReturn(Optional.empty());
+    Assert.assertNull(repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "test", ""));
   }
 
   @Test(expected = AppException.class)
   public void shouldThrowExceptionWhenCosmosException() throws CosmosClientException {
-    doThrow(CosmosClientException.class)
-        .when(cosmosItem)
-        .read(any());
+    doThrow(AppException.class)
+        .when(cosmosStore)
+        .findItem(any(), any(), any(), any(), any(), any());
     repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.INGEST, "well_log", "");
   }
 

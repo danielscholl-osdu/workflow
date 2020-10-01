@@ -31,7 +31,7 @@
 
   <properties>
     <azure.version>2.1.7</azure.version>
-    <osdu.azurecore.version>0.0.6-SNAPSHOT</osdu.azurecore.version>
+    <osdu.azurecore.version>0.0.24</osdu.azurecore.version>
     <azure.appservice.resourcegroup></azure.appservice.resourcegroup>
     <azure.appservice.plan></azure.appservice.plan>
     <azure.appservice.appname></azure.appservice.appname>
@@ -47,6 +47,17 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+      </exclusions>
+
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
