@@ -34,15 +34,6 @@ public class AzureBootstrapConfig {
   @Value("${azure.keyvault.url}")
   private String keyVaultURL;
 
-  @Value("${azure.cosmosdb.database}")
-  private String cosmosDBName;
-
-  @Value("${azure.cosmosdb.ingestionstrategy.collection}")
-  private String ingestionStrategyCollectionName;
-
-  @Value("${azure.cosmosdb.workflowstatus.collection}")
-  private String workflowStatusCollectionName;
-
   @Value("${azure.airflow.url}")
   private String airflowURL;
 
@@ -83,19 +74,5 @@ public class AzureBootstrapConfig {
   @Named("COSMOS_KEY")
   public String cosmosKey(SecretClient kv) {
     return KeyVaultFacade.getSecretWithValidation(kv, "cosmos-primary-key");
-  }
-
-  @Bean
-  @Named("INGESTION_STRATEGY_CONTAINER")
-  CosmosContainer ingestionStrategyContainer(final CosmosClient cosmosClient) {
-    Validators.checkNotNull(cosmosClient, "Cosmos client cannot be null");
-    return cosmosClient.getDatabase(cosmosDBName).getContainer(ingestionStrategyCollectionName);
-  }
-
-  @Bean
-  @Named("WORKFLOW_STATUS_CONTAINER")
-  CosmosContainer workflowStatusContainer(final CosmosClient cosmosClient) {
-    Validators.checkNotNull(cosmosClient, "Cosmos client cannot be null");
-    return cosmosClient.getDatabase(cosmosDBName).getContainer(workflowStatusCollectionName);
   }
 }

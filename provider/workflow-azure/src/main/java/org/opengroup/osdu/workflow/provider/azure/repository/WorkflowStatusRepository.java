@@ -20,10 +20,12 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.azure.CosmosFacade;
+import org.opengroup.osdu.azure.CosmosStore;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowStatusDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,21 +43,28 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
   private static Logger logger = Logger.getLogger(WorkflowStatusRepository.class.getName());
 
   @Autowired
-  @Named("WORKFLOW_STATUS_CONTAINER")
-  private CosmosContainer workflowStatusContainer;
+  private CosmosConfig cosmosConfig;
+
+  @Autowired
+  private CosmosStore cosmosStore;
+
+  @Autowired
+  private DpsHeaders dpsHeaders;
 
   @Override
   public WorkflowStatus findWorkflowStatus(String workflowId) {
     logger.log(Level.INFO, String.format("Requesting workflow status by workflow Id :{%s}",
       workflowId));
 
-    Optional<WorkflowStatusDoc> document = CosmosFacade.findItem(
-      workflowStatusContainer,
-      workflowId,
-      workflowId,
-      WorkflowStatusDoc.class);
+    Optional<WorkflowStatusDoc> document = cosmosStore.findItem(
+        dpsHeaders.getPartitionId(),
+        cosmosConfig.getDatabase(),
+        cosmosConfig.getWorkflowStatusCollection(),
+        workflowId,
+        workflowId,
+        WorkflowStatusDoc.class);
 
-    WorkflowStatusDoc workflowStatusDoc = !document.isPresent() ? null : document.get();
+        WorkflowStatusDoc workflowStatusDoc = !document.isPresent() ? null : document.get();
 
     if(workflowStatusDoc == null) {
       throw new WorkflowNotFoundException(
@@ -74,15 +83,18 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
       workflowStatus));
 
 
-    Optional<WorkflowStatusDoc> existingDoc = CosmosFacade.findItem(
-      workflowStatusContainer,
-      workflowStatus.getWorkflowId(),
-      workflowStatus.getWorkflowId(),
-      WorkflowStatusDoc.class);
+    Optional<WorkflowStatusDoc> existingDoc = cosmosStore.findItem(
+        dpsHeaders.getPartitionId(),
+        cosmosConfig.getDatabase(),
+        cosmosConfig.getWorkflowStatusCollection(),
+        workflowStatus.getWorkflowId(),
+        workflowStatus.getWorkflowId(),
+        WorkflowStatusDoc.class);
 
     if (!existingDoc.isPresent()) {
       WorkflowStatusDoc newStatusDoc = buildWorkflowStatusDoc(workflowStatus);
-      CosmosFacade.upsertItem(workflowStatusContainer, newStatusDoc);
+      cosmosStore.upsertItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
+          cosmosConfig.getWorkflowStatusCollection(), newStatusDoc);
     }
 
     logger.log(Level.INFO, String.format("Fetch saved workflow status: {%s}", workflowStatus));
@@ -96,11 +108,13 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
     logger.log(Level.INFO, String.format("Update workflow status for workflow id: {%s}, new status: {%s}",
       workflowId, workflowStatusType));
 
-    Optional<WorkflowStatusDoc> existingDoc = CosmosFacade.findItem(
-      workflowStatusContainer,
-      workflowId,
-      workflowId,
-      WorkflowStatusDoc.class);
+    Optional<WorkflowStatusDoc> existingDoc = cosmosStore.findItem(
+        dpsHeaders.getPartitionId(),
+        cosmosConfig.getDatabase(),
+        cosmosConfig.getWorkflowStatusCollection(),
+        workflowId,
+        workflowId,
+        WorkflowStatusDoc.class);
 
     WorkflowStatusDoc workflowStatusDoc = !existingDoc.isPresent() ? null : existingDoc.get();
 
@@ -112,7 +126,8 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
     logger.log(Level.INFO, String.format("Found workflow status : {%s}", workflowStatusDoc));
     workflowStatusDoc.workflowStatusType = WorkflowStatusType.valueOf(workflowStatusType.toString());
 
-    CosmosFacade.upsertItem(workflowStatusContainer, workflowStatusDoc);
+    cosmosStore.upsertItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
+        cosmosConfig.getWorkflowStatusCollection(), workflowStatusDoc);
 
     WorkflowStatus workflowStatus = buildWorkflowStatus(workflowStatusDoc);
     logger.log(Level.INFO, String.format("Updated workflow status : {%s}", workflowStatus));
