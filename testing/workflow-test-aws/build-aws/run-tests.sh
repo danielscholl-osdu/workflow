@@ -32,11 +32,12 @@ export AWS_COGNITO_AUTH_PARAMS_PASSWORD=$ADMIN_PASSWORD
 export AWS_COGNITO_AUTH_PARAMS_USER=$ADMIN_USER
 export AWS_COGNITO_AUTH_PARAMS_USER_NO_ACCESS=$USER_NO_ACCESS
 export WORKFLOW_HOST=$WORKFLOW_URL
-export DOMAIN=testing.com
+export DOMAIN=example.com
 export DYNAMO_DB_REGION=us-east-1
 export DYNAMO_DB_ENDPOINT=https://dynamodb.us-east-1.amazonaws.com
 export ENVIRONMENT=$RESOURCE_PREFIX
 export INT_TEST_DAG_NAME=my_first_dag
+export DEFAULT_DATA_PARTITION_ID_TENANT1=int-test-workflow
 
 #### RUN INTEGRATION TEST #########################################################################
 

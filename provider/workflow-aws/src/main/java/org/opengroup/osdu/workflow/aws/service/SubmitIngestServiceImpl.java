@@ -78,6 +78,10 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
     try {
       ObjectMapper mapper = new ObjectMapper();
       serializedData = mapper.writeValueAsString(data);
+      // airflow calls fail on empty bodies
+      if(serializedData == null || serializedData == ""){
+        serializedData = "{}";
+      }
     } catch (JsonProcessingException e){
       throw new OsduRuntimeException(PARSE_ERROR_MSG, e);
     }

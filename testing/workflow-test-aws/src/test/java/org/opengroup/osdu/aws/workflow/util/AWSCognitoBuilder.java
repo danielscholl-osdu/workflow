@@ -17,11 +17,12 @@ package org.opengroup.osdu.aws.workflow.util;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import org.opengroup.osdu.core.aws.iam.IAMConfig;
 
 public class AWSCognitoBuilder {
     public static AWSCognitoIdentityProvider generateCognitoClient(){
         return AWSCognitoIdentityProviderClientBuilder.standard()
-                .withCredentials(new EnvironmentVariableCredentialsProvider())
+                .withCredentials(IAMConfig.amazonAWSCredentials())
                 .build();
     }
 }

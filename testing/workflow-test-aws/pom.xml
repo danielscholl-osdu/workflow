@@ -25,6 +25,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
+  <groupId>org.opengroup.osdu.workflow</groupId>
   <artifactId>workflow-test-aws</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
