@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.opengroup.osdu.workflow.swagger;
+package org.opengroup.osdu.aws.workflow;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.platform.suite.api.SelectPackages;
+import org.junit.runner.RunWith;
 
-@Controller
-public class HomeController {
-	@RequestMapping(value = "/swagger")
-	public String swagger() {
-		System.out.println("swagger-ui.html");
-		return "redirect:swagger-ui.html";
-	}
+@RunWith(JUnitPlatform.class)
+@SelectPackages("org.opengroup.osdu.aws.workflow")
+public class RunTests {
+
 }

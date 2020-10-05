@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.opengroup.osdu.workflow.swagger;
+package org.opengroup.osdu.workflow.aws;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@Controller
-public class HomeController {
-	@RequestMapping(value = "/swagger")
-	public String swagger() {
-		System.out.println("swagger-ui.html");
-		return "redirect:swagger-ui.html";
-	}
+@SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
+public class WorkflowAwsApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(WorkflowAwsApplication.class, args);
+  }
 }
