@@ -31,7 +31,8 @@ export AWS_COGNITO_AUTH_FLOW=USER_PASSWORD_AUTH
 export AWS_COGNITO_AUTH_PARAMS_PASSWORD=$ADMIN_PASSWORD
 export AWS_COGNITO_AUTH_PARAMS_USER=$ADMIN_USER
 export AWS_COGNITO_AUTH_PARAMS_USER_NO_ACCESS=$USER_NO_ACCESS
-export WORKFLOW_HOST=$WORKFLOW_URL
+# core code assumes no slash at the end but CF forces slash at end
+export WORKFLOW_HOST=${WORKFLOW_URL%?}
 export DOMAIN=example.com
 export DYNAMO_DB_REGION=us-east-1
 export DYNAMO_DB_ENDPOINT=https://dynamodb.us-east-1.amazonaws.com
