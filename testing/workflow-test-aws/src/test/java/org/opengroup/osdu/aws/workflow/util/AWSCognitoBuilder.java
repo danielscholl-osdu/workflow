@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.opengroup.osdu.workflow.swagger;
+package org.opengroup.osdu.aws.workflow.util;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import org.opengroup.osdu.core.aws.iam.IAMConfig;
 
-@Controller
-public class HomeController {
-	@RequestMapping(value = "/swagger")
-	public String swagger() {
-		System.out.println("swagger-ui.html");
-		return "redirect:swagger-ui.html";
-	}
+public class AWSCognitoBuilder {
+    public static AWSCognitoIdentityProvider generateCognitoClient(){
+        return AWSCognitoIdentityProviderClientBuilder.standard()
+                .withCredentials(IAMConfig.amazonAWSCredentials())
+                .build();
+    }
 }
