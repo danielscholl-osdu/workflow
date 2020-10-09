@@ -18,7 +18,7 @@ import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 
 public class WorkflowStatusUtil {
 
-  private final static String ENVIRONMENT = "ENVIRONMENT";
+  private final static String RESOURCE_PREFIX = "RESOURCE_PREFIX";
   private final static String DYNAMO_DB_REGION = "DYNAMO_DB_REGION";
   private final static String DYNAMO_DB_ENDPOINT = "DYNAMO_DB_ENDPOINT";
 
@@ -29,7 +29,7 @@ public class WorkflowStatusUtil {
   DynamoDBQueryHelper queryHelper;
 
   public String insertWorkflowStatus() throws Exception {
-    String tablePrefix = String.format("%s%s", System.getenv(ENVIRONMENT), "-");
+    String tablePrefix = String.format("%s%s", System.getenv(RESOURCE_PREFIX), "-");
     String dynamoDbRegion = System.getenv(DYNAMO_DB_REGION);
     String dynamoDbEndpoint = System.getenv(DYNAMO_DB_ENDPOINT);
     queryHelper = new DynamoDBQueryHelper(dynamoDbEndpoint, dynamoDbRegion, tablePrefix);

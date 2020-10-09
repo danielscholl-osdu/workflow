@@ -83,6 +83,7 @@ The following software have components provided under the terms of this license:
 - JSONassert (from https://github.com/skyscreamer/JSONassert)
 - Jackson 2 extensions to the Google HTTP Client Library for Java. (from https://github.com/google/google-http-java-client.git/google-http-client-jackson2)
 - Jackson dataformat: CBOR (from http://github.com/FasterXML/jackson-dataformats-binary)
+- Jackson dataformat: CBOR (from http://github.com/FasterXML/jackson-dataformats-binary)
 - Jackson datatype: JSR310 (from http://wiki.fasterxml.com/JacksonModuleJSR310)
 - Jackson datatype: JSR310 (from http://wiki.fasterxml.com/JacksonModuleJSR310)
 - Jackson-annotations (from http://github.com/FasterXML/jackson)

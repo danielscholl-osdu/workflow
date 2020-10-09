@@ -14,6 +14,12 @@ variables:
   IBM_BUILD_SUBDIR: provider/workflow-ibm
   IBM_INT_TEST_SUBDIR: testing/workflow-test-ibm
 
+  AWS_BUILD_SUBDIR: provider/workflow-aws/build-aws
+  AWS_TEST_SUBDIR: testing/workflow-test-aws
+  AWS_SERVICE: ingestion-workflow
+  AWS_ENVIRONMENT: dev
+
+
 include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
@@ -42,6 +48,12 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
     file: "cloud-providers/ibm.yml"
+  
+  - project: "osdu/platform/ci-cd-pipelines"
+    file: "cloud-providers/aws.yml"
+
+  
+  
 
 osdu-gcp-test:
   allow_failure: false
