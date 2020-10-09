@@ -14,13 +14,9 @@
 
 package org.opengroup.osdu.workflow.provider.azure.repository;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.azure.CosmosStore;
+import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowStatus;
@@ -31,9 +27,9 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowStatusRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.azure.cosmos.CosmosContainer;
-
-import javax.inject.Named;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Repository
 @Slf4j
