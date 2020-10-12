@@ -31,7 +31,7 @@
 
   <properties>
     <azure.version>2.1.7</azure.version>
-    <osdu.azurecore.version>0.0.24</osdu.azurecore.version>
+    <osdu.azurecore.version>0.0.33</osdu.azurecore.version>
     <azure.appservice.resourcegroup></azure.appservice.resourcegroup>
     <azure.appservice.plan></azure.appservice.plan>
     <azure.appservice.appname></azure.appservice.appname>
@@ -71,6 +71,11 @@
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-azure</artifactId>
       <version>${osdu.azurecore.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opengroup.osdu</groupId>
+      <artifactId>os-core-common</artifactId>
+      <version>0.3.12</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>

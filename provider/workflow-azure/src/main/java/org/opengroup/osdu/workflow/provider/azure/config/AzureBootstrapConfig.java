@@ -14,16 +14,10 @@
 
 package org.opengroup.osdu.workflow.provider.azure.config;
 
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosContainer;
-import com.azure.security.keyvault.secrets.SecretClient;
-
-import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.opengroup.osdu.common.Validators;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import sun.misc.BASE64Encoder;
 
 import javax.inject.Named;
@@ -62,17 +56,5 @@ public class AzureBootstrapConfig {
   @Named("KEY_VAULT_URL")
   public String keyVaultURL() {
     return keyVaultURL;
-  }
-
-  @Bean
-  @Named("COSMOS_ENDPOINT")
-  public String cosmosEndpoint(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "cosmos-endpoint");
-  }
-
-  @Bean
-  @Named("COSMOS_KEY")
-  public String cosmosKey(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "cosmos-primary-key");
   }
 }
