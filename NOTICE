@@ -126,6 +126,7 @@ The following software have components provided under the terms of this license:
 - Lucene Spatial Extras (from )
 - Lucene Suggest (from )
 - MapStruct Core (from )
+- Metrics Core (from https://github.com/dropwizard/metrics)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
