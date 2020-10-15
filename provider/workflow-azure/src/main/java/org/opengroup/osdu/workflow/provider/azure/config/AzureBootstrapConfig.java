@@ -14,7 +14,12 @@
 
 package org.opengroup.osdu.workflow.provider.azure.config;
 
+import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.security.keyvault.secrets.SecretClient;
+import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.opengroup.osdu.common.Validators;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +55,13 @@ public class AzureBootstrapConfig {
     Validators.checkNotNull(airflowPassword, "Airflow password cannot be null");
     String airflowAuthString = airflowUsername + ":" + airflowPassword;
     return new BASE64Encoder().encode(airflowAuthString.getBytes());
+  }
+
+  @Bean
+  public CosmosClient buildCosmosClient(SecretClient kv) {
+    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-endpoint");
+    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-primary-key");
+    return new CosmosClientBuilder().setEndpoint(cosmosEndpoint).setKey(cosmosPrimaryKey).buildClient();
   }
 
   @Bean
