@@ -16,6 +16,10 @@ analyze:
     type: mvn
     target: workflow-core/pom.xml
     path: .
+  - name: workflow-aws
+    type: mvn
+    target: provider/workflow-aws/pom.xml
+    path: .
   - name: workflow-azure
     type: mvn
     target: provider/workflow-azure/pom.xml
@@ -24,11 +28,11 @@ analyze:
     type: mvn
     target: provider/workflow-gcp/pom.xml
     path: .
+  - name: workflow-ibm
+    type: mvn
+    target: provider/workflow-ibm/pom.xml
+    path: .
   - name: workflow-gcp-datastore
     type: mvn
     target: provider/workflow-gcp-datastore/pom.xml
-    path: .
-  - name: workflow-test-core
-    type: mvn
-    target: testing/workflow-test-core/pom.xml
     path: .
