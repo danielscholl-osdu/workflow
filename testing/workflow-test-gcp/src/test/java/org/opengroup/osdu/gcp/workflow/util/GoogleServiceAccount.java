@@ -6,12 +6,17 @@ import com.google.gson.JsonParser;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.io.FileInputStream;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Predicate;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -20,53 +25,61 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import lombok.extern.java.Log;
 
+@Log
 public class GoogleServiceAccount {
-	final ServiceAccountCredentials serviceAccount;
+  private final static Predicate<String> contentAcceptanceTester = s -> s.trim().startsWith("{");
+  final ServiceAccountCredentials serviceAccount;
 
-	public GoogleServiceAccount(String serviceAccountJson) throws IOException {
-		try (InputStream inputStream = new FileInputStream(serviceAccountJson)) {
-			this.serviceAccount = ServiceAccountCredentials.fromStream(inputStream);
-		}
-	}
 
-	public String getEmail() {
-		return this.serviceAccount.getClientEmail();
-	}
+  public GoogleServiceAccount(String serviceAccountValue) throws IOException {
 
-	public String getAuthToken(String audience) throws IOException {
-		JwtBuilder jwtBuilder = Jwts.builder();
+    serviceAccountValue = new DecodedContentExtractor(serviceAccountValue, contentAcceptanceTester).getContent();
 
-		Map<String, Object> header = new HashMap<>();
-		header.put("type", "JWT");
-		header.put("alg", "RS256");
-		jwtBuilder.setHeader(header);
+    try (InputStream inputStream = new ByteArrayInputStream(serviceAccountValue.getBytes())) {
+      this.serviceAccount = ServiceAccountCredentials.fromStream(inputStream);
+    }
+  }
 
-		Map<String, Object> claims = new HashMap<>();
-		claims.put("target_audience", audience);
-		claims.put("exp", System.currentTimeMillis() / 1000 + 3600);
-		claims.put("iat", System.currentTimeMillis() / 1000);
-		claims.put("iss", this.getEmail());
-		claims.put("aud", "https://www.googleapis.com/oauth2/v4/token");
-		jwtBuilder.addClaims(claims);
 
-		jwtBuilder.signWith(SignatureAlgorithm.RS256, this.serviceAccount.getPrivateKey());
-		String jwt = jwtBuilder.compact();
+  public String getEmail() {
+    return this.serviceAccount.getClientEmail();
+  }
 
-		HttpPost httpPost = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
+  public String getAuthToken(String audience) throws IOException {
+    JwtBuilder jwtBuilder = Jwts.builder();
 
-		ArrayList<NameValuePair> postParameters = new ArrayList<>();
-		postParameters.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"));
-		postParameters.add(new BasicNameValuePair("assertion", jwt));
+    Map<String, Object> header = new HashMap<>();
+    header.put("type", "JWT");
+    header.put("alg", "RS256");
+    jwtBuilder.setHeader(header);
 
-		HttpClient client = new DefaultHttpClient();
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("target_audience", audience);
+    claims.put("exp", System.currentTimeMillis() / 1000 + 3600);
+    claims.put("iat", System.currentTimeMillis() / 1000);
+    claims.put("iss", this.getEmail());
+    claims.put("aud", "https://www.googleapis.com/oauth2/v4/token");
+    jwtBuilder.addClaims(claims);
 
-		httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
-		httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-		HttpResponse response = client.execute(httpPost);
+    jwtBuilder.signWith(SignatureAlgorithm.RS256, this.serviceAccount.getPrivateKey());
+    String jwt = jwtBuilder.compact();
 
-		String responseEntity = EntityUtils.toString(response.getEntity());
-		JsonObject content = new JsonParser().parse(responseEntity).getAsJsonObject();
-		return content.get("id_token").getAsString();
-	}
+    HttpPost httpPost = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
+
+    ArrayList<NameValuePair> postParameters = new ArrayList<>();
+    postParameters.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"));
+    postParameters.add(new BasicNameValuePair("assertion", jwt));
+
+    HttpClient client = new DefaultHttpClient();
+
+    httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+    httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+    HttpResponse response = client.execute(httpPost);
+
+    String responseEntity = EntityUtils.toString(response.getEntity());
+    JsonObject content = new JsonParser().parse(responseEntity).getAsJsonObject();
+    return content.get("id_token").getAsString();
+  }
 }

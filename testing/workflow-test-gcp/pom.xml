@@ -67,6 +67,13 @@
       <artifactId>google-auth-library-oauth2-http</artifactId>
       <version>${google.oauth.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
