@@ -28,8 +28,8 @@ In order to run the service locally, you will need to have the following environ
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
-| `INTEGRATION_TESTER` | `********` | Service account for API calls. Note: this user must have entitlements configured already | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
 | `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
 | `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com` | Endpoint of workflow service | no | - |
 | `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
@@ -39,7 +39,7 @@ In order to run the service locally, you will need to have the following environ
 
 **Entitlements configuration for integration accounts**
 
-| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER | 
+| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
 | ---  | ---   |
 | users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
 
