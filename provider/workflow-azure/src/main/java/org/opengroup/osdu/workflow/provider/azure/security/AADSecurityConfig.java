@@ -16,6 +16,7 @@ package org.opengroup.osdu.workflow.provider.azure.security;
 
 import com.microsoft.azure.spring.autoconfigure.aad.AADAppRoleStatelessAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,27 +24,29 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@ConditionalOnProperty(value = "azure.istio.auth.enabled", havingValue = "false", matchIfMissing = false)
 public class AADSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private AADAppRoleStatelessAuthenticationFilter appRoleAuthFilter;
+  @Autowired
+  private AADAppRoleStatelessAuthenticationFilter appRoleAuthFilter;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http
         .csrf().disable()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
         .antMatchers("/",
-          "/v2/api-docs",
-          "/swagger-resources/**",
-          "/swagger-ui.html",
-          "/webjars/**")
+            "/v2/api-docs",
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/webjars/**")
         .permitAll()
         .anyRequest().authenticated()
         .and()
         .addFilterBefore(appRoleAuthFilter, UsernamePasswordAuthenticationFilter.class);
-    }
+  }
 }
