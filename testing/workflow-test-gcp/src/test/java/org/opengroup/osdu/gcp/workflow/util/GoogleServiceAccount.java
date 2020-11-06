@@ -42,7 +42,6 @@ public class GoogleServiceAccount {
     }
   }
 
-
   public String getEmail() {
     return this.serviceAccount.getClientEmail();
   }
