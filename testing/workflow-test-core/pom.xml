@@ -23,6 +23,7 @@
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>workflow-test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>workflow-test-core</artifactId>
