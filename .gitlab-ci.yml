@@ -43,7 +43,7 @@ include:
     file: "publishing/pages.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "cicd-storage"
+    ref: "master"
     file: "cloud-providers/osdu-gcp-cloudrun.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
