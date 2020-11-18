@@ -1,6 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.repository;
 
-import com.azure.cosmos.CosmosClientException;
+import com.azure.cosmos.CosmosException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +54,7 @@ public class IngestionStrategyRepositoryTest {
   }
 
   @Test
-  public void findByWorkflowTypeAndDataTypeAndUserId() throws CosmosClientException, IOException {
+  public void findByWorkflowTypeAndDataTypeAndUserId() throws CosmosException, IOException {
     IngestionStrategyDoc ingestionStrategyDoc = new IngestionStrategyDoc();
     ingestionStrategyDoc.setDagName("osdu_python_sdk_well_log_ingestion");
     ingestionStrategyDoc.setDataType("well_log");
@@ -76,14 +76,14 @@ public class IngestionStrategyRepositoryTest {
   }
 
   @Test
-  public void shouldReturnNullWhenRecordNotFound() throws CosmosClientException {
+  public void shouldReturnNullWhenRecordNotFound() throws CosmosException {
     when(cosmosStore.findItem(any(), any(), any(), any(), any(), any()))
         .thenReturn(Optional.empty());
     Assert.assertNull(repository.findByWorkflowTypeAndDataTypeAndUserId(WorkflowType.OSDU, "test", ""));
   }
 
   @Test(expected = AppException.class)
-  public void shouldThrowExceptionWhenCosmosException() throws CosmosClientException {
+  public void shouldThrowExceptionWhenCosmosException() throws CosmosException {
     doThrow(AppException.class)
         .when(cosmosStore)
         .findItem(any(), any(), any(), any(), any(), any());
