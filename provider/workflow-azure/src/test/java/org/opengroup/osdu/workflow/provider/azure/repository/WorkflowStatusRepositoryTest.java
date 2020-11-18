@@ -1,6 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.repository;
 
-import com.azure.cosmos.CosmosClientException;
+import com.azure.cosmos.CosmosException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +75,7 @@ public class WorkflowStatusRepositoryTest {
 
 
   @Test(expected = WorkflowNotFoundException.class)
-  public void shouldThrowExceptionWhenWorkflowNotFound() throws CosmosClientException {
+  public void shouldThrowExceptionWhenWorkflowNotFound() throws CosmosException {
     when(cosmosStore.findItem(
         eq(PARTITION_ID),
         eq(DATABASE_NAME),
@@ -87,7 +87,7 @@ public class WorkflowStatusRepositoryTest {
   }
 
   @Test(expected = AppException.class)
-  public void shouldThrowExceptionWhenCosmosException() throws CosmosClientException {
+  public void shouldThrowExceptionWhenCosmosException() throws CosmosException {
     when(cosmosStore.findItem(
         eq(PARTITION_ID),
         eq(DATABASE_NAME),
@@ -124,6 +124,7 @@ public class WorkflowStatusRepositoryTest {
         eq(PARTITION_ID),
         eq(DATABASE_NAME),
         eq(WORKFLOW_STATUS_COLLECTION_NAME),
+        eq(TEST_WORKFLOW_ID),
         any());
 
     WorkflowStatus status = workflowStatusRepository.saveWorkflowStatus(workflowstatus);
@@ -152,7 +153,7 @@ public class WorkflowStatusRepositoryTest {
   }
 
   @Test(expected = WorkflowNotFoundException.class)
-  public void updateWorkflowStatusThrowWorkflowIDNotFound() throws CosmosClientException {
+  public void updateWorkflowStatusThrowWorkflowIDNotFound() throws CosmosException {
     when(cosmosStore.findItem(
         eq(PARTITION_ID),
         eq(DATABASE_NAME),

@@ -61,7 +61,7 @@ public class AzureBootstrapConfig {
   public CosmosClient buildCosmosClient(SecretClient kv) {
     final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-endpoint");
     final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-primary-key");
-    return new CosmosClientBuilder().setEndpoint(cosmosEndpoint).setKey(cosmosPrimaryKey).buildClient();
+    return new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosPrimaryKey).buildClient();
   }
 
   @Bean

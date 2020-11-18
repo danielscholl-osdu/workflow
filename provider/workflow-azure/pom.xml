@@ -31,12 +31,25 @@
 
   <properties>
     <azure.version>2.1.7</azure.version>
-    <osdu.azurecore.version>0.0.33</osdu.azurecore.version>
+    <osdu.corelibazure.version>0.0.44</osdu.corelibazure.version>
     <azure.appservice.resourcegroup></azure.appservice.resourcegroup>
     <azure.appservice.plan></azure.appservice.plan>
     <azure.appservice.appname></azure.appservice.appname>
     <azure.appservice.subscription></azure.appservice.subscription>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Inherit managed dependencies from core-lib-azure -->
+      <dependency>
+        <groupId>org.opengroup.osdu</groupId>
+        <artifactId>core-lib-azure</artifactId>
+        <version>${osdu.corelibazure.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -70,7 +83,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-azure</artifactId>
-      <version>${osdu.azurecore.version}</version>
+      <version>${osdu.corelibazure.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>

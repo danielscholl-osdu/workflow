@@ -90,7 +90,7 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
     if (!existingDoc.isPresent()) {
       WorkflowStatusDoc newStatusDoc = buildWorkflowStatusDoc(workflowStatus);
       cosmosStore.upsertItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-          cosmosConfig.getWorkflowStatusCollection(), newStatusDoc);
+          cosmosConfig.getWorkflowStatusCollection(), newStatusDoc.getWorkflowId(), newStatusDoc);
     }
 
     logger.log(Level.INFO, String.format("Fetch saved workflow status: {%s}", workflowStatus));
@@ -123,7 +123,7 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
     workflowStatusDoc.workflowStatusType = WorkflowStatusType.valueOf(workflowStatusType.toString());
 
     cosmosStore.upsertItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-        cosmosConfig.getWorkflowStatusCollection(), workflowStatusDoc);
+        cosmosConfig.getWorkflowStatusCollection(), workflowStatusDoc.getWorkflowId(), workflowStatusDoc);
 
     WorkflowStatus workflowStatus = buildWorkflowStatus(workflowStatusDoc);
     logger.log(Level.INFO, String.format("Updated workflow status : {%s}", workflowStatus));
