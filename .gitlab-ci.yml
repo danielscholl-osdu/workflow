@@ -20,6 +20,14 @@ variables:
   AWS_ENVIRONMENT: dev
   AWS_SKIP_DEPLOY: 'true'
 
+  # Start azure specific variables
+  AZURE_SERVICE: ingestion-workfow
+  AZURE_BUILD_SUBDIR: provider/workflow-azure
+  AZURE_TEST_SUBDIR: testing/workflow-test-azure
+  AZURE_SKIP_TEST: 'true'
+
+  # End azure specific variables
+
 
 include:
   - project: "osdu/platform/ci-cd-pipelines"
@@ -49,12 +57,16 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
     file: "cloud-providers/ibm.yml"
-  
+
   - project: "osdu/platform/ci-cd-pipelines"
     file: "cloud-providers/aws.yml"
 
-  
-  
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "azure-workflow-service"
+    file: "cloud-providers/azure.yml"
+
+
+
 
 osdu-gcp-test:
   allow_failure: false

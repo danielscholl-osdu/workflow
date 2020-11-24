@@ -1,0 +1,121 @@
+#  Copyright © Microsoft Corporation
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: osdu
+spec:
+  replicas: {{ .Values.global.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        aadpodidbinding: osdu-identity
+    spec:
+      volumes:
+        - name: azure-keyvault
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-keyvault
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}/{{ .Chart.Name }}-{{ .Values.image.branch }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /api/workflow/v1/swagger-ui.html
+              port: 80
+            initialDelaySeconds: 100
+            timeoutSeconds: 30
+          volumeMounts:
+            - name: azure-keyvault
+              mountPath: "/mnt/azure-keyvault"
+              readOnly: true
+          env:
+            - name: spring_application_name
+              value: ingestion-workflow
+            - name: server.servlet.contextPath
+              value: /api/workflow/v1/
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: active-directory
+                  key: tenantid
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: active-directory
+                  key: principal-clientid
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: active-directory
+                  key: principal-clientpassword
+            - name: aad_client_id
+              valueFrom:
+                secretKeyRef:
+                  name: active-directory
+                  key: application-appid
+            - name: appinsights_key
+              valueFrom:
+                secretKeyRef:
+                  name: central-logging
+                  key: appinsights
+            - name: KEYVAULT_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: osdu-svc-properties
+                  key: ENV_KEYVAULT
+            - name: cosmosdb_database
+              value: osdu-db
+            - name: OSDU_ENTITLEMENTS_URL
+              value: "http://entitlements-azure/entitlements/v1"
+            - name: OSDU_ENTITLEMENTS_APPKEY
+              value: "OBSOLETE"
+            - name: airflow_url
+              value: "http://airflow-web:8080/airflow"
+            - name: airflow_username
+              value: "admin"
+            - name: airflow_password
+              valueFrom:
+                secretKeyRef:
+                  name: airflow
+                  key: admin-password
+            - name: AIRFLOW_STORAGE_ACCOUNT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: airflow
+                  key: azurestorageaccountname
+            - name: AIRFLOW_STORAGE_ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: airflow
+                  key: azurestorageaccountkey
+            - name: LOG_PREFIX
+              value: "workflow"
+            - name: server_port
+              value: "80"
+            - name: azure_istioauth_enabled
+              value: "true"
+            - name: partition_service_endpoint
+              value: "http://partition/api/partition/v1"
