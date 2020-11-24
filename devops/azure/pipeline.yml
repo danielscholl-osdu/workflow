@@ -63,6 +63,7 @@ stages:
         provider/workflow-azure/maven/settings.xml
         provider/workflow-azure/pom.xml
         provider/workflow-azure/target/*-spring-boot.jar
+        .mvn/community-maven.settings.xml
       copyFileContentsToFlatten: ''
       mavenSettingsFile: './maven/settings.xml'
       serviceBase: ${{ variables.serviceName }}
