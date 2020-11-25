@@ -24,7 +24,6 @@ variables:
   AZURE_SERVICE: ingestion-workfow
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure
-  AZURE_SKIP_TEST: 'true'
 
   # End azure specific variables
 
