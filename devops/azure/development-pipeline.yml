@@ -49,7 +49,7 @@ variables:
   - name: 'MANIFEST_REPO'
     value: $[ resources.repositories['FluxRepo'].name ]
   - name: SKIP_TESTS
-    value: 'true'
+    value: 'false'
 
 stages:
   - template: /devops/build-stage.yml@TemplateRepo
