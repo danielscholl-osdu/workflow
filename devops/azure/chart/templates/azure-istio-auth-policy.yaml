@@ -33,6 +33,6 @@ spec:
                         "*/swagger","*/swagger-resources","*/swagger-ui.html",
                         "*/actuator/health", "*/health",
                         "*/configuration/ui","*/configuration/security",
-                        "/api/workflow/v2/swagger-resources/*",
-                        "/api/workflow/v2/webjars/*"
+                        "/api/workflow/v1/swagger-resources/*",
+                        "/api/workflow/v1/webjars/*"
             ]
