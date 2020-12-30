@@ -388,12 +388,6 @@ CC-BY-2.5
 The following software have components provided under the terms of this license:
 
 - Checker Qual (from https://checkerframework.org)
-
-========================================================================
-CC-BY-3.0
-========================================================================
-The following software have components provided under the terms of this license:
-
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
 
 ========================================================================
@@ -418,7 +412,6 @@ CDDL-1.0
 ========================================================================
 The following software have components provided under the terms of this license:
 
-- JavaBeans(TM) Activation Framework (from http://java.sun.com/javase/technologies/desktop/javabeans/jaf/index.jsp)
 - JavaMail API (from )
 - javax.annotation-api (from http://jcp.org/en/jsr/detail?id=250)
 - jersey-client (from )
@@ -431,15 +424,22 @@ CDDL-1.1
 The following software have components provided under the terms of this license:
 
 - JavaBeans Activation Framework (from )
+- JavaBeans(TM) Activation Framework (from http://java.sun.com/javase/technologies/desktop/javabeans/jaf/index.jsp)
 - tomcat-embed-core (from http://tomcat.apache.org/)
+
+========================================================================
+CPL-1.0
+========================================================================
+The following software have components provided under the terms of this license:
+
+- JUnit (from http://junit.org)
+- JUnit (from http://junit.org)
 
 ========================================================================
 EPL-1.0
 ========================================================================
 The following software have components provided under the terms of this license:
 
-- JUnit (from http://junit.org)
-- JUnit (from http://junit.org)
 - JUnit Jupiter (Aggregator) (from https://junit.org/junit5/)
 - Logback Classic Module (from )
 - Logback Core Module (from )
@@ -542,7 +542,6 @@ LGPL-2.1-or-later
 ========================================================================
 The following software have components provided under the terms of this license:
 
-- Java Native Access (from https://github.com/java-native-access/jna)
 - Java Native Access Platform (from https://github.com/java-native-access/jna)
 - SnakeYAML (from http://www.snakeyaml.org)
 
@@ -683,6 +682,7 @@ The following software have components provided under the terms of this license:
 - Microsoft Azure client library for Blob Storage (from https://github.com/Azure/azure-sdk-for-java)
 - Project Lombok (from https://projectlombok.org)
 - Spring Web (from https://github.com/spring-projects/spring-framework)
+- StAX API (from http://stax.codehaus.org/)
 - msal4j (from https://github.com/AzureAD/microsoft-authentication-library-for-java)
 - reactive-streams (from http://www.reactive-streams.org/)
 
@@ -694,6 +694,8 @@ The following software have components provided under the terms of this license:
 - Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (from http://www.bouncycastle.org/java.html)
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html)
 - Byte Buddy (without dependencies) (from )
+- JUnit (from http://junit.org)
+- JUnit (from http://junit.org)
 - JUnit Jupiter (Aggregator) (from https://junit.org/junit5/)
 - JavaBeans Activation Framework API jar (from )
 - JavaMail API (from )
