@@ -58,8 +58,8 @@ stages:
     parameters:
       mavenGoal: 'package'
       mavenPublishJUnitResults: true
-      serviceCoreMavenOptions: '-pl workflow-core'
-      mavenOptions: '-pl workflow-azure --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+      serviceCoreMavenOptions: '-pl workflow-core --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+      mavenOptions: '-pl provider/workflow-azure --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
       copyFileContents: |
         pom.xml
         provider/workflow-azure/maven/settings.xml
