@@ -48,6 +48,8 @@ variables:
     value: "devops/azure/chart/helm-config.yaml"
   - name: 'MANIFEST_REPO'
     value: $[ resources.repositories['FluxRepo'].name ]
+  - name: 'MAVEN_CACHE_FOLDER'
+    value: $(Pipeline.Workspace)/.m2/repository
   - name: SKIP_TESTS
     value: 'false'
 
@@ -56,8 +58,8 @@ stages:
     parameters:
       mavenGoal: 'package'
       mavenPublishJUnitResults: true
-      serviceCoreMavenOptions: '-P workflow-core'
-      mavenOptions: '-P workflow-azure'
+      serviceCoreMavenOptions: '-pl workflow-core --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+      mavenOptions: '-pl provider/workflow-azure --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
       copyFileContents: |
         pom.xml
         provider/workflow-azure/maven/settings.xml
