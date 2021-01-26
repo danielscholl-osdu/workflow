@@ -48,7 +48,7 @@ public class SwaggerDocumentationConfig {
     return new Docket(DocumentationType.SWAGGER_2)
       .globalOperationParameters(parameters)
       .select()
-      .apis(RequestHandlerSelectors.basePackage("org.opengroup.osdu.workflow.api"))
+      .apis(RequestHandlerSelectors.basePackage("org.opengroup.osdu.workflow.aws.api"))
       .build()
       .securityContexts(Collections.singletonList(securityContext()))
       .securitySchemes(Collections.singletonList(apiKey()));
