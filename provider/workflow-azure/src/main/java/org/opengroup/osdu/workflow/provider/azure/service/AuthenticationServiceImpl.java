@@ -14,14 +14,14 @@
 
 package org.opengroup.osdu.workflow.provider.azure.service;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
 import org.opengroup.osdu.workflow.provider.interfaces.IAuthenticationService;
 import org.springframework.stereotype.Service;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 @Slf4j

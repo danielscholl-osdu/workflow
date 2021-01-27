@@ -1,12 +1,8 @@
 package org.opengroup.osdu.workflow.model;
 
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
+
+import lombok.*;
 
 @Getter
 @Setter
@@ -14,6 +10,7 @@ import lombok.Setter;
 @NonNull
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class WorkflowMetadata {
   private String workflowId;
   private String workflowName;

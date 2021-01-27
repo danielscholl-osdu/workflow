@@ -30,10 +30,10 @@ public interface IWorkflowRunRepository {
                                                final String cursor);
 
   /**
-   * Deletes all workflow runs associated with runIds.
+   * Deletes all workflow runs associated with workflowName.
    * @param runIds Run ids to delete
    */
-  void deleteWorkflowRuns(final String workflowId, final List<String> runIds);
+  void deleteWorkflowRuns(final String workflowName, final List<String> runIds);
 
   /**
    * Updates workflow run in persistence store.
@@ -42,6 +42,12 @@ public interface IWorkflowRunRepository {
    */
   WorkflowRun updateWorkflowRun(final WorkflowRun workflowRun);
 
+  /**
+   * Return all instances of workflow runs based on workflow name
+   * @param workflowName WorkflowName associated with WorkflowRuns
+   * @param params Search parameters
+   * @return
+   */
   List<WorkflowRun> getAllRunInstancesOfWorkflow(final String workflowName, Map<String, Object> params);
 
 }

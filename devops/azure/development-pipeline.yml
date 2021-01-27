@@ -24,7 +24,6 @@ trigger:
       - /docs
       - /provider/workflow-aws
       - /provider/workflow-gcp
-      - /provider/workflow-gcp-datastore
       - /provider/workflow-ibm
 
 resources:

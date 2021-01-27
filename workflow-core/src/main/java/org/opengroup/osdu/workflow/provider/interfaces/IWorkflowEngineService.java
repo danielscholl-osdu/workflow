@@ -6,10 +6,10 @@ import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 public interface IWorkflowEngineService {
   /**
    * Saves the workflow definition into workflow engine accessible location.
-   * @param workflowDefinition Definition of workflow.
+   * @param registrationInstruction Definition of workflow.
    * @param workflowName Name of the workflow for which workflow definition must be saved.
    */
-  void createWorkflow(final String workflowDefinition, final String workflowName);
+  void createWorkflow(final Map<String, Object> registrationInstruction, final String workflowName);
 
   /**
    * Deletes the workflow definition in workflow engine accessible location.

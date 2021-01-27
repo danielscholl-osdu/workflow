@@ -8,8 +8,6 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class CreateWorkflowRequest {
   private String workflowName;
-  private String workflowDetailContent;
   private String description;
-  private boolean active;
   private Map<String, Object> registrationInstructions;
 }

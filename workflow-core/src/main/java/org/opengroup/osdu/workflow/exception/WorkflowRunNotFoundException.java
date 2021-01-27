@@ -16,11 +16,15 @@
 
 package org.opengroup.osdu.workflow.exception;
 
-import org.opengroup.osdu.core.common.exception.BadRequestException;
+import org.opengroup.osdu.core.common.exception.CoreException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-public class IngestionStrategyNotFoundException extends BadRequestException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class WorkflowRunNotFoundException extends CoreException {
 
-  public IngestionStrategyNotFoundException(String message) {
+  public WorkflowRunNotFoundException(String message) {
     super(message);
   }
+
 }

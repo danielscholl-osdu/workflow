@@ -30,7 +30,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final IWorkflowStatusService workflowStatusRepository;
 
   @Override
-  public void createWorkflow(String workflowDefinition, String workflowName) {}
+  public void createWorkflow(final Map<String, Object> registrationInstruction, String workflowName) {}
 
   @Override
   public void deleteWorkflow(String workflowName) {}
