@@ -19,6 +19,8 @@ package org.opengroup.osdu.workflow.provider.ibm.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.provider.interfaces.IAuthenticationService;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,13 @@ public class IBMAuthenticationService implements IAuthenticationService {
     // TODO: add check of user permissions
 
     log.debug("Finished checking authentication.");
+  }
+
+  @Override
+  public ClientResponse sendAirflowRequest(
+      String httpMethod, String url, String body,
+      WorkflowEngineRequest rq) {
+    return null;
   }
 
   private void checkPreconditions(String authorizationToken, String partitionID) {
