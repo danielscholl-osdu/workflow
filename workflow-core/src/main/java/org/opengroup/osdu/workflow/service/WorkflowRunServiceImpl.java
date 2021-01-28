@@ -8,11 +8,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
-import org.opengroup.osdu.workflow.model.WorkflowMetadata;
-import org.opengroup.osdu.workflow.model.WorkflowRun;
-import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
@@ -51,9 +47,9 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
     final WorkflowRun workflowRun = buildWorkflowRun(workflowName, workflowId, runId);
-    workflowEngineService.triggerWorkflow(runId, workflowId, workflowName,
-        createWorkflowPayload(workflowId, runId, request,
-            dpsHeaders.getCorrelationId()), workflowRun.getStartTimeStamp());
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName);
+    final Map<String, Object> context = createWorkflowPayload(workflowId, runId, dpsHeaders.getCorrelationId(), request);
+    workflowEngineService.triggerWorkflow(rq, context);
     return workflowRunRepository.saveWorkflowRun(workflowRun);
   }
 
@@ -80,13 +76,13 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   @Override
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
-      Map<String, Object> params) {
+                                                        Map<String, Object> params) {
     return workflowRunRepository.getAllRunInstancesOfWorkflow(workflowName, params);
   }
 
   @Override
   public WorkflowRun updateWorkflowRunStatus(String workflowName, String runId,
-      WorkflowStatusType status) {
+                                             WorkflowStatusType status) {
     WorkflowRun workflowRun = workflowRunRepository.getWorkflowRun(workflowName, runId);
     workflowRun.setStatus(status);
     return workflowRunRepository.saveWorkflowRun(workflowRun);
@@ -106,25 +102,23 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return workflowRuns;
   }
 
-  private Map<String, Object> createWorkflowPayload(final String workflowId,
-                                                    final String runId,
-                                                    final TriggerWorkflowRequest request,
-                                                    final String correlationId) {
+  private Map<String, Object> createWorkflowPayload(final String runId,
+                                                    final String workflowId,
+                                                    final String correlationId,
+                                                    final TriggerWorkflowRequest request) {
     final Map<String, Object> payload = new HashMap<>();
     payload.put(KEY_RUN_ID, runId);
     payload.put(KEY_WORKFLOW_ID, workflowId);
     payload.put(KEY_CORRELATION_ID, correlationId);
-    payload.put(KEY_EXECUTION_CONTEXT,
-        OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
+    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
     return payload;
   }
 
-  private WorkflowRun fetchAndUpdateWorkflowRunStatus (final WorkflowRun workflowRun){
-    final WorkflowMetadata workflowMetadata =
-        workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
+  private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {
+    final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
     final String workflowName = workflowMetadata.getWorkflowName();
-    final WorkflowStatusType currentStatusType =
-        workflowEngineService.getWorkflowRunStatus(workflowName, workflowRun.getStartTimeStamp());
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName, workflowRun.getStartTimeStamp());
+    final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
     if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
       if (getCompletedStatusTypes().contains(currentStatusType)) {
         // Setting EndTimeStamp with the timestamp of Instant when this API is called.
@@ -141,7 +135,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   }
 
   private WorkflowRun buildWorkflowRun(final String workflowName,
-      final String workflowId, final String runId) {
+                                       final String workflowId, final String runId) {
     return WorkflowRun.builder()
         .runId(runId)
         .startTimeStamp(System.currentTimeMillis())

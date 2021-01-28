@@ -24,7 +24,7 @@ public class WorkflowRunApi {
    * @return Information about workflow run.
    */
   @PostMapping("/{workflow_name}/workflowRun")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "', '" + WorkflowRole.ADMIN + "')")
   public WorkflowRun triggerWorkflow(@PathVariable("workflow_name") String workflowName,
       @RequestBody TriggerWorkflowRequest request) {
     return workflowRunService.triggerWorkflow(workflowName, request);
@@ -37,7 +37,7 @@ public class WorkflowRunApi {
    * @return Information about workflow run.
    */
   @GetMapping("/{workflow_name}/workflowRun/{runId}")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "', '" + WorkflowRole.CREATOR + "', '" + WorkflowRole.ADMIN + "')")
   public WorkflowRun getWorkflowRunById(@PathVariable("workflow_name") final String workflowName,
       @PathVariable("runId") final String runId) {
     return workflowRunService.getWorkflowRunByName(workflowName, runId);
@@ -49,7 +49,7 @@ public class WorkflowRunApi {
    * @return Information list about workflow run.
    */
   @GetMapping("/{workflow_name}/workflowRun")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "', '" + WorkflowRole.CREATOR + "', '" + WorkflowRole.ADMIN + "')")
   public List<WorkflowRun> getAllRunInstances(
       @PathVariable("workflow_name") String workflowName,
       @RequestParam Map<String, Object> params) {
@@ -63,7 +63,7 @@ public class WorkflowRunApi {
    * @return Information about workflow run.
    */
   @PutMapping("/{workflow_name}/workflowRun/{runId}")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "', '" + WorkflowRole.CREATOR + "')")
   public WorkflowRun updateWorkflowRun(
       @PathVariable("workflow_name") String workflowName,
       @PathVariable("runId") String runId,

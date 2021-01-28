@@ -12,7 +12,7 @@ import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.handler.ConflictApiError;
-import org.opengroup.osdu.workflow.middleware.AuthorizationFilter;
+import org.opengroup.osdu.workflow.sucurity.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRole;

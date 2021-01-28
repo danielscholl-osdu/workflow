@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   private static final long START_VERSION = 1;
+
   @Autowired
   private DpsHeaders dpsHeaders;
 
@@ -30,10 +32,10 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   @Override
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
-    final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail(), START_VERSION);
+    final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
-    workflowEngineService.createWorkflow(
-        request.getRegistrationInstructions(), workflowMetadata.getWorkflowName());
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
+    workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
     return savedMetadata;
   }
 
@@ -45,7 +47,8 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   @Override
   public void deleteWorkflow(String workflowName) {
     workflowRunService.deleteWorkflowRunsByWorkflowName(workflowName);
-    workflowEngineService.deleteWorkflow(workflowName);
+    WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName);
+    workflowEngineService.deleteWorkflow(rq);
     workflowMetadataRepository.deleteWorkflow(workflowName);
   }
 
@@ -55,12 +58,12 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   }
 
   private WorkflowMetadata getWorkflowMetadata(final CreateWorkflowRequest request,
-                                               final String createdBy, final Long version) {
+                                               final String createdBy) {
     return WorkflowMetadata.builder()
         .description(request.getDescription())
         .createdBy(createdBy)
         .creationTimestamp(System.currentTimeMillis())
-        .version(version)
+        .version(WorkflowManagerServiceImpl.START_VERSION)
         .registrationInstructions(request.getRegistrationInstructions())
         .workflowName(request.getWorkflowName())
         .build();

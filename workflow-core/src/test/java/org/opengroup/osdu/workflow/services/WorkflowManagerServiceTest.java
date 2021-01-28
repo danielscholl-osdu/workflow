@@ -16,11 +16,16 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.opengroup.osdu.workflow.service.WorkflowManagerServiceImpl;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -32,6 +37,13 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 public class WorkflowManagerServiceTest {
+  private static final String WORKFLOW_NAME = "test_dag_name";
+  private static final String INVALID_WORKFLOW_ID = "invalid-workflow-id";
+  private static final String USER_EMAIL = "user@email.com";
+  private static final long SEED_VERSION = 1;
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private static final String CREATE_WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
       "  \"workflowDetailContent\": \"from airflow import DAG\\r\\nfrom airflow.operators import BashOperator\",\n" +
@@ -53,12 +65,7 @@ public class WorkflowManagerServiceTest {
       "  \"version\": 1\n" +
       "}";
 
-  private static final String WORKFLOW_NAME = "test_dag_name";
-  private static final String INVALID_WORKFLOW_ID = "invalid-workflow-id";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String USER_EMAIL = "user@email.com";
-  private static final long SEED_VERSION = 1;
 
   @Mock
   private IWorkflowMetadataRepository workflowMetadataRepository;
@@ -90,10 +97,10 @@ public class WorkflowManagerServiceTest {
     when(workflowMetadataRepository.createWorkflow(workflowMetadataCaptor.capture())).thenReturn(responseMetadata);
     final ArgumentCaptor<String> fileNameCaptor = ArgumentCaptor.forClass(String.class);
     doNothing().when(workflowEngineService)
-        .createWorkflow(eq(request.getRegistrationInstructions()), fileNameCaptor.capture());
+        .createWorkflow(eq(workflowEngineRequest(fileNameCaptor.capture())), eq(request.getRegistrationInstructions()));
     final WorkflowMetadata returnedMetadata = workflowManagerService.createWorkflow(request);
     verify(workflowMetadataRepository).createWorkflow(any(WorkflowMetadata.class));
-    verify(workflowEngineService).createWorkflow(eq(request.getRegistrationInstructions()), anyString());
+    verify(workflowEngineService).createWorkflow(workflowEngineRequest(anyString()), eq(request.getRegistrationInstructions()));
     verify(dpsHeaders, times(1)).getUserEmail();
     assertThat(returnedMetadata, equalTo(responseMetadata));
     assertThat(fileNameCaptor.getValue(), equalTo(workflowMetadataCaptor.getValue().getWorkflowName()));
@@ -120,7 +127,7 @@ public class WorkflowManagerServiceTest {
     });
     verify(workflowMetadataRepository, times(1)).createWorkflow(any(WorkflowMetadata.class));
     verify(workflowEngineService, times(0))
-        .createWorkflow(eq(request.getRegistrationInstructions()), anyString());
+        .createWorkflow(workflowEngineRequest(anyString()), eq(request.getRegistrationInstructions()));
     verify(dpsHeaders, times(1)).getUserEmail();
     assertThat(workflowMetadataCaptor.getValue().getWorkflowName(), equalTo(request.getWorkflowName()));
     assertThat(workflowMetadataCaptor.getValue().getDescription(), equalTo(request.getDescription()));
@@ -158,14 +165,14 @@ public class WorkflowManagerServiceTest {
     when(workflowMetadataRepository.getWorkflow(WORKFLOW_NAME)).thenReturn(workflowMetadata);
     doNothing().when(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
     doNothing().when(workflowMetadataRepository).deleteWorkflow(WORKFLOW_NAME);
-    doNothing().when(workflowEngineService).deleteWorkflow(eq(workflowMetadata.getWorkflowName()));
+    doNothing().when(workflowEngineService).deleteWorkflow(eq(workflowEngineRequest(workflowMetadata.getWorkflowName())));
 
     workflowManagerService.deleteWorkflow(WORKFLOW_NAME);
 
     verify(workflowMetadataRepository).getWorkflow(WORKFLOW_NAME);
     verify(workflowMetadataRepository).deleteWorkflow(WORKFLOW_NAME);
     verify(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
-    verify(workflowEngineService).deleteWorkflow(eq(workflowMetadata.getWorkflowName()));
+    verify(workflowEngineService).deleteWorkflow(eq(workflowEngineRequest(workflowMetadata.getWorkflowName())));
   }
 
   @Test
@@ -181,7 +188,7 @@ public class WorkflowManagerServiceTest {
     verify(workflowMetadataRepository).getWorkflow(INVALID_WORKFLOW_ID);
     verify(workflowMetadataRepository, times(0)).deleteWorkflow(WORKFLOW_NAME);
     verify(workflowRunService, times(0)).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
-    verify(workflowEngineService, times(0)).deleteWorkflow(anyString());
+    verify(workflowEngineService, times(0)).deleteWorkflow(workflowEngineRequest(anyString()));
   }
 
   @Test
@@ -200,6 +207,10 @@ public class WorkflowManagerServiceTest {
     verify(workflowMetadataRepository).getWorkflow(WORKFLOW_NAME);
     verify(workflowMetadataRepository, times(0)).deleteWorkflow(WORKFLOW_NAME);
     verify(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
-    verify(workflowEngineService, times(0)).deleteWorkflow(eq(workflowMetadata.getWorkflowName()));
+    verify(workflowEngineService, times(0)).deleteWorkflow(eq(workflowEngineRequest(workflowMetadata.getWorkflowName())));
+  }
+
+  private WorkflowEngineRequest workflowEngineRequest(final String workflowName) {
+    return new WorkflowEngineRequest(workflowName);
   }
 }

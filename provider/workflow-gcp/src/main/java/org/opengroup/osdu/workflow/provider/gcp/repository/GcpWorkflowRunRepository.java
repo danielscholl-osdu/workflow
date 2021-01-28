@@ -81,7 +81,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     log.info("Saving workflow run. Workflow name : {}", workflowName);
     try {
       EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-          .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+          .setKind(this.propertiesConfig.getWorkflowRunKind())
           .setFilter(CompositeFilter.and(
               PropertyFilter.eq(KEY_WORKFLOW_NAME, workflowName),
               PropertyFilter.eq(KEY_AIRFLOW_RUN_ID, workflowRun.getRunId())));
@@ -112,7 +112,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
         runId);
     Datastore ds = getDatastore();
     EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-        .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+        .setKind(this.propertiesConfig.getWorkflowRunKind())
         .setFilter(CompositeFilter.and(
             PropertyFilter.eq(KEY_WORKFLOW_NAME, workflowName),
             PropertyFilter.eq(KEY_AIRFLOW_RUN_ID, runId)));
@@ -150,7 +150,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
       Transaction txn = null;
       try {
         EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-            .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+            .setKind(this.propertiesConfig.getWorkflowRunKind())
             .setFilter(CompositeFilter.and(
                 PropertyFilter.eq(KEY_WORKFLOW_NAME, workflowName),
                 PropertyFilter.eq(KEY_AIRFLOW_RUN_ID, runId)));
@@ -181,7 +181,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     log.info("Saving workflow run. Workflow name : {}", workflowName);
     try {
       EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-          .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+          .setKind(this.propertiesConfig.getWorkflowRunKind())
           .setFilter(CompositeFilter.and(
               PropertyFilter.eq(KEY_WORKFLOW_NAME, workflowName),
               PropertyFilter.eq(KEY_AIRFLOW_RUN_ID, workflowRun.getRunId())));
@@ -225,7 +225,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
   private String getAirflowRunIdToEntity(WorkflowRun workflowRun) {
     Datastore ds = getDatastore();
     EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-        .setKind(this.propertiesConfig.getWorkflowStatusDatastoreKind())
+        .setKind(this.propertiesConfig.getWorkflowStatusKind())
         .setFilter(
             PropertyFilter.eq(KEY_RUN_ID, workflowRun.getRunId()));
     QueryResults<Entity> tasks = ds.run(queryBuilder.build());
@@ -237,7 +237,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
 
   private Builder getBaseQueryBuilder(String workflowName) {
     return Query.newEntityQueryBuilder()
-        .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+        .setKind(this.propertiesConfig.getWorkflowRunKind())
         .setFilter(PropertyFilter.eq(KEY_WORKFLOW_NAME, workflowName));
   }
 
@@ -246,7 +246,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     String airflowRunId = workflowRun.getRunId();
     if (Objects.isNull(newKey)) {
       newKey = ds.newKeyFactory()
-          .setKind(this.propertiesConfig.getWorkflowRunDatastoreKind())
+          .setKind(this.propertiesConfig.getWorkflowRunKind())
           .newKey(UUID.randomUUID().toString());
       airflowRunId = getAirflowRunIdToEntity(workflowRun);
     }

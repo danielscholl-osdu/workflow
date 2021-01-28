@@ -51,11 +51,11 @@ import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
 import org.opengroup.osdu.core.gcp.multitenancy.IDatastoreFactory;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.exception.IntegrationException;
 import org.opengroup.osdu.workflow.exception.RuntimeException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
-import org.opengroup.osdu.workflow.provider.gcp.property.AirflowProperties;
 import org.opengroup.osdu.workflow.provider.gcp.service.GoogleIapHelper;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 
@@ -77,12 +77,13 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
   private static final String VERSION = "Version";
 
   private Map<String, Datastore> tenantRepositories = new HashMap<String, Datastore>();
-  private final AirflowProperties airflowProperties;
+  private final AirflowConfig airflowConfig;
+  private final WorkflowPropertiesConfiguration workflowConfig;
   private final GoogleIapHelper googleIapHelper;
   private final TenantInfo tenantInfo;
   private final IDatastoreFactory datastoreFactory;
   private final ITenantFactory tenantFactory;
-  private final WorkflowPropertiesConfiguration properties;
+
 
   @Override
   public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {
@@ -101,7 +102,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     }
     // validate DAG name
     try {
-      String airflowUrl = this.airflowProperties.getUrl();
+      String airflowUrl = this.airflowConfig.getUrl();
       String iapClientId = this.googleIapHelper.getIapClientId(airflowUrl);
       String webServerUrl = String.format("%s/api/experimental/latest_runs", airflowUrl);
 
@@ -173,7 +174,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     Datastore ds = getDatastore();
     List<WorkflowMetadata> responseList = new ArrayList<>();
     EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-        .setKind(this.properties.getWorkflowDatastoreKind());
+        .setKind(this.workflowConfig.getWorkflowKind());
     QueryResults<Entity> tasks = ds.run(queryBuilder.build());
     while (tasks.hasNext()) {
       responseList.add(convertEntityToWorkflowMetadata(tasks.next()));
@@ -219,7 +220,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
   private Entity convertWorkflowMetadataToEntity(WorkflowMetadata workflowMetadata, String dagName) {
     Datastore ds = getDatastore();
     Key taskKey = ds.newKeyFactory()
-        .setKind(this.properties.getWorkflowDatastoreKind())
+        .setKind(this.workflowConfig.getWorkflowKind())
         .newKey(UUID.randomUUID().toString());
     return Entity.newBuilder(taskKey)
         .set(DAG_NAME, dagName == null ? "" : dagName)
@@ -247,7 +248,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
   private Builder getBaseQueryBuilder(String workflowName) {
     return Query.newEntityQueryBuilder()
-        .setKind(this.properties.getWorkflowDatastoreKind())
+        .setKind(this.workflowConfig.getWorkflowKind())
         .setFilter(PropertyFilter.eq(WORKFLOW_NAME, workflowName));
   }
 

@@ -32,7 +32,7 @@ public class WorkflowManagerApi {
    * @return Workflow metadata.
    */
   @PostMapping
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
   public WorkflowMetadata create(@RequestBody final CreateWorkflowRequest request) {
     return workflowManagerService.createWorkflow(request);
   }
@@ -43,7 +43,7 @@ public class WorkflowManagerApi {
    * @return Workflow metadata
    */
   @GetMapping("/{workflow_name}")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "','" + WorkflowRole.CREATOR + "','" + WorkflowRole.ADMIN + "')")
   public  WorkflowMetadata getWorkflowByName(@PathVariable("workflow_name") final String workflowName) {
     return workflowManagerService.getWorkflowByName(workflowName);
   }
@@ -53,7 +53,7 @@ public class WorkflowManagerApi {
    * @param workflowName Name of the workflow which needs to be deleted.
    */
   @DeleteMapping("/{workflow_name}")
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteWorkflowById(@PathVariable("workflow_name") final String workflowName) {
     workflowManagerService.deleteWorkflow(workflowName);
@@ -64,7 +64,7 @@ public class WorkflowManagerApi {
    * @param prefix Filter workflow names which start with the full prefix specified.
    */
   @GetMapping
-  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "')")
+  @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "','" + WorkflowRole.CREATOR + "','" + WorkflowRole.ADMIN + "')")
   public List<WorkflowMetadata> getAllWorkflowForTenant(
       @RequestParam(required = false) String prefix) {
     return workflowManagerService.getAllWorkflowForTenant(prefix);
