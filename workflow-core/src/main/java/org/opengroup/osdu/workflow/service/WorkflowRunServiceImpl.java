@@ -156,6 +156,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
         .submittedBy(workflowRun.getSubmittedBy())
         .status(workflowStatusType)
         .workflowId(workflowRun.getWorkflowId())
+        .workflowName(workflowRun.getWorkflowName())
         .build();
   }
 }

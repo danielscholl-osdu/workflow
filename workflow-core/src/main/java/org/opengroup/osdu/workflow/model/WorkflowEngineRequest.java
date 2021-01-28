@@ -3,11 +3,6 @@ package org.opengroup.osdu.workflow.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 @Getter
 @EqualsAndHashCode
 public class WorkflowEngineRequest {
@@ -29,7 +24,7 @@ public class WorkflowEngineRequest {
   }
 
   public WorkflowEngineRequest(String workflowName, Long startTimeStamp) {
-    this(null, null, workflowName, System.currentTimeMillis());
+    this(null, null, workflowName, startTimeStamp);
   }
 
   public WorkflowEngineRequest(String workflowName) {

@@ -38,6 +38,7 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.Strings;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
@@ -69,7 +70,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
 
   private final WorkflowPropertiesConfiguration propertiesConfig;
   private final TenantInfo tenantInfo;
-  private Map<String, Datastore> tenantRepositories = new HashMap<String, Datastore>();
+  private Map<String, Datastore> tenantRepositories = new HashMap<>();
   private final IDatastoreFactory datastoreFactory;
   private final ITenantFactory tenantFactory;
 
@@ -222,19 +223,6 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     return responseList;
   }
 
-  private String getAirflowRunIdToEntity(WorkflowRun workflowRun) {
-    Datastore ds = getDatastore();
-    EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder()
-        .setKind(this.propertiesConfig.getWorkflowStatusKind())
-        .setFilter(
-            PropertyFilter.eq(KEY_RUN_ID, workflowRun.getRunId()));
-    QueryResults<Entity> tasks = ds.run(queryBuilder.build());
-    if (tasks.hasNext()) {
-      return tasks.next().getString(KEY_AIRFLOW_RUN_ID);
-    }
-    return "";
-  }
-
   private Builder getBaseQueryBuilder(String workflowName) {
     return Query.newEntityQueryBuilder()
         .setKind(this.propertiesConfig.getWorkflowRunKind())
@@ -243,12 +231,10 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
 
   private Entity convertWorkflowRunToEntity(WorkflowRun workflowRun, Key newKey) {
     Datastore ds = getDatastore();
-    String airflowRunId = workflowRun.getRunId();
     if (Objects.isNull(newKey)) {
       newKey = ds.newKeyFactory()
           .setKind(this.propertiesConfig.getWorkflowRunKind())
           .newKey(UUID.randomUUID().toString());
-      airflowRunId = getAirflowRunIdToEntity(workflowRun);
     }
     return Entity.newBuilder(newKey)
         .set(KEY_WORKFLOW_ID,
@@ -256,7 +242,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
         .set(KEY_WORKFLOW_NAME,
             workflowRun.getWorkflowName() == null ? "" : workflowRun.getWorkflowName())
         .set(KEY_AIRFLOW_RUN_ID,
-            airflowRunId == null ? "" : airflowRunId)
+            workflowRun.getRunId() == null ? "" : workflowRun.getRunId())
         .set(KEY_SUBMITTED_BY,
             workflowRun.getSubmittedBy() == null ? "" : workflowRun.getSubmittedBy())
         .set(KEY_START_TIME,
@@ -299,7 +285,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
   private WorkflowRun buildWorkflowRunFromDataStoreEntity(Entity entity) {
     return WorkflowRun.builder()
         .runId(entity.getString(KEY_AIRFLOW_RUN_ID))
-        .status(entity.getString(KEY_STATUS) == "" ?
+        .status(Strings.isNullOrEmpty(entity.getString(KEY_STATUS)) ?
             null : WorkflowStatusType.valueOf(entity.getString(KEY_STATUS)))
         .startTimeStamp(entity.getLong(KEY_START_TIME))
         .endTimeStamp(entity.getLong(KEY_END_TIME))

@@ -92,7 +92,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void shouldReturn400WhenUpdateWorkflowRunInstance() throws Exception {
+  public void shouldReturn200WhenUpdateWorkflowRunInstance() throws Exception {
     String responseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
@@ -110,7 +110,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.BAD_REQUEST.value(), getResponse.getStatus());
+    assertEquals(HttpStatus.OK.value(), getResponse.getStatus());
   }
 
   private String createWorkflowRun(String url) throws Exception {

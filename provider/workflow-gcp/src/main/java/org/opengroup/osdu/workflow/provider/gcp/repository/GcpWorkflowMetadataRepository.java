@@ -76,7 +76,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
   private static final String CREATION_TIME_STAMP = "CreationTimestamp";
   private static final String VERSION = "Version";
 
-  private Map<String, Datastore> tenantRepositories = new HashMap<String, Datastore>();
+  private Map<String, Datastore> tenantRepositories = new HashMap<>();
   private final AirflowConfig airflowConfig;
   private final WorkflowPropertiesConfiguration workflowConfig;
   private final GoogleIapHelper googleIapHelper;
@@ -193,17 +193,16 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     Transaction txn = ds.newTransaction();
     String workflowName = workflowMetadata.getWorkflowName();
     try {
-      Entity entity = convertWorkflowMetadataToEntity(workflowMetadata, dagName);
       EntityQuery.Builder queryBuilder = getBaseQueryBuilder(workflowName);
       QueryResults<Entity> tasks = ds.run(queryBuilder.build());
-      if (tasks.hasNext()) {
-        String errMessage = String.format("Workflow with name %s exists", workflowName);
-        throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), errMessage,
-            errMessage);
+      if (!tasks.hasNext()) {
+        Entity entity = convertWorkflowMetadataToEntity(workflowMetadata, dagName);
+        txn.put(entity);
+        txn.commit();
+        workflowMetadata.setWorkflowId(entity.getKey().getName());
+      } else {
+        workflowMetadata.setWorkflowId(tasks.next().getKey().getName());
       }
-      txn.put(entity);
-      txn.commit();
-      workflowMetadata.setWorkflowId(entity.getKey().getName());
     } catch (DatastoreException ex) {
       throw new PersistenceException(ex.getCode(), ex.getMessage(), ex.getReason());
     } finally {
