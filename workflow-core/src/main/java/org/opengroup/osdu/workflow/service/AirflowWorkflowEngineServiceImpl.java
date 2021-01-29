@@ -15,12 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.interfaces.IAuthenticationService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 
 import org.springframework.stereotype.Service;
@@ -42,9 +40,6 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
       "Failed to trigger workflow with id %s and name %s";
   private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
       "No WorkflowRun executed for Workflow: %s on %s ";
-
-  private final AirflowConfig airflowConfig;
-  private final IAuthenticationService restClient;
 
   @Override
   public void createWorkflow(final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
@@ -105,21 +100,12 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
     }
   }
 
-  private ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
+  protected ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
       WorkflowEngineRequest rq, String errorMessage) {
-    String url = format("%s/%s", airflowConfig.getUrl(), apiEndpoint);
-    log.info("Calling airflow endpoint {} with method {}", url, httpMethod);
-
-    ClientResponse response = restClient.sendAirflowRequest(httpMethod, url, body, rq);
-    int status = response.getStatusCode();
-    log.info("Received response status: {}.", status);
-    if (status != 200) {
-      throw new AppException(status, (String) response.getResponseBody(), errorMessage);
-    }
-    return response;
+    return null;
   }
 
-  private String executionDate(final Long executionTimeStamp){
+  protected String executionDate(final Long executionTimeStamp){
     Instant instant = Instant.ofEpochMilli(executionTimeStamp);
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
     return zonedDateTime.format(DateTimeFormatter.ofPattern(AIRFLOW_EXECUTION_DATE_FORMAT));

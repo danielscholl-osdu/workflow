@@ -41,13 +41,6 @@ public class IBMAuthenticationService implements IAuthenticationService {
     log.debug("Finished checking authentication.");
   }
 
-  @Override
-  public ClientResponse sendAirflowRequest(
-      String httpMethod, String url, String body,
-      WorkflowEngineRequest rq) {
-    return null;
-  }
-
   private void checkPreconditions(String authorizationToken, String partitionID) {
     if (authorizationToken == null) {
       throw new UnauthorizedException("Missing authorization token");

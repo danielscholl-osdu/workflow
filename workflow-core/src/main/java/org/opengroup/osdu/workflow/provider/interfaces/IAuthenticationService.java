@@ -17,8 +17,6 @@
 package org.opengroup.osdu.workflow.provider.interfaces;
 
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
-import org.opengroup.osdu.workflow.model.ClientResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 
 public interface IAuthenticationService {
 
@@ -32,7 +30,5 @@ public interface IAuthenticationService {
    *                                   doesn't have assigned user groups
    */
   void checkAuthentication(String authorizationToken, String partitionID);
-
-  ClientResponse sendAirflowRequest(String httpMethod, String url, String body, WorkflowEngineRequest rq);
 
 }

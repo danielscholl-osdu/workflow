@@ -43,8 +43,9 @@ import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
-import org.opengroup.osdu.workflow.provider.interfaces.IAuthenticationService;
 
+import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -54,9 +55,10 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class AuthenticationServiceImpl implements IAuthenticationService {
+@Primary
+@RequiredArgsConstructor
+public class GcpAirflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
   private static final String KEY_AIRFLOW_RUN_ID = "AirflowRunID";
   private static final String KEY_WORKFLOW_ID = "WorkflowID";
   private static final String KEY_RUN_ID = "RunID";
@@ -67,17 +69,11 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
   private final GoogleIapHelper googleIapHelper;
   private final ObjectMapper objectMapper;
   private final TenantInfo tenantInfo;
-  private Map<String, Datastore> tenantRepositories = new HashMap<>();
+  private final Map<String, Datastore> tenantRepositories = new HashMap<>();
   private final IDatastoreFactory datastoreFactory;
   private final ITenantFactory tenantFactory;
 
-  @Override
-  public void checkAuthentication(String authorizationToken, String partitionID) {
-    // This is not relevant yet
-  }
-
-  @Override
-  public ClientResponse sendAirflowRequest(
+  private ClientResponse sendAirflowRequest(
       String httpMethod, String url, String stringData, WorkflowEngineRequest rq) {
     log.info(
         "Calling airflow endpoint with Google API. Http method: {}, Endpoint: {}, request body: {}",
@@ -114,6 +110,21 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
       log.error(errorMessage, e);
       throw new AppException(500, "Failed to send request.", errorMessage);
     }
+  }
+
+  @Override
+  protected ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
+      WorkflowEngineRequest rq, String errorMessage) {
+    String url = format("%s/%s", airflowConfig.getUrl(), apiEndpoint);
+    log.info("Calling airflow endpoint {} with method {}", url, httpMethod);
+
+    ClientResponse response = sendAirflowRequest(httpMethod, url, body, rq);
+    int status = response.getStatusCode();
+    log.info("Received response status: {}.", status);
+    if (status != 200) {
+      throw new AppException(status, (String) response.getResponseBody(), errorMessage);
+    }
+    return response;
   }
 
   private void saveWorkflowStatus(String content, WorkflowEngineRequest rq) {
