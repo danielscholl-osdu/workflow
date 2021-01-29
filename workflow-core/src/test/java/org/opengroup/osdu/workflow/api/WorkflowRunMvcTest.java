@@ -1,7 +1,6 @@
 package org.opengroup.osdu.workflow.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
@@ -10,9 +9,9 @@ import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.handler.RestExceptionHandler;
 import org.opengroup.osdu.workflow.sucurity.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
-import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,25 +43,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(WorkflowRunApi.class)
 @AutoConfigureMockMvc
 @Import({AuthorizationFilter.class, DpsHeaders.class})
-public class WorkflowRunMvcTest {
+class WorkflowRunMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
   private static final String WORKFLOW_NAME = "test-dag-name";
   private static final String RUN_ID = "d13f7fd0-d27e-4176-8d60-6e9aad86e347";
-  private static final String TRIGGER_WORKFLOW_ENDPOINT = String.format("/workflow/%s/workflowRun", WORKFLOW_NAME);
+  private static final String TRIGGER_WORKFLOW_ENDPOINT = String
+      .format("/v1/workflow/%s/workflowRun", WORKFLOW_NAME);
   private static final String TRIGGER_WORKFLOW_REQUEST = "{\n" +
       "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
-      "  \"workflowTriggerConfig\": {\n" +
+      "  \"executionContext\": {\n" +
       "    \"id\": \"someid\",\n" +
       "    \"kind\": \"somekind\",\n" +
       "    \"dataPartitionId\": \"someId\"\n" +
-      "  },\n" +
-      "  \"additionalProperties\": {}\n" +
+      "  }\n" +
       "}";
   private static final String WORKFLOW_RUN_RESPONSE = "{\n" +
       "  \"workflowId\": \"2afccfb8-1351-41c6-9127-61f2d7f22ff8\",\n" +
       "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
       "  \"startTimeStamp\": 1600145420675,\n" +
+      "  \"endTimeStamp\": 1600145420675,\n" +
       "  \"status\": \"submitted\",\n" +
       "  \"submittedBy\": \"user@mail.com\"\n" +
       "}";
@@ -84,12 +84,13 @@ public class WorkflowRunMvcTest {
   private AuthorizationResponse authorizationResponse;
 
   @Test
-  @Disabled
-  public void testTriggerWorkflowApiWithSuccess() throws Exception {
-    final TriggerWorkflowRequest request = mapper.readValue(TRIGGER_WORKFLOW_REQUEST, TriggerWorkflowRequest.class);
+  void testTriggerWorkflowApiWithSuccess() throws Exception {
+    final TriggerWorkflowRequest request = mapper
+        .readValue(TRIGGER_WORKFLOW_REQUEST, TriggerWorkflowRequest.class);
     final WorkflowRun workflowRun = mapper.readValue(WORKFLOW_RUN_RESPONSE, WorkflowRun.class);
-    when(workflowRunService.triggerWorkflow(eq(WORKFLOW_NAME), eq(request))).thenReturn(workflowRun);
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
+    when(workflowRunService.triggerWorkflow(eq(WORKFLOW_NAME), eq(request)))
+        .thenReturn(workflowRun);
+    when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
         post(TRIGGER_WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -99,29 +100,30 @@ public class WorkflowRunMvcTest {
         .andExpect(status().isOk())
         .andReturn();
     verify(workflowRunService, times(1)).triggerWorkflow(eq(WORKFLOW_NAME), eq(request));
-    verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
-    final WorkflowRun response = mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRun.class);
+    verify(authorizationService, times(1)).authorizeAny(any(), any());
+    final WorkflowRun response = mapper
+        .readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRun.class);
     assertThat(workflowRun, equalTo(response));
   }
 
   @Test
-  @Disabled
-  public void testGetWorkflowRunApiWithSuccess() throws Exception {
+  void testGetWorkflowRunApiWithSuccess() throws Exception {
     final WorkflowRun workflowRun = mapper.readValue(WORKFLOW_RUN_RESPONSE, WorkflowRun.class);
-    when(workflowRunService.getWorkflowRunByName(eq(WORKFLOW_NAME),eq(RUN_ID))).thenReturn(workflowRun);
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(workflowRunService.getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID)))
+        .thenReturn(workflowRun);
+    when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
-        get( "/workflow/{id}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
+        get("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
             .headers(getHttpHeaders())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isOk())
         .andReturn();
-    verify(workflowRunService).getWorkflowRunByName(eq(WORKFLOW_NAME),eq(RUN_ID));
-    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
+    verify(workflowRunService).getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID));
+    verify(authorizationService).authorizeAny(any(), any());
     final WorkflowRun responseWorkflowRun =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRun.class);
-    assertThat(workflowRun,equalTo(responseWorkflowRun));
+    assertThat(workflowRun, equalTo(responseWorkflowRun));
 
   }
 

@@ -1,22 +1,19 @@
 package org.opengroup.osdu.workflow.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
-import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
-import org.opengroup.osdu.workflow.exception.handler.ConflictApiError;
 import org.opengroup.osdu.workflow.sucurity.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -47,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(WorkflowManagerApi.class)
 @AutoConfigureMockMvc
 @Import({AuthorizationFilter.class, DpsHeaders.class})
-public class WorkflowManagerMvcTest {
+class WorkflowManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
   private static final String WORKFLOW_RESPONSE = "{\n" +
@@ -56,18 +53,13 @@ public class WorkflowManagerMvcTest {
       "  \"description\": \"This is a test workflow\",\n" +
       "  \"creationTimestamp\": 1600144876028,\n" +
       "  \"createdBy\": \"user@email.com\",\n" +
-      "  \"version\": 1,\n" +
-      "  \"registrationInstructions\": null" +
+      "  \"version\": 1\n" +
       "}";
   private static final String WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
-      "  \"workflowDetailContent\": \"from airflow import DAG\\r\\nfrom airflow.operators import BashOperator\",\n" +
-      "  \"description\": \"This is a test workflow\",\n" +
-      "  \"concurrentWorkflowRun\": 5,\n" +
-      "  \"concurrentTaskRun\": 5,\n" +
-      "  \"active\": true\n" +
+      "  \"description\": \"This is a test workflow\"\n" +
       "}";
-  private static final String WORKFLOW_ENDPOINT = "/workflow";
+  private static final String WORKFLOW_ENDPOINT = "/v1/workflow";
   private static final String EXISTING_WORKFLOW_ID = "existing-id";
   private static final String WORKFLOW_NAME = "test-dag-name";
 
@@ -90,12 +82,13 @@ public class WorkflowManagerMvcTest {
   private AuthorizationResponse authorizationResponse;
 
   @Test
-  @Disabled
-  public void testCreateApiWithSuccess() throws Exception {
-    final CreateWorkflowRequest request = mapper.readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
+  void testCreateApiWithSuccess() throws Exception {
+    final CreateWorkflowRequest request = mapper
+        .readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
     when(workflowManagerService.createWorkflow(eq(request))).thenReturn(metadata);
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
+        .thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -105,84 +98,61 @@ public class WorkflowManagerMvcTest {
         .andExpect(status().isOk())
         .andReturn();
     verify(workflowManagerService, times(1)).createWorkflow(eq(request));
-    verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.CREATOR));
+    verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
     assertThat(metadata, equalTo(responseMetadata));
   }
 
   @Test
-  @Disabled
-  public void testCreateApiWithConflict() throws Exception {
-    final CreateWorkflowRequest request = mapper.readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
-    when(workflowManagerService.createWorkflow(eq(request)))
-        .thenThrow(new ResourceConflictException(EXISTING_WORKFLOW_ID, "conflict"));
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
-    final MvcResult mvcResult = mockMvc.perform(
-        post(WORKFLOW_ENDPOINT)
-            .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf())
-            .content(WORKFLOW_REQUEST))
-        .andExpect(status().isConflict())
-        .andReturn();
-    verify(workflowManagerService, times(1)).createWorkflow(eq(request));
-    verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.CREATOR));
-    final ConflictApiError response =
-        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ConflictApiError.class);
-    Assertions.assertEquals(EXISTING_WORKFLOW_ID, response.getConflictId());
-  }
-
-  @Test
-  @Disabled
-  public void testGetApiWithSuccess() throws Exception {
+  void testGetApiWithSuccess() throws Exception {
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
     when(workflowManagerService.getWorkflowByName(eq(WORKFLOW_NAME))).thenReturn(metadata);
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
-        get( "/workflow/{id}", WORKFLOW_NAME)
+        get(WORKFLOW_ENDPOINT + "/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
             .headers(getHttpHeaders())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isOk())
         .andReturn();
     verify(workflowManagerService).getWorkflowByName(eq(WORKFLOW_NAME));
-    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
+    verify(authorizationService).authorizeAny(any(), any());
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
-    assertThat(metadata,equalTo(responseMetadata));
+    assertThat(metadata, equalTo(responseMetadata));
   }
 
   @Test
-  @Disabled
-  public void testDeleteApiWithSuccess() throws Exception {
+  void testDeleteApiWithSuccess() throws Exception {
     doNothing().when(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
+        .thenReturn(authorizationResponse);
     mockMvc.perform(
-        delete( "/workflow/{id}", WORKFLOW_NAME)
+        delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
             .headers(getHttpHeaders())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().is(204))
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
-    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.ADMIN));
   }
 
   @Test
-  @Disabled
-  public void testDeleteApiWithError() throws Exception {
-    doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
-    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+  void testDeleteApiWithError() throws Exception {
+    doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService)
+        .deleteWorkflow(eq(WORKFLOW_NAME));
+    when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     mockMvc.perform(
-        delete( "/workflow/{id}", WORKFLOW_NAME)
+        delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
             .headers(getHttpHeaders())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isNotFound())
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
-    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.CREATOR));
+    verify(authorizationService).authorizeAny(any(), any());
   }
 
   private HttpHeaders getHttpHeaders() {
