@@ -18,7 +18,7 @@ public class TestConstants {
 	public static final String GET_STATUS_API_ENDPOINT = "/getStatus";
 	public static final String UPDATE_STATUS_API_ENDPOINT = "/updateStatus";
 
-	public static final String CREATE_WORKFLOW_API_ENDPOINT = "/v1/workflow";
+	public static final String CREATE_WORKFLOW_API_ENDPOINT = "v1/workflow";
 	public static final String CREATE_WORKFLOW_RUN_API_ENDPOINT =
       CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun";
 	public static final String GET_DETAILS_WORKFLOW_RUN_API_ENDPOINT =
