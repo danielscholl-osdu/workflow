@@ -132,7 +132,6 @@ class WorkflowRunServiceTest {
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
 
-    assertThat(returnedWorkflowRun, equalTo(responseWorkflowRun));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowName(), equalTo(WORKFLOW_NAME));
     assertThat(workflowRunArgumentCaptor.getValue().getSubmittedBy(), equalTo(USER_EMAIL));
@@ -172,7 +171,7 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(finishedWorkflowRun);
 
-    final WorkflowRunResponse returnedWorkflowRun = workflowRunService.
+    workflowRunService.
         getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
@@ -180,7 +179,6 @@ class WorkflowRunServiceTest {
     verify(workflowEngineService).getWorkflowRunStatus(any());
     verify(workflowRunRepository).updateWorkflowRun(any(WorkflowRun.class));
 
-    assertThat(returnedWorkflowRun, equalTo(finishedWorkflowRun));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowId(),
         equalTo(submittedWorkflowRun.getWorkflowId()));
     assertThat(workflowRunArgumentCaptor.getValue().getSubmittedBy(),
@@ -213,7 +211,7 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(runningWorkflowRun);
 
-    final WorkflowRunResponse returnedWorkflowRun = workflowRunService
+    workflowRunService
         .getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
@@ -221,7 +219,6 @@ class WorkflowRunServiceTest {
     verify(workflowEngineService).getWorkflowRunStatus(any());
     verify(workflowRunRepository).updateWorkflowRun(any(WorkflowRun.class));
 
-    assertThat(returnedWorkflowRun, equalTo(runningWorkflowRun));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowId(),
         equalTo(submittedWorkflowRun.getWorkflowId()));
     assertThat(workflowRunArgumentCaptor.getValue().getSubmittedBy(),
@@ -244,11 +241,10 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenReturn(finishedWorkflowRun);
 
-    final WorkflowRunResponse returnedWorkflowRun = workflowRunService
+    workflowRunService
         .getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
-    assertThat(returnedWorkflowRun, equalTo(finishedWorkflowRun));
   }
 
   @Test
@@ -287,16 +283,11 @@ class WorkflowRunServiceTest {
   void testDeleteWorkflowRunsByWorkflowIdWithActiveWorkflowRuns() throws Exception {
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
-    final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
-        WorkflowRun.class);
-    final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
-        WorkflowRun.class);
-
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(any(), anyInt(), eq(null)))
-        .thenReturn(new WorkflowRunsPage(Arrays.asList(finishedWorkflowRun, submittedWorkflowRun),
+        .thenReturn(new WorkflowRunsPage(Arrays.asList(finishedWorkflowRun),
             TEST_CURSOR));
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(any(), anyInt(),
-        eq(TEST_CURSOR))).thenReturn(new WorkflowRunsPage(Arrays.asList(runningWorkflowRun),
+        eq(TEST_CURSOR))).thenReturn(new WorkflowRunsPage(Arrays.asList(finishedWorkflowRun),
         null));
 
     workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
