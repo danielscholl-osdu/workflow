@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
@@ -29,7 +30,6 @@ import com.google.cloud.datastore.Transaction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
@@ -57,8 +57,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Service
 @Slf4j
 @Primary
-@RequiredArgsConstructor
-public class GcpAirflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
+public class GcpComposerEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
   private static final String KEY_AIRFLOW_RUN_ID = "AirflowRunID";
   private static final String KEY_WORKFLOW_ID = "WorkflowID";
   private static final String KEY_RUN_ID = "RunID";
@@ -73,6 +72,26 @@ public class GcpAirflowEngineServiceImpl extends AirflowWorkflowEngineServiceImp
   private final IDatastoreFactory datastoreFactory;
   private final ITenantFactory tenantFactory;
 
+
+  public GcpComposerEngineServiceImpl(AirflowConfig airflowConfig,
+                                      WorkflowPropertiesConfiguration workflowConfig,
+                                      GoogleIapHelper googleIapHelper,
+                                      ObjectMapper objectMapper,
+                                      TenantInfo tenantInfo,
+                                      IDatastoreFactory datastoreFactory,
+                                      ITenantFactory tenantFactory
+  ) {
+    super(null, airflowConfig);
+    this.airflowConfig = airflowConfig;
+    this.workflowConfig = workflowConfig;
+    this.googleIapHelper = googleIapHelper;
+    this.objectMapper = objectMapper;
+    this.tenantInfo = tenantInfo;
+    this.datastoreFactory = datastoreFactory;
+    this.tenantFactory = tenantFactory;
+  }
+
+
   private ClientResponse sendAirflowRequest(
       String httpMethod, String url, String stringData, WorkflowEngineRequest rq) {
     log.info(
@@ -84,7 +103,7 @@ public class GcpAirflowEngineServiceImpl extends AirflowWorkflowEngineServiceImp
     try {
       HttpRequest httpRequest;
       if (HttpMethod.POST.name().equals(httpMethod)) {
-        Map<String, Object> data = objectMapper.readValue(stringData, Map.class);
+        Map<String, Object> data = objectMapper.readValue(stringData, new TypeReference<Map<String, Object>>() {});
         httpRequest = this.googleIapHelper.buildIapPostRequest(url, iapClientId, data);
       } else if (HttpMethod.GET.name().equals(httpMethod)) {
         httpRequest = this.googleIapHelper.buildIapGetRequest(url, iapClientId);

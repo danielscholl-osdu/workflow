@@ -10,24 +10,28 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import static java.lang.String.format;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final String RUN_ID_PARAMETER_NAME = "run_id";
   private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
@@ -40,6 +44,14 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
       "Failed to trigger workflow with id %s and name %s";
   private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
       "No WorkflowRun executed for Workflow: %s on %s ";
+
+  private final Client restClient;
+  private final AirflowConfig airflowConfig;
+
+  public AirflowWorkflowEngineServiceImpl(Client restClient, AirflowConfig airflowConfig){
+    this.restClient = restClient;
+    this.airflowConfig = airflowConfig;
+  }
 
   @Override
   public void createWorkflow(final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
@@ -96,13 +108,36 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
     } catch (JsonProcessingException e) {
       final String errorMessage = format("Unable to Process Json Received. %s", e.getMessage());
       log.error(errorMessage, e);
-      throw new AppException(500, "Failed to Get Status from Airflow", errorMessage);
+      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to Get Status from Airflow", errorMessage);
     }
   }
 
   protected ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
       WorkflowEngineRequest rq, String errorMessage) {
-    return null;
+    String url = format("%s/%s", airflowConfig.getUrl(), apiEndpoint);
+    log.info("Calling airflow endpoint {} with method {}", url, httpMethod);
+
+    WebResource webResource = restClient.resource(url);
+    com.sun.jersey.api.client.ClientResponse response = webResource
+        .type(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Basic " + airflowConfig.getAppKey())
+        .method(httpMethod, com.sun.jersey.api.client.ClientResponse.class, body);
+
+    final int status = response.getStatus();
+    log.info("Received response status: {}.", status);
+
+    if (status != HttpStatus.OK.value()) {
+      String responseBody = response.getEntity(String.class);
+      throw new AppException(status, responseBody, errorMessage);
+    }
+
+    return ClientResponse.builder()
+        .contentType(String.valueOf(response.getType()))
+        .responseBody(response.toString())
+        .status(HttpStatus.OK)
+        .statusCode(response.getStatus())
+        .statusMessage(response.getStatusInfo().getReasonPhrase())
+        .build();
   }
 
   protected String executionDate(final Long executionTimeStamp){
