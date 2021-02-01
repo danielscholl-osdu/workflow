@@ -7,7 +7,8 @@ import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.handler.RestExceptionHandler;
-import org.opengroup.osdu.workflow.sucurity.AuthorizationFilter;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
+import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
@@ -87,7 +88,8 @@ class WorkflowRunMvcTest {
   void testTriggerWorkflowApiWithSuccess() throws Exception {
     final TriggerWorkflowRequest request = mapper
         .readValue(TRIGGER_WORKFLOW_REQUEST, TriggerWorkflowRequest.class);
-    final WorkflowRun workflowRun = mapper.readValue(WORKFLOW_RUN_RESPONSE, WorkflowRun.class);
+    final WorkflowRunResponse workflowRun = mapper
+        .readValue(WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
     when(workflowRunService.triggerWorkflow(eq(WORKFLOW_NAME), eq(request)))
         .thenReturn(workflowRun);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
@@ -101,14 +103,15 @@ class WorkflowRunMvcTest {
         .andReturn();
     verify(workflowRunService, times(1)).triggerWorkflow(eq(WORKFLOW_NAME), eq(request));
     verify(authorizationService, times(1)).authorizeAny(any(), any());
-    final WorkflowRun response = mapper
-        .readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRun.class);
+    final WorkflowRunResponse response = mapper
+        .readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRun, equalTo(response));
   }
 
   @Test
   void testGetWorkflowRunApiWithSuccess() throws Exception {
-    final WorkflowRun workflowRun = mapper.readValue(WORKFLOW_RUN_RESPONSE, WorkflowRun.class);
+    final WorkflowRunResponse workflowRun = mapper
+        .readValue(WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
     when(workflowRunService.getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenReturn(workflowRun);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
@@ -121,8 +124,8 @@ class WorkflowRunMvcTest {
         .andReturn();
     verify(workflowRunService).getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(authorizationService).authorizeAny(any(), any());
-    final WorkflowRun responseWorkflowRun =
-        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRun.class);
+    final WorkflowRunResponse responseWorkflowRun =
+        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRun, equalTo(responseWorkflowRun));
 
   }

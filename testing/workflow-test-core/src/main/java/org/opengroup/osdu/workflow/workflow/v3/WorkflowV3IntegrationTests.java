@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.HttpMethod;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 import org.springframework.http.HttpStatus;
@@ -131,6 +132,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void shouldDeleteWorkflowDefinition() throws Exception {
     String responseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);

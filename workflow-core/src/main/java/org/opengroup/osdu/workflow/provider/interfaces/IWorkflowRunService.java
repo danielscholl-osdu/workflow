@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 
 public interface IWorkflowRunService {
@@ -13,7 +14,7 @@ public interface IWorkflowRunService {
    * @param request Request object which has information to trigger workflow.
    * @return Information about workflow run.
    */
-  WorkflowRun triggerWorkflow(final String workflowName, TriggerWorkflowRequest request);
+  WorkflowRunResponse triggerWorkflow(final String workflowName, TriggerWorkflowRequest request);
 
   /**
    * Returns Information about workflow run. based on workflowId, runId
@@ -21,7 +22,7 @@ public interface IWorkflowRunService {
    * @param runId Id of the workflowRun for which metadata should be retrieved.
    * @return Information about workflow run.
    */
-  WorkflowRun getWorkflowRunByName(final String workflowName, final String runId);
+  WorkflowRunResponse getWorkflowRunByName(final String workflowName, final String runId);
 
   /**
    * Deletes all workflow runs information for a workflowId
@@ -42,6 +43,6 @@ public interface IWorkflowRunService {
    * @param runId Id of the workflowRun for which metadata should be updated.
    * @param status New status.
    */
-  WorkflowRun updateWorkflowRunStatus(final String workflowName, final String runId,
+  WorkflowRunResponse updateWorkflowRunStatus(final String workflowName, final String runId,
       WorkflowStatusType status);
 }

@@ -6,6 +6,7 @@ import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.UpdateWorkflowRunRequest;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +26,7 @@ public class WorkflowRunApi {
    */
   @PostMapping("/{workflow_name}/workflowRun")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.CREATOR + "', '" + WorkflowRole.ADMIN + "')")
-  public WorkflowRun triggerWorkflow(@PathVariable("workflow_name") String workflowName,
+  public WorkflowRunResponse triggerWorkflow(@PathVariable("workflow_name") String workflowName,
       @RequestBody TriggerWorkflowRequest request) {
     return workflowRunService.triggerWorkflow(workflowName, request);
   }
@@ -38,7 +39,7 @@ public class WorkflowRunApi {
    */
   @GetMapping("/{workflow_name}/workflowRun/{runId}")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "', '" + WorkflowRole.CREATOR + "', '" + WorkflowRole.ADMIN + "')")
-  public WorkflowRun getWorkflowRunById(@PathVariable("workflow_name") final String workflowName,
+  public WorkflowRunResponse getWorkflowRunById(@PathVariable("workflow_name") final String workflowName,
       @PathVariable("runId") final String runId) {
     return workflowRunService.getWorkflowRunByName(workflowName, runId);
   }
@@ -64,7 +65,7 @@ public class WorkflowRunApi {
    */
   @PutMapping("/{workflow_name}/workflowRun/{runId}")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "', '" + WorkflowRole.CREATOR + "')")
-  public WorkflowRun updateWorkflowRun(
+  public WorkflowRunResponse updateWorkflowRun(
       @PathVariable("workflow_name") String workflowName,
       @PathVariable("runId") String runId,
       @RequestBody UpdateWorkflowRunRequest body) {

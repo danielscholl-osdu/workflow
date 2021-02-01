@@ -8,7 +8,7 @@ import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
-import org.opengroup.osdu.workflow.sucurity.AuthorizationFilter;
+import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRole;

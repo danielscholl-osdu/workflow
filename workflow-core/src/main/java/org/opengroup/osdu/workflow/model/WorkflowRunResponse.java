@@ -4,22 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 @EqualsAndHashCode
-public class WorkflowRun {
+@AllArgsConstructor
+public class WorkflowRunResponse {
   private String workflowId;
-  private String workflowName;
   private String runId;
   private Long startTimeStamp;
   private Long endTimeStamp;
   private WorkflowStatusType status;
   private String submittedBy;
-  private String workflowEngineExecutionDate;
 }
+

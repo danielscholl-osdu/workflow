@@ -54,13 +54,13 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   }
 
   @Override
-  public WorkflowRun getWorkflowRun(String workflowId, String runId) {
+  public WorkflowRun getWorkflowRun(String workflowName, String runId) {
     final Optional<WorkflowRunDoc> workflowRunDoc =
         cosmosStore.findItem(dpsHeaders.getPartitionId(),
             cosmosConfig.getDatabase(),
             cosmosConfig.getWorkflowRunCollection(),
             runId,
-            workflowId,
+            workflowName,
             WorkflowRunDoc.class);
     if (!workflowRunDoc.isPresent()) {
       final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowId);

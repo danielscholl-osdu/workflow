@@ -27,6 +27,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.exception.IntegrationException;
+import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -94,6 +95,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     return handleExceptionInternal(ex, apiError, headers, status, request);
   }
 
+  @ExceptionHandler({ResourceConflictException.class})
+  protected ResponseEntity<Object> handle(ResourceConflictException r, WebRequest request) {
+    log.error("Exception during REST request: " + request.getDescription(false), r);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    ConflictApiError conflictApiError = ConflictApiError.ConflictErrorBuilder()
+        .conflictId(r.getConflictingResourceId())
+        .message(ExceptionUtils.getRootCauseMessage(r))
+        .build();
+    return handleExceptionInternal(r, conflictApiError, headers, HttpStatus.CONFLICT, request);
+  }
 
   private ResponseEntity<Object> getErrorResponse(AppException e) {
 

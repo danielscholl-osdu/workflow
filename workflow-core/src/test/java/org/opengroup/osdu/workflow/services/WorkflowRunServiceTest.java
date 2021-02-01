@@ -2,9 +2,7 @@ package org.opengroup.osdu.workflow.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -125,7 +123,7 @@ class WorkflowRunServiceTest {
     final WorkflowRun responseWorkflowRun = mock(WorkflowRun.class);
     when(workflowRunRepository.saveWorkflowRun(workflowRunArgumentCaptor.capture()))
         .thenReturn(responseWorkflowRun);
-    final WorkflowRun returnedWorkflowRun = workflowRunService
+    final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .triggerWorkflow(WORKFLOW_NAME, request);
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
     verify(workflowEngineService)
@@ -174,7 +172,7 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(finishedWorkflowRun);
 
-    final WorkflowRun returnedWorkflowRun = workflowRunService.
+    final WorkflowRunResponse returnedWorkflowRun = workflowRunService.
         getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
@@ -215,7 +213,7 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(runningWorkflowRun);
 
-    final WorkflowRun returnedWorkflowRun = workflowRunService
+    final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
@@ -246,7 +244,7 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenReturn(finishedWorkflowRun);
 
-    final WorkflowRun returnedWorkflowRun = workflowRunService
+    final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
@@ -322,25 +320,8 @@ class WorkflowRunServiceTest {
     verify(workflowRunRepository, times(0)).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
   }
 
-
-  private WorkflowEngineRequest workflowEngineRequest(final String workflowName) {
-    return workflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME);
-  }
-
   private WorkflowEngineRequest workflowEngineRequest(final String runId, final String workflowId,
       final String workflowName) {
     return new WorkflowEngineRequest(runId, workflowId, workflowName, WORKFLOW_RUN_START_TIMESTAMP);
-  }
-
-  private Map<String, Object> workflowPayload(final String runId,
-      final TriggerWorkflowRequest request) {
-    final Map<String, Object> payload = new HashMap<>();
-    payload.put(KEY_RUN_ID, runId);
-    payload.put(KEY_AUTH_TOKEN, AUTH_TOKEN);
-    payload.put(KEY_RUN_CONFIG,
-        OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
-    payload.put(KEY_WORKFLOW_ID, WORKFLOW_NAME);
-    payload.put(KEY_CORRELATION_ID, CORRELATION_ID);
-    return payload;
   }
 }

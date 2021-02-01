@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.skyscreamer.jsonassert.JSONAssert;
 

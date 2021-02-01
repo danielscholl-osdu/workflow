@@ -65,7 +65,7 @@ public class WorkflowManagerApi {
    */
   @GetMapping
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.VIEWER + "','" + WorkflowRole.CREATOR + "','" + WorkflowRole.ADMIN + "')")
-  public List<WorkflowMetadata> getAllWorkflowForTenant(
+  public List<WorkflowMetadata> getAllWorkflowsForTenant(
       @RequestParam(required = false) String prefix) {
     return workflowManagerService.getAllWorkflowForTenant(prefix);
   }

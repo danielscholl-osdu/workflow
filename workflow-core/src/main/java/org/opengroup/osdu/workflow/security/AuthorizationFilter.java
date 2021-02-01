@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.sucurity;
+package org.opengroup.osdu.workflow.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
