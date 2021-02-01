@@ -63,7 +63,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
             workflowName,
             WorkflowRunDoc.class);
     if (!workflowRunDoc.isPresent()) {
-      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowId);
+      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowName);
          logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowRunNotFoundException(errorMessage);
     } else {
