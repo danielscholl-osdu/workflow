@@ -9,25 +9,38 @@ public class WorkflowEngineRequest {
   private final String runId;
   private final String workflowId;
   private final String workflowName;
+  private final String workflowDetailContent;
+  private final String workflowEngineExecutionDate;
   private final long executionTimeStamp;
 
 
-  public WorkflowEngineRequest(String runId, String workflowId, String workflowName, long executionTimeStamp) {
+  public WorkflowEngineRequest(String runId, String workflowId, String workflowName,
+      long executionTimeStamp, String workflowDetailContent, String workflowEngineExecutionDate) {
     this.runId = runId;
     this.workflowId = workflowId;
     this.workflowName = workflowName;
     this.executionTimeStamp = executionTimeStamp;
+    this.workflowDetailContent = workflowDetailContent;
+    this.workflowEngineExecutionDate = workflowEngineExecutionDate;
   }
 
   public WorkflowEngineRequest(String runId, String workflowId, String workflowName) {
-    this(runId, workflowId, workflowName, System.currentTimeMillis());
+    this(runId, workflowId, workflowName, System.currentTimeMillis(), null, null);
   }
 
   public WorkflowEngineRequest(String workflowName, Long startTimeStamp) {
-    this(null, null, workflowName, startTimeStamp);
+    this(null, null, workflowName, startTimeStamp, null, null);
+  }
+
+  public WorkflowEngineRequest(String workflowName, Long startTimeStamp, String workflowEngineExecutionDate) {
+    this(null, null, workflowName, startTimeStamp, null, workflowEngineExecutionDate);
+  }
+
+  public WorkflowEngineRequest(String workflowName,  String workflowDetailContent) {
+    this(null, null, workflowName, 0, workflowDetailContent, null);
   }
 
   public WorkflowEngineRequest(String workflowName) {
-    this(null, null, workflowName, System.currentTimeMillis());
+    this(null, null, workflowName, System.currentTimeMillis(), null, null);
   }
 }

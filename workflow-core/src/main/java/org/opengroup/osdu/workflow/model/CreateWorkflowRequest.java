@@ -9,5 +9,6 @@ import lombok.Getter;
 public class CreateWorkflowRequest {
   private String workflowName;
   private String description;
+  private String workflowDetailContent;
   private Map<String, Object> registrationInstructions;
 }

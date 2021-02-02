@@ -14,4 +14,5 @@ public class WorkflowRunDoc {
   private Long endTimeStamp;
   private String status;
   private String submittedBy;
+  private String workflowEngineExecutionDate;
 }

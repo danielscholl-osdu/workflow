@@ -34,7 +34,8 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName(),
+        request.getWorkflowDetailContent());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
     return savedMetadata;
   }
