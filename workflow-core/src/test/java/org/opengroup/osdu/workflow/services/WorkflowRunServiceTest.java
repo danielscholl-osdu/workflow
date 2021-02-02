@@ -313,6 +313,6 @@ class WorkflowRunServiceTest {
 
   private WorkflowEngineRequest workflowEngineRequest(final String runId, final String workflowId,
       final String workflowName) {
-    return new WorkflowEngineRequest(runId, workflowId, workflowName, WORKFLOW_RUN_START_TIMESTAMP, null, null);
+    return new WorkflowEngineRequest(runId, workflowId, workflowName, WORKFLOW_RUN_START_TIMESTAMP, null);
   }
 }

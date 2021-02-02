@@ -34,8 +34,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName(),
-        request.getWorkflowDetailContent());
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
     return savedMetadata;
   }
@@ -47,6 +46,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   @Override
   public void deleteWorkflow(String workflowName) {
+    workflowMetadataRepository.getWorkflow(workflowName);
     workflowRunService.deleteWorkflowRunsByWorkflowName(workflowName);
     WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName);
     workflowEngineService.deleteWorkflow(rq);

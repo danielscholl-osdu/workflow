@@ -46,6 +46,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
+import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
@@ -141,7 +142,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     if (tasks.hasNext()) {
       return convertEntityToWorkflowMetadata(tasks.next());
     }
-    throw new BadRequestException(
+    throw new NotFoundException(
         String.format("Workflow entity for workflow name: %s not found.", workflowName));
   }
 

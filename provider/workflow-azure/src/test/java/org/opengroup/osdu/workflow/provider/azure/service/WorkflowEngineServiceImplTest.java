@@ -252,6 +252,6 @@ public class WorkflowEngineServiceImplTest {
 
   @NotNull
   private WorkflowEngineRequest workflowEngineRequest() {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, EXECUTION_TIMESTAMP);
+    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, EXECUTION_TIMESTAMP, null);
   }
 }

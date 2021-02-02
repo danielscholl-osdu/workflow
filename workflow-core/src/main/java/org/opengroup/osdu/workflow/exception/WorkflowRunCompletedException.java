@@ -26,7 +26,7 @@ public class WorkflowRunCompletedException extends CoreException {
   public static final String WORKFLOW_RUN_ENDED_MESSAGE = "WorkflowRunCompletedException: WorkflowRun with name %s and for Run Id %s already completed";
 
   public WorkflowRunCompletedException(String workflowName, String runId) {
-    super(String.format(WORKFLOW_RUN_ENDED_MESSAGE, runId, workflowName));
+    super(String.format(WORKFLOW_RUN_ENDED_MESSAGE, workflowName, runId));
   }
 
 }

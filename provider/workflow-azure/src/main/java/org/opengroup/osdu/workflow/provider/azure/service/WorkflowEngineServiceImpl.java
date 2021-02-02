@@ -13,14 +13,12 @@ import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
@@ -30,8 +28,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @Primary
 public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
   private static final Logger LOGGER = LoggerFactory.getLogger(SubmitIngestServiceImpl.class);
@@ -50,6 +49,7 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
+  private static final String KEY_WORKFLOW_DETAIL_CONTENT = "workflowDetailContent";
 
   @Autowired
   private AirflowConfig airflowConfig;
@@ -67,7 +67,7 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
       Client restClient1,
       FileShareStore dagsFileShareStore,
       FileShareStore customOperatorsFileShareStore) {
-    super(restClient, airflowConfig);
+    super(null, airflowConfig);
     this.airflowConfig = airflowConfig1;
     this.restClient = restClient1;
     this.dagsFileShareStore = dagsFileShareStore;
@@ -75,10 +75,10 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
   }
 
   @Override
-  public void createWorkflow(final WorkflowEngineRequest rq,
-      final Map<String, Object> registrationInstruction) {
-    dagsFileShareStore.createFile(rq.getWorkflowDetailContent(),
-        getFileNameFromWorkflow(rq.getWorkflowName()));
+  public void createWorkflow(
+      final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
+    String workflowDetailContent = (String) registrationInstruction.get(KEY_WORKFLOW_DETAIL_CONTENT);
+    dagsFileShareStore.createFile(workflowDetailContent, getFileNameFromWorkflow(rq.getWorkflowName()));
   }
 
   @Override

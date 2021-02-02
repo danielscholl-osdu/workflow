@@ -128,7 +128,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
   }
 
   @Test
