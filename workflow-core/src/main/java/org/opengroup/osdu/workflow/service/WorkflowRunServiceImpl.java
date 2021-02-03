@@ -130,8 +130,8 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return workflowRuns;
   }
 
-  private Map<String, Object> createWorkflowPayload(final String runId,
-                                                    final String workflowId,
+  private Map<String, Object> createWorkflowPayload(final String workflowId,
+                                                    final String runId,
                                                     final String correlationId,
                                                     final TriggerWorkflowRequest request) {
     final Map<String, Object> payload = new HashMap<>();
