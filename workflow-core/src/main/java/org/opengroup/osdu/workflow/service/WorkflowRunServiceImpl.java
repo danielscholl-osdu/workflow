@@ -169,7 +169,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return WorkflowRun.builder()
         .runId(rq.getRunId())
         .startTimeStamp(rq.getExecutionTimeStamp())
-        .workflowEngineExecutionDate(null == rs ? rs.getExecutionDate() : null)
+        .workflowEngineExecutionDate(rs != null ? rs.getExecutionDate() : null)
         .submittedBy(dpsHeaders.getUserEmail())
         .status(WorkflowStatusType.SUBMITTED)
         .workflowId(rq.getWorkflowId())
