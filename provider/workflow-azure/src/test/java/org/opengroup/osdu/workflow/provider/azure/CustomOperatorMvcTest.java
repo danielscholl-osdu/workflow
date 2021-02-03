@@ -15,12 +15,17 @@ import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.azure.api.CustomOperatorApi;
 import org.opengroup.osdu.workflow.provider.azure.exception.CustomOperatorNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorService;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingService;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperator;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperatorsPage;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.RegisterCustomOperatorRequest;
+import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -43,10 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for {@link CustomOperatorApi}
  */
-//@WebMvcTest(CustomOperatorApi.class)
-//@AutoConfigureMockMvc
-//@Import({AuthorizationFilter.class, DpsHeaders.class})
-@Disabled
+@WebMvcTest(CustomOperatorApi.class)
+@AutoConfigureMockMvc
+@Import({AuthorizationFilter.class, DpsHeaders.class})
 public class CustomOperatorMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
@@ -109,6 +113,9 @@ public class CustomOperatorMvcTest {
 
   @MockBean
   private ICustomOperatorService customOperatorService;
+
+  @MockBean
+  private IWorkflowTasksSharingService workflowTasksSharingService;
 
   @MockBean
   private IAuthorizationService authorizationService;

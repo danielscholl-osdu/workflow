@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("customOperator")
+@RequestMapping("/v1/customOperator")
 public class CustomOperatorApi {
   @Autowired
   private ICustomOperatorService customOperatorService;

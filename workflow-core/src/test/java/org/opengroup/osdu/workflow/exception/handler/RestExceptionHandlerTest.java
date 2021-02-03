@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.workflow.ReplaceCamelCase;
+import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.WebRequest;
@@ -40,6 +41,7 @@ import org.springframework.web.context.request.WebRequest;
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(ReplaceCamelCase.class)
 class RestExceptionHandlerTest {
+  private static final String CONFLICT_ID = "conflict_id";
 
   @Mock
   private WebRequest webRequest;
@@ -97,6 +99,25 @@ class RestExceptionHandlerTest {
       then(error.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
       then(error.getMessage()).contains("ConstraintViolationException");
       then(error.getErrors().get(0)).isEqualTo("testField: testMessage");
+    });
+  }
+
+  @Test
+  public void shouldHandleResourceConflictException() {
+    // given
+    given(webRequest.getDescription(anyBoolean())).willReturn("uri=/test");
+
+    // when
+    ResponseEntity<Object> response = restExceptionHandler
+        .handle(new ResourceConflictException(CONFLICT_ID, "Conflicted"), webRequest);
+
+    // then
+    then(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    then(response.getBody()).satisfies(body -> {
+      ConflictApiError error = (ConflictApiError) body;
+      then(error.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+      then(error.getMessage()).isEqualTo("ResourceConflictException: Conflicted");
+      then(error.getConflictId()).isEqualTo(CONFLICT_ID);
     });
   }
 }

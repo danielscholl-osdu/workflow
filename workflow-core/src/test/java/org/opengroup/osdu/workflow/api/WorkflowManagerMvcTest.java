@@ -1,13 +1,16 @@
 package org.opengroup.osdu.workflow.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
+import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
+import org.opengroup.osdu.workflow.exception.handler.ConflictApiError;
 import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
@@ -102,6 +105,27 @@ class WorkflowManagerMvcTest {
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
     assertThat(metadata, equalTo(responseMetadata));
+  }
+
+  @Test
+  public void testCreateApiWithConflict() throws Exception {
+    final CreateWorkflowRequest request = mapper.readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
+    when(workflowManagerService.createWorkflow(eq(request)))
+        .thenThrow(new ResourceConflictException(EXISTING_WORKFLOW_ID, "conflict"));
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
+    final MvcResult mvcResult = mockMvc.perform(
+        post(WORKFLOW_ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(getHttpHeaders())
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            .content(WORKFLOW_REQUEST))
+        .andExpect(status().isConflict())
+        .andReturn();
+    verify(workflowManagerService, times(1)).createWorkflow(eq(request));
+    verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
+    final ConflictApiError response =
+        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ConflictApiError.class);
+    Assertions.assertEquals(EXISTING_WORKFLOW_ID, response.getConflictId());
   }
 
   @Test

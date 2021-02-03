@@ -63,8 +63,9 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
             workflowName,
             WorkflowRunDoc.class);
     if (!workflowRunDoc.isPresent()) {
-      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowName);
-         logger.error(LOGGER_NAME, errorMessage);
+      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist",
+          runId, workflowName);
+      logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowRunNotFoundException(errorMessage);
     } else {
       return buildWorkflowRun(workflowRunDoc.get());
@@ -72,7 +73,8 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   }
 
   @Override
-  public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit, String cursor) {
+  public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit,
+                                                        String cursor) {
     if(cursor != null) {
       cursor = cursorUtils.decodeCosmosCursor(cursor);
     }
@@ -111,19 +113,21 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         workflowRunDoc.getId(),
         workflowRunDoc.getWorkflowName(),
         workflowRunDoc);
-    logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s", workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
+    logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
+        workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }
 
   @Override
-  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName, Map<String, Object> params) {
+  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
+                                                        Map<String, Object> params) {
     return null;
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {
     return WorkflowRunDoc.builder()
         .id(workflowRun.getRunId())
-        .workflowName(workflowRun.getWorkflowId())
+        .workflowName(workflowRun.getWorkflowName())
         .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
         .startTimeStamp(workflowRun.getStartTimeStamp())
         .endTimeStamp(workflowRun.getEndTimeStamp())
@@ -135,6 +139,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     return WorkflowRun.builder()
         .runId(workflowRunDoc.getId())
         .workflowId(workflowRunDoc.getWorkflowName())
+        .workflowName(workflowRunDoc.getWorkflowName())
         .status(WorkflowStatusType.valueOf(workflowRunDoc.getStatus()))
         .workflowEngineExecutionDate(workflowRunDoc.getWorkflowEngineExecutionDate())
         .startTimeStamp(workflowRunDoc.getStartTimeStamp())

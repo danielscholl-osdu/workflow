@@ -38,15 +38,15 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
     final WorkflowMetadataDoc workflowMetadataDoc = buildWorkflowMetadataDoc(workflowMetadata);
     try {
       cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-          cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getWorkflowId(),
+          cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getWorkflowName(),
           workflowMetadataDoc);
       return buildWorkflowMetadata(workflowMetadataDoc);
     } catch (AppException e) {
       if(e.getError().getCode() == 409) {
-        final String errorMessage = String.format("Workflow with name %s and id %s already exists",
-            workflowMetadataDoc.getWorkflowName(), workflowMetadataDoc.getWorkflowId());
+        final String errorMessage = String.format("Workflow with name %s already exists",
+            workflowMetadataDoc.getWorkflowName());
         logger.error(errorMessage, e);
-        throw new ResourceConflictException(workflowMetadataDoc.getWorkflowId(), errorMessage);
+        throw new ResourceConflictException(workflowMetadataDoc.getWorkflowName(), errorMessage);
       } else {
         throw e;
       }
@@ -54,16 +54,16 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   }
 
   @Override
-  public WorkflowMetadata getWorkflow(final String workflowId) {
+  public WorkflowMetadata getWorkflow(final String workflowName) {
     final Optional<WorkflowMetadataDoc> workflowMetadataDoc =
         cosmosStore.findItem(dpsHeaders.getPartitionId(),
             cosmosConfig.getDatabase(),
             cosmosConfig.getWorkflowMetadataCollection(),
-            workflowId,
-            workflowId,
+            workflowName,
+            workflowName,
             WorkflowMetadataDoc.class);
     if (!workflowMetadataDoc.isPresent()) {
-      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowId);
+      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
       logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowNotFoundException(errorMessage);
     } else {
@@ -72,9 +72,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   }
 
   @Override
-  public void deleteWorkflow(String workflowId) {
+  public void deleteWorkflow(String workflowName) {
     cosmosStore.deleteItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-        cosmosConfig.getWorkflowMetadataCollection(), workflowId, workflowId);
+        cosmosConfig.getWorkflowMetadataCollection(), workflowName, workflowName);
   }
 
   @Override
@@ -85,28 +85,24 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private WorkflowMetadataDoc buildWorkflowMetadataDoc(final WorkflowMetadata workflowMetadata) {
     // If we need to save multiple versions of workflow, then choose id as guid and get becomes a query.
     // This is to avoid conflicts. Only one combination of Id and partition key should exist.
-    final String workflowId = convertToBase64(workflowMetadata.getWorkflowName());
     return WorkflowMetadataDoc.builder()
-            .id(workflowId)
-            .workflowId(workflowId)
-            .workflowName(workflowMetadata.getWorkflowName())
-            .description(workflowMetadata.getDescription())
-            .createdBy(workflowMetadata.getCreatedBy())
-            .creationDate(workflowMetadata.getCreationTimestamp())
-            .version(workflowMetadata.getVersion()).build();
+        .id(workflowMetadata.getWorkflowName())
+        .workflowName(workflowMetadata.getWorkflowName())
+        .description(workflowMetadata.getDescription())
+        .createdBy(workflowMetadata.getCreatedBy())
+        .creationTimestamp(workflowMetadata.getCreationTimestamp())
+        .version(workflowMetadata.getVersion())
+        .registrationInstructions(workflowMetadata.getRegistrationInstructions()).build();
   }
 
   private WorkflowMetadata buildWorkflowMetadata(final WorkflowMetadataDoc workflowMetadataDoc) {
     return WorkflowMetadata.builder()
-        .workflowId(workflowMetadataDoc.getWorkflowId())
+        .workflowId(workflowMetadataDoc.getWorkflowName())
         .workflowName(workflowMetadataDoc.getWorkflowName())
         .description(workflowMetadataDoc.getDescription())
         .createdBy(workflowMetadataDoc.getCreatedBy())
-        .creationTimestamp(workflowMetadataDoc.getCreationDate())
-        .version(workflowMetadataDoc.getVersion()).build();
-  }
-
-  private String convertToBase64(final String input) {
-    return Base64.getUrlEncoder().encodeToString(input.getBytes());
+        .creationTimestamp(workflowMetadataDoc.getCreationTimestamp())
+        .version(workflowMetadataDoc.getVersion())
+        .registrationInstructions(workflowMetadataDoc.getRegistrationInstructions()).build();
   }
 }
