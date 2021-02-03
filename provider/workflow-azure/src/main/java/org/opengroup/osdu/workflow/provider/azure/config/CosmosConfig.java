@@ -13,4 +13,8 @@ public class CosmosConfig {
   private String database;
   private String ingestionStrategyCollection;
   private String workflowStatusCollection;
+  private String workflowMetadataCollection;
+  private String workflowRunCollection;
+  private String workflowTasksSharingCollection;
+  private String customOperatorCollection;
 }

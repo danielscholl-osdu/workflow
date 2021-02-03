@@ -254,5 +254,4 @@ development purposes because signing a blob is only available with the service a
 Remember to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. Follow the [instructions
 on the Google developer's portal][application-default-credentials].
 
-* Documentation for the GCP Cloud Datastore implementation is located in [here](./provider/workflow-gcp-datastore/README.md)
-* Documentation for the GCP Cloud Firestore implementation is located in [here](./provider/workflow-gcp/README.md)
+* Documentation for the GCP Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)

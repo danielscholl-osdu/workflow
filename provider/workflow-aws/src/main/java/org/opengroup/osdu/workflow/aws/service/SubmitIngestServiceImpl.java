@@ -18,8 +18,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opengroup.osdu.workflow.aws.interfaces.ISubmitIngestService;
 import org.opengroup.osdu.workflow.exception.OsduRuntimeException;
-import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

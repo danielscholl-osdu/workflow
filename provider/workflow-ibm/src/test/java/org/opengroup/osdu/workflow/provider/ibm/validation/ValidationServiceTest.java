@@ -31,17 +31,14 @@ import org.hibernate.validator.HibernateValidatorConfiguration;
 import org.hibernate.validator.internal.cfg.context.DefaultConstraintMapping;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.config.RequestConstraintMappingContributor;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.ibm.validation.UpdateStatusRequestValidator;
-import org.opengroup.osdu.workflow.provider.interfaces.IValidationService;
+import org.opengroup.osdu.workflow.provider.ibm.interfaces.IValidationService;
 import org.opengroup.osdu.workflow.validation.CommonUpdateStatusRequestValidator;
 import org.opengroup.osdu.workflow.validation.UpdateStatusRequestValidatorWrapper;
-import org.opengroup.osdu.workflow.validation.ValidationServiceImpl;
 
 
 class ValidationServiceTest {
@@ -53,7 +50,7 @@ class ValidationServiceTest {
   private static Validator validator;
   private IValidationService validationService;
   static final Integer DATASTORE_MAX_VALUE_SIZE = 1500;
-  
+
   @BeforeAll
   static void initAll() {
     HibernateValidatorConfiguration configuration = (HibernateValidatorConfiguration) Validation
@@ -124,7 +121,7 @@ class ValidationServiceTest {
     @Test
     void shouldFailValidationWhenWorkflowIdIsTooLong() {
       // given
-    	
+
       UpdateStatusRequest request = UpdateStatusRequest.builder()
           .workflowId(RandomStringUtils.randomAlphanumeric(DATASTORE_MAX_VALUE_SIZE + 1))
           .workflowStatusType(WorkflowStatusType.RUNNING)

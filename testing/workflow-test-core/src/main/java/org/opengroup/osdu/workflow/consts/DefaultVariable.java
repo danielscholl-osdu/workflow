@@ -13,7 +13,10 @@ public enum DefaultVariable {
 	OTHER_RELEVANT_DATA_COUNTRIES(""),
 
 	GOOGLE_AUDIENCE(""),
-	FINISHED_WORKFLOW_ID("");
+	FINISHED_WORKFLOW_ID(""),
+
+	TEST_DAG_NAME(""),
+  DEFAULT_DATA_PARTITION_ID_TENANT("");
 
 
 	public static String getEnvironmentVariableOrDefaultKey(DefaultVariable key){

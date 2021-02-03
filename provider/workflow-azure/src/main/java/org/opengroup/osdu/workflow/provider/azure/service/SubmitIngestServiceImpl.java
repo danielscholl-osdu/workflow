@@ -14,24 +14,22 @@
 
 package org.opengroup.osdu.workflow.provider.azure.service;
 
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.opengroup.osdu.workflow.model.WorkflowStatus;
-import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
+import org.opengroup.osdu.workflow.model.WorkflowStatus;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.ISubmitIngestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Named;
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -44,19 +42,14 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
   private final static String RUN_ID_PARAMETER_NAME = "run_id";
 
   @Autowired
-  @Named("AIRFLOW_URL")
-  private String airflowURL;
-
-  @Autowired
-  @Named("AIRFLOW_APP_KEY")
-  private String airflowAppKey;
+  private AirflowConfig airflowConfig;
 
   @Override
   public boolean submitIngest(String dagName, Map<String, Object> data) {
     logger.log(Level.INFO, String.format("Submitting ingestion with Airflow with dagName: {%s}",
-      dagName));
+        dagName));
 
-    String airflowApiUrl = String.format("%s/api/experimental/dags/%s/dag_runs", airflowURL, dagName);
+    String airflowApiUrl = String.format("%s/api/experimental/dags/%s/dag_runs", airflowConfig.getUrl(), dagName);
 
 /*    String workflowId = data.get(RUN_ID_PARAMETER_NAME).toString();
     data.remove(RUN_ID_PARAMETER_NAME);*/
@@ -73,9 +66,9 @@ public class SubmitIngestServiceImpl implements ISubmitIngestService {
     WebResource webResource = restClient.resource(airflowApiUrl);
 
     ClientResponse response = webResource
-      .type(MediaType.APPLICATION_JSON)
-      .header("Authorization", "Basic " + airflowAppKey)
-      .post(ClientResponse.class, requestBody.toString());
+        .type(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Basic " + airflowConfig.getAppKey())
+        .post(ClientResponse.class, requestBody.toString());
 
     logger.log(Level.INFO, String.format("Airflow response: {%s}.", response.getStatus()));
 

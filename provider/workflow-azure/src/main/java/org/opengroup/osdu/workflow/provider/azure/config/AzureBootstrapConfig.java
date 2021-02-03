@@ -17,13 +17,13 @@ package org.opengroup.osdu.workflow.provider.azure.config;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.security.keyvault.secrets.SecretClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.common.StorageSharedKeyCredential;
 import org.opengroup.osdu.azure.KeyVaultFacade;
-import org.opengroup.osdu.common.Validators;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import sun.misc.BASE64Encoder;
 
 import javax.inject.Named;
 
@@ -33,40 +33,40 @@ public class AzureBootstrapConfig {
   @Value("${azure.keyvault.url}")
   private String keyVaultURL;
 
-  @Value("${azure.airflow.url}")
-  private String airflowURL;
-
-  @Value("${azure.airflow.username}")
-  private String airflowUsername;
-
-  @Value("${azure.airflow.password}")
-  private String airflowPassword;
-
-  @Bean
-  @Named("AIRFLOW_URL")
-  public String airflowURL() {
-    return airflowURL;
-  }
-
-  @Bean
-  @Named("AIRFLOW_APP_KEY")
-  public String airflowAppKey() {
-    Validators.checkNotNull(airflowUsername, "Airflow username cannot be null");
-    Validators.checkNotNull(airflowPassword, "Airflow password cannot be null");
-    String airflowAuthString = airflowUsername + ":" + airflowPassword;
-    return new BASE64Encoder().encode(airflowAuthString.getBytes());
-  }
+  @Value("${osdu.azure.partitionId}")
+  private String partitionId;
 
   @Bean
   public CosmosClient buildCosmosClient(SecretClient kv) {
-    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-endpoint");
-    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, "opendes-cosmos-primary-key");
+    final String partitionId = getPartitionId();
+    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-endpoint", partitionId));
+    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-primary-key", partitionId));
     return new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosPrimaryKey).buildClient();
+  }
+
+  @Bean
+  public BlobServiceClient blobServiceClient(SecretClient kv) {
+    final String partitionId = getPartitionId();
+    final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage", partitionId));
+    final String accountKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage-key", partitionId));
+    StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+    String endpoint = String.format("https://%s.blob.core.windows.net", accountName);
+
+    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+        .endpoint(endpoint)
+        .credential(storageSharedKeyCredential)
+        .buildClient();
+
+    return blobServiceClient;
   }
 
   @Bean
   @Named("KEY_VAULT_URL")
   public String keyVaultURL() {
     return keyVaultURL;
+  }
+
+  public String getPartitionId() {
+    return this.partitionId;
   }
 }

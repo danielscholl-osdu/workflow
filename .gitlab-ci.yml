@@ -3,7 +3,7 @@ variables:
   OSDU_GCP_BUILD_SUBDIR: provider/file-gcp-datastore
   # OSDU_GCP_INT_TEST_SUBDIR: testing/file-test-core
   OSDU_GCP_SERVICE: workflow
-  OSDU_GCP_VENDOR: gcp-datastore
+  OSDU_GCP_VENDOR: gcp
   OSDU_GCP_NAMESPACE: osdu-namespace
   OSDU_GCP_APPLICATION_NAME: os-workflow
   OSDU_GCP_ENV_VARS: SPRING_CLOUD_GCP_DATASTORE_NAMESPACE=$OSDU_GCP_NAMESPACE,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR
@@ -43,7 +43,7 @@ include:
 
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
-    file: "scanners/fossa.yml"
+    file: "scanners/fossa-maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
@@ -63,8 +63,6 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "azure-workflow-service"
     file: "cloud-providers/azure.yml"
-
-
 
 
 osdu-gcp-test:
