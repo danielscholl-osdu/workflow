@@ -18,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
-import org.opengroup.osdu.workflow.model.ClientResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 
 import org.springframework.http.HttpStatus;
@@ -33,7 +30,7 @@ import static java.lang.String.format;
 @Slf4j
 public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final String RUN_ID_PARAMETER_NAME = "run_id";
-  private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+  private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
   private static final String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
   private static final String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
   private static final String TRIGGER_AIRFLOW_ENDPOINT = "api/experimental/dags/%s/dag_runs";
@@ -68,7 +65,7 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
   }
 
   @Override
-  public void triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context) {
+  public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context) {
     log.info("Submitting ingestion with Airflow with dagName: {}", rq.getWorkflowName());
     final String url = format(TRIGGER_AIRFLOW_ENDPOINT, rq.getWorkflowName());
     final JSONObject requestBody = new JSONObject();
@@ -76,13 +73,22 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
     requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, context);
     requestBody.put(EXECUTION_DATE_PARAMETER_NAME, executionDate(rq.getExecutionTimeStamp()));
     final String errMsg = format(AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE, rq.getWorkflowId(), rq.getWorkflowName());
-    callAirflow(
+    ClientResponse airflowRs = callAirflow(
         HttpMethod.POST,
         url,
         requestBody.toString(),
         rq,
         errMsg
     );
+    try {
+      ObjectMapper om = new ObjectMapper();
+      String body = airflowRs.getResponseBody().toString();
+      return om.readValue(body, TriggerWorkflowResponse.class);
+    } catch (JsonProcessingException e) {
+      log.info("Airflow response: {}.", airflowRs);
+      final String error = "Unable to Process(Parse, Generate) JSON value";
+      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), error, e.getMessage());
+    }
   }
 
   @Override

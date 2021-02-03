@@ -1,6 +1,8 @@
 package org.opengroup.osdu.workflow.provider.interfaces;
 
 import java.util.Map;
+
+import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 
@@ -31,7 +33,7 @@ public interface IWorkflowEngineService {
    * @param context context data object used by Workflow.
    * @return
    */
-  void triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context);
+  TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context);
 
   /**
    * Gets Status of the workflowRun

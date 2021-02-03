@@ -49,10 +49,11 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
-    final WorkflowRun workflowRun = buildWorkflowRun(workflowName, workflowId, runId);
+
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName);
     final Map<String, Object> context = createWorkflowPayload(workflowId, runId, dpsHeaders.getCorrelationId(), request);
-    workflowEngineService.triggerWorkflow(rq, context);
+    TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
+    final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
     return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
   }
 
@@ -163,15 +164,16 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return workflowRun;
   }
 
-  private WorkflowRun buildWorkflowRun(final String workflowName,
-                                       final String workflowId, final String runId) {
+  private WorkflowRun buildWorkflowRun(final WorkflowEngineRequest rq,
+                                       final TriggerWorkflowResponse rs) {
     return WorkflowRun.builder()
-        .runId(runId)
-        .startTimeStamp(System.currentTimeMillis())
+        .runId(rq.getRunId())
+        .startTimeStamp(rq.getExecutionTimeStamp())
+        .workflowEngineExecutionDate(null == rs ? rs.getExecutionDate() : null)
         .submittedBy(dpsHeaders.getUserEmail())
         .status(WorkflowStatusType.SUBMITTED)
-        .workflowId(workflowId)
-        .workflowName(workflowName)
+        .workflowId(rq.getWorkflowId())
+        .workflowName(rq.getWorkflowName())
         .build();
   }
 

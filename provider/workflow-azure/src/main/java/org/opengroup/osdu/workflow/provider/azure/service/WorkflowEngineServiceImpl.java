@@ -13,6 +13,7 @@ import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Primary
-public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
+public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final Logger LOGGER = LoggerFactory.getLogger(SubmitIngestServiceImpl.class);
   private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE =
       "Failed to trigger workflow with id %s and name %s";
@@ -61,18 +62,6 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
   @Autowired
   @Qualifier("customOperators")
   private FileShareStore customOperatorsFileShareStore;
-
-  public WorkflowEngineServiceImpl(Client restClient,
-      AirflowConfig airflowConfig, AirflowConfig airflowConfig1,
-      Client restClient1,
-      FileShareStore dagsFileShareStore,
-      FileShareStore customOperatorsFileShareStore) {
-    super(null, airflowConfig);
-    this.airflowConfig = airflowConfig1;
-    this.restClient = restClient1;
-    this.dagsFileShareStore = dagsFileShareStore;
-    this.customOperatorsFileShareStore = customOperatorsFileShareStore;
-  }
 
   @Override
   public void createWorkflow(
@@ -141,7 +130,7 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
   }
 
   @Override
-  public void triggerWorkflow(WorkflowEngineRequest rq,
+  public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
       Map<String, Object> inputData) {
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
@@ -159,6 +148,7 @@ public class WorkflowEngineServiceImpl extends AirflowWorkflowEngineServiceImpl 
       final TriggerWorkflowResponse triggerWorkflowResponse = OBJECT_MAPPER
           .readValue(response.getEntity(String.class), TriggerWorkflowResponse.class);
       LOGGER.info("Airflow response: {}.", triggerWorkflowResponse);
+      return triggerWorkflowResponse;
     } catch (JsonProcessingException e) {
       final String error = "Unable to Process(Parse, Generate) JSON value";
       throw new AppException(500, error, e.getMessage());
