@@ -16,7 +16,7 @@ package org.opengroup.osdu.azure.workflow.utils;
 
 import com.google.common.base.Strings;
 import org.opengroup.osdu.azure.util.AzureServicePrincipal;
-import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
 
 
 public class HTTPClientAzure extends HTTPClient {
