@@ -57,6 +57,8 @@ public class WorkflowRunRepositoryTest {
   private static final String WORKFLOW_RUN_DOC = "{\n" +
       "  \"workflowName\": \"test-workflow-name\",\n" +
       "  \"id\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"partitionKey\": \"test-workflow-name\",\n" +
       "  \"startTimeStamp\": 1600145420675,\n" +
       "  \"workflowEngineExecutionDate\": \"2020-12-05T11:36:45\",\n" +
       "  \"status\": \"SUBMITTED\",\n" +
@@ -65,6 +67,8 @@ public class WorkflowRunRepositoryTest {
   private static final String UPDATED_WORKFLOW_RUN_DOC = "{\n" +
       "  \"workflowName\": \"test-workflow-name\",\n" +
       "  \"id\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"partitionKey\": \"test-workflow-name\",\n" +
       "  \"startTimeStamp\": 1607430997362,\n" +
       "  \"endTimeStamp\": 1600258424158,\n" +
       "  \"status\": \"FINISHED\",\n" +
@@ -258,7 +262,7 @@ public class WorkflowRunRepositoryTest {
     verify(cosmosStore).queryItemsPage(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_RUN_COLLECTION),
         any(SqlQuerySpec.class), eq(WorkflowRunDoc.class), eq(TEST_LIMIT), eq(cursor));
     SqlQuerySpec capturedSqlQuerySpec = sqlQuerySpecArgumentCaptor.getValue();
-    Assertions.assertEquals("SELECT * from c where c.workflowName = @workflowName ORDER BY c._ts DESC",
+    Assertions.assertEquals("SELECT * from c where c.partitionKey = @workflowName ORDER BY c._ts DESC",
         capturedSqlQuerySpec.getQueryText());
     Assertions.assertEquals(1, capturedSqlQuerySpec.getParameters().size());
     SqlParameter capturedSqlParameter = capturedSqlQuerySpec.getParameters().get(0);

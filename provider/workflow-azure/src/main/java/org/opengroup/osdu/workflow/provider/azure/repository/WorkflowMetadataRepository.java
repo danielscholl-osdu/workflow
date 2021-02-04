@@ -13,7 +13,6 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataReposito
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +37,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
     final WorkflowMetadataDoc workflowMetadataDoc = buildWorkflowMetadataDoc(workflowMetadata);
     try {
       cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-          cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getWorkflowName(),
+          cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getPartitionKey(),
           workflowMetadataDoc);
       return buildWorkflowMetadata(workflowMetadataDoc);
     } catch (AppException e) {
@@ -87,6 +86,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
     // This is to avoid conflicts. Only one combination of Id and partition key should exist.
     return WorkflowMetadataDoc.builder()
         .id(workflowMetadata.getWorkflowName())
+        .partitionKey(workflowMetadata.getWorkflowName())
         .workflowName(workflowMetadata.getWorkflowName())
         .description(workflowMetadata.getDescription())
         .createdBy(workflowMetadata.getCreatedBy())
@@ -97,7 +97,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   private WorkflowMetadata buildWorkflowMetadata(final WorkflowMetadataDoc workflowMetadataDoc) {
     return WorkflowMetadata.builder()
-        .workflowId(workflowMetadataDoc.getWorkflowName())
+        .workflowId(workflowMetadataDoc.getId())
         .workflowName(workflowMetadataDoc.getWorkflowName())
         .description(workflowMetadataDoc.getDescription())
         .createdBy(workflowMetadataDoc.getCreatedBy())

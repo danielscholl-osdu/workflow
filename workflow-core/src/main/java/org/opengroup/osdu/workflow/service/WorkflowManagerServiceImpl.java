@@ -1,6 +1,8 @@
 package org.opengroup.osdu.workflow.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   private static final long START_VERSION = 1;
+  private static final String KEY_WORKFLOW_DETAIL_CONTENT = "workflowDetailContent";
 
   @Autowired
   private DpsHeaders dpsHeaders;
@@ -60,12 +63,16 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   private WorkflowMetadata getWorkflowMetadata(final CreateWorkflowRequest request,
                                                final String createdBy) {
+    Map<String, Object> registrationInstructionForMetadata =
+        new HashMap<>(request.getRegistrationInstructions());
+    registrationInstructionForMetadata.remove(KEY_WORKFLOW_DETAIL_CONTENT);
+
     return WorkflowMetadata.builder()
         .description(request.getDescription())
         .createdBy(createdBy)
         .creationTimestamp(System.currentTimeMillis())
         .version(WorkflowManagerServiceImpl.START_VERSION)
-        .registrationInstructions(request.getRegistrationInstructions())
+        .registrationInstructions(registrationInstructionForMetadata)
         .workflowName(request.getWorkflowName())
         .build();
   }

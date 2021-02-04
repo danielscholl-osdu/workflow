@@ -12,6 +12,7 @@ import java.util.Map;
 @EqualsAndHashCode
 public class WorkflowMetadataDoc {
   private String id;
+  private String partitionKey;
   private String workflowName;
   private String description;
   private String createdBy;

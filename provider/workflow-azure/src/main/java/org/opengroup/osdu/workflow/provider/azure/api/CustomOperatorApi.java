@@ -46,14 +46,14 @@ public class CustomOperatorApi {
 
   /**
    * Returns custom operator by ID
-   * @param customOperatorId Id of custom operator
+   * @param customOperatorName Name of custom operator
    * @return Custom Operator by ID
    */
-  @GetMapping("/{customOperatorId}")
+  @GetMapping("/{custom_operator_name}")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "', '"
       + WorkflowRole.CREATOR + "', '" + WorkflowRole.VIEWER + "')")
-  public CustomOperator getCustomOperatorById(@PathVariable("customOperatorId")
-                                                 String customOperatorId) {
-    return customOperatorService.getOperatorById(customOperatorId);
+  public CustomOperator getCustomOperatorById(@PathVariable("custom_operator_name")
+                                                 String customOperatorName) {
+    return customOperatorService.getOperatorByName(customOperatorName);
   }
 }

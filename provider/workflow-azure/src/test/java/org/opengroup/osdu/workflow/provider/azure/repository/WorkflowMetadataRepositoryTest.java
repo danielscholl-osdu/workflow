@@ -38,7 +38,6 @@ public class WorkflowMetadataRepositoryTest {
       "    \"workflowName\": \"HelloWorld\",\n" +
       "    \"description\": \"This is a test workflow\",\n" +
       "    \"registrationInstructions\": {\n" +
-      "    \"workflowDetailContent\": \"sample-dag-content\",\n" +
       "    \"concurrentWorkflowRun\": 5,\n" +
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +
@@ -52,7 +51,6 @@ public class WorkflowMetadataRepositoryTest {
       "    \"workflowName\": \"HelloWorld\",\n" +
       "    \"description\": \"This is a test workflow\",\n" +
       "    \"registrationInstructions\": {\n" +
-      "    \"workflowDetailContent\": \"sample-dag-content\",\n" +
       "    \"concurrentWorkflowRun\": 5,\n" +
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +
@@ -63,10 +61,10 @@ public class WorkflowMetadataRepositoryTest {
       "}";
   private static final String WORKFLOW_METADATA_DOC = "{\n" +
       "    \"id\": \"HelloWorld\",\n" +
+      "    \"partitionKey\": \"HelloWorld\",\n" +
       "    \"workflowName\": \"HelloWorld\",\n" +
       "    \"description\": \"This is a test workflow\",\n" +
       "    \"registrationInstructions\": {\n" +
-      "    \"workflowDetailContent\": \"sample-dag-content\",\n" +
       "    \"concurrentWorkflowRun\": 5,\n" +
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +

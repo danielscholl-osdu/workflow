@@ -29,6 +29,7 @@ import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TE
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_KUBERNETES_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_PYTHON_DAG;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_VALIDATE_RUN_CONFIG_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
 import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.NEW_WORKFLOW_RUN_ID_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.NEW_WORKFLOW_RUN_STATUS;
@@ -64,9 +65,9 @@ public abstract class PostTriggerWorkflowIntegrationTests extends TestBase {
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
         verifyAndTriggerWorkflowRun(TEST_SIMPLE_CUSTOM_OPERATOR_DAG));
 
-//    workflowIdToWorkflowRunId.put(getWorkflow(TEST_VALIDATE_RUN_CONFIG_DAG)
-//            .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
-//        verifyAndTriggerWorkflowRun(TEST_VALIDATE_RUN_CONFIG_DAG));
+    workflowIdToWorkflowRunId.put(getWorkflow(TEST_VALIDATE_RUN_CONFIG_DAG)
+            .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
+        verifyAndTriggerWorkflowRun(TEST_VALIDATE_RUN_CONFIG_DAG));
 
     workflowIdToWorkflowRunId.put(getWorkflow(TEST_DUMMY_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
