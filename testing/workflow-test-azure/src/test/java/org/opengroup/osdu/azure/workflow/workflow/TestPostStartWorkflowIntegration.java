@@ -37,7 +37,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.workflow.consts.TestConstants.*;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_STATUS_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.START_WORKFLOW_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.STATUS_FIELD;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_ID_FIELD;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUBMITTED;
 
 @Ignore
 public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrationTests {

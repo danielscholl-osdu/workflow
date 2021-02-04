@@ -22,8 +22,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.workflow.exception.RuntimeException;
+import org.opengroup.osdu.workflow.provider.ibm.interfaces.ISubmitIngestService;
 import org.opengroup.osdu.workflow.provider.ibm.property.AirflowProperties;
-import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 import org.springframework.stereotype.Service;
 import java.util.Collections;
 import javax.ws.rs.core.MediaType;
@@ -40,28 +40,28 @@ import com.sun.jersey.api.client.WebResource;
 public class SubmitIngestServiceImpl implements ISubmitIngestService {
 
   final AirflowProperties airflowProperties;
- 
+
   private static final String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
 
   @Override
   public boolean submitIngest(String dagName, Map<String, Object> data) {
 
     try {
-    	
+
     	String airflowUrl = airflowProperties.getUrl();
         String webServerUrl = format("%s/api/experimental/dags/%s/dag_runs", airflowUrl, dagName);
-        
+
         Map<String, Object> confdata = Collections.singletonMap(AIRFLOW_PAYLOAD_PARAMETER_NAME, data);
-        
+
         JSONObject requestBody = new JSONObject(confdata);
         Client restClient = Client.create();
         WebResource webResource = restClient.resource(webServerUrl);
-        
+
         ClientResponse response = webResource
 		        .type(MediaType.APPLICATION_JSON)
 		        .post(ClientResponse.class, requestBody.toString());
-                             
-   
+
+
         return  response.getStatus() == 200 ? true : false;
  //   } catch (HttpResponseException e) {
   //    throw new IntegrationException("Airflow request fail", e);

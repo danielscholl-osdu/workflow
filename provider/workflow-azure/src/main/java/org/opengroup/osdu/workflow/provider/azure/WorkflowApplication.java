@@ -26,15 +26,15 @@ import org.springframework.context.annotation.FilterType;
  * ignored.
  */
 @ComponentScan(
-        basePackages = {"org.opengroup.osdu"},
-        excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.opengroup.osdu.is.*"),
-        }
+    basePackages = {"org.opengroup.osdu"},
+    excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.opengroup.osdu.is.*"),
+    }
 )
 
 @SpringBootApplication
 public class WorkflowApplication {
-    public static void main(String[] args) {
-      SpringApplication.run(WorkflowApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(WorkflowApplication.class, args);
+  }
 }

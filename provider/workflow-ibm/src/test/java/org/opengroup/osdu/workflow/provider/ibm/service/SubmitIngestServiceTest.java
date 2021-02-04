@@ -27,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.workflow.provider.ibm.property.AirflowProperties;
-import org.opengroup.osdu.workflow.provider.ibm.service.SubmitIngestServiceImpl;
-import org.opengroup.osdu.workflow.provider.interfaces.ISubmitIngestService;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.HttpResponse;
@@ -40,24 +38,24 @@ class SubmitIngestServiceTest {
   private static final String TEST_AIRFLOW_URL = "http://test-airflow";
   private static final String TEST_CLIENT_ID = "client-id";
   private static final String Websrv_URL = "http://test-airflow/api/dag_id/dagruns";
- 
+
   @Mock
   private AirflowProperties airflowProperties;
 
-  
-  
+
+
   @Mock
   private HttpPost httpPost;
-  
 
- 
-  
+
+
+
   @Mock
   private HttpClient httpClient;
 
  @Mock
  SubmitIngestServiceImpl submitIngestService;
-  
+
   @Mock
   private HttpResponse httpResponse;
 
@@ -68,27 +66,27 @@ class SubmitIngestServiceTest {
     // given
     HashMap<String, Object> data = new HashMap<>();
     data.put("key", "value");
-    
-        
+
+
    Mockito.when(submitIngestService.submitIngest("dag-name", data)).thenReturn(true);
     // when
     assertEquals(submitIngestService.submitIngest("dag-name", data), true);
 
     // then
-   
+
   }
 
   // Cannot throw runtime excpetion
   @Test
   void shouldThrowExceptionIfRequestFails() throws IOException {
-	  
+
 	  // given
 	    HashMap<String, Object> data = new HashMap<>();
 	    data.put("key", "value");
-	    
-	        
-	  
-	  
+
+
+
+
   }
 
 }

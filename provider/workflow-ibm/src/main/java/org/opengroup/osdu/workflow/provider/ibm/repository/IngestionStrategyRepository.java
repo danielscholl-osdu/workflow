@@ -32,7 +32,7 @@ import org.opengroup.osdu.core.common.model.WorkflowType;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
 import org.opengroup.osdu.workflow.provider.ibm.exception.IngestionStrategyQueryException;
-import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
+import org.opengroup.osdu.workflow.provider.ibm.interfaces.IIngestionStrategyRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ import static com.cloudant.client.api.query.Operation.and;
 @RequiredArgsConstructor
 public class IngestionStrategyRepository implements IIngestionStrategyRepository {
 
-	@Value("${ibm.db.url}") 
+	@Value("${ibm.db.url}")
 	private String dbUrl;
 	@Value("${ibm.db.apikey:#{null}}")
 	private String apiKey;
@@ -60,12 +60,12 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
 	private String dbUser;
 	@Value("${ibm.db.password:#{null}}")
 	private String dbPassword;
-	
+
 	@Value("${ibm.env.prefix:local-dev}")
 	private String dbNamePrefix;
 
 	private IBMCloudantClientFactory cloudantFactory;
-	
+
 	@Autowired
 	private TenantInfo tenant;
 
@@ -74,13 +74,13 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
 
 	@PostConstruct
 	public void init() throws MalformedURLException {
-		
+
 			cloudantFactory = new IBMCloudantClientFactory(new ServiceCredentials(dbUrl,dbUser,dbPassword));
-		
+
 		db = cloudantFactory.getDatabase(dbNamePrefix, COLLECTION_NAME);
-		
-		
-	// TODO-- need to chk if indexing needs to be done here.	
+
+
+	// TODO-- need to chk if indexing needs to be done here.
 	//	db.createIndex(JsonIndex.builder().name("kind-json-index").asc("kind").definition());
 	//	db.createIndex(JsonIndex.builder().name("legalTagsNames-json-index").asc("legalTagsNames").definition());
 	}
@@ -88,10 +88,10 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
   @Override
   public IngestionStrategy findByWorkflowTypeAndDataTypeAndUserId(WorkflowType workflowType,
       String dataType, String userId) {
-	  
+
 	  log.debug("Requesting dag selection. Workflow type : {}, Data type : {}, User id : {}",
 		        workflowType, dataType, userId);
-	 
+
 	  QueryResult<IngestionStrategy> results = null;
 	try {
 		results = db.query(new QueryBuilder(and(eq("workflowType", workflowType.toString().toLowerCase()),eq("dataType", dataType),eq("userId", userId))).build(),
@@ -102,23 +102,23 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
 				 format("Failed to find a dag by Workflow type - %s, Data type - %s and User id - %s",
 				            workflowType, dataType, userId));
 	}
-	
+
 	  if(results == null ) {
 			 throw new IngestionStrategyQueryException(
 					 format("Failed to find a dag by Workflow type - %s, Data type - %s and User id - %s",
 					            workflowType, dataType, userId));
 		 }
-	  
+
 	  if(results != null && results.getDocs().size() > 1) {
 		 throw new IngestionStrategyQueryException(
 		          format("Find dag selection returned %s documents(s), expected 1, query by Workflow"
 		                  + " type - %s, Data type - %s and User id - %s",
 		                  results.getDocs().size(), workflowType, dataType, userId));
 	  }
-            
-	 
+
+
 	  IngestionStrategy ingestion = results.getDocs().get(0);
-	  
+
       return ingestion;
   }
 
@@ -132,9 +132,9 @@ public class IngestionStrategyRepository implements IIngestionStrategyRepository
       throw new IngestionStrategyQueryException(errorMsg, e);
     }
   }
-  
- 
- 
 
- 
+
+
+
+
 }

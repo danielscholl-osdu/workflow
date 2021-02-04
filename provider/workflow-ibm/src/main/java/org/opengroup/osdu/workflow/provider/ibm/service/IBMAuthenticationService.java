@@ -19,6 +19,8 @@ package org.opengroup.osdu.workflow.provider.ibm.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.provider.interfaces.IAuthenticationService;
 import org.springframework.stereotype.Service;
 

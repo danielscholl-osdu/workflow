@@ -6,6 +6,8 @@ import static org.opengroup.osdu.workflow.consts.DefaultVariable.DOMAIN;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.LEGAL_TAG;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.OTHER_RELEVANT_DATA_COUNTRIES;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+import static org.opengroup.osdu.workflow.consts.TestConstants.DATA_PARTITION_ID_TENANT;
 
 import com.google.gson.Gson;
 import java.util.HashMap;
@@ -66,4 +68,53 @@ public class PayloadBuilder {
 				getEnvironmentVariableOrDefaultKey(DOMAIN)
 		);
 	}
+
+	public static String buildCreateWorkflowValidPayload() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
+    payload.put("registrationInstructions", new HashMap<String, String>());
+    payload.put("description", "Test workflow record for integration tests.");
+
+	  return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowPayloadWithIncorrectDag() {
+    Map<String, Object> payload = new HashMap<>();
+    Map<String, String> registrationInstructions = new HashMap<>();
+    registrationInstructions.put("dagName", "incorrectDagName");
+    payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
+    payload.put("description", "Test workflow record for integration tests.");
+    payload.put("registrationInstructions", registrationInstructions);
+
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowPayloadWithIncorrectWorkflowName() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", "-абвгд-");
+    payload.put("description", "Test workflow record for integration tests.");
+
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowRunValidPayload() {
+    Map<String, Object> requestBody = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    Map<String, Object> payload = new HashMap<>();
+
+    executionContext.put("workflowID", null);
+    payload.put("authorization", null);
+    payload.put("data-partition-id", DATA_PARTITION_ID_TENANT);
+    payload.put("appKey", "test");
+
+    executionContext.put("payload", payload);
+    requestBody.put("executionContext", executionContext);
+    return new Gson().toJson(requestBody);
+  }
+
+  public static String buildUpdateWorkflowPayload() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("status", "finished");
+    return new Gson().toJson(payload);
+  }
 }

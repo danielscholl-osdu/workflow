@@ -36,8 +36,8 @@ import org.opengroup.osdu.workflow.provider.ibm.exception.WorkflowStatusNotFound
 import org.opengroup.osdu.workflow.provider.ibm.exception.WorkflowStatusNotSavedException;
 import org.opengroup.osdu.workflow.provider.ibm.exception.WorkflowStatusNotUpdatedException;
 import org.opengroup.osdu.workflow.provider.ibm.exception.WorkflowStatusQueryException;
+import org.opengroup.osdu.workflow.provider.ibm.interfaces.IWorkflowStatusRepository;
 import org.opengroup.osdu.workflow.provider.ibm.model.WorkflowStatusDoc;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -53,7 +53,7 @@ import com.cloudant.client.api.Database;
 @RequiredArgsConstructor
 public class WorkflowStatusRepository implements IWorkflowStatusRepository {
 
-	@Value("${ibm.db.url}") 
+	@Value("${ibm.db.url}")
 	private String dbUrl;
 	@Value("${ibm.db.apikey:#{null}}")
 	private String apiKey;
@@ -61,17 +61,17 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
 	private String dbUser;
 	@Value("${ibm.db.password:#{null}}")
 	private String dbPassword;
-	
+
 	@Value("${ibm.env.prefix:local-dev}")
 	private String dbNamePrefix;
-	
+
 	@Autowired
 	private DpsHeaders headers;
-	
+
 	@Autowired
 	private TenantInfo tenant;
 
-	
+
 	private WorkflowStatusDoc document ;
 
 	private IBMCloudantClientFactory cloudantFactory;
@@ -80,12 +80,12 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
 
   @PostConstruct
 	public void init() throws MalformedURLException {
-		
+
 			cloudantFactory = new IBMCloudantClientFactory(new ServiceCredentials(dbUrl,dbUser,dbPassword));
-		
+
 		db = cloudantFactory.getDatabase(dbNamePrefix, COLLECTION_NAME);
-				
-	// TODO-- need to chk if indexing needs to be done here.	
+
+	// TODO-- need to chk if indexing needs to be done here.
 	//	db.createIndex(JsonIndex.builder().name("kind-json-index").asc("kind").definition());
 	//	db.createIndex(JsonIndex.builder().name("legalTagsNames-json-index").asc("legalTagsNames").definition());
 	}
@@ -93,28 +93,28 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
   @Override
   public WorkflowStatus findWorkflowStatus(String workflowId) {
 	  log.debug("Requesting workflow status by workflow id - {}", workflowId);
-	  
+
 	  tenant.getName();
-	  
-	 
+
+
 	try {
-		document = db.find(WorkflowStatusDoc.class,workflowId);	
-		
+		document = db.find(WorkflowStatusDoc.class,workflowId);
+
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		throw new WorkflowStatusQueryException( String.format("Failed to find a workflow status by Workflow id - %s", workflowId));
 	}
-	  	   
+
 	if (document== null) {
 		  throw new WorkflowNotFoundException(
 		          String.format("No  workflow status found in"
 		                  + " Workflow id - %s",
 		               workflowId));
-		  
+
 	 }
-		 
+
 	  WorkflowStatus workflowstatus = buildWorkflowStatus(document);
-		    	
+
       return workflowstatus;
   }
 
@@ -123,26 +123,26 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
 
 	  tenant.getName();
 	  log.info("Saving workflow status  location : {}", workflowStatus);
-	  
-	  // TODO -- chk for date   
+
+	  // TODO -- chk for date
 	  final String errorMsg = "Exceptions during saving  workflow status: " + workflowStatus;
-	       
+
 	  workflowStatus.setSubmittedBy(headers.getUserEmail());
 	  workflowStatus.setSubmittedAt(new Date());
-	    
+
 	  WorkflowStatusDoc workflowstatusdoc = new WorkflowStatusDoc(workflowStatus);
-	    
+
 	  try {
 		  	  db.save(workflowstatusdoc);
-		  
+
 	  }catch(Exception e) {
-		
+
 		  throw new WorkflowStatusNotSavedException( errorMsg);
-			
+
 	  }
-	 	 	     
+
 	  return workflowStatus;
-    
+
   }
 
   @Override
@@ -152,55 +152,55 @@ public class WorkflowStatusRepository implements IWorkflowStatusRepository {
 	  tenant.getName();
 	  log.info("Update workflow status  for workflow id: {}, new status: {}", workflowId,
 		        workflowStatusType);
-	
-	 
+
+
 		try {
 			document = db.find(WorkflowStatusDoc.class,workflowId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			throw new WorkflowStatusQueryException( String.format("Failed to find a workflow status by Workflow id - %s", workflowId));
 		}
-	   
-	  
+
+
 	  if (document== null) {
 		  throw new WorkflowStatusNotFoundException(
 		          String.format("Workflow status for Workflow id: %s not found", workflowId));
-		  
+
 	  }
-	  
+
 	  if (document.getWorkflowStatusType().equals(workflowStatusType)) {
 	      throw new WorkflowStatusNotUpdatedException(String.format(
 	          "Workflow status for workflow id: %s already has status:%s and can not be updated",
 	          workflowId, workflowStatusType));
 	    }
-	  
+
 	  document.setWorkflowStatusType(workflowStatusType);
-	
+
 	 try {
-	  
+
 	  db.update(document);
-	  
+
 	 }catch (Exception e) {
-		 
+
 		 throw new WorkflowStatusQueryException( String.format("Failed to update a workflow status by Workflow id - %s", workflowId));
 	 }
-	  
+
     return buildWorkflowStatus(document);
   }
 
- 
-  
+
+
 
   private WorkflowStatus buildWorkflowStatus(WorkflowStatusDoc document) {
-	  
+
 	return WorkflowStatus.builder()
 		        .workflowId(document.get_id())
 		        .airflowRunId(document.getAirflowRunId())
 		        .workflowStatusType(document.getWorkflowStatusType())
 		        .submittedAt(document.getSubmittedAt())
 		        .submittedBy(document.getSubmittedBy()).build();
-	  
-	 	  
+
+
 	  }
- 
+
 }

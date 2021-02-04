@@ -16,17 +16,12 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.config;
 
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.FirestoreOptions;
-import org.springframework.context.annotation.Bean;
+import org.opengroup.osdu.workflow.provider.gcp.IGcpPackageMarker;
+import org.springframework.cloud.gcp.data.datastore.repository.config.EnableDatastoreRepositories;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableDatastoreRepositories(basePackageClasses = IGcpPackageMarker.class)
 public class GcpConfiguration {
-
-  @Bean
-  public Firestore googleCloudFirestore() {
-    return FirestoreOptions.getDefaultInstance().getService();
-  }
 
 }

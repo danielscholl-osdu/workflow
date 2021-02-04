@@ -41,7 +41,6 @@
     <module>provider/workflow-azure</module>
     <module>provider/workflow-gcp</module>
     <module>provider/workflow-ibm</module>
-    <module>provider/workflow-gcp-datastore</module>
   </modules>
 
   <properties>

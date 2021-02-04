@@ -8,27 +8,12 @@ The Workflow Service is a [Spring Boot](https://spring.io/projects/spring-boot) 
 
 
 
-## Setup
+## Build
 All references on repositories settings are external to `pom.xml` and should be configured through Maven `settings.xml` file.
+To build against Community GitLab repositories, use `.mvn/community-maven.settings.xml` settings:
+`mvn clean compile test --settings .mvn/community-maven.settings.xml`
 
-To run maven against Community GitLab repositories, follow the below instructions.
 
-**Note:** All the commands mentioned below need to be executed from the project root directory
-
-#### Resolve dependencies
-```sh
-mvn clean compile -s .mvn/community-maven.settings.xml
-```
-
-#### Run unit tests
-```sh
-mvn clean test -s .mvn/community-maven.settings.xml
-```
-
-#### Packaging
-```sh
-mvn clean package -s .mvn/community-maven.settings.xml
-```
 
 ## Running Locally
 
@@ -45,13 +30,13 @@ In order to run this service locally, you will need the following:
 
 **Environment Variable Management**
 The following tools make environment variable configuration simpler
- - [direnv](https://direnv.net/) - for a shell/terminal environment
- - [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) - for [Intellij IDEA](https://www.jetbrains.com/idea/)
+- [direnv](https://direnv.net/) - for a shell/terminal environment
+- [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) - for [Intellij IDEA](https://www.jetbrains.com/idea/)
 
 **Lombok**
 This project uses [Lombok](https://projectlombok.org/) for code generation. You may need to configure your IDE to take advantage of this tool.
- - [Intellij configuration](https://projectlombok.org/setup/intellij)
- - [VSCode configuration](https://projectlombok.org/setup/vscode)
+- [Intellij configuration](https://projectlombok.org/setup/intellij)
+- [VSCode configuration](https://projectlombok.org/setup/vscode)
 
 ### Understanding Environment Variables
 
@@ -67,25 +52,19 @@ az keyvault secret show --vault-name $KEY_VAULT_NAME --name $KEY_VAULT_SECRET_NA
 | `AZURE_CLIENT_ID` | `********` | Identity to run the service locally. This enables access to Azure resources. You only need this if running locally | yes |
 | `AZURE_TENANT_ID` | `********` | AD tenant to authenticate users from | yes |
 | `AZURE_CLIENT_SECRET` | `********` | Secret for `$AZURE_CLIENT_ID` | yes |
-| `appinsights_key` | `********` | API Key for App Insights | yes |
+| `azure.application-insights.instrumentation-key` | ******** | API Key for App Insights | yes |
 | `KEYVAULT_URI` | ex https://foo-keyvault.vault.azure.net/ | URI of KeyVault that holds application secrets | no |
 | `cosmosdb_database` | ex `dev-osdu-r2-db` | Cosmos database for storage documents | no | output of infrastructure deployment |
 | `OSDU_ENTITLEMENTS_URL` | ex `https://foo-entitlements.azurewebsites.net` | Entitlements API endpoint | no | output of infrastructure deployment |
 | `OSDU_ENTITLEMENTS_APPKEY` | `********` | The API key clients will need to use when calling the entitlements | yes | -- |
 | `airflow_url` | ex `http://foo.org/test/airflow` | Airflow API endpoint | no |
-| `airflow_username` | `********` | User Name | yes |
-| `airflow_password` | `********` | Airflow API password | yes |
+| `airflow_username` | ******** | User Name | yes |
+| `airflow_password` | ******** | Airflow API password | yes |
+| `adf_url` | ***** | ADF API endpoint | yes |
+| `argo_url` | ex `http://foo.org/test/workflows/argo` | Argo API endpoint | no |
+| `argo_token` | ***** | Argo token | yes |
 | `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
 | `server_port` | `8082` | Port of application. | no | -- |
-| `azure_istioauth_enabled` | `true` | Flag to disable AAD auth | no |
-| `partition_service_endpoint` | ex `https//foo-partition.azurewebsites.net/api/partition/v1` | Partition API endpoint | no |
-| `azure.activedirectory.app-resource-id` | `********` | AAD client application ID | yes | output of infrastructure deployment |
-| `azure.activedirectory.client-id` | `********` | AAD client application ID | yes | output of infrastructure deployment |
-| `azure.activedirectory.AppIdUri` | `api://${azure.activedirectory.client-id}` | URI for AAD Application | no | -- |
-| `azure.activedirectory.session-stateless` | `true` | Flag run in stateless mode (needed by AAD dependency) | no | -- |
-| `aad_client_id` | `*******` | AAD client application ID | yes | output of infrastructure deployment|
-
-
 
 In Order to run service with AAD authentication add below environment variables, which will enable Authentication in workflow service using AAD filter.
 
@@ -98,7 +77,7 @@ In Order to run service with AAD authentication add below environment variables,
 
 In Order to run service without authentication add below environment variables, which will disable authentication in workflow service.
 
- name | value | description | sensitive? | source |
+name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `azure_istioauth_enabled` | `true` | Flag to Disable AAD auth | no | -- |
 

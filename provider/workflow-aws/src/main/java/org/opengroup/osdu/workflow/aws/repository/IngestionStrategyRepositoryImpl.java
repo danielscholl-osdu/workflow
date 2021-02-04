@@ -18,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.common.model.WorkflowType;
+import org.opengroup.osdu.workflow.aws.interfaces.IIngestionStrategyRepository;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.IngestionStrategyDoc;
 import org.opengroup.osdu.workflow.model.IngestionStrategy;
-import org.opengroup.osdu.workflow.provider.interfaces.IIngestionStrategyRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 

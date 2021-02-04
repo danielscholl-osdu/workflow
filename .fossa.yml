@@ -32,7 +32,3 @@ analyze:
     type: mvn
     target: provider/workflow-ibm/pom.xml
     path: .
-  - name: workflow-gcp-datastore
-    type: mvn
-    target: provider/workflow-gcp-datastore/pom.xml
-    path: .
