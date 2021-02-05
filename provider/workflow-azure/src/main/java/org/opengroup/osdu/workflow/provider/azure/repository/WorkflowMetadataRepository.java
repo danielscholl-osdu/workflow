@@ -101,7 +101,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
         .creationTimestamp(workflowMetadata.getCreationTimestamp())
         .version(workflowMetadata.getVersion())
         .isRegisteredByWorkflowService(
-            workflowDetailContent == null || workflowDetailContent.isEmpty())
+            workflowDetailContent != null && !workflowDetailContent.isEmpty())
         .registrationInstructions(registrationInstructionForMetadata).build();
   }
 
