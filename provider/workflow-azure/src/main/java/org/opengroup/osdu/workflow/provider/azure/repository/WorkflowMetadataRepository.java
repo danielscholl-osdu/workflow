@@ -13,12 +13,15 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataReposito
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private static final String LOGGER_NAME = WorkflowMetadataRepository.class.getName();
+  private static final String KEY_WORKFLOW_DETAIL_CONTENT = "workflowDetailContent";
 
   @Autowired
   private CosmosConfig cosmosConfig;
@@ -84,6 +87,11 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private WorkflowMetadataDoc buildWorkflowMetadataDoc(final WorkflowMetadata workflowMetadata) {
     // If we need to save multiple versions of workflow, then choose id as guid and get becomes a query.
     // This is to avoid conflicts. Only one combination of Id and partition key should exist.
+    Map<String, Object> registrationInstructionForMetadata =
+        new HashMap<>(workflowMetadata.getRegistrationInstructions());
+    String workflowDetailContent =
+        (String) registrationInstructionForMetadata.remove(KEY_WORKFLOW_DETAIL_CONTENT);
+
     return WorkflowMetadataDoc.builder()
         .id(workflowMetadata.getWorkflowName())
         .partitionKey(workflowMetadata.getWorkflowName())
@@ -92,7 +100,8 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
         .createdBy(workflowMetadata.getCreatedBy())
         .creationTimestamp(workflowMetadata.getCreationTimestamp())
         .version(workflowMetadata.getVersion())
-        .registrationInstructions(workflowMetadata.getRegistrationInstructions()).build();
+        .isManifest(workflowDetailContent == null || workflowDetailContent.isEmpty())
+        .registrationInstructions(registrationInstructionForMetadata).build();
   }
 
   private WorkflowMetadata buildWorkflowMetadata(final WorkflowMetadataDoc workflowMetadataDoc) {

@@ -33,7 +33,22 @@ public class WorkflowMetadataRepositoryTest {
   private static final String DATABASE_NAME = "someDbName";
   private static final String WORKFLOW_METADATA_COLLECTION = "someCollection";
   private static final String WORKFLOW_NAME = "HelloWorld";
-  private static final String INPUT_WORKFLOW_METADATA = "{\n" +
+  private static final String INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT = "{\n" +
+      "    \"workflowId\": \"foo\",\n" +
+      "    \"workflowName\": \"HelloWorld\",\n" +
+      "    \"description\": \"This is a test workflow\",\n" +
+      "    \"registrationInstructions\": {\n" +
+      "    \"concurrentWorkflowRun\": 5,\n" +
+      "    \"concurrentTaskRun\": 5,\n" +
+      "    \"active\": true,\n" +
+      "    \"workflowDetailContent\": \"sample-dag-content\"\n" +
+      "    },\n" +
+      "    \"creationTimestamp\": 1600144876028,\n" +
+      "    \"createdBy\": \"user@email.com\",\n" +
+      "    \"version\": 1\n" +
+      "}";
+
+  private static final String INPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT = "{\n" +
       "    \"workflowId\": \"foo\",\n" +
       "    \"workflowName\": \"HelloWorld\",\n" +
       "    \"description\": \"This is a test workflow\",\n" +
@@ -46,6 +61,22 @@ public class WorkflowMetadataRepositoryTest {
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +
       "}";
+
+  private static final String INPUT_WORKFLOW_METADATA_WITH_EMPTY_DAG_CONTENT = "{\n" +
+      "    \"workflowId\": \"foo\",\n" +
+      "    \"workflowName\": \"HelloWorld\",\n" +
+      "    \"description\": \"This is a test workflow\",\n" +
+      "    \"registrationInstructions\": {\n" +
+      "    \"concurrentWorkflowRun\": 5,\n" +
+      "    \"concurrentTaskRun\": 5,\n" +
+      "    \"active\": true,\n" +
+      "    \"workflowDetailContent\": \"\"\n" +
+      "    },\n" +
+      "    \"creationTimestamp\": 1600144876028,\n" +
+      "    \"createdBy\": \"user@email.com\",\n" +
+      "    \"version\": 1\n" +
+      "}";
+
   private static final String OUTPUT_WORKFLOW_METADATA = "{\n" +
       "    \"workflowId\": \"HelloWorld\",\n" +
       "    \"workflowName\": \"HelloWorld\",\n" +
@@ -59,7 +90,7 @@ public class WorkflowMetadataRepositoryTest {
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +
       "}";
-  private static final String WORKFLOW_METADATA_DOC = "{\n" +
+  private static final String WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT = "{\n" +
       "    \"id\": \"HelloWorld\",\n" +
       "    \"partitionKey\": \"HelloWorld\",\n" +
       "    \"workflowName\": \"HelloWorld\",\n" +
@@ -69,6 +100,23 @@ public class WorkflowMetadataRepositoryTest {
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +
       "    },\n" +
+      "    \"isManifest\": false,\n" +
+      "    \"creationTimestamp\": 1600144876028,\n" +
+      "    \"createdBy\": \"user@email.com\",\n" +
+      "    \"version\": 1\n" +
+      "}";
+
+  private static final String WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT = "{\n" +
+      "    \"id\": \"HelloWorld\",\n" +
+      "    \"partitionKey\": \"HelloWorld\",\n" +
+      "    \"workflowName\": \"HelloWorld\",\n" +
+      "    \"description\": \"This is a test workflow\",\n" +
+      "    \"registrationInstructions\": {\n" +
+      "    \"concurrentWorkflowRun\": 5,\n" +
+      "    \"concurrentTaskRun\": 5,\n" +
+      "    \"active\": true\n" +
+      "    },\n" +
+      "    \"isManifest\": true,\n" +
       "    \"creationTimestamp\": 1600144876028,\n" +
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +
@@ -91,30 +139,54 @@ public class WorkflowMetadataRepositoryTest {
   private WorkflowMetadataRepository workflowMetadataRepository;
 
   @Test
-  public void testCreateWorkflow() throws Exception {
-    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
-    final WorkflowMetadata outputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
-    final WorkflowMetadataDoc workflowMetadataDoc =
-        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC, WorkflowMetadataDoc.class);
+  public void testCreateWorkflowWithDAGContent() throws Exception {
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
+    final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    final WorkflowMetadataDoc expectedDocToBeStored =
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
+    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+  }
+
+  @Test
+  public void testCreateWorkflowWithoutDAGContent() throws Exception {
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
+    final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    final WorkflowMetadataDoc expectedDocToBeStored =
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
+    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+  }
+
+  @Test
+  public void testCreateWorkflowWithEmptyDAGContent() throws Exception {
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_EMPTY_DAG_CONTENT, WorkflowMetadata.class);
+    final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    final WorkflowMetadataDoc expectedDocToBeStored =
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
+    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+  }
+
+  private void testCreateWorkflow(WorkflowMetadata inputWorkflowMetadata,
+                                  WorkflowMetadata expectedOutputWorkflowMetadata,
+                                  WorkflowMetadataDoc expectedDocToBeStored) {
     when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
     doNothing().when(cosmosStore)
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(workflowMetadataDoc));
+        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
     final WorkflowMetadata response = workflowMetadataRepository.createWorkflow(inputWorkflowMetadata);
     verify(cosmosStore, times(1))
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(workflowMetadataDoc));
+        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
     verify(cosmosConfig, times(1)).getDatabase();
     verify(cosmosConfig, times(1)).getWorkflowMetadataCollection();
     verify(dpsHeaders, times(1)).getPartitionId();
-    assertThat(response, equalTo(outputWorkflowMetadata));
+    assertThat(response, equalTo(expectedOutputWorkflowMetadata));
   }
 
   @Test
   public void testCreateWorkflowWithExistingId() throws Exception {
-    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc workflowMetadataDoc =
-        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC, WorkflowMetadataDoc.class);
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
     when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
@@ -140,7 +212,7 @@ public class WorkflowMetadataRepositoryTest {
   public void testGetWorkflowWithExistingWorkflowId() throws Exception {
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
     final WorkflowMetadataDoc workflowMetadataDoc =
-        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC, WorkflowMetadataDoc.class);
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
     when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);

@@ -67,7 +67,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
     String workflowDetailContent = (String) registrationInstruction.get(KEY_WORKFLOW_DETAIL_CONTENT);
-    dagsFileShareStore.createFile(workflowDetailContent, getFileNameFromWorkflow(rq.getWorkflowName()));
+    if(workflowDetailContent != null && !workflowDetailContent.isEmpty()) {
+      dagsFileShareStore.createFile(workflowDetailContent,
+          getFileNameFromWorkflow(rq.getWorkflowName()));
+    }
   }
 
   @Override

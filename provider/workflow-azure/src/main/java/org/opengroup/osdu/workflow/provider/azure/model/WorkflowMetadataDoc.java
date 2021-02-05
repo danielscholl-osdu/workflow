@@ -18,5 +18,6 @@ public class WorkflowMetadataDoc {
   private String createdBy;
   private Long creationTimestamp;
   private Long version;
+  private Boolean isManifest;
   private Map<String, Object> registrationInstructions;
 }

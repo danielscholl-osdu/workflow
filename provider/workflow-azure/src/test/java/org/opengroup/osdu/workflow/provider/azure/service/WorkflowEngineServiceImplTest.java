@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,10 +112,25 @@ public class WorkflowEngineServiceImplTest {
   private WorkflowEngineServiceImpl workflowEngineService;
 
   @Test
-  public void testSaveWorkflow() {
+  public void testCreateWorkflowWithDagContent() {
     doNothing().when(dagsFileShareStore).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
-    workflowEngineService.createWorkflow(workflowEngineRequest(null), registrationInstructions());
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(WORKFLOW_DEFINITION));
     verify(dagsFileShareStore, times(1)).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
+  }
+
+  @Test
+  public void testCreateWorkflowWithNullDagContent() {
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(null));
+    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
+  }
+
+  @Test
+  public void testCreateWorkflowWithEmptyDagContent() {
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(""));
+    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
   }
 
   @Test
@@ -314,9 +330,9 @@ public class WorkflowEngineServiceImplTest {
         workflowEngineExecutionDate);
   }
 
-  private Map<String, Object> registrationInstructions() {
+  private Map<String, Object> registrationInstructions(String workflowDefinition) {
     Map<String, Object> res = new HashMap<>();
-    res.put("workflowDetailContent", WORKFLOW_DEFINITION);
+    res.put("workflowDetailContent", workflowDefinition);
     return res;
   }
 }
