@@ -1,8 +1,6 @@
 package org.opengroup.osdu.workflow.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
