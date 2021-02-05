@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.INVALID_PARTITION;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_CUSTOM_OPERATOR_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
@@ -28,6 +29,7 @@ import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTes
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION_FIELD;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_NAME_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getInvalidCreateWorkflowRequest;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getValidCreateWorkflowRequest;
@@ -149,9 +151,18 @@ public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
     assertEquals(responseBody.get("workflowId").getAsString(),
         duplicateResponseBody.get("conflictId").getAsString());
     assertEquals(String.format(WORKFLOW_NAME_CONFLICT_MESSAGE,
-        responseBody.get("workflowName").getAsString(),
-        responseBody.get("workflowId").getAsString()),
+        responseBody.get("workflowName").getAsString()),
         duplicateResponseBody.get("message").getAsString());
+
+    ClientResponse deleteResponse = client.send(
+        HttpMethod.DELETE,
+        String.format(WORKFLOW_URL, responseBody.get(WORKFLOW_ID_FIELD).getAsString()),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.SC_NO_CONTENT, deleteResponse.getStatus());
   }
 
   @Test
