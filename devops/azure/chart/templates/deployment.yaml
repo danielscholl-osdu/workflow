@@ -55,7 +55,7 @@ spec:
             - name: spring_application_name
               value: ingestion-workflow
             - name: server.servlet.contextPath
-              value: /api/workflow/v1/
+              value: /api/workflow/
             - name: AZURE_TENANT_ID
               valueFrom:
                 secretKeyRef:
