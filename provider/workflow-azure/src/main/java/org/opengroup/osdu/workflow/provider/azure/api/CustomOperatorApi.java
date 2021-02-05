@@ -52,7 +52,7 @@ public class CustomOperatorApi {
   @GetMapping("/{custom_operator_name}")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "', '"
       + WorkflowRole.CREATOR + "', '" + WorkflowRole.VIEWER + "')")
-  public CustomOperator getCustomOperatorById(@PathVariable("custom_operator_name")
+  public CustomOperator getCustomOperatorByName(@PathVariable("custom_operator_name")
                                                  String customOperatorName) {
     return customOperatorService.getOperatorByName(customOperatorName);
   }
