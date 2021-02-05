@@ -92,11 +92,11 @@ spec:
               value: "http://entitlements-azure/entitlements/v1"
             - name: OSDU_ENTITLEMENTS_APPKEY
               value: "OBSOLETE"
-            - name: airflow_url
+            - name: OSDU_AIRFLOW_URL
               value: "http://airflow-web:8080/airflow"
-            - name: airflow_username
+            - name: OSDU_AIRFLOW_USERNAME
               value: "admin"
-            - name: airflow_password
+            - name: OSDU_AIRFLOW_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: airflow

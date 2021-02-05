@@ -14,7 +14,7 @@ public enum DefaultVariable {
 
 	GOOGLE_AUDIENCE(""),
 	FINISHED_WORKFLOW_ID(""),
-	DAG_ACTIVATION_TIME("90"),
+	DAG_ACTIVATION_TIME("180"),
 	TEST_DATA_DIRECTORY(""),
 	TEST_DATA_FILE_NAME("testData.json");
 
