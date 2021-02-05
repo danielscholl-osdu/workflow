@@ -47,7 +47,7 @@ class WorkflowRunServiceTest {
   private static final String KEY_RUN_ID = "run_id";
   private static final String KEY_AUTH_TOKEN = "authToken";
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
-  private static final String KEY_WORKFLOW_ID = "workflow_id";
+  private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
   private static final String AUTH_TOKEN = "Bearer Dummy";
   private static final String WORKFLOW_ID = "some-workflow-id";
@@ -498,7 +498,7 @@ class WorkflowRunServiceTest {
     payload.put(KEY_AUTH_TOKEN, AUTH_TOKEN);
     payload.put(KEY_EXECUTION_CONTEXT,
         OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
-    payload.put(KEY_WORKFLOW_ID, WORKFLOW_NAME);
+    payload.put(KEY_WORKFLOW_NAME, WORKFLOW_NAME);
     payload.put(KEY_CORRELATION_ID, CORRELATION_ID);
     return payload;
   }

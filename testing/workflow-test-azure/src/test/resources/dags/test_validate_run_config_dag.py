@@ -19,7 +19,7 @@ default_args = {
   'retry_delay': timedelta(minutes=1)
 }
 
-MANDATORY_CONFIGURATION_EXPECTED = ["run_id", "workflow_id", "correlation_id", "execution_context", "authToken"]
+MANDATORY_CONFIGURATION_EXPECTED = ["run_id", "workflow_name", "correlation_id", "execution_context", "authToken"]
 
 dag = DAG('${dagId}', schedule_interval=None, default_args=default_args)
 

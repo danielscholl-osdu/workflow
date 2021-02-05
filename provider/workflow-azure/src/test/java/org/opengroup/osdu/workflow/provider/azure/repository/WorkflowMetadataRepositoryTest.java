@@ -100,7 +100,7 @@ public class WorkflowMetadataRepositoryTest {
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +
       "    },\n" +
-      "    \"isManifest\": false,\n" +
+      "    \"isRegisteredByWorkflowService\": false,\n" +
       "    \"creationTimestamp\": 1600144876028,\n" +
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +
@@ -116,7 +116,7 @@ public class WorkflowMetadataRepositoryTest {
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true\n" +
       "    },\n" +
-      "    \"isManifest\": true,\n" +
+      "    \"isRegisteredByWorkflowService\": true,\n" +
       "    \"creationTimestamp\": 1600144876028,\n" +
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +

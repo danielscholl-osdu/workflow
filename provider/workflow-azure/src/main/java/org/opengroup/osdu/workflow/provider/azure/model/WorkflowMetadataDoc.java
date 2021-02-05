@@ -18,6 +18,6 @@ public class WorkflowMetadataDoc {
   private String createdBy;
   private Long creationTimestamp;
   private Long version;
-  private Boolean isManifest;
+  private Boolean isRegisteredByWorkflowService;
   private Map<String, Object> registrationInstructions;
 }
