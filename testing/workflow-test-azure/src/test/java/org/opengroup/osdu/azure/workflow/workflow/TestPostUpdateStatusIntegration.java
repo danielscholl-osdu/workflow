@@ -21,12 +21,12 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opengroup.osdu.azure.workflow.framework.workflow.PostUpdateStatusIntegrationTests;
 import org.opengroup.osdu.azure.workflow.utils.AzurePayLoadBuilder;
 import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzure;
 import org.opengroup.osdu.workflow.consts.DefaultVariable;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.PayloadBuilder;
-import org.opengroup.osdu.workflow.workflow.PostUpdateStatusIntegrationTests;
 
 import javax.ws.rs.HttpMethod;
 
@@ -46,7 +46,8 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
   @BeforeEach
   @Override
-  public void setup() {
+  public void setup() throws Exception {
+    super.setup();
     this.client = new HTTPClientAzure();
     this.headers = client.getCommonHeader();
   }
@@ -84,7 +85,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
 
   @Test
- @Override
+  @Override
 	public void should_returnBadRequest_when_givenCurrentWorkflowStatus() throws Exception {
   ClientResponse workflowStartedResponse = client.send(
       HttpMethod.POST,
@@ -175,7 +176,8 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 
   @AfterEach
   @Override
-  public void tearDown()  {
+  public void tearDown() throws Exception {
+    super.tearDown();
     this.client = null;
     this.headers = null;
   }

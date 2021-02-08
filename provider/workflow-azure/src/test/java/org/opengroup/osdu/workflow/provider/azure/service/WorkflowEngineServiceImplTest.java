@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,10 +87,10 @@ public class WorkflowEngineServiceImplTest {
   private static final Long EXECUTION_TIMESTAMP = 1609932804071L;
   private static final String EXECUTION_DATE = "2021-01-05T11:36:45+00:00";
 
-  @Mock(name = "dags")
+  @Mock
   private FileShareStore dagsFileShareStore;
 
-  @Mock(name = "customOperators")
+  @Mock
   private FileShareStore customOperatorsFileShareStore;
 
   @Mock
@@ -111,15 +112,28 @@ public class WorkflowEngineServiceImplTest {
   private WorkflowEngineServiceImpl workflowEngineService;
 
   @Test
-  @Disabled("TODO: Fix test as it fail on dagsFileShareStore Mock invocation")
-  public void testSaveWorkflow() {
+  public void testCreateWorkflowWithDagContent() {
     doNothing().when(dagsFileShareStore).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
-    workflowEngineService.createWorkflow(workflowEngineRequest(), registrationInstructions());
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(WORKFLOW_DEFINITION));
     verify(dagsFileShareStore, times(1)).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
   }
 
   @Test
-  @Disabled("TODO: Fix test as it fail on customOperators Mock invocation")
+  public void testCreateWorkflowWithNullDagContent() {
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(null));
+    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
+  }
+
+  @Test
+  public void testCreateWorkflowWithEmptyDagContent() {
+    workflowEngineService.createWorkflow(workflowEngineRequest(null),
+        registrationInstructions(""));
+    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
+  }
+
+  @Test
   public void testStoreCustomOperator() {
     doNothing().when(customOperatorsFileShareStore).createFile(eq(CUSTOM_OPERATOR_DEFINITION), eq(FILE_NAME));
     workflowEngineService.saveCustomOperator(CUSTOM_OPERATOR_DEFINITION, FILE_NAME);
@@ -142,7 +156,7 @@ public class WorkflowEngineServiceImplTest {
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
-    workflowEngineService.triggerWorkflow(workflowEngineRequest(), INPUT_DATA);
+    workflowEngineService.triggerWorkflow(workflowEngineRequest(null), INPUT_DATA);
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -171,7 +185,7 @@ public class WorkflowEngineServiceImplTest {
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(INTERNAL_SERVER_ERROR_STATUS_CODE);
     Assertions.assertThrows(AppException.class, () -> {
-      workflowEngineService.triggerWorkflow(workflowEngineRequest(), INPUT_DATA);
+      workflowEngineService.triggerWorkflow(workflowEngineRequest(null), INPUT_DATA);
     });
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
@@ -200,7 +214,7 @@ public class WorkflowEngineServiceImplTest {
     when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class), airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
-    workflowEngineService.triggerWorkflow(workflowEngineRequest(), INPUT_DATA);
+    workflowEngineService.triggerWorkflow(workflowEngineRequest(null), INPUT_DATA);
     verify(restClient).resource(eq(AIRFLOW_CONTROLLER_DAG_TRIGGER_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -214,8 +228,8 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  @Disabled("TODO: Fix test as it is failing on dagsFileShareStore Mock invocation")
   public void testDeleteWorkflowWithSuccess() {
+    doNothing().when(dagsFileShareStore).deleteFile(eq(FILE_NAME));
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
@@ -226,7 +240,7 @@ public class WorkflowEngineServiceImplTest {
         .thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
 
-    workflowEngineService.deleteWorkflow(workflowEngineRequest());
+    workflowEngineService.deleteWorkflow(workflowEngineRequest(null));
 
     verify(dagsFileShareStore).deleteFile(eq(FILE_NAME));
     verify(restClient).resource(eq(AIRFLOW_DAG_URL));
@@ -251,7 +265,7 @@ public class WorkflowEngineServiceImplTest {
     when(clientResponse.getStatus()).thenReturn(INTERNAL_SERVER_ERROR_STATUS_CODE);
 
     Assertions.assertThrows(AppException.class, () -> {
-      workflowEngineService.deleteWorkflow(workflowEngineRequest());
+      workflowEngineService.deleteWorkflow(workflowEngineRequest(null));
     });
 
     verify(dagsFileShareStore, times(0)).deleteFile(eq(FILE_NAME));
@@ -276,7 +290,8 @@ public class WorkflowEngineServiceImplTest {
         any())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(AIRFLOW_GET_STATUS_RESPONSE);
-    WorkflowStatusType response = workflowEngineService.getWorkflowRunStatus(workflowEngineRequest());
+    WorkflowStatusType response = workflowEngineService
+        .getWorkflowRunStatus(workflowEngineRequest(EXECUTION_DATE));
     verify(restClient).resource(eq(AIRFLOW_DAG_GET_STATUS_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -299,7 +314,7 @@ public class WorkflowEngineServiceImplTest {
         any())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(INTERNAL_SERVER_ERROR_STATUS_CODE);
     Assertions.assertThrows(AppException.class, () -> {
-      workflowEngineService.getWorkflowRunStatus(workflowEngineRequest());
+      workflowEngineService.getWorkflowRunStatus(workflowEngineRequest(EXECUTION_DATE));
     });
     verify(restClient).resource(eq(AIRFLOW_DAG_GET_STATUS_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
@@ -310,13 +325,14 @@ public class WorkflowEngineServiceImplTest {
     verify(airflowConfig).getAppKey();
   }
 
-  private WorkflowEngineRequest workflowEngineRequest() {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, EXECUTION_TIMESTAMP, EXECUTION_DATE);
+  private WorkflowEngineRequest workflowEngineRequest(String workflowEngineExecutionDate) {
+    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, EXECUTION_TIMESTAMP,
+        workflowEngineExecutionDate);
   }
 
-  private Map<String, Object> registrationInstructions() {
+  private Map<String, Object> registrationInstructions(String workflowDefinition) {
     Map<String, Object> res = new HashMap<>();
-    res.put("workflowDetailContent", WORKFLOW_DEFINITION);
+    res.put("workflowDetailContent", workflowDefinition);
     return res;
   }
 }

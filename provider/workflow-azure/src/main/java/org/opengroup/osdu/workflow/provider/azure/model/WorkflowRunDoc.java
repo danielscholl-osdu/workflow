@@ -9,6 +9,8 @@ import lombok.*;
 @EqualsAndHashCode
 public class WorkflowRunDoc {
   private String id;
+  private String partitionKey;
+  private String runId;
   private String workflowName;
   private Long startTimeStamp;
   private Long endTimeStamp;

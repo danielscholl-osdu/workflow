@@ -55,7 +55,7 @@ public class CustomOperatorServiceImpl implements ICustomOperatorService {
   }
 
   @Override
-  public CustomOperator getOperatorById(String id) {
-    return customOperatorMetadataRepository.getMetadataByCustomOperatorId(id);
+  public CustomOperator getOperatorByName(String operatorName) {
+    return customOperatorMetadataRepository.getMetadataByCustomOperatorName(operatorName);
   }
 }
