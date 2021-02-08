@@ -15,16 +15,15 @@
 package org.opengroup.osdu.workflow.provider.azure.config;
 
 import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.security.keyvault.secrets.SecretClient;
-
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.common.StorageSharedKeyCredential;
 import org.opengroup.osdu.azure.KeyVaultFacade;
-import org.opengroup.osdu.common.Validators;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import sun.misc.BASE64Encoder;
 
 import javax.inject.Named;
 
@@ -34,37 +33,31 @@ public class AzureBootstrapConfig {
   @Value("${azure.keyvault.url}")
   private String keyVaultURL;
 
-  @Value("${azure.cosmosdb.database}")
-  private String cosmosDBName;
-
-  @Value("${azure.cosmosdb.ingestionstrategy.collection}")
-  private String ingestionStrategyCollectionName;
-
-  @Value("${azure.cosmosdb.workflowstatus.collection}")
-  private String workflowStatusCollectionName;
-
-  @Value("${azure.airflow.url}")
-  private String airflowURL;
-
-  @Value("${azure.airflow.username}")
-  private String airflowUsername;
-
-  @Value("${azure.airflow.password}")
-  private String airflowPassword;
+  @Value("${osdu.azure.partitionId}")
+  private String partitionId;
 
   @Bean
-  @Named("AIRFLOW_URL")
-  public String airflowURL() {
-    return airflowURL;
+  public CosmosClient buildCosmosClient(SecretClient kv) {
+    final String partitionId = getPartitionId();
+    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-endpoint", partitionId));
+    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-primary-key", partitionId));
+    return new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosPrimaryKey).buildClient();
   }
 
   @Bean
-  @Named("AIRFLOW_APP_KEY")
-  public String airflowAppKey() {
-    Validators.checkNotNull(airflowUsername, "Airflow username cannot be null");
-    Validators.checkNotNull(airflowPassword, "Airflow password cannot be null");
-    String airflowAuthString = airflowUsername + ":" + airflowPassword;
-    return new BASE64Encoder().encode(airflowAuthString.getBytes());
+  public BlobServiceClient blobServiceClient(SecretClient kv) {
+    final String partitionId = getPartitionId();
+    final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage", partitionId));
+    final String accountKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage-key", partitionId));
+    StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+    String endpoint = String.format("https://%s.blob.core.windows.net", accountName);
+
+    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+        .endpoint(endpoint)
+        .credential(storageSharedKeyCredential)
+        .buildClient();
+
+    return blobServiceClient;
   }
 
   @Bean
@@ -73,29 +66,7 @@ public class AzureBootstrapConfig {
     return keyVaultURL;
   }
 
-  @Bean
-  @Named("COSMOS_ENDPOINT")
-  public String cosmosEndpoint(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "cosmos-endpoint");
-  }
-
-  @Bean
-  @Named("COSMOS_KEY")
-  public String cosmosKey(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "cosmos-primary-key");
-  }
-
-  @Bean
-  @Named("INGESTION_STRATEGY_CONTAINER")
-  CosmosContainer ingestionStrategyContainer(final CosmosClient cosmosClient) {
-    Validators.checkNotNull(cosmosClient, "Cosmos client cannot be null");
-    return cosmosClient.getDatabase(cosmosDBName).getContainer(ingestionStrategyCollectionName);
-  }
-
-  @Bean
-  @Named("WORKFLOW_STATUS_CONTAINER")
-  CosmosContainer workflowStatusContainer(final CosmosClient cosmosClient) {
-    Validators.checkNotNull(cosmosClient, "Cosmos client cannot be null");
-    return cosmosClient.getDatabase(cosmosDBName).getContainer(workflowStatusCollectionName);
+  public String getPartitionId() {
+    return this.partitionId;
   }
 }

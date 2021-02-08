@@ -1,36 +1,69 @@
 variables:
+  # --- osdu gcp specific variables ---
   OSDU_GCP_BUILD_SUBDIR: provider/file-gcp-datastore
   # OSDU_GCP_INT_TEST_SUBDIR: testing/file-test-core
   OSDU_GCP_SERVICE: workflow
-  OSDU_GCP_RECORDS_ROOT_URL: https://os-storage-dot-nice-etching-277309.uc.r.appspot.com/api/storage/v2
-  OSDU_GCP_VENDOR: gcp-datastore
+  OSDU_GCP_VENDOR: gcp
   OSDU_GCP_NAMESPACE: osdu-namespace
   OSDU_GCP_APPLICATION_NAME: os-workflow
-  OSDU_GCP_ENV_VARS: SPRING_CLOUD_GCP_DATASTORE_NAMESPACE=$OSDU_GCP_NAMESPACE,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR 
+  OSDU_GCP_ENV_VARS: SPRING_CLOUD_GCP_DATASTORE_NAMESPACE=$OSDU_GCP_NAMESPACE,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR
   OSDU_GCP_ENVIRONMENT: dev
   OSDU_GCP_PORT: 8080
+  # --- end of osdu gcp specific variables ---
+
+  IBM_BUILD_SUBDIR: provider/workflow-ibm
+  IBM_INT_TEST_SUBDIR: testing/workflow-test-ibm
+
+  AWS_BUILD_SUBDIR: provider/workflow-aws/build-aws
+  AWS_TEST_SUBDIR: testing/workflow-test-aws
+  AWS_SERVICE: ingestion-workflow
+  AWS_ENVIRONMENT: dev
+  AWS_SKIP_DEPLOY: 'true'
+
+  # Start azure specific variables
+  AZURE_SERVICE: ingestion-workfow
+  AZURE_BUILD_SUBDIR: provider/workflow-azure
+  AZURE_TEST_SUBDIR: testing/workflow-test-azure
+
+  # End azure specific variables
+
 
 include:
-  - project: 'osdu/platform/ci-cd-pipelines'
-    ref: 'master'
-    file: 'standard-setup.yml'
-
-  - project: 'osdu/platform/ci-cd-pipelines'
-    ref: 'master'
-    file: 'build/maven.yml'
-
-  - project: 'osdu/platform/ci-cd-pipelines'
-    ref: 'master'
-    file: 'scanners/gitlab-ultimate.yml'
-
-  - project: 'osdu/platform/ci-cd-pipelines'
-    ref: 'master'
-    file: 'scanners/fossa.yml'
-
-  - project: 'osdu/platform/ci-cd-pipelines'
-    ref: 'master'
-    file: 'publishing/pages.yml'
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "standard-setup.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: 'master'
-    file: 'cloud-providers/osdu-gcp-cloudrun.yml'
+    ref: "master"
+    file: "build/maven.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "scanners/gitlab-ultimate.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "scanners/fossa-maven.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "publishing/pages.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "cloud-providers/osdu-gcp-cloudrun.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "master"
+    file: "cloud-providers/ibm.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    file: "cloud-providers/aws.yml"
+
+  - project: "osdu/platform/ci-cd-pipelines"
+    ref: "azure-workflow-service"
+    file: "cloud-providers/azure.yml"
+
+
+osdu-gcp-test:
+  allow_failure: false

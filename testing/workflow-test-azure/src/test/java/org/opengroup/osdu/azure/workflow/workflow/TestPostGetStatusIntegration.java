@@ -17,6 +17,7 @@ package org.opengroup.osdu.azure.workflow.workflow;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_STATUS_URL;
 
+@Ignore
 public class TestPostGetStatusIntegration extends PostGetStatusIntegrationTests {
   protected static final DummyRecordsHelper RECORDS_HELPER = new DummyRecordsHelper();
 

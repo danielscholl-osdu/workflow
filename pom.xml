@@ -37,10 +37,10 @@
 
   <modules>
     <module>workflow-core</module>
+    <module>provider/workflow-aws</module>
     <module>provider/workflow-azure</module>
     <module>provider/workflow-gcp</module>
-<!--    <module>provider/workflow-ibm</module> Fix: Missing classes-->
-    <module>provider/workflow-gcp-datastore</module>
+    <module>provider/workflow-ibm</module>
   </modules>
 
   <properties>
@@ -51,7 +51,7 @@
     <javax.inject.version>1</javax.inject.version>
     <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
-    <os-core-common.version>0.3.5</os-core-common.version>
+    <os-core-common.version>0.3.6</os-core-common.version>
     <springfox.version>2.9.2</springfox.version>
   </properties>
 
@@ -316,5 +316,24 @@
       <url>${publish.snapshots.url}</url>
     </snapshotRepository>
   </distributionManagement>
+
+  <profiles>
+    <profile>
+      <id>Default</id>
+      <activation>
+        <property>
+          <name>!repo.releases.id</name>
+        </property>
+      </activation>
+      <properties>
+        <repo.releases.id>community-maven-repo</repo.releases.id>
+        <publish.snapshots.id>community-maven-via-job-token</publish.snapshots.id>
+        <publish.releases.id>community-maven-via-job-token</publish.releases.id>
+        <repo.releases.url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</repo.releases.url>
+        <publish.snapshots.url>https://community.opengroup.org/api/v4/projects/146/packages/maven</publish.snapshots.url>
+        <publish.releases.url>https://community.opengroup.org/api/v4/projects/146/packages/maven</publish.releases.url>
+      </properties>
+    </profile>
+  </profiles>
 
 </project>

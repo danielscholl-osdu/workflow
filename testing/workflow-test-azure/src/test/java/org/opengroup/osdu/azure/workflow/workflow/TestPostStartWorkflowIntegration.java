@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +37,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.workflow.consts.TestConstants.*;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_STATUS_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.START_WORKFLOW_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.STATUS_FIELD;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_ID_FIELD;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUBMITTED;
 
+@Ignore
 public class TestPostStartWorkflowIntegration extends PostStartWorkflowIntegrationTests {
   protected static final DummyRecordsHelper RECORDS_HELPER = new DummyRecordsHelper();
 

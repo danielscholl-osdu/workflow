@@ -15,23 +15,22 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>org.opengroup.osdu</groupId>
     <artifactId>workflow-test</artifactId>
+    <groupId>org.opengroup.osdu</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+  <modelVersion>4.0.0</modelVersion>
 
   <artifactId>workflow-test-gcp</artifactId>
+
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-
-  <name>workflow-test-gcp</name>
-  <description>GCP implementation of test project for workflow service</description>
+  <name>workflow-test-gcp-datastore</name>
+  <description>GCP implementation of datastore test project for workflow service</description>
 
   <properties>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -67,6 +66,13 @@
       <artifactId>google-auth-library-oauth2-http</artifactId>
       <version>${google.oauth.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -89,4 +95,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

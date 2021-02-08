@@ -18,6 +18,9 @@ package org.opengroup.osdu.workflow.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum WorkflowStatusType {
 
   @JsonProperty("submitted")
@@ -30,6 +33,17 @@ public enum WorkflowStatusType {
   FINISHED,
 
   @JsonProperty("failed")
-  FAILED;
+  FAILED,
+
+  @JsonProperty("success")
+  SUCCESS;
+
+  public static List<WorkflowStatusType> getActiveStatusTypes() {
+    return Arrays.asList(SUBMITTED, RUNNING);
+  }
+
+  public static List<WorkflowStatusType> getCompletedStatusTypes() {
+    return Arrays.asList(FINISHED, FAILED, SUCCESS);
+  }
 
 }

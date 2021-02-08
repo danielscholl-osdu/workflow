@@ -1,22 +1,21 @@
 /*
- * Copyright 2020 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+  Copyright 2020 Google LLC
+  Copyright 2020 EPAM Systems, Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
-
-import static com.google.api.client.http.HttpMethods.POST;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -52,7 +51,6 @@ public class GoogleIapHelper {
 
   /**
    * Fetch Google IAP client ID
-   *
    * @param url service URL
    * @return IAP client ID
    */
@@ -69,32 +67,62 @@ public class GoogleIapHelper {
               String.format("No client_id found in redirect response to AirFlow - %s", url)))
           .getValue();
     } catch (IOException | URISyntaxException e) {
-      throw new RuntimeException(
-          "Exception during get Google IAP client id. Check link to Workflow engine", e);
+      throw new RuntimeException("Exception during get Google IAP client id", e);
     }
   }
 
   /**
    * Make request and add an IAP Bearer Authorization header with signed JWT token.
    */
-  public HttpRequest buildIapRequest(String webServerUrl, String iapClientId,
+  public HttpRequest buildIapPostRequest(String webServerUrl, String iapClientId,
       Map<String, Object> data) {
     try {
       JsonHttpContent jsonHttpContent = new JsonHttpContent(new JacksonFactory(), data);
       IdTokenProvider idTokenProvider = getIdTokenProvider();
-      IdTokenCredentials credentials = IdTokenCredentials.newBuilder()
-          .setIdTokenProvider(idTokenProvider)
-          .setTargetAudience(iapClientId)
-          .build();
-
+      IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
       HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
 
       return httpTransport
           .createRequestFactory(httpRequestInitializer)
-          .buildRequest(POST, new GenericUrl(webServerUrl), jsonHttpContent);
+          .buildPostRequest(new GenericUrl(webServerUrl), jsonHttpContent);
     } catch (IOException e) {
       throw new GoogleIamException("Exception when build authorized request", e);
     }
+  }
+
+  public HttpRequest buildIapDeleteRequest(String webServerUrl, String iapClientId) {
+    try {
+      IdTokenProvider idTokenProvider = getIdTokenProvider();
+      IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
+      HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
+
+      return httpTransport
+          .createRequestFactory(httpRequestInitializer)
+          .buildDeleteRequest(new GenericUrl(webServerUrl));
+    } catch (IOException e) {
+      throw new GoogleIamException("Exception when build authorized request", e);
+    }
+  }
+
+  public HttpRequest buildIapGetRequest(String webServerUrl, String iapClientId) {
+    try {
+      IdTokenProvider idTokenProvider = getIdTokenProvider();
+      IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
+      HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
+
+      return httpTransport
+          .createRequestFactory(httpRequestInitializer)
+          .buildGetRequest(new GenericUrl(webServerUrl));
+    } catch (IOException e) {
+      throw new GoogleIamException("Exception when build authorized request", e);
+    }
+  }
+
+  private IdTokenCredentials getIdTokenCredentials(IdTokenProvider idTokenProvider, String iapClientId) {
+    return IdTokenCredentials.newBuilder()
+        .setIdTokenProvider(idTokenProvider)
+        .setTargetAudience(iapClientId)
+        .build();
   }
 
   private IdTokenProvider getIdTokenProvider() throws IOException {
