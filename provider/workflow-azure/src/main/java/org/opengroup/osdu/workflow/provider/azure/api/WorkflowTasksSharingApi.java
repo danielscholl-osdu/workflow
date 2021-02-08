@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("workflow")
+@RequestMapping("/v1/workflow")
 public class WorkflowTasksSharingApi {
   @Autowired
   private IWorkflowTasksSharingService workflowTasksSharingService;

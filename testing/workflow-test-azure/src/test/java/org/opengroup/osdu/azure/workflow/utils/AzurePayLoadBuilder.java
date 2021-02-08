@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 package org.opengroup.osdu.azure.workflow.utils;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 
 public class AzurePayLoadBuilder {
+
   public static String buildInvalidWorkflowIdPayload(String workflowId){
     Map<String, Object> payload = new HashMap<>();
 

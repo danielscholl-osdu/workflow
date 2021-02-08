@@ -49,7 +49,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
     final WorkflowRunDoc workflowRunDoc = buildWorkflowRunDoc(workflowRun);
     cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-        cosmosConfig.getWorkflowRunCollection(), workflowRunDoc.getWorkflowName(), workflowRunDoc);
+        cosmosConfig.getWorkflowRunCollection(), workflowRunDoc.getPartitionKey(), workflowRunDoc);
     return buildWorkflowRun(workflowRunDoc);
   }
 
@@ -63,8 +63,9 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
             workflowName,
             WorkflowRunDoc.class);
     if (!workflowRunDoc.isPresent()) {
-      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowName);
-         logger.error(LOGGER_NAME, errorMessage);
+      final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist",
+          runId, workflowName);
+      logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowRunNotFoundException(errorMessage);
     } else {
       return buildWorkflowRun(workflowRunDoc.get());
@@ -72,16 +73,17 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   }
 
   @Override
-  public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit, String cursor) {
+  public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit,
+                                                        String cursor) {
     if(cursor != null) {
       cursor = cursorUtils.decodeCosmosCursor(cursor);
     }
 
     try {
-      SqlParameter workflowIdParameter = new SqlParameter("@workflowName", workflowName);
+      SqlParameter workflowNameParameter = new SqlParameter("@workflowName", workflowName);
       SqlQuerySpec sqlQuerySpec = new SqlQuerySpec(
-          "SELECT * from c where c.workflowName = @workflowName ORDER BY c._ts DESC",
-          workflowIdParameter);
+          "SELECT * from c where c.partitionKey = @workflowName ORDER BY c._ts DESC",
+          workflowNameParameter);
       final Page<WorkflowRunDoc> pagedCustomOperatorDoc =
           cosmosStore.queryItemsPage(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
               cosmosConfig.getWorkflowRunCollection(), sqlQuerySpec, WorkflowRunDoc.class,
@@ -109,21 +111,25 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         cosmosConfig.getDatabase(),
         cosmosConfig.getWorkflowRunCollection(),
         workflowRunDoc.getId(),
-        workflowRunDoc.getWorkflowName(),
+        workflowRunDoc.getPartitionKey(),
         workflowRunDoc);
-    logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s", workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
+    logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
+        workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }
 
   @Override
-  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName, Map<String, Object> params) {
+  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
+                                                        Map<String, Object> params) {
     return null;
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {
     return WorkflowRunDoc.builder()
         .id(workflowRun.getRunId())
-        .workflowName(workflowRun.getWorkflowId())
+        .runId(workflowRun.getRunId())
+        .partitionKey(workflowRun.getWorkflowName())
+        .workflowName(workflowRun.getWorkflowName())
         .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
         .startTimeStamp(workflowRun.getStartTimeStamp())
         .endTimeStamp(workflowRun.getEndTimeStamp())
@@ -133,8 +139,9 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   private WorkflowRun buildWorkflowRun(final WorkflowRunDoc workflowRunDoc) {
     return WorkflowRun.builder()
-        .runId(workflowRunDoc.getId())
+        .runId(workflowRunDoc.getRunId())
         .workflowId(workflowRunDoc.getWorkflowName())
+        .workflowName(workflowRunDoc.getWorkflowName())
         .status(WorkflowStatusType.valueOf(workflowRunDoc.getStatus()))
         .workflowEngineExecutionDate(workflowRunDoc.getWorkflowEngineExecutionDate())
         .startTimeStamp(workflowRunDoc.getStartTimeStamp())

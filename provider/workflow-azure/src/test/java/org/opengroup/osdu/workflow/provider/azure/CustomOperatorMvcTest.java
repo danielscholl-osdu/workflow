@@ -15,12 +15,17 @@ import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.azure.api.CustomOperatorApi;
 import org.opengroup.osdu.workflow.provider.azure.exception.CustomOperatorNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorService;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingService;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperator;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperatorsPage;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.RegisterCustomOperatorRequest;
+import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -43,9 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for {@link CustomOperatorApi}
  */
-//@WebMvcTest(CustomOperatorApi.class)
-//@AutoConfigureMockMvc
-//@Import({AuthorizationFilter.class, DpsHeaders.class})
+@WebMvcTest(CustomOperatorApi.class)
+@AutoConfigureMockMvc
+@Import({AuthorizationFilter.class, DpsHeaders.class})
 @Disabled
 public class CustomOperatorMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
@@ -109,6 +114,9 @@ public class CustomOperatorMvcTest {
 
   @MockBean
   private ICustomOperatorService customOperatorService;
+
+  @MockBean
+  private IWorkflowTasksSharingService workflowTasksSharingService;
 
   @MockBean
   private IAuthorizationService authorizationService;
@@ -225,7 +233,7 @@ public class CustomOperatorMvcTest {
     final String id = "Zm9vX29wZXJhdG9y";
     final CustomOperator customOperator = mapper.readValue(RESPONSE_CUSTOM_OPERATOR,
         CustomOperator.class);
-    when(customOperatorService.getOperatorById(id)).thenReturn(customOperator);
+    when(customOperatorService.getOperatorByName(id)).thenReturn(customOperator);
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN), eq(WorkflowRole.CREATOR),
         eq(WorkflowRole.VIEWER))).thenReturn(authorizationResponse);
 
@@ -235,7 +243,7 @@ public class CustomOperatorMvcTest {
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isOk())
         .andReturn();
-    verify(customOperatorService, times(1)).getOperatorById(id);
+    verify(customOperatorService, times(1)).getOperatorByName(id);
     verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN),
         eq(WorkflowRole.CREATOR), eq(WorkflowRole.VIEWER));
     final CustomOperator response = mapper.readValue(mvcResult.getResponse()
@@ -246,7 +254,7 @@ public class CustomOperatorMvcTest {
   @Test
   public void testGetCustomOperatorByIdWithInvalidId() throws Exception {
     final String invalidId = "wdqqfqfqweew";
-    when(customOperatorService.getOperatorById(invalidId))
+    when(customOperatorService.getOperatorByName(invalidId))
         .thenThrow(new CustomOperatorNotFoundException("Not found"));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN), eq(WorkflowRole.CREATOR),
         eq(WorkflowRole.VIEWER))).thenReturn(authorizationResponse);
@@ -257,7 +265,7 @@ public class CustomOperatorMvcTest {
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isNotFound())
         .andReturn();
-    verify(customOperatorService, times(1)).getOperatorById(invalidId);
+    verify(customOperatorService, times(1)).getOperatorByName(invalidId);
     verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN),
         eq(WorkflowRole.CREATOR), eq(WorkflowRole.VIEWER));
   }

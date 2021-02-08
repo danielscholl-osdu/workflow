@@ -57,7 +57,7 @@ public class CustomOperatorMetadataRepositoryTest {
       "    ]\n" +
       "}";
   private static final String OUTPUT_CUSTOM_OPERATOR = "{\n" +
-      "\t\"id\": \"Zm9vX29wZXJhdG9y\",\n" +
+      "\t\"id\": \"foo_operator\",\n" +
       "    \"name\": \"foo_operator\",\n" +
       "    \"className\": \"HelloWorld\",\n" +
       "    \"description\": \"Used to print hello world\",\n" +
@@ -72,8 +72,8 @@ public class CustomOperatorMetadataRepositoryTest {
       "    ]\n" +
       "}";
   private static final String OUTPUT_CUSTOM_OPERATOR_DOC = "{\n" +
-      "    \"id\": \"Zm9vX29wZXJhdG9y\",\n" +
-      "    \"operatorId\": \"Zm9vX29wZXJhdG9y\",\n" +
+      "    \"id\": \"foo_operator\",\n" +
+      "    \"partitionKey\": \"foo_operator\",\n" +
       "    \"name\": \"foo_operator\",\n" +
       "    \"className\": \"HelloWorld\",\n" +
       "    \"description\": \"Used to print hello world\",\n" +
@@ -87,10 +87,10 @@ public class CustomOperatorMetadataRepositoryTest {
       "        }\n" +
       "    ]\n" +
       "}";
-  private static final String VALID_ID = "Zm9vX29wZXJhdG9y";
-  private static final String VALID_PARTITION_KEY = "Zm9vX29wZXJhdG9y";
-  private static final String INVALID_ID = "Zm9vX29wZXJhdG";
-  private static final String INVALID_PARTITION_KEY = "Zm9vX29wZXJhdG";
+  private static final String VALID_ID = "foo_operator";
+  private static final String VALID_PARTITION_KEY = "foo_operator";
+  private static final String INVALID_ID = "invalid_operator";
+  private static final String INVALID_PARTITION_KEY = "invalid_operator";
   private static final String REQUEST_CONTINUATION =
       "{\"token\":\"-RID:~O0wNANEhDQECAAAAAAAAAA==#RT:1#TRC:1#ISV:2#IEO:65551\",\n" +
       "\"range\":\"{\\\"min\\\":\\\"\\\",\\\"max\\\":\\\"FF\\\",\\\"isMinInclusive\\\":true,\n" +
@@ -196,7 +196,7 @@ public class CustomOperatorMetadataRepositoryTest {
         VALID_PARTITION_KEY, CustomOperatorDoc.class)).thenReturn(Optional.of(customOperator));
 
     CustomOperator returnedCustomOperator = customOperatorMetadataRepository
-        .getMetadataByCustomOperatorId(VALID_ID);
+        .getMetadataByCustomOperatorName(VALID_ID);
     CustomOperator expectedCustomOperator = objectMapper.readValue(OUTPUT_CUSTOM_OPERATOR,
         CustomOperator.class);
     verifyCustomOperator(returnedCustomOperator, expectedCustomOperator);
@@ -215,7 +215,7 @@ public class CustomOperatorMetadataRepositoryTest {
     boolean isException = false;
     try {
       CustomOperator returnedCustomOperator = customOperatorMetadataRepository
-          .getMetadataByCustomOperatorId(INVALID_ID);
+          .getMetadataByCustomOperatorName(INVALID_ID);
     } catch (CustomOperatorNotFoundException e) {
       isException = true;
     }

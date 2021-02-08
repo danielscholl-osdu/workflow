@@ -156,22 +156,22 @@ public class CustomOperatorServiceTest {
   @Test
   public void testGetOperatorByIdWithValidId() {
     final CustomOperator mockedCustomOperator = mock(CustomOperator.class);
-    when(customOperatorMetadataRepository.getMetadataByCustomOperatorId(VALID_OPERATOR_ID))
+    when(customOperatorMetadataRepository.getMetadataByCustomOperatorName(VALID_OPERATOR_ID))
         .thenReturn(mockedCustomOperator);
 
-    CustomOperator customOperator = customOperatorService.getOperatorById(VALID_OPERATOR_ID);
+    CustomOperator customOperator = customOperatorService.getOperatorByName(VALID_OPERATOR_ID);
 
     verify(customOperatorMetadataRepository, times(1))
-        .getMetadataByCustomOperatorId(VALID_OPERATOR_ID);
+        .getMetadataByCustomOperatorName(VALID_OPERATOR_ID);
     assertThat(customOperator, equalTo(mockedCustomOperator));
   }
 
   @Test
   public void testGetOperatorByIdWithInvalidId() {
-    when(customOperatorMetadataRepository.getMetadataByCustomOperatorId(INVALID_OPERATOR_ID))
+    when(customOperatorMetadataRepository.getMetadataByCustomOperatorName(INVALID_OPERATOR_ID))
         .thenThrow(new CustomOperatorNotFoundException("Not found"));
     Assertions.assertThrows(CustomOperatorNotFoundException.class, () -> {
-      customOperatorService.getOperatorById(INVALID_OPERATOR_ID);
+      customOperatorService.getOperatorByName(INVALID_OPERATOR_ID);
     });
   }
 
