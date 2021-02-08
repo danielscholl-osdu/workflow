@@ -61,7 +61,7 @@ include:
     file: "cloud-providers/aws.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "azure-workflow-service"
+    ref: "master"
     file: "cloud-providers/azure.yml"
 
 
