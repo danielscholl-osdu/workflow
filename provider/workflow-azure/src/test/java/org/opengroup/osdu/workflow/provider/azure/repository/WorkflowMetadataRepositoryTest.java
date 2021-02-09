@@ -41,7 +41,7 @@ public class WorkflowMetadataRepositoryTest {
       "    \"concurrentWorkflowRun\": 5,\n" +
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true,\n" +
-      "    \"workflowDetailContent\": \"sample-dag-content\"\n" +
+      "    \"dagContent\": \"sample-dag-content\"\n" +
       "    },\n" +
       "    \"creationTimestamp\": 1600144876028,\n" +
       "    \"createdBy\": \"user@email.com\",\n" +
@@ -70,7 +70,7 @@ public class WorkflowMetadataRepositoryTest {
       "    \"concurrentWorkflowRun\": 5,\n" +
       "    \"concurrentTaskRun\": 5,\n" +
       "    \"active\": true,\n" +
-      "    \"workflowDetailContent\": \"\"\n" +
+      "    \"dagContent\": \"\"\n" +
       "    },\n" +
       "    \"creationTimestamp\": 1600144876028,\n" +
       "    \"createdBy\": \"user@email.com\",\n" +

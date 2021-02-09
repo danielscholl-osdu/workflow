@@ -21,7 +21,7 @@ import java.util.Optional;
 @Component
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private static final String LOGGER_NAME = WorkflowMetadataRepository.class.getName();
-  private static final String KEY_WORKFLOW_DETAIL_CONTENT = "workflowDetailContent";
+  private static final String KEY_DAG_CONTENT = "dagContent";
 
   @Autowired
   private CosmosConfig cosmosConfig;
@@ -89,8 +89,8 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
     // This is to avoid conflicts. Only one combination of Id and partition key should exist.
     Map<String, Object> registrationInstructionForMetadata =
         new HashMap<>(workflowMetadata.getRegistrationInstructions());
-    String workflowDetailContent =
-        (String) registrationInstructionForMetadata.remove(KEY_WORKFLOW_DETAIL_CONTENT);
+    String dagContent =
+        (String) registrationInstructionForMetadata.remove(KEY_DAG_CONTENT);
 
     return WorkflowMetadataDoc.builder()
         .id(workflowMetadata.getWorkflowName())
@@ -101,7 +101,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
         .creationTimestamp(workflowMetadata.getCreationTimestamp())
         .version(workflowMetadata.getVersion())
         .isRegisteredByWorkflowService(
-            workflowDetailContent != null && !workflowDetailContent.isEmpty())
+            dagContent != null && !dagContent.isEmpty())
         .registrationInstructions(registrationInstructionForMetadata).build();
   }
 

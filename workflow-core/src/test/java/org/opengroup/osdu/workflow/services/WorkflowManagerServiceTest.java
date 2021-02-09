@@ -51,7 +51,7 @@ class WorkflowManagerServiceTest {
       "  \"workflowName\": \"HelloWorld\",\n" +
       "  \"description\": \"This is a test workflow\",\n" +
       "  \"registrationInstructions\": {\n" +
-      "    \"workflowDetailContent\": \"sample-dag-content\"\n" +
+      "    \"dagContent\": \"sample-dag-content\"\n" +
       "  }\n" +
       "}";
 
