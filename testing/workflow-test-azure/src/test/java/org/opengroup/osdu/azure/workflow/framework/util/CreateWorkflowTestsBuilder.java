@@ -46,7 +46,7 @@ public class CreateWorkflowTestsBuilder {
 
     Map<String, Object> registrationInstructions = new HashMap<>();
     registrationInstructions.put("dagName", workflowName);
-    registrationInstructions.put("workflowDetailContent", workflowContent);
+    registrationInstructions.put("dagContent", workflowContent);
     registrationInstructions.put("concurrentWorkflowRun", WORKFLOW_CONCURRENT_WORKFLOW_RUN);
     registrationInstructions.put("concurrentTaskRun", WORKFLOW_CONCURRENT_TASK_RUN);
     registrationInstructions.put("active", WORKFLOW_ACTIVE);

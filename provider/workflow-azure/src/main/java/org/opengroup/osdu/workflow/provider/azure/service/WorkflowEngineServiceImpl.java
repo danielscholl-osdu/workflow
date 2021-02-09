@@ -14,7 +14,6 @@ import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
-  private static final String KEY_WORKFLOW_DETAIL_CONTENT = "workflowDetailContent";
+  private static final String KEY_DAG_CONTENT = "dagContent";
 
   @Autowired
   private AirflowConfig airflowConfig;
@@ -66,9 +65,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
-    String workflowDetailContent = (String) registrationInstruction.get(KEY_WORKFLOW_DETAIL_CONTENT);
-    if(workflowDetailContent != null && !workflowDetailContent.isEmpty()) {
-      dagsFileShareStore.createFile(workflowDetailContent,
+    String dagContent = (String) registrationInstruction.get(KEY_DAG_CONTENT);
+    if(dagContent != null && !dagContent.isEmpty()) {
+      dagsFileShareStore.createFile(dagContent,
           getFileNameFromWorkflow(rq.getWorkflowName()));
     }
   }

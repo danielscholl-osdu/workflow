@@ -330,9 +330,9 @@ public class WorkflowEngineServiceImplTest {
         workflowEngineExecutionDate);
   }
 
-  private Map<String, Object> registrationInstructions(String workflowDefinition) {
+  private Map<String, Object> registrationInstructions(String dagContent) {
     Map<String, Object> res = new HashMap<>();
-    res.put("workflowDetailContent", workflowDefinition);
+    res.put("dagContent", dagContent);
     return res;
   }
 }
