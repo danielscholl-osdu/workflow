@@ -5,104 +5,65 @@
 * [Introduction](#introduction)
 * [System interactions](#system-interactions)
 * [Workflow API](#workflow-api)
-    * [POST /startWorkflow](#post-startworkflow)
-    * [POST /getStatus](#post-getstatus)
-    * [POST /updateWorkflowStatus](#post-updateworkflowstatus)
+    * [POST /v1/workflow](#post-v1workflow)
+    * [GET /v1/workflow](#get-v1workflow)
+    * [DELETE /v1/workflow/{workflow_name](#delete-v1workflowworkflow_name)
+    * [GET /v1/workflow/{workflow_name](#get-v1workflowworkflow_name)
+    * [POST /v1/workflow/{workflow_name}/workflowRun](#post-v1workflowworkflow_nameworkflowrun)
+    * [GET /v1/workflow/{workflow_name}/workflowRun](#get-v1workflowworkflow_nameworkflowrun)
+    * [GET /v1/workflow/{workflow_name}/workflowRun/{runId}](#get-v1workflowworkflow_nameworkflowrunrunid)
+    * [PUT /v1/workflow/{workflow_name}/workflowRun/{runId}](#put-v1workflowworkflow_nameworkflowrunrunid)
 * [Service Provider Interfaces](#workflow-service-provider-interfaces)
 * [GCP implementation](#gcp-implementation)
 * [Firestore](#firestore-collections)
 
 ## Introduction
 
-The OSDU R2 Workflow service is designed to start business processes in the system. In the OSDU R2
-prototype phase, the service only starts ingestion of OSDU data.
+The OSDU R3 Workflow service is designed to start business processes in the system. In the OSDU R3
+prototype phase, the service allows you to work with workflow metadata, supporting CRUD operations
+and also trigger workflow in airflow, get, delete and change the status of process startup records.
 
 The Workflow service provides a wrapper functionality around the Apache Airflow functions and is
 designed to carry out preliminary work with files before running the Airflow Directed Acyclic Graphs
 (DAGs) that will perform actual ingestion of OSDU data.
 
-In OSDU R2, depending on the types of data, workflow, and user, the Workflow service starts the
-necessary workflow such as well log ingestion or opaque ingestion.
-
 ## System interactions
 
-The Workflow service in the OSDU R2 Prototype defines the following workflows:
+The Workflow service in the OSDU R3 Prototype defines the following workflows:
 
 * Ingestion of new files
 * Delivery of an ingestion workflow status
 * Update of the workflow status
+* Work with workflows definition
+* Work with workflows run records
 
 ### Start ingestion
 
-The ingestion workflow starts by a call to the `/startWorkflow` API endpoint. The following diagram
-shows the workflow.
+The ingestion workflow starts by a call to the `/v1/workflow/{workflow_name}/workflowRun` API endpoint.
+The following diagram shows the workflow.
 
-![OSDU R2 WorkflowService startWorkflow](img/75542676-ef684080-5a28-11ea-93a3-c28ed13c1fe5.png)
+![OSDU R3 WorkflowService trigger Workflow](img/75542676-ef684080-5a28-11ea-93a3-c28ed13c1fe5.png)
 
-Upon a `/startWorkflow` request:
+Upon a `/v1/workflow/{workflow_name}/workflowRun` request:
 
 1. Validate the incoming request.
     * Verify the authorization token. Fail ingestion if the token is missing or invalid, and then
     respond with the `401 Unauthorized` status.
     * Verify the partition ID. Fail ingestion if the partition ID is missing, invalid or doesn't
     have assigned user groups, and then respond with the `400 Bad Request` status.
-    * Check that the workflow type is "ingest" or "osdu".
-    * Check that the data type is "well_log" or "opaque".
-        > The `DataType` property can actually be any string value. If the `DataType` value is not
-        > "well_log", then it's treated as the "opaque" data type.
-2. Query the database to obtain a DAG suitable for the current request. The Workflow service
-decides which DAG to run by the following three parameters:
-    * `WorkflowType`
-    * `DataType`
-    * `UserType`
-3. Submit a new ingestion job to the OSDU R2 Workflow Engine (Apache Airflow).
-4. Create a workflow data record in the database with the **submitted** status.
-5. Respond with the workflow ID to the Ingestion service.
-
-### Get workflow status
-
-Upon a `/getStatus` request:
-
-1. Validate the incoming request.
-    * Verify the authorization token. If the token is missing or invalid, respond with the `401
-    Unauthorized` status.
-    * Verify the partition ID. If the partition ID is missing, invalid or doesn't have assigned user
-    groups, respond with the `400 Bad Request` status.
-2. Query the database with the workflow ID received from the client.
-    * Respond with the **404 Not Found** status if the requested workflow ID isn't found.
-3. Return the workflow job status to the user or application.
-
-### Update workflow status
-
-In OSDU R2, the Opaque Ingestion DAG or the Manifest Ingestion DAG query the Workflow service to
-update the status of a workflow job. The ingestion workflow status can be set to **running**,
-**finished**, or **failed**.
-
-![OSDU R2 Workflow Status Update](img/77782134-77a92800-705f-11ea-92f0-b36f33e00fe0.png)
-
-Upon an `/updateWorkflowStatus` request:
-
-1. Validate the incoming request.
-    * Verify the authorization token. Fail workflow status update if the token is missing or
-    invalid, and then respond with the `401 Unauthorized` status.
-    * Verify the partition ID. Fail workflow status update if the partition ID is missing, invalid
-    or doesn't have assigned user groups, and then respond with the `400 Bad Request` status.
-    * Fail the request if the workflow ID or status is not provided.
-    * Fail the request if the workflow status is not **running**, **finished**, or **failed**.
-2. Update the workflow status in the database.
-    * Fail the update if the workflow ID is not found in the database.
-    * Fail the update if there's more than one workflow found by the workflow ID.
-    * Fail the update if the stored status and the incoming status are the same.
-3. Return the workflow ID and the workflow status to the OSDU R2 service or component that requested
-the update.
+2. Submit a new ingestion job to the OSDU R3 Workflow Engine (Apache Airflow).
+3. Create a workflow data record in the database with the **submitted** status.
+4. Respond with the workflow run ID to the Ingestion service.
 
 ## Workflow API
 
-The OSDU R2 Workflow API includes the following endpoints:
+The OSDU R3 Workflow API includes the following endpoints:
 
-* `/startWorkflow`, internal
-* `/getStatus`, external
-* `/updateWorkflowStatus`, internal
+* `/v1/workflow`, external (Get, Post)
+* `/v1/workflow/{workflow_name}`, external (Get, Delete)
+
+* `/v1/workflow/{workflow_name}/workflowRun`, external (Get, Post)
+* `/v1/workflow/{workflow_name}/workflowRun/{runId}`, external (Get, Put)
 
 General considerations related to querying the Workflow API:
 
@@ -112,39 +73,33 @@ General considerations related to querying the Workflow API:
 `"Partition-Id: "default_partition"`
 * The request and response Content Type is "application/json"
 
-### POST /startWorkflow
+### POST /v1/workflow
 
-The `/startWorkflow` API endpoint starts a new workflow. This endpoint closed for external requests.
-
-The `/startWorkflow` endpoint is a wrapper around the Airflow invocation, and is designed to
-reconfigure the default workflows. For each combination of the user, data, and workflow types, the
-API identifies a suitable DAG and then calls Airflow.
-
-For OSDU R2 Prototype, the API doesn't reconfigure the workflows and only queries the database to
-determine which DAG to run.
+Creates workflow definition with standard orchestrator operators.
 
 #### Request body
 
 | Property     | Type     | Description                                                     |
 | ------------ | -------- | --------------------------------------------------------------- |
-| WorkflowType | `String` | Type of workflow job to run &mdash; "osdu" or "ingest"          |
-| DataType     | `String` | Type of data to be ingested &mdash; "well_log" or "opaque"      |
-| Context      | `Object` | Data required to run a DAG, provided as list of key-value pairs |
-
-> The Context may include a file location, ACL and legal tags, and the Airflow run ID. The
-> **/startWorkflow API** passes the Context to Airflow without modifying it.
+| workflowName | `String` | Workflow name          |
+| registrationInstructions | `Object` | Data provided as list of key-value pairs |
+| description | `String` | Description |
 
 Request example:
 
 ```sh
-curl --location --request POST 'https://{path}/startWorkflow' \
+curl --location --request POST 'https://{path}/v1/workflow' \
     --header 'Authorization: Bearer {token}' \
     --header 'Data-Partition-Id: {assigned partition ID}' \
     --header 'Content-Type: application/json' \
     --data-raw '{
-        "WorkflowType": "ingest",
-        "DataType": "opaque",
-        "Context": {}
+        "workflowName": "string",
+        "registrationInstructions": {
+            "dagName": "osdu-default",
+            "dagContent": null,
+            "etc": "string"
+        },
+        "description": "string"
     }'
 ```
 
@@ -152,82 +107,242 @@ curl --location --request POST 'https://{path}/startWorkflow' \
 
 | Property   | Type     | Description                   |
 | ---------- | -------- | ----------------------------- |
-| WorkflowID | `String` | Unique ID of the workflow job |
+| workflowId | `String` | Workflow Id |
+| workflowName | `String` | Workflow name |
+| description | `String` | Workflow description |
+| createdBy | `String` | User Id who started the workflow |
+| creationTimestamp | `long` | Workflow creation date |
+| version | `String` | Workflow definitions version |
 
-### POST /getStatus
+### GET /v1/workflow
 
-The `/getStatus` API endpoint returns the current status of a workflow job. This endpoint is
-available for external requests.
-
-#### Request body
-
-| Property   | Type     | Description                 |
-| ---------- | -------- | --------------------------- |
-| WorkflowID | `String` | Unique ID of a workflow job |
+List all the workflows for the tenant.
 
 Request example:
 
 ```sh
-curl --location --request POST 'https://{path}/getStatus' \
+curl --location --request GET 'https://{path}/v1/workflow' \
     --header 'Authorization: Bearer {token}' \
     --header 'Data-Partition-Id: {assigned partition ID}' \
-    --header 'Content-Type: application/json' \
-    --data-raw '{
-        "WorkflowID": "2b905e77-7e04-4c04-8581-7b4c224164dd"
-    }'
+    --header 'Content-Type: application/json'
 ```
+
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| prefix | Filter workflow names which start with the full prefix specified. |
 
 #### Response body
 
-If the workflow ID is found in the database, the following response is returned to the user.
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Workflow Id |
+| workflowName | `String` | Workflow name |
+| description | `String` | Workflow description |
+| createdBy | `String` | User Id who started the workflow |
+| creationTimestamp | `long` | Workflow creation date |
+| version | `String` | Workflow definitions version |
 
-| Property | Type     | Description                                                                  |
-| -------- | -------- | ---------------------------------------------------------------------------- |
-| Status   | `String` | Current status of a workflow &mdash; submitted, running, finished, or failed |
+### DELETE /v1/workflow/{workflow_name}
 
-If the workflow ID isn't found in the database, the `404 Not Found` status is returned.
-
-### POST /updateWorkflowStatus
-
-The `/updateWorkflowStatus` API endpoint updates the status of a workflow job. This endpoint is not
-available for external requests. The endpoint is necesasry to let Apache Airflow DAGs update the
-workflow status.
-
-#### Request body
-
-| Property   | Type     | Description                                      |
-| ---------- | -------- | ------------------------------------------------ |
-| WorkflowID | `String` | Unique ID of a workflow that needs to be updated |
-| Status     | `String` | New status of the workflow                       |
+Delete a workflow by it's name.
 
 Request example:
 
 ```sh
-curl --location --request POST 'https://{path}/updateWorkflowStatus' \
+curl --location --request DELETE 'https://{path}/v1/workflow/airflow_name' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'Data-Partition-Id: {assigned partition ID}' \
+    --header 'Content-Type: application/json'
+```
+
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| workflow_name | Unique name of the Workflow to be deleted. |
+
+#### Response
+
+Response with 204 code
+
+### GET /v1/workflow/{workflow_name}
+
+Get complete details for a workflow.
+
+Request example:
+
+```sh
+curl --location --request GET 'https://{path}/v1/workflow/{workflow_name}' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'Data-Partition-Id: {assigned partition ID}' \
+    --header 'Content-Type: application/json'
+```
+
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| workflow_name | Name of the workflow. |
+
+#### Response body
+
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Workflow Id |
+| workflowName | `String` | Workflow name |
+| description | `String` | Workflow description |
+| createdBy | `String` | User Id who started the workflow |
+| creationTimestamp | `long` | Workflow creation date |
+| version | `String` | Workflow definitions version |
+
+### POST /v1/workflow/{workflow_name}/workflowRun
+
+The `/v1/workflow/{workflow_name}/workflowRun` API endpoint starts a new workflow.
+
+For OSDU R3 Prototype, the API doesn't reconfigure the workflows and only queries the database to
+determine which DAG to run.
+
+#### Request body
+
+| Property     | Type     | Description                                                     |
+| ------------ | -------- | --------------------------------------------------------------- |
+| runId | `String` | Workflow start run Id          |
+| executionContext | `Object` | Data required to run a DAG, provided as list of key-value pairs |
+
+> The Context may include a file location, ACL and legal tags, and the Airflow run ID. The
+> **/v1/workflow/{workflow_name}/workflowRun API** passes the Context to Airflow without modifying it.
+
+Request example:
+
+```sh
+curl --location --request POST 'https://{path}/v1/workflow/{workflow_name}/workflowRun' \
     --header 'Authorization: Bearer {token}' \
     --header 'Data-Partition-Id: {assigned partition ID}' \
     --header 'Content-Type: application/json' \
     --data-raw '{
-        "WorkflowID": "2b905e77-7e04-4c04-8581-7b4c224164dd",
-        "Status": "finished"
-    }'
+      "runId": "string",
+      "executionContext": {
+        "key1": "value1"
+      }
+  }'
 ```
 
 #### Response body
 
-| Property   | Type     | Description                              |
-| ---------- | -------- | ---------------------------------------- |
-| WorkflowID | `String` | Unique ID of a workflow that was updated |
-| Status     | `String` | The latest status of the workflow        |
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Unique ID of the workflow job |
+| runId | `String` | Unique ID of the workflow run |
+| startTimestamp | `long` | Workflow run start date |
+| endTimestamp | `long` | Workflow run end date |
+| status | `String` | Workflow status |
+| submittedBy | `String` | User Id who started the workflow |
 
-Response body example:
 
-```json
-{
-    "WorkflowID": "2b905e77-7e04-4c04-8581-7b4c224164dd",
-    "Status": "finished"
-}
+
+
+
+
+
+### GET /v1/workflow/{workflow_name}/workflowRun
+
+Get all run instances for a workflow.
+
+Request example:
+
+```sh
+curl --location --request GET 'https://{path}/v1/workflow/{workflow_name}/workflowRun' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'Data-Partition-Id: {assigned partition ID}' \
+    --header 'Content-Type: application/json'
 ```
+
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| workflow_name | Name of the workflow. |
+| prefix | A prefix used when generating the runId of the workflow run. |
+| startDate | The start date where this call should start creating workflow runs from (inclusive) |
+| endDate | The end date where this call should stop creating workflow runs at (inclusive) |
+| limit | The maximum number of workflow runs to create in a single request. |
+
+#### Response body
+
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Unique ID of the workflow job |
+| runId | `String` | Unique ID of the workflow run |
+| startTimestamp | `long` | Workflow run start date |
+| endTimestamp | `long` | Workflow run end date |
+| status | `String` | Workflow status |
+| submittedBy | `String` | User Id who started the workflow |
+
+### GET /v1/workflow/{workflow_name}/workflowRun/{runId}
+
+Get details for a speciffic workflow run instance.
+
+Request example:
+
+```sh
+curl --location --request GET 'https://{path}/v1/workflow/{workflow_name}/workflowRun/{runId}' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'Data-Partition-Id: {assigned partition ID}' \
+    --header 'Content-Type: application/json'
+```
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| workflow_name | Name of the workflow. |
+| runId  | Run id for the workfkow. |
+
+#### Response body
+
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Unique ID of the workflow job |
+| runId | `String` | Unique ID of the workflow run |
+| startTimestamp | `long` | Workflow run start date |
+| endTimestamp | `long` | Workflow run end date |
+| status | `String` | Workflow status |
+| submittedBy | `String` | User Id who started the workflow |
+
+### PUT /v1/workflow/{workflow_name}/workflowRun/{runId}
+
+Update the workflow run instance.
+
+Request example:
+
+```sh
+curl --location --request PUT 'https://{path}/v1/workflow/{workflow_name}/workflowRun/{runId}' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'Data-Partition-Id: {assigned partition ID}' \
+    --header 'Content-Type: application/json'\
+    --data-raw '{
+        "status": "INPROGRESS"
+    }'
+```
+
+#### Parameters
+
+| Name | Description                   |
+| ---------- | ----------------------------- |
+| workflow_name | Name of the workflow. |
+| runId  | Run id for the workfkow. |
+
+#### Response body
+
+| Property   | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| workflowId | `String` | Unique ID of the workflow job |
+| runId | `String` | Unique ID of the workflow run |
+| startTimestamp | `long` | Workflow run start date |
+| endTimestamp | `long` | Workflow run end date |
+| status | `String` | Workflow status |
+| submittedBy | `String` | User Id who started the workflow |
 
 ## Workflow Service Provider Interfaces
 
@@ -235,14 +350,12 @@ The Workflow service has several Service Provider Interfaces that the classes ne
 
 | Interface                   | Obligatory / Optional   | Path                                                                         |
 | --------------------------- | ----------------------- | ---------------------------------------------------------------------------- |
-| AuthenticationService       | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/AuthenticationService`       |
-| IngestionStrategyRepository | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyRepository` |
-| IngestionStrategyService    | Optional to implement   | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
-| SubmitIngestService         | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
-| ValidationService           | Optional to implement   | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
-| WorkflowService             | Optional to implement   | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
-| WorkflowStatusRepository    | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
-| WorkflowStatusService       | Optional to implement   | `workflow-core/src/main/.../provider/interfaces/IngestionStrategyService`    |
+| IAuthenticationService      | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IAuthenticationService`       |
+| IWorkflowEngineService      | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowEngineService`       |
+| IWorkflowManagerService     | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowManagerService`       |
+| IWorkflowMetadataRepository | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowMetadataRepository`       |
+| IWorkflowRunRepository      | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunRepository`       |
+| IWorkflowRunService         | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunService`       |
 
 ## GCP implementation
 

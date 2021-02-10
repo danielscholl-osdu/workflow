@@ -1,10 +1,12 @@
 # workflow-gcp
 
-The OSDU R2 Workflow service is designed to start business processes in the system. In the OSDU R2 prototype phase, the service only starts ingestion of OSDU data.
+The OSDU R3 Workflow service is designed to start business processes in the system. In the OSDU R3
+prototype phase, the service allows you to work with workflow metadata, supporting CRUD operations
+and also trigger workflow in airflow, get, delete and change the status of process startup records.
 
-The Workflow service provides a wrapper functionality around the Apache Airflow functions and is designed to carry out preliminary work with files before running the Airflow Directed Acyclic Graphs (DAGs) that will perform actual ingestion of OSDU data.
-
-In OSDU R2, depending on the types of data, workflow, and user, the Workflow service starts the necessary workflow such as well log ingestion or opaque ingestion.
+The Workflow service provides a wrapper functionality around the Apache Airflow functions and is
+designed to carry out preliminary work with files before running the Airflow Directed Acyclic Graphs
+(DAGs) that will perform actual ingestion of OSDU data.
 
 ## Running Locally
 
