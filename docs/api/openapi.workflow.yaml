@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: |
-    Workflow Service API is a wrapper API on existing orchestrator services (ariflow) defined in way which suits the domain workflow needs.Operational tasks like starting,stopping, pausing etc will be part of this API. Also creation and maintenance will be responsilbilities of this API. 
+    Workflow Service API is a wrapper API on existing orchestrator services (ariflow) defined in way which suits the domain workflow needs.Operational tasks like starting,stopping, pausing etc will be part of this API. Also creation and maintenance will be responsilbilities of this API.
 
     ## Key Points:
 
@@ -10,7 +10,7 @@ info:
     **Workflow Run** - Workflow Run is single execution of a workflow. For example, a CSV workflow executed to ingest a CSV is CSV workflow run.
     In case of Airflow as orchestrator, a workflow run will be equivalent to one dag run.
 
-    Each instance of workflow run is represented by unique run id. (`runId`). 
+    Each instance of workflow run is represented by unique run id. (`runId`).
   version: 2.0.5
   title: Workflow Service API
   contact:
@@ -85,7 +85,7 @@ paths:
           description: 'Filter workflow names which start with  the full prefix specified.'
           required: false
           schema:
-            type: string   
+            type: string
       responses:
         '200':
           content:
@@ -124,8 +124,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'    
-  
+                $ref: '#/components/schemas/error'
+
   /v1/workflow/{workflow_name}:
     delete:
       tags:
@@ -186,7 +186,7 @@ paths:
           required: true
           schema:
             type: string
-        
+
       responses:
         '200':
           description: Workflow Details.
@@ -242,7 +242,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/workflowTriggerRequest' 
+              $ref: '#/components/schemas/workflowTriggerRequest'
       responses:
         '200':
           description: Workflow successully triggered.
@@ -316,13 +316,13 @@ paths:
           description: 'The maximum number of workflow runs to create in a single request. Maximum is 500.'
           required: false
           schema:
-            type: integer   
+            type: integer
         - name: cursor
           in: query
           description: 'Cursor for subsequent request.'
           required: false
           schema:
-            type: string   
+            type: string
         - name: partial
           in: query
           description: 'Whether or not a partial batch can be created. If true, and the number of workflow runs that would be created between the start and end exceeds the limit, no workflow runs will be created.'
@@ -334,7 +334,7 @@ paths:
           description: 'JSON configuration added to the Workflow run conf attribute'
           required: false
           schema:
-            type: string   
+            type: string
       responses:
         '200':
           content:
@@ -374,7 +374,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-    
+
   /v1/workflow/{workflow_name}/workflowRun/{runId}:
     get:
       tags:
@@ -450,7 +450,7 @@ paths:
           description: Run id for the worfkow.
           required: true
           schema:
-            type: string   
+            type: string
       requestBody:
         content:
           application/json:
@@ -492,9 +492,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'                        
-  
-  
+                $ref: '#/components/schemas/error'
+
+
 components:
   securitySchemes:
     bearer:
@@ -515,8 +515,8 @@ components:
             key1:
               type: string
               example: value1
-  
-          description: Map to configure workflow speciffic key value pairs.    
+
+          description: Map to configure workflow speciffic key value pairs.
     workflow:
       type: object
       title: Workflow
@@ -543,17 +543,17 @@ components:
               example: osdu-default
             dagContent:
               type: string
-              example: 
+              example:
             etc:
               type: string
         description:
           type: string
           description: Description of workflow provided by user at time of creation of workflow.
-        createdby:  
+        createdby:
           readOnly: true
           type: string
           description: System captured user info who created workflow.
-        creationTimestamp: 
+        creationTimestamp:
           readOnly: true
           type: number
           description: System date of creation of workflow.Epoch tiemstamp.
@@ -592,12 +592,12 @@ components:
             - "FAILED"
             - "SUBMITTED"
           title: "status"
-          type: "string" 
-        submittedBy: 
+          type: "string"
+        submittedBy:
           readOnly: true
           type: string
           description: System captured user details which triggered the  run.
-    
+
     error:
       title: Error
       type: object
