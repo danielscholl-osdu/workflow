@@ -1,14 +1,9 @@
 variables:
   # --- osdu gcp specific variables ---
-  OSDU_GCP_BUILD_SUBDIR: provider/file-gcp-datastore
-  # OSDU_GCP_INT_TEST_SUBDIR: testing/file-test-core
   OSDU_GCP_SERVICE: workflow
   OSDU_GCP_VENDOR: gcp
-  OSDU_GCP_NAMESPACE: osdu-namespace
   OSDU_GCP_APPLICATION_NAME: os-workflow
-  OSDU_GCP_ENV_VARS: SPRING_CLOUD_GCP_DATASTORE_NAMESPACE=$OSDU_GCP_NAMESPACE,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR
-  OSDU_GCP_ENVIRONMENT: dev
-  OSDU_GCP_PORT: 8080
+  OSDU_GCP_ENV_VARS: OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_URL,OSDU_ENTITLEMENTS_APPKEY=$OSDU_GCP_ENTITLEMENTS_APPKEY,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR
   # --- end of osdu gcp specific variables ---
 
   IBM_BUILD_SUBDIR: provider/workflow-ibm
@@ -24,9 +19,7 @@ variables:
   AZURE_SERVICE: ingestion-workfow
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure
-
   # End azure specific variables
-
 
 include:
   - project: "osdu/platform/ci-cd-pipelines"
@@ -63,7 +56,3 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
     file: "cloud-providers/azure.yml"
-
-
-osdu-gcp-test:
-  allow_failure: false
