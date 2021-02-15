@@ -20,6 +20,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
@@ -125,6 +126,9 @@ class WorkflowRunServiceTest {
 
   @Mock
   private IWorkflowEngineService workflowEngineService;
+
+  @Mock
+  private AuditLogger auditLogger;
 
   @InjectMocks
   private WorkflowRunServiceImpl workflowRunService;
