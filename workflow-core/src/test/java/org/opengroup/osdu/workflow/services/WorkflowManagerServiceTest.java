@@ -15,6 +15,7 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
@@ -75,6 +76,9 @@ class WorkflowManagerServiceTest {
 
   @Mock
   private IWorkflowRunService workflowRunService;
+
+  @Mock
+  private AuditLogger auditLogger;
 
   @InjectMocks
   private WorkflowManagerServiceImpl workflowManagerService;

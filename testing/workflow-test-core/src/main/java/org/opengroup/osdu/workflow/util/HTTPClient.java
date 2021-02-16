@@ -4,6 +4,7 @@ import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PA
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
 import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATION_ID;
 import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_DATA_PARTITION_ID;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_USER;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -89,6 +90,7 @@ public abstract class HTTPClient {
 	public Map<String, String> getCommonHeader() {
 		Map<String, String> headers = new HashMap<>();
 		headers.put(HEADER_DATA_PARTITION_ID, getEnvironmentVariableOrDefaultKey(DEFAULT_DATA_PARTITION_ID_TENANT1));
+		headers.put(HEADER_USER, "testUser");
 		return headers;
 	}
 
