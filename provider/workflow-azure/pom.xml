@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>os-workflow</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -32,10 +32,10 @@
   <properties>
     <azure.version>2.1.7</azure.version>
     <osdu.corelibazure.version>0.0.56</osdu.corelibazure.version>
-    <azure.appservice.resourcegroup></azure.appservice.resourcegroup>
-    <azure.appservice.plan></azure.appservice.plan>
-    <azure.appservice.appname></azure.appservice.appname>
-    <azure.appservice.subscription></azure.appservice.subscription>
+    <azure.appservice.resourcegroup />
+    <azure.appservice.plan />
+    <azure.appservice.appname />
+    <azure.appservice.subscription />
   </properties>
 
   <dependencyManagement>
@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>

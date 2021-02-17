@@ -23,8 +23,8 @@ public interface ICustomOperatorService {
 
   /**
    * Get registered custom operator filtered by operator id
-   * @param id Custom operator id.
+   * @param operatorName Custom operator name.
    * @return  Custom operator information for the specified custom operator id.
    */
-  CustomOperator getOperatorById(String id);
+  CustomOperator getOperatorByName(String operatorName);
 }

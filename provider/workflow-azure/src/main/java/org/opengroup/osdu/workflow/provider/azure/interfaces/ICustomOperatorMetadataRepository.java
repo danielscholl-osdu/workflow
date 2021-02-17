@@ -14,10 +14,10 @@ public interface ICustomOperatorMetadataRepository {
 
   /**
    * Get custom operator metadata by custom operator name/id.
-   * @param id custom operator id.
+   * @param operatorName custom operator name.
    * @return Custom Operator object associated to given id.
    */
-  CustomOperator getMetadataByCustomOperatorId(String id);
+  CustomOperator getMetadataByCustomOperatorName(String operatorName);
 
   /**
    * Get all custom operators metadata which are created.

@@ -1,18 +1,6 @@
-/**
- * Copyright 2020 IBM Corp. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* Licensed Materials - Property of IBM              */
+/* (c) Copyright IBM Corp. 2020. All Rights Reserved.*/
+
 
 package org.opengroup.osdu.workflow.provider.ibm.security;
 
@@ -31,13 +19,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-            .antMatchers("/v1/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**").permitAll()
-            .anyRequest().authenticated().and().oauth2ResourceServer().jwt();
+            	.antMatchers("/v1/api-docs",
+		            "/configuration/ui",
+		            "/swagger-resources/**",
+		            "/configuration/security",
+		            "/swagger-ui.html",
+		            "/swagger",
+		            "/webjars/**",
+		            "/liveness_check",
+		            "/readiness_check").permitAll()
+            	.anyRequest()
+            		.authenticated()
+            		.and()
+            	.oauth2ResourceServer().jwt();
     }
 }
 

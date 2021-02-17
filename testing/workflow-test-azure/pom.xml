@@ -15,21 +15,19 @@
   limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>workflow-test</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
     <groupId>org.opengroup.osdu.workflow</groupId>
     <artifactId>workflow-test-azure</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -38,12 +36,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.main.basedir>${project.basedir}</project.main.basedir>
         <jackson.version>2.10.1</jackson.version>
+        <skipTests>false</skipTests>
+        <test.data.file.name>testData.json</test.data.file.name>
+        <test.data.directory>${project.build.directory}</test.data.directory>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.opengroup.osdu</groupId>
             <artifactId>workflow-test-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -56,11 +57,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-      <dependency>
-        <groupId>org.opengroup.osdu</groupId>
-        <artifactId>workflow-test-core</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-      </dependency>
 
         <!-- Tests -->
         <dependency>
@@ -117,34 +113,80 @@
         <artifactId>os-core-common</artifactId>
         <version>0.3.5</version>
       </dependency>
+      <dependency>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>2.3.30</version>
+      </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.4.2</version>
-                <executions>
-                    <execution>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>**/workflow</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>pre-integration-test</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
                 <configuration>
-                    <trimStackTrace>false</trimStackTrace>
+                  <skip>${skipTests}</skip>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-DTEST_DATA_DIRECTORY=${test.data.directory}</argument>
+                    <argument>-DTEST_DATA_FILE_NAME=${test.data.file.name}</argument>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>org.opengroup.osdu.azure.workflow.RunPreIntegrationSetup</argument>
+                  </arguments>
+                  <classpathScope>test</classpathScope>
                 </configuration>
-            </plugin>
+              </execution>
+              <execution>
+                <id>post-integration-test</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <skip>${skipTests}</skip>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-DTEST_DATA_DIRECTORY=${test.data.directory}</argument>
+                    <argument>-DTEST_DATA_FILE_NAME=${test.data.file.name}</argument>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>org.opengroup.osdu.azure.workflow.RunPostIntegrationTeardown</argument>
+                  </arguments>
+                  <classpathScope>test</classpathScope>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <skipITs>${skipTests}</skipITs>
+              <argLine>-DTEST_DATA_DIRECTORY=${test.data.directory} -DTEST_DATA_FILE_NAME=${test.data.file.name}</argLine>
+              <includes>
+                <include>**/RunTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
         </plugins>
     </build>
 </project>

@@ -1,6 +1,7 @@
 package org.opengroup.osdu.workflow.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
@@ -25,7 +27,7 @@ import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedS
 @Component
 public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private static final String KEY_RUN_ID = "run_id";
-  private static final String KEY_WORKFLOW_ID = "workflow_id";
+  private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
   private static final String KEY_AUTH_TOKEN = "authToken";
@@ -44,6 +46,9 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   @Autowired
   private IWorkflowEngineService workflowEngineService;
 
+  @Autowired
+  private AuditLogger auditLogger;
+
   @Override
   public WorkflowRunResponse triggerWorkflow(final String workflowName, final TriggerWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
@@ -51,9 +56,10 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
 
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName);
-    final Map<String, Object> context = createWorkflowPayload(workflowId, runId, dpsHeaders.getCorrelationId(), request);
+    final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
+    auditLogger.workflowRunEvent(Collections.singletonList(request.toString()));
     return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
   }
 
@@ -130,13 +136,13 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return workflowRuns;
   }
 
-  private Map<String, Object> createWorkflowPayload(final String workflowId,
+  private Map<String, Object> createWorkflowPayload(final String workflowName,
                                                     final String runId,
                                                     final String correlationId,
                                                     final TriggerWorkflowRequest request) {
     final Map<String, Object> payload = new HashMap<>();
     payload.put(KEY_RUN_ID, runId);
-    payload.put(KEY_WORKFLOW_ID, workflowId);
+    payload.put(KEY_WORKFLOW_NAME, workflowName);
     payload.put(KEY_AUTH_TOKEN, dpsHeaders.getAuthorization());
     payload.put(KEY_CORRELATION_ID, correlationId);
     payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));

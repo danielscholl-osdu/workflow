@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CustomOperatorDoc {
   private String id;
-  private String operatorId;
+  private String partitionKey;
   private String name;
   private String className;
   private String description;

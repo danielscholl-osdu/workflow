@@ -44,16 +44,16 @@ public class CustomOperatorMetadataRepository implements ICustomOperatorMetadata
     final CustomOperatorDoc customOperatorDoc = buildCustomOperatorDoc(customOperator);
     try {
       cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-          cosmosConfig.getCustomOperatorCollection(), customOperatorDoc.getOperatorId(),
+          cosmosConfig.getCustomOperatorCollection(), customOperatorDoc.getPartitionKey(),
           customOperatorDoc);
       return buildCustomOperator(customOperatorDoc);
     } catch (AppException e) {
       if(e.getError().getCode() == 409) {
         final String errorMessage = String.format(
             "Custom operator with name %s and id %s already exists", customOperatorDoc.getName(),
-            customOperatorDoc.getOperatorId());
+            customOperatorDoc.getName());
         logger.error(errorMessage, e);
-        throw new ResourceConflictException(customOperatorDoc.getOperatorId(), errorMessage);
+        throw new ResourceConflictException(customOperatorDoc.getName(), errorMessage);
       } else {
         throw e;
       }
@@ -61,18 +61,18 @@ public class CustomOperatorMetadataRepository implements ICustomOperatorMetadata
   }
 
   @Override
-  public CustomOperator getMetadataByCustomOperatorId(String id) {
+  public CustomOperator getMetadataByCustomOperatorName(String operatorName) {
     final Optional<CustomOperatorDoc> customOperatorDoc =
         cosmosStore.findItem(dpsHeaders.getPartitionId(),
             cosmosConfig.getDatabase(),
             cosmosConfig.getCustomOperatorCollection(),
-            id,
-            id,
+            operatorName,
+            operatorName,
             CustomOperatorDoc.class);
     if (customOperatorDoc.isPresent()) {
       return buildCustomOperator(customOperatorDoc.get());
     } else {
-      final String errorMessage = String.format("Custom operator with id %s not found", id);
+      final String errorMessage = String.format("Custom operator with id %s not found", operatorName);
       logger.error(LOGGER_NAME, errorMessage);
       throw new CustomOperatorNotFoundException(errorMessage);
     }
@@ -97,12 +97,9 @@ public class CustomOperatorMetadataRepository implements ICustomOperatorMetadata
   }
 
   private CustomOperatorDoc buildCustomOperatorDoc(final CustomOperator customOperator) {
-    String customOperatorId = Base64.getUrlEncoder().encodeToString(customOperator.getName()
-        .getBytes());
-
     return CustomOperatorDoc.builder()
-        .id(customOperatorId)
-        .operatorId(customOperatorId)
+        .id(customOperator.getName())
+        .partitionKey(customOperator.getName())
         .name(customOperator.getName())
         .className(customOperator.getClassName())
         .description(customOperator.getDescription())
@@ -113,7 +110,7 @@ public class CustomOperatorMetadataRepository implements ICustomOperatorMetadata
   }
 
   private CustomOperator buildCustomOperator(final CustomOperatorDoc customOperatorDoc) {
-    return CustomOperator.builder().id(customOperatorDoc.getOperatorId())
+    return CustomOperator.builder().id(customOperatorDoc.getId())
         .name(customOperatorDoc.getName())
         .className(customOperatorDoc.getClassName()).description(customOperatorDoc.getDescription())
         .createdAt(customOperatorDoc.getCreatedAt()).createdBy(customOperatorDoc.getCreatedBy())

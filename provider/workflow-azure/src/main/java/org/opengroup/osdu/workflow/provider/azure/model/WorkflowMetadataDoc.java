@@ -2,6 +2,8 @@ package org.opengroup.osdu.workflow.provider.azure.model;
 
 import lombok.*;
 
+import java.util.Map;
+
 @Builder
 @Getter
 @NonNull
@@ -10,13 +12,12 @@ import lombok.*;
 @EqualsAndHashCode
 public class WorkflowMetadataDoc {
   private String id;
-  private String workflowId;
+  private String partitionKey;
   private String workflowName;
   private String description;
-  private int concurrentWorkflowRun;
-  private int concurrentTaskRun;
-  private boolean active;
   private String createdBy;
-  private Long creationDate;
+  private Long creationTimestamp;
   private Long version;
+  private Boolean isRegisteredByWorkflowService;
+  private Map<String, Object> registrationInstructions;
 }

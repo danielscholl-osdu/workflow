@@ -138,7 +138,7 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
 
     return ClientResponse.builder()
         .contentType(String.valueOf(response.getType()))
-        .responseBody(response.toString())
+        .responseBody(response.getEntity(String.class))
         .status(HttpStatus.OK)
         .statusCode(response.getStatus())
         .statusMessage(response.getStatusInfo().getReasonPhrase())

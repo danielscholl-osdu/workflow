@@ -6,11 +6,13 @@ import org.mockito.Mock;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
+import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
 import org.opengroup.osdu.workflow.exception.handler.RestExceptionHandler;
+import org.opengroup.osdu.workflow.model.UpdateWorkflowRunRequest;
+import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
 import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
-import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +33,13 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -67,6 +71,27 @@ class WorkflowRunMvcTest {
       "  \"status\": \"submitted\",\n" +
       "  \"submittedBy\": \"user@mail.com\"\n" +
       "}";
+  private static final String WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA = "{\n" +
+      "  \"status\": \"finished\"\n" +
+      "}";
+  private static final String WORKFLOW_RUN_UPDATE_RUNNING_STATUS_REQUEST_DATA = "{\n" +
+      "  \"status\": \"running\"\n" +
+      "}";
+  private static final String STATUS_FINISHED_WORKFLOW_RUN_RESPONSE = "{\n" +
+      "  \"workflowId\" : \"SGVsbG9Xb3JsZA==\",\n" +
+      "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"startTimeStamp\": 1607430997362,\n" +
+      "  \"endTimeStamp\": 1607936756808,\n" +
+      "  \"status\": \"finished\",\n" +
+      "  \"submittedBy\": \"user@email.com\"\n" +
+      "}";
+  private static final String STATUS_RUNNING_WORKFLOW_RUN_RESPONSE = "{\n" +
+      "  \"workflowId\" : \"SGVsbG9Xb3JsZA==\",\n" +
+      "  \"runId\": \"d13f7fd0-d27e-4176-8d60-6e9aad86e347\",\n" +
+      "  \"startTimeStamp\": 1607430997362,\n" +
+      "  \"status\": \"running\",\n" +
+      "  \"submittedBy\": \"user@email.com\"\n" +
+      "}";
 
   @Autowired
   private MockMvc mockMvc;
@@ -88,10 +113,10 @@ class WorkflowRunMvcTest {
   void testTriggerWorkflowApiWithSuccess() throws Exception {
     final TriggerWorkflowRequest request = mapper
         .readValue(TRIGGER_WORKFLOW_REQUEST, TriggerWorkflowRequest.class);
-    final WorkflowRunResponse workflowRun = mapper
+    final WorkflowRunResponse workflowRunResponse = mapper
         .readValue(WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
     when(workflowRunService.triggerWorkflow(eq(WORKFLOW_NAME), eq(request)))
-        .thenReturn(workflowRun);
+        .thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
         post(TRIGGER_WORKFLOW_ENDPOINT)
@@ -105,15 +130,15 @@ class WorkflowRunMvcTest {
     verify(authorizationService, times(1)).authorizeAny(any(), any());
     final WorkflowRunResponse response = mapper
         .readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
-    assertThat(workflowRun, equalTo(response));
+    assertThat(workflowRunResponse, equalTo(response));
   }
 
   @Test
   void testGetWorkflowRunApiWithSuccess() throws Exception {
-    final WorkflowRunResponse workflowRun = mapper
+    final WorkflowRunResponse workflowRunResponse = mapper
         .readValue(WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
     when(workflowRunService.getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID)))
-        .thenReturn(workflowRun);
+        .thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     final MvcResult mvcResult = mockMvc.perform(
         get("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
@@ -126,8 +151,85 @@ class WorkflowRunMvcTest {
     verify(authorizationService).authorizeAny(any(), any());
     final WorkflowRunResponse responseWorkflowRun =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
-    assertThat(workflowRun, equalTo(responseWorkflowRun));
+    assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
 
+  }
+
+  @Test
+  public void testUpdateWorkflowRunStatusApiWithSuccessTypeRunning() throws Exception {
+    final WorkflowRunResponse workflowRunResponse = mapper
+        .readValue(STATUS_RUNNING_WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
+    final UpdateWorkflowRunRequest request = mapper
+        .readValue(WORKFLOW_RUN_UPDATE_RUNNING_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
+    when(workflowRunService.updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()))).thenReturn(workflowRunResponse);
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    final MvcResult mvcResult = mockMvc.perform(
+        put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(getHttpHeaders())
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            .content(WORKFLOW_RUN_UPDATE_RUNNING_STATUS_REQUEST_DATA))
+        .andExpect(status().isOk())
+        .andReturn();
+    verify(workflowRunService).updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR));
+    final WorkflowRunResponse responseWorkflowRun =
+        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
+    assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
+  }
+
+  @Test
+  public void testUpdateWorkflowRunStatusApiWithSuccessTypeFinished() throws Exception {
+    final WorkflowRunResponse workflowRunResponse = mapper
+        .readValue(STATUS_FINISHED_WORKFLOW_RUN_RESPONSE, WorkflowRunResponse.class);
+    final UpdateWorkflowRunRequest request = mapper
+        .readValue(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
+    when(workflowRunService.updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()))).thenReturn(workflowRunResponse);
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    final MvcResult mvcResult = mockMvc.perform(
+        put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(getHttpHeaders())
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            .content(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA))
+        .andExpect(status().isOk())
+        .andReturn();
+    verify(workflowRunService).updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR));
+    final WorkflowRunResponse responseWorkflowRun =
+        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
+    assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
+  }
+
+  @Test
+  public void testUpdateWorkflowRunStatusApiWithFailure() throws Exception {
+    final UpdateWorkflowRunRequest request = mapper
+        .readValue(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
+    when(workflowRunService.updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()))).thenThrow(new WorkflowRunCompletedException(WORKFLOW_NAME,RUN_ID));
+    when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    final MvcResult mvcResult = mockMvc.perform(
+        put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(getHttpHeaders())
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            .content(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA))
+        .andExpect(status().isBadRequest())
+        .andReturn();
+    verify(workflowRunService).updateWorkflowRunStatus(eq(WORKFLOW_NAME), eq(RUN_ID),
+        eq(request.getStatus()));
+    verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
+        eq(WorkflowRole.CREATOR));
+    assertTrue(mvcResult.getResolvedException() instanceof WorkflowRunCompletedException);
   }
 
   private HttpHeaders getHttpHeaders() {
