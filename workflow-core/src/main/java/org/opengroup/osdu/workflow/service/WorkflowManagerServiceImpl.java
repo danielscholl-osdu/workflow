@@ -1,8 +1,10 @@
 package org.opengroup.osdu.workflow.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
@@ -30,12 +32,16 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   @Autowired
   private IWorkflowRunService workflowRunService;
 
+  @Autowired
+  private AuditLogger auditLogger;
+
   @Override
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
+    auditLogger.workflowCreateEvent(Collections.singletonList(savedMetadata.toString()));
     return savedMetadata;
   }
 
@@ -51,6 +57,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
     WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName);
     workflowEngineService.deleteWorkflow(rq);
     workflowMetadataRepository.deleteWorkflow(workflowName);
+    auditLogger.workflowDeleteEvent(Collections.singletonList(workflowName));
   }
 
   @Override
