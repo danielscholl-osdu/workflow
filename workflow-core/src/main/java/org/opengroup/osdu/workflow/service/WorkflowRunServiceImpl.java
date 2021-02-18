@@ -1,6 +1,7 @@
 package org.opengroup.osdu.workflow.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
@@ -44,6 +46,9 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   @Autowired
   private IWorkflowEngineService workflowEngineService;
 
+  @Autowired
+  private AuditLogger auditLogger;
+
   @Override
   public WorkflowRunResponse triggerWorkflow(final String workflowName, final TriggerWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
@@ -54,6 +59,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
+    auditLogger.workflowRunEvent(Collections.singletonList(request.toString()));
     return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
   }
 

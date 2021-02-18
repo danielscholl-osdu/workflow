@@ -12,6 +12,7 @@ public class TestConstants {
 	//Headers consts
 	public static final String HEADER_CORRELATION_ID = "correlation-id";
 	public static final String HEADER_DATA_PARTITION_ID = "data-partition-id";
+	public static final String HEADER_USER = "user";
 
 	//Api endpoints
 	public static final String START_WORKFLOW_API_ENDPOINT = "/startWorkflow";
