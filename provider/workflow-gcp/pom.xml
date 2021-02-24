@@ -85,7 +85,13 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-gcp</artifactId>
-      <version>0.3.21</version>
+      <version>0.6.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-json-classic</artifactId>
+      <version>0.1.5</version>
     </dependency>
 
   </dependencies>
