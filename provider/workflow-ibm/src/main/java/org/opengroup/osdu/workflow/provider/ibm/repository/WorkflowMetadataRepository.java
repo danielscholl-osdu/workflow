@@ -5,8 +5,10 @@
 package org.opengroup.osdu.workflow.provider.ibm.repository;
 
 import static com.cloudant.client.api.query.Expression.eq;
+import static com.cloudant.client.api.query.Expression.regex;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudant.client.api.Database;
 import com.cloudant.client.api.model.Response;
+import com.cloudant.client.api.query.Expression;
 import com.cloudant.client.api.query.QueryBuilder;
 import com.cloudant.client.api.query.QueryResult;
 import com.cloudant.client.org.lightcouch.DocumentConflictException;
@@ -110,10 +113,10 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
 	@Override
 	public List<WorkflowMetadata> getAllWorkflowForTenant(String prefix) {
-		// TODO Auto-generated method stub
-		//need to check
-		
-		return null;
+		Database db = getDatabase();
+		QueryResult<WorkflowMetadataDoc> result = db.query(new QueryBuilder(Expression.regex("workflowName", prefix)).build(), WorkflowMetadataDoc.class);
+		List<WorkflowMetadata> workflowMetadataList = result.getDocs().stream().map(i -> i.getWorkflowMetadata()).collect(Collectors.toList());
+		return workflowMetadataList;
 	}
 
 }

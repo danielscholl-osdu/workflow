@@ -25,61 +25,23 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
 		this.headers = null;
 	}
 
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturnSuccessWhenGivenValidRequestWorkflowCreate() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturnSuccessWhenGivenValidRequestWorkflowCreate();
-	}
 
 	@Override
 	@Test
 	@Disabled
 	public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate();
+		// Validation logic is missing in core. issue raised to opengroup
+		//super.shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate();
 	}
 
 	@Override
 	@Test
 	@Disabled
 	public void shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate();
+		// Validation logic is missing in core. issue raised to opengroup
+		//super.shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate();
 	}
 
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturn200WhenGetListWorkflowForTenant() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturn200WhenGetListWorkflowForTenant();
-	}
-
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturn200WhenGetCompleteDetailsForWorkflow() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturn200WhenGetCompleteDetailsForWorkflow();
-	}
-
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturnBadRequestWhenGetCompleteDetailsForWorkflow() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldReturnBadRequestWhenGetCompleteDetailsForWorkflow();
-	}
-
-	@Override
-	@Test
-	@Disabled
-	public void shouldDeleteWorkflowDefinition() throws Exception {
-		// TODO Auto-generated method stub
-		super.shouldDeleteWorkflowDefinition();
-	}
 
 	private void deleteAllTestWorkflowRecords() {
 		createdWorkflows.stream().forEach(c -> {
