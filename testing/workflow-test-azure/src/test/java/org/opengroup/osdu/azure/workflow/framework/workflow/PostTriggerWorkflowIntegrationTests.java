@@ -49,7 +49,7 @@ public abstract class PostTriggerWorkflowIntegrationTests extends TestBase {
   @Test
   public void should_complete_execution_when_givenValidRequest() throws Exception {
     Map<String, String> workflowIdToWorkflowRunId = new HashMap<>();
-    workflowIdToWorkflowRunId.put(getWorkflow(TEST_SIMPLE_PYTHON_DAG)
+    /*workflowIdToWorkflowRunId.put(getWorkflow(TEST_SIMPLE_PYTHON_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
         verifyAndTriggerWorkflowRun(TEST_SIMPLE_PYTHON_DAG));
 
@@ -59,19 +59,19 @@ public abstract class PostTriggerWorkflowIntegrationTests extends TestBase {
 
     workflowIdToWorkflowRunId.put(getWorkflow(TEST_SIMPLE_KUBERNETES_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
-        verifyAndTriggerWorkflowRun(TEST_SIMPLE_KUBERNETES_DAG));
+        verifyAndTriggerWorkflowRun(TEST_SIMPLE_KUBERNETES_DAG));*/
 
     workflowIdToWorkflowRunId.put(getWorkflow(TEST_SIMPLE_CUSTOM_OPERATOR_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
         verifyAndTriggerWorkflowRun(TEST_SIMPLE_CUSTOM_OPERATOR_DAG));
 
-    workflowIdToWorkflowRunId.put(getWorkflow(TEST_VALIDATE_RUN_CONFIG_DAG)
+    /*workflowIdToWorkflowRunId.put(getWorkflow(TEST_VALIDATE_RUN_CONFIG_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
         verifyAndTriggerWorkflowRun(TEST_VALIDATE_RUN_CONFIG_DAG));
 
     workflowIdToWorkflowRunId.put(getWorkflow(TEST_DUMMY_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString(),
-        verifyAndTriggerWorkflowRun(TEST_DUMMY_DAG));
+        verifyAndTriggerWorkflowRun(TEST_DUMMY_DAG));*/
 
     Map<String, String> runIdExecutionStatus = new HashMap<>();
 

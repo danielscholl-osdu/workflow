@@ -21,7 +21,8 @@ public class TestConstants {
 	public static final String UPDATE_STATUS_API_ENDPOINT = "/updateStatus";
 	public static final String CREATE_WORKFLOW_API_ENDPOINT = "/workflow";
 	public static final String TRIGGER_WORKFLOW_API_ENDPOINT = "/workflow/%s/workflowRun";
-	public static final String WORKFLOW_API_ENDPOINT = "/workflow/%s";
+	public static final String GET_WORKFLOWS_FOR_TENANT_API_ENDPOINT = "/workflow/?prefix=%s";
+	public static final String GET_WORKFLOW_BY_ID_API_ENDPOINT = "/workflow/%s";
 	public static final String GET_WORKFLOW_RUN_API_ENDPOINT = "/workflow/%s/workflowRun/%s";
 	public static final String UPDATE_WORKFLOW_RUN_STATUS_API_ENDPOINT =
       "/workflow/%s/workflowRun/%s/updateStatus";
@@ -53,8 +54,10 @@ public class TestConstants {
 		getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT;
 	public static final String TRIGGER_WORKFLOW_URL =
 		getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + TRIGGER_WORKFLOW_API_ENDPOINT;
-  	public static final String WORKFLOW_URL =
-      	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + WORKFLOW_API_ENDPOINT;
+  	public static final String GET_WORKFLOW_BY_ID_URL =
+      	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_BY_ID_API_ENDPOINT;
+  	public static final String GET_WORKFLOWS_FOR_TENANT_URL =
+      	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOWS_FOR_TENANT_API_ENDPOINT;
   	public static final String GET_WORKFLOW_RUN_URL =
       	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_API_ENDPOINT;
 	public static final String CUSTOM_OPERATOR_URL =

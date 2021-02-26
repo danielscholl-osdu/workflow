@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getValidCreateWorkflowRequest;
@@ -44,7 +44,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
 
     ClientResponse deleteResponse = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, responseBody.get(WORKFLOW_ID_FIELD).getAsString()),
+        String.format(GET_WORKFLOW_BY_ID_URL, responseBody.get(WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
         client.getAccessToken()
@@ -57,7 +57,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
   public void should_throw_error_when_given_invalid_workflow_id() throws Exception {
     ClientResponse deleteResponse = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, INVALID_WORKFLOW_ID),
+        String.format(GET_WORKFLOW_BY_ID_URL, INVALID_WORKFLOW_ID),
         null,
         headers,
         client.getAccessToken()
@@ -86,7 +86,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
 
     ClientResponse deleteResponse = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, existingWorkflowId),
+        String.format(GET_WORKFLOW_BY_ID_URL, existingWorkflowId),
         null,
         headers,
         client.getAccessToken()
@@ -99,7 +99,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_notGivenAccessToken() {
     ClientResponse response = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
@@ -113,7 +113,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
@@ -127,7 +127,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.DELETE,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(WORKFLOW_ID_FIELD).getAsString()),
         null,
         HTTPClient.overrideHeader(headers, INVALID_PARTITION),
