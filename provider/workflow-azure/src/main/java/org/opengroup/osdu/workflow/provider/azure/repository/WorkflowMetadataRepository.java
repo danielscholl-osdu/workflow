@@ -1,5 +1,9 @@
 package org.opengroup.osdu.workflow.provider.azure.repository;
 
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -17,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Component
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
@@ -81,7 +86,35 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Override
   public List<WorkflowMetadata> getAllWorkflowForTenant(String prefix) {
-    throw new UnsupportedOperationException("getAllWorkflowForTenant is not implemented for Azure");
+    try {
+      SqlQuerySpec sqlQuerySpec;
+      if (prefix != null && !(prefix.isEmpty())){
+        SqlParameter prefixParameter = new SqlParameter("@prefix", prefix);
+        sqlQuerySpec = new SqlQuerySpec("SELECT * FROM c " +
+                "where STARTSWITH(c.workflowName, @prefix, true) " +
+                "ORDER BY c._ts DESC", prefixParameter);
+      }
+      else
+      {
+        sqlQuerySpec = new SqlQuerySpec("SELECT * FROM c " +
+            "ORDER BY c._ts DESC");
+      }
+      final List<WorkflowMetadataDoc> workflowMetadataDocs = cosmosStore.queryItems(
+              dpsHeaders.getPartitionId(),
+              cosmosConfig.getDatabase(),
+              cosmosConfig.getWorkflowMetadataCollection(),
+              sqlQuerySpec,
+              new CosmosQueryRequestOptions(),
+              WorkflowMetadataDoc.class);
+      List<WorkflowMetadata> workflowMetadataList = new ArrayList<>();
+      for(WorkflowMetadataDoc workflowMetadataDoc: workflowMetadataDocs)
+      {
+        workflowMetadataList.add(buildWorkflowMetadata(workflowMetadataDoc));
+      }
+      return workflowMetadataList;
+    } catch (CosmosException e) {
+      throw new AppException(e.getStatusCode(), e.getMessage(), e.getMessage(), e);
+    }
   }
 
   private WorkflowMetadataDoc buildWorkflowMetadataDoc(final WorkflowMetadata workflowMetadata) {
