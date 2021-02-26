@@ -24,6 +24,8 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataReposito
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.opengroup.osdu.workflow.service.WorkflowManagerServiceImpl;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,6 +66,8 @@ class WorkflowManagerServiceTest {
       "  \"createdBy\": \"user@email.com\",\n" +
       "  \"version\": 1\n" +
       "}";
+
+  private static final String PREFIX_INPUT = "hwoello";
 
   @Mock
   private IWorkflowMetadataRepository workflowMetadataRepository;
@@ -223,4 +227,15 @@ class WorkflowManagerServiceTest {
     verify(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
     verify(workflowEngineService, times(0)).deleteWorkflow(any(WorkflowEngineRequest.class));
   }
+
+   @Test
+   public void testGetAllWorkflowsSuccess() {
+     final List<WorkflowMetadata> mockedWorkflowMetadataList = mock(List.class);
+     when(workflowMetadataRepository.getAllWorkflowForTenant(eq(PREFIX_INPUT))).
+         thenReturn(mockedWorkflowMetadataList);
+     List<WorkflowMetadata> responseWorkflowMetadataList =
+         workflowManagerService.getAllWorkflowForTenant(PREFIX_INPUT);
+     verify(workflowMetadataRepository).getAllWorkflowForTenant(eq(PREFIX_INPUT));
+     assertThat(responseWorkflowMetadataList, equalTo(mockedWorkflowMetadataList));
+   }
 }

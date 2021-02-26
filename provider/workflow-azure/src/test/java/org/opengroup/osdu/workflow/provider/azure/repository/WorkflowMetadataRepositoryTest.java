@@ -1,9 +1,12 @@
 package org.opengroup.osdu.workflow.provider.azure.repository;
 
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.SqlQuerySpec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,12 +20,19 @@ import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link WorkflowMetadataRepository}
@@ -121,6 +131,14 @@ public class WorkflowMetadataRepositoryTest {
       "    \"createdBy\": \"user@email.com\",\n" +
       "    \"version\": 1\n" +
       "}";
+  private static final String PREFIX_VALUE = "Hello";
+
+  private static final String SQL_QUERY_SPEC_QUERY_TEXT_WITH_PREFIX = "SELECT * FROM c " +
+      "where STARTSWITH(c.workflowName, @prefix, true) " +
+      "ORDER BY c._ts DESC";
+  private static final String SQL_QUERY_SPEC_QUERY_TEXT_WITHOUT_PREFIX = "SELECT * FROM c " +
+      "ORDER BY c._ts DESC";
+
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Mock
@@ -244,6 +262,61 @@ public class WorkflowMetadataRepositoryTest {
     verify(cosmosConfig, times(1)).getDatabase();
     verify(cosmosConfig, times(1)).getWorkflowMetadataCollection();
     verify(dpsHeaders, times(1)).getPartitionId();
+  }
+
+  @Test
+  public void testGetAllWorkflowForTenant() throws Exception {
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    final WorkflowMetadataDoc workflowMetadataDoc =
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
+    List<WorkflowMetadataDoc> workflowMetadataDocList = Arrays.asList(workflowMetadataDoc);
+    ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor =
+        ArgumentCaptor.forClass(SqlQuerySpec.class);
+    when(cosmosStore.queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        sqlQuerySpecArgumentCaptor.capture(), any(CosmosQueryRequestOptions.class),
+        eq(WorkflowMetadataDoc.class))).thenReturn(workflowMetadataDocList);
+    List<WorkflowMetadata> responseWorkflowMetadataList =
+        workflowMetadataRepository.getAllWorkflowForTenant(PREFIX_VALUE);
+    verify(cosmosStore).queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        any(SqlQuerySpec.class), any(CosmosQueryRequestOptions.class), eq(WorkflowMetadataDoc.class));
+    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getWorkflowMetadataCollection();
+    verify(dpsHeaders).getPartitionId();
+    assertThat(responseWorkflowMetadataList.size(), equalTo(1));
+    WorkflowMetadata workflowMetadata =
+        OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    assertThat(workflowMetadata, equalTo(responseWorkflowMetadataList.get(0)));
+    assertThat(sqlQuerySpecArgumentCaptor.getValue().getQueryText(), equalTo(SQL_QUERY_SPEC_QUERY_TEXT_WITH_PREFIX));
+  }
+
+  @Test
+  public void testGetAllWorkflowForTenantEmptyPrefix() throws Exception {
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    final WorkflowMetadataDoc workflowMetadataDoc =
+        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
+    List<WorkflowMetadataDoc> workflowMetadataDocList = Arrays.asList(workflowMetadataDoc);
+    ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor =
+        ArgumentCaptor.forClass(SqlQuerySpec.class);
+    when(cosmosStore.queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        sqlQuerySpecArgumentCaptor.capture(), any(CosmosQueryRequestOptions.class),
+        eq(WorkflowMetadataDoc.class))).thenReturn(workflowMetadataDocList);
+    List<WorkflowMetadata> responseWorkflowMetadataList =
+        workflowMetadataRepository.getAllWorkflowForTenant("");
+    verify(cosmosStore).queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        any(SqlQuerySpec.class), any(CosmosQueryRequestOptions.class), eq(WorkflowMetadataDoc.class));
+    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getWorkflowMetadataCollection();
+    verify(dpsHeaders).getPartitionId();
+    assertThat(responseWorkflowMetadataList.size(), equalTo(1));
+    WorkflowMetadata workflowMetadata =
+        OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA, WorkflowMetadata.class);
+    assertThat(workflowMetadata, equalTo(responseWorkflowMetadataList.get(0)));
+    assertThat(sqlQuerySpecArgumentCaptor.getValue().getQueryText(),
+        equalTo(SQL_QUERY_SPEC_QUERY_TEXT_WITHOUT_PREFIX));
   }
 
   @Test

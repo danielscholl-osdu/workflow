@@ -12,7 +12,7 @@ import javax.ws.rs.HttpMethod;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ACTIVE_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_TASK_RUN_FIELD;
@@ -33,7 +33,7 @@ public abstract class GetWorkflowByIdIntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(WORKFLOW_URL, workflow.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()),
+        String.format(GET_WORKFLOW_BY_ID_URL, workflow.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
         client.getAccessToken()
@@ -55,7 +55,7 @@ public abstract class GetWorkflowByIdIntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(WORKFLOW_URL, INVALID_WORKFLOW_ID),
+        String.format(GET_WORKFLOW_BY_ID_URL, INVALID_WORKFLOW_ID),
         null,
         headers,
         client.getAccessToken()
@@ -72,7 +72,7 @@ public abstract class GetWorkflowByIdIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_notGivenAccessToken() {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
@@ -86,7 +86,7 @@ public abstract class GetWorkflowByIdIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()),
         null,
         headers,
@@ -100,7 +100,7 @@ public abstract class GetWorkflowByIdIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(WORKFLOW_URL, getWorkflow(TEST_DUMMY_DAG)
+        String.format(GET_WORKFLOW_BY_ID_URL, getWorkflow(TEST_DUMMY_DAG)
             .get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()),
         null,
         HTTPClient.overrideHeader(headers, INVALID_PARTITION),

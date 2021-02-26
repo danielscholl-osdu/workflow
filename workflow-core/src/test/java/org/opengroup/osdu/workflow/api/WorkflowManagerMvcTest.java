@@ -33,6 +33,8 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +60,20 @@ class WorkflowManagerMvcTest {
       "  \"createdBy\": \"user@email.com\",\n" +
       "  \"version\": 1\n" +
       "}";
+  private static final String WORKFLOW_METADATA_LIST_RESPONSE = "[\n" +
+      "    {\n" +
+      "        \"workflowId\": \"2afccfb8-1351-41c6-9127-61f2d7f22ff8\",\n" +
+      "        \"workflowName\": \"HelloWorld\",\n" +
+      "        \"description\": \"This is a test workflow\",\n" +
+      "        \"creationTimestamp\": 1600144876028,\n" +
+      "        \"version\": 1,\n" +
+      "        \"registrationInstructions\": {\n" +
+      "            \"active\": true,\n" +
+      "            \"concurrentWorkflowRun\": 5,\n" +
+      "            \"concurrentTaskRun\": 5\n" +
+      "        }\n" +
+      "    }\n" +
+      "]";
   private static final String WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
       "  \"description\": \"This is a test workflow\"\n" +
@@ -65,6 +81,9 @@ class WorkflowManagerMvcTest {
   private static final String WORKFLOW_ENDPOINT = "/v1/workflow";
   private static final String EXISTING_WORKFLOW_ID = "existing-id";
   private static final String WORKFLOW_NAME = "test-dag-name";
+  private static final String WORKFLOW_ID = "2afccfb8-1351-41c6-9127-61f2d7f22ff8";
+  private static final String EMPTY_PREFIX_ERROR =
+      "Prefix cannot be Null or Empty. Please provide a value.";
 
   @Autowired
   private MockMvc mockMvc;
@@ -178,6 +197,29 @@ class WorkflowManagerMvcTest {
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     verify(authorizationService).authorizeAny(any(), any());
   }
+
+   @Test
+   public void testGetAllWorkflowsWithSuccess() throws Exception {
+     final List<WorkflowMetadata> workflowMetadataList =
+         mapper.readValue(WORKFLOW_METADATA_LIST_RESPONSE, List.class);
+     when(workflowManagerService.getAllWorkflowForTenant(eq("Hello"))).
+         thenReturn(workflowMetadataList);
+     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER), eq(WorkflowRole.CREATOR),
+         eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
+     final MvcResult mvcResult = mockMvc.perform(
+         get( String.format("/v1/workflow/?prefix=%s","Hello"))
+             .contentType(MediaType.APPLICATION_JSON)
+             .headers(getHttpHeaders())
+             .with(SecurityMockMvcRequestPostProcessors.csrf()))
+         .andExpect(status().isOk())
+         .andReturn();
+     verify(workflowManagerService).getAllWorkflowForTenant(eq("Hello"));
+     verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER), eq(WorkflowRole.CREATOR),
+         eq(WorkflowRole.ADMIN));
+     final List<WorkflowMetadata> responseWorkflowMetadataList =
+         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class);
+     assertThat(workflowMetadataList,equalTo(responseWorkflowMetadataList));
+   }
 
   private HttpHeaders getHttpHeaders() {
     HttpHeaders headers = new HttpHeaders();

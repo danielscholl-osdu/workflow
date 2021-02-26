@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.azure.workflow.framework.consts.DefaultVariable;
+import org.opengroup.osdu.azure.workflow.framework.models.WorkflowMetadata;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +40,18 @@ public class TestDataUtil {
 
   public static JsonObject getAllOperators() {
     return getTestData().getAsJsonObject(OPERATORS_SECTION_KEY);
+  }
+
+  public static Map<String, WorkflowMetadata> getAllWorkflows() {
+    Map<String, WorkflowMetadata> testDataWorkflowNameToInfo = new HashMap<>();
+    JsonObject workflows = getTestData().getAsJsonObject(DAGS_SECTION_KEY);
+    for (String workflowMetadataKey : workflows.keySet()) {
+      WorkflowMetadata workflowMetadata = TestBase.gson.fromJson(
+          workflows.get(workflowMetadataKey), WorkflowMetadata.class);
+      testDataWorkflowNameToInfo.put(workflowMetadata.getWorkflowName(),
+          workflowMetadata);
+    }
+    return testDataWorkflowNameToInfo;
   }
 
   public static JsonObject getOperator(String operatorName) {
