@@ -17,6 +17,14 @@
 package org.opengroup.osdu.ibm.workflow.util;
 
 
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT1;
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_DATA_PARTITION_ID;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_USER;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opengroup.osdu.core.ibm.util.IdentityClient;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import lombok.ToString;
@@ -53,5 +61,13 @@ public class HTTPClientIBM extends HTTPClient {
         }
         return noDataAccesstoken;
     }
+	
+	@Override
+	public Map<String, String> getCommonHeader() {
+		Map<String, String> headers = new HashMap<>();
+		headers.put(HEADER_DATA_PARTITION_ID, getEnvironmentVariableOrDefaultKey(DEFAULT_DATA_PARTITION_ID_TENANT1));
+		//headers.put(HEADER_USER, "testUser");
+		return headers;
+	}
 
 }
