@@ -2,6 +2,7 @@ package org.opengroup.osdu.workflow.model;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @Getter
@@ -19,5 +20,17 @@ public class WorkflowMetadata {
   private String createdBy;
   private Long creationTimestamp;
   private Long version;
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private boolean isDeployedThroughWorkflowService;
   private Map<String, Object> registrationInstructions;
+
+  @JsonIgnore
+  public boolean isDeployedThroughWorkflowService() {
+    return isDeployedThroughWorkflowService;
+  }
+
+  public void setIsDeployedThroughWorkflowService(boolean isDeployedThroughWorkflowService) {
+    this.isDeployedThroughWorkflowService = isDeployedThroughWorkflowService;
+  }
 }

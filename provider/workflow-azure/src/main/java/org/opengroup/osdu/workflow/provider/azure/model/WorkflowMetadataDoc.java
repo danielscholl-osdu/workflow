@@ -18,6 +18,7 @@ public class WorkflowMetadataDoc {
   private String createdBy;
   private Long creationTimestamp;
   private Long version;
+  // This tells if the DAG is deployed to airflow through workflow service
   private Boolean isRegisteredByWorkflowService;
   private Map<String, Object> registrationInstructions;
 }

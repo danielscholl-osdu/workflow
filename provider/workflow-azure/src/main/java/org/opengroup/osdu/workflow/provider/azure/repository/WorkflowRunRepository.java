@@ -121,7 +121,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   @Override
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
                                                         Map<String, Object> params) {
-    return null;
+    return getWorkflowRunsByWorkflowName(workflowName, 50, null).getItems();
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {

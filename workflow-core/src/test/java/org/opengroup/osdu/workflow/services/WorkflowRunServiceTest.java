@@ -521,6 +521,6 @@ class WorkflowRunServiceTest {
   }
 
   private WorkflowEngineRequest workflowEngineRequest() {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, WORKFLOW_RUN_START_TIMESTAMP, null);
+    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, WORKFLOW_RUN_START_TIMESTAMP, null, false);
   }
 }
