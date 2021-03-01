@@ -146,6 +146,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
         .createdBy(workflowMetadataDoc.getCreatedBy())
         .creationTimestamp(workflowMetadataDoc.getCreationTimestamp())
         .version(workflowMetadataDoc.getVersion())
+        .isDeployedThroughWorkflowService(workflowMetadataDoc.getIsRegisteredByWorkflowService())
         .registrationInstructions(workflowMetadataDoc.getRegistrationInstructions()).build();
   }
 }

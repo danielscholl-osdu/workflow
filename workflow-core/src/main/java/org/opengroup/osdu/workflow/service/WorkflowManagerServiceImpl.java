@@ -52,9 +52,9 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   @Override
   public void deleteWorkflow(String workflowName) {
-    workflowMetadataRepository.getWorkflow(workflowName);
+    final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
     workflowRunService.deleteWorkflowRunsByWorkflowName(workflowName);
-    WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName);
+    WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName, workflowMetadata.isDeployedThroughWorkflowService());
     workflowEngineService.deleteWorkflow(rq);
     workflowMetadataRepository.deleteWorkflow(workflowName);
     auditLogger.workflowDeleteEvent(Collections.singletonList(workflowName));

@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.service;
 
+import com.azure.storage.file.share.models.ShareStorageException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
@@ -87,9 +88,18 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       }
     }
 
-    String fileName = getFileNameFromWorkflow(workflowName);
-    LOGGER.info("Deleting DAG file {} from file share", fileName);
-    dagsFileShareStore.deleteFile(fileName);
+    if (rq.isDeployedThroughWorkflowService()) {
+      // Deleting only if dag is deployed through workflow service.
+      String fileName = getFileNameFromWorkflow(workflowName);
+      LOGGER.info("Deleting DAG file {} from file share", fileName);
+      try {
+        dagsFileShareStore.deleteFile(fileName);
+      } catch (final ShareStorageException e) {
+        if (e.getStatusCode() != 404) {
+          throw e;
+        }
+      }
+    }
   }
 
   @Override
