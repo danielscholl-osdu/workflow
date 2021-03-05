@@ -457,7 +457,7 @@ class WorkflowRunServiceTest {
   void testDeleteWorkflowRunsByWorkflowIdWithActiveWorkflowRuns() throws Exception {
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
-	final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
+	  final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
         WorkflowRun.class);
     final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
         WorkflowRun.class);
@@ -493,6 +493,34 @@ class WorkflowRunServiceTest {
     verify(workflowRunRepository)
         .getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null));
     verify(workflowRunRepository, times(0)).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
+  }
+
+  @Test
+  void testGetAllRunInstancesOfWorkflowForExistentWorkflowName() throws Exception {
+    final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
+        WorkflowRun.class);
+    final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
+        WorkflowRun.class);
+    final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
+        WorkflowRun.class);
+    final List<WorkflowRun> workflowRuns =
+        Arrays.asList(finishedWorkflowRun, submittedWorkflowRun, runningWorkflowRun);
+    final Map<String, Object> config = new HashMap<>();
+    final WorkflowMetadata workflowMetadata = mock(WorkflowMetadata.class);
+    when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
+    when(workflowRunRepository.getAllRunInstancesOfWorkflow(eq(WORKFLOW_NAME), eq(config))).thenReturn(workflowRuns);
+    Assertions.assertEquals(workflowRuns, workflowRunService.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, config));
+    verify(workflowRunRepository).getAllRunInstancesOfWorkflow(eq(WORKFLOW_NAME), eq(config));
+    verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
+  }
+
+  @Test
+  void testGetAllRunInstancesOfWorkflowForNonExistentWorkflowName() {
+    when(workflowMetadataRepository.getWorkflow(WORKFLOW_NAME)).thenThrow(WorkflowNotFoundException.class);
+    Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
+      workflowRunService.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, new HashMap<>());
+    });
+    verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
   }
 
   private Map<String, Object> createWorkflowPayload(final String runId,

@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.*;
@@ -91,7 +92,10 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   @Override
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
-                                                        Map<String, Object> params) {
+                                                        Map<String, Object> params)
+      throws WorkflowNotFoundException {
+    // Calling getWorkflow will throw WorkflowNotFoundException
+    workflowMetadataRepository.getWorkflow(workflowName);
     return workflowRunRepository.getAllRunInstancesOfWorkflow(workflowName, params);
   }
 
