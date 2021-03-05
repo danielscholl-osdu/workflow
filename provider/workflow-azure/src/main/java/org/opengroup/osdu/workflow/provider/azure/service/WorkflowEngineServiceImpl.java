@@ -78,18 +78,20 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     String workflowName = rq.getWorkflowName();
     LOGGER.info("Deleting DAG {} in Airflow", workflowName);
 
-    try {
-      String deleteDAGEndpoint = String.format("api/experimental/dags/%s", workflowName);
-      callAirflowApi(deleteDAGEndpoint, HttpMethod.DELETE, null,
-          String.format(AIRFLOW_DELETE_DAG_ERROR_MESSAGE, workflowName));
-    } catch (AppException e) {
-      if (e.getError().getCode() != 404) {
-        throw e;
-      }
-    }
-
     if (rq.isDeployedThroughWorkflowService()) {
       // Deleting only if dag is deployed through workflow service.
+      // Figure out how to only remove the metadata but not the DAG.
+      // Because in repeated delete create fashion the dag will not appear for a while
+      try {
+        String deleteDAGEndpoint = String.format("api/experimental/dags/%s", workflowName);
+        callAirflowApi(deleteDAGEndpoint, HttpMethod.DELETE, null,
+            String.format(AIRFLOW_DELETE_DAG_ERROR_MESSAGE, workflowName));
+      } catch (AppException e) {
+        if (e.getError().getCode() != 404) {
+          throw e;
+        }
+      }
+
       String fileName = getFileNameFromWorkflow(workflowName);
       LOGGER.info("Deleting DAG file {} from file share", fileName);
       try {

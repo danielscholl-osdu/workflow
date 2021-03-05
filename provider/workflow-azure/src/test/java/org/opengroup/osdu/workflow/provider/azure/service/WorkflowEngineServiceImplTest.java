@@ -310,27 +310,27 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testDeleteWorkflowShouldShouldNotCallFileShareForDAGsNotDeployedThroughWorkflowService() {
-    when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
-    when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
-    when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
-    when(webResource.type(eq(MediaType.APPLICATION_JSON))).thenReturn(webResourceBuilder);
-    when(webResourceBuilder.header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE)))
-        .thenReturn(webResourceBuilder);
-    when(webResourceBuilder.method(eq("DELETE"), eq(ClientResponse.class), eq(null)))
-        .thenReturn(clientResponse);
-    when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+  public void testDeleteWorkflowShouldShouldNotCallFileShareAndAirflowForDAGsNotDeployedThroughWorkflowService() {
+//    when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
+//    when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
+//    when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
+//    when(webResource.type(eq(MediaType.APPLICATION_JSON))).thenReturn(webResourceBuilder);
+//    when(webResourceBuilder.header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE)))
+//        .thenReturn(webResourceBuilder);
+//    when(webResourceBuilder.method(eq("DELETE"), eq(ClientResponse.class), eq(null)))
+//        .thenReturn(clientResponse);
+//    when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
 
     workflowEngineService.deleteWorkflow(workflowEngineRequest(null, false));
 
     verify(dagsFileShareStore, times(0)).deleteFile(eq(FILE_NAME));
-    verify(restClient).resource(eq(AIRFLOW_DAG_URL));
-    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
-    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
-    verify(webResourceBuilder).method(eq("DELETE"), eq(ClientResponse.class), eq(null));
-    verify(clientResponse).getStatus();
-    verify(airflowConfig).getUrl();
-    verify(airflowConfig).getAppKey();
+    verify(restClient, times(0)).resource(eq(AIRFLOW_DAG_URL));
+    verify(webResource, times(0)).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder, times(0)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder, times(0)).method(eq("DELETE"), eq(ClientResponse.class), eq(null));
+    verify(clientResponse, times(0)).getStatus();
+    verify(airflowConfig, times(0)).getUrl();
+    verify(airflowConfig, times(0)).getAppKey();
   }
 
   @Test
