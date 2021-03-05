@@ -15,7 +15,7 @@
 # https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html
 FROM amazoncorretto:8
 
-ARG JAR_FILE=provider/dataset-aws/target/*spring-boot.jar
+ARG JAR_FILE=provider/workflow-aws/target/*spring-boot.jar
 WORKDIR /
 
 #Default to using self signed generated TLS cert
