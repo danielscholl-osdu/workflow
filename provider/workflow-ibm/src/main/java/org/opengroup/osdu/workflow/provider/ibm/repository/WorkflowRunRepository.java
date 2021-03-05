@@ -167,9 +167,6 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 		QueryResult<WorkflowRunDoc> results = db.query(new QueryBuilder(
 				eq("workflowName", workflowName)).
 				build(), WorkflowRunDoc.class);
-		if(results.getDocs().isEmpty()) {
-			throw new AppException(HttpStatus.SC_NOT_FOUND, "NOT_FOUND", String.format("WorkflowRun %s does not exists", workflowName));
-		}
 		List<WorkflowRun> workflowRunList = results.getDocs().stream().map(wrd -> wrd.getWorkflowRun()).collect(Collectors.toList());
 		return workflowRunList;
 	}
