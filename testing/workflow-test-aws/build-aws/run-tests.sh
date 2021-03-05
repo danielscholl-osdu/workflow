@@ -37,12 +37,13 @@ export DOMAIN=example.com
 export DYNAMO_DB_REGION=us-east-1
 export DYNAMO_DB_ENDPOINT=https://dynamodb.us-east-1.amazonaws.com
 export RESOURCE_PREFIX=$RESOURCE_PREFIX
-export INT_TEST_DAG_NAME=my_first_dag
+export TEST_DAG_NAME=my_first_dag
 export DEFAULT_DATA_PARTITION_ID_TENANT1=int-test-workflow
 
 #### RUN INTEGRATION TEST #########################################################################
 
 mvn test -f "$SCRIPT_SOURCE_DIR"/../pom.xml
+# mvn -Dmaven.surefire.debug test -f "$SCRIPT_SOURCE_DIR"/../pom.xml
 TEST_EXIT_CODE=$?
 
 #### COPY TEST REPORTS #########################################################################

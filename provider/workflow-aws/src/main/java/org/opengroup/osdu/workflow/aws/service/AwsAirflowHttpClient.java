@@ -26,8 +26,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 @Slf4j
-public class AirflowClient  {
+@Component
+public class AwsAirflowHttpClient  {
   /**
    * Sends a request to airflow by dag name
    * @param airflowDagURL
@@ -35,9 +41,11 @@ public class AirflowClient  {
    * @param dagName
    * @throws IOException
    */
-    public void makeRequestToAirflow(String airflowDagURL, String body, String dagName) throws IOException {
+    public void makeRequestToAirflow(String airflowDagURL, String body, String dagName, DpsHeaders originalRequestHeaders) throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
+        headers.put("Authorization", originalRequestHeaders.getAuthorization());
+        headers.put("data-partition-id", originalRequestHeaders.getPartitionId());
 
         HttpURLConnection connection = getConnection(body, headers, airflowDagURL);
 
@@ -48,6 +56,7 @@ public class AirflowClient  {
           log.info(String.format("Response from airflow for dag %s: %s", dagName, response));
         } else {
           log.info(String.format("Something is wrong and we didn't get a good response for %s. It was a %s response", dagName, connection.getResponseCode()));
+          throw new AppException(connection.getResponseCode(), HttpStatus.valueOf(connection.getResponseCode()).getReasonPhrase(), "Airflow Error: " + connection.getResponseMessage());
         }
     }
 
