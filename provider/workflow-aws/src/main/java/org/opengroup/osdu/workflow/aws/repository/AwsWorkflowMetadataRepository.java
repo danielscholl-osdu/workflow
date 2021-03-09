@@ -27,6 +27,7 @@ import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -134,9 +135,18 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
         String filterExpression = "dataPartitionId = :partitionId";
-        AttributeValue attributeValue = new AttributeValue(dataPartitionId);
+        
+        AttributeValue dataPartitionAttributeValue = new AttributeValue(dataPartitionId);
+        
+        
         Map<String, AttributeValue> eav = new HashMap<>();
-        eav.put(":partitionId", attributeValue);
+        eav.put(":partitionId", dataPartitionAttributeValue);
+        
+        if (StringUtils.isNotBlank(prefix)) {
+          filterExpression += " AND begins_with ( workflowName, :workflowNamePrefix )";
+          AttributeValue workflowNamePrefixAttributeValue = new AttributeValue(prefix);
+          eav.put(":workflowNamePrefix", workflowNamePrefixAttributeValue);
+        }
 
         ArrayList<WorkflowMetadataDoc> docs = queryHelper.scanTable(WorkflowMetadataDoc.class, filterExpression, eav);
 
