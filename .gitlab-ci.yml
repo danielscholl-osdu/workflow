@@ -13,7 +13,6 @@ variables:
   AWS_TEST_SUBDIR: testing/workflow-test-aws
   AWS_SERVICE: ingestion-workflow
   AWS_ENVIRONMENT: dev
-  AWS_SKIP_DEPLOY: 'true'
 
   # Start azure specific variables
   AZURE_SERVICE: ingestion-workfow
