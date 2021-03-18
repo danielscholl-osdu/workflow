@@ -18,6 +18,7 @@ package org.opengroup.osdu.workflow.aws.service;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
@@ -28,12 +29,14 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import org.json.JSONObject;
+import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsAirflowApiMode;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
+import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -48,10 +51,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
-  
-  private static final Logger LOGGER = LoggerFactory.getLogger(AwsWorkflowEngineServiceImpl.class);  
 
-  @Inject 
+  private static final Logger LOGGER = LoggerFactory.getLogger(AwsWorkflowEngineServiceImpl.class);
+
+  @Inject
+  private AwsServiceConfig config;
+
+  @Inject
   AwsServiceConfig awsConfig;
 
   @Inject
@@ -71,6 +77,13 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   final ObjectMapper objectMapper = new ObjectMapper();
 
+  private DynamoDBQueryHelper queryHelper;
+
+  @PostConstruct
+  public void init() {
+      queryHelper = new DynamoDBQueryHelper(config.dynamoDbEndpoint, config.dynamoDbRegion, config.dynamoDbTablePrefix);
+  }
+
   // @Autowired
   // @Qualifier("dags")
   // private FileShareStore dagsFileShareStore;
@@ -81,19 +94,19 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
-    
+
   }
 
   @Override
   public void deleteWorkflow(WorkflowEngineRequest rq) {
-    // throw new AppException(HttpStatus.NOT_IMPLEMENTED.value(), 
+    // throw new AppException(HttpStatus.NOT_IMPLEMENTED.value(),
     //                       HttpStatus.NOT_IMPLEMENTED.getReasonPhrase(),
     //                       "Deleting a running workflow is not supported");
   }
 
   @Override
   public void saveCustomOperator(final String customOperatorDefinition, final String fileName) {
-    
+
   }
 
   @Override
@@ -104,6 +117,8 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
         String runId = rq.getRunId();
         String workflowId = rq.getWorkflowId();
 
+        validateRunId(runId);
+
         TriggerWorkflowResponse resp = null;
 
         switch (awsConfig.airflowApiMode) {
@@ -111,7 +126,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
             ClientResponse clientResp = triggerWorkflowUsingApi(runId, workflowId, workflowName, inputData);
             try {
               resp = objectMapper
-              .readValue(clientResp.getEntity(String.class), TriggerWorkflowResponse.class);            
+              .readValue(clientResp.getEntity(String.class), TriggerWorkflowResponse.class);
             }
             catch (Exception e) {
               throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Failure parsing Airflow response");
@@ -126,14 +141,28 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
                                   .build();
             break;
           default:
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
-                                   HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), 
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                   HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                                    "Unsupported Airflow API mode set. cannot execute workflow");
-        }        
-        
+        }
+
 
         return resp;
-   
+
+  }
+
+  /**
+   * The service can't rely on airflow to throw runId exists errors because it leverages SQS
+   * in production.
+   * @param runId
+   */
+  private void validateRunId(final String runId) {
+    WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
+    workflowRunDoc.setRunId(runId);
+    if(queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc)){
+      throw new AppException(HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST.getReasonPhrase(), "Cannot kick off workflow with duplicate runId");
+    }
   }
 
   private void triggerWorkflowUsingSqs(final String runId, final String workflowId,
@@ -141,7 +170,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
     String serializedData = workflowRequestBodyFactory.getSerializedWorkflowRequest(inputData,
         workflowName, runId, headers, true);
-    
+
     sqsClient.sendMessageToWorkflowQueue(serializedData);
 
   }
@@ -182,8 +211,8 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Override
   public WorkflowStatusType getWorkflowRunStatus(WorkflowEngineRequest rq) {
-    
-    //we don't have this visibility on SQS yet.  Need to work on it. 
+
+    //we don't have this visibility on SQS yet.  Need to work on it.
     return null;
   }
 }
