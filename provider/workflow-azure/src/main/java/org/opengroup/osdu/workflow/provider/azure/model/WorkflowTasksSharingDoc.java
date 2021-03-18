@@ -1,8 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.model;
 
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 @Builder
 @Getter
