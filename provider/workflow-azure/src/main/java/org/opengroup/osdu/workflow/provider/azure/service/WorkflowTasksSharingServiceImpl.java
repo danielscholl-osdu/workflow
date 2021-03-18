@@ -3,7 +3,7 @@ package org.opengroup.osdu.workflow.provider.azure.service;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingRepository;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowTasksSharingRepository;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingService;
 import org.opengroup.osdu.workflow.provider.azure.model.GetSignedUrlResponse;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
