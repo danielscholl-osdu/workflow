@@ -126,6 +126,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
         workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
 
+    // TODO [aaljain]: The feature for deleting container needs to be moved to service folder later
     final WorkflowStatusType currentStatusType = workflowRun.getStatus();
     if (getCompletedStatusTypes().contains(currentStatusType)) {
         workflowTaskSharingUtils.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
