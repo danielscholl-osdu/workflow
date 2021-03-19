@@ -45,8 +45,8 @@ public class AzureBootstrapConfig {
 
   @Bean
   public BlobServiceClient buildBlobServiceClient(SecretClient kv) {
-    // Create a BlobServiceClient object which will be used to create a container client
-    String connectionStr = KeyVaultFacade.getSecretWithValidation(kv, "workflow-storage-connection");
+    final String partitionId = getPartitionId();
+    final String connectionStr = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage-connection", partitionId));
     return new BlobServiceClientBuilder().connectionString(connectionStr).buildClient();
   }
 
