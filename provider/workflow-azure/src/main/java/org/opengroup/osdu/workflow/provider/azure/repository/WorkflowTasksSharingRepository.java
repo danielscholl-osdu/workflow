@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -46,12 +46,13 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
         .setWritePermission(true)
         .setListPermission(true);
 
-    final List<WorkflowTasksSharingDoc> workflowTasksSharingDocs = workflowTasksSharingUtils.getWorkflowTasksSharingDocsForWorkflowNameAndRunId(dataPartitionId, workflowName, runId);
+    final Optional<WorkflowTasksSharingDoc> optionalWorkflowTasksSharingDoc =
+        cosmosStore.findItem(dataPartitionId, cosmosConfig.getDatabase(), cosmosConfig.getWorkflowTasksSharingCollection(), runId, workflowName, WorkflowTasksSharingDoc.class);
 
     String containerId;
 
-    if (!workflowTasksSharingDocs.isEmpty()) {
-      containerId = workflowTasksSharingDocs.get(0).getId();
+    if (optionalWorkflowTasksSharingDoc.isPresent()) {
+      containerId = optionalWorkflowTasksSharingDoc.get().getContainerId();
     } else {
       containerId = UUID.randomUUID().toString();
       blobStore.createBlobContainer(dataPartitionId, containerId);
@@ -64,7 +65,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
 
   WorkflowTasksSharingDoc workflowTasksSharingDocBuilder(String workflowName, String runId, String containerId) {
     return WorkflowTasksSharingDoc.builder()
-        .id(UUID.randomUUID().toString())
+        .id(runId)
         .partitionKey(workflowName)
         .containerId(containerId)
         .workflowName(workflowName)
