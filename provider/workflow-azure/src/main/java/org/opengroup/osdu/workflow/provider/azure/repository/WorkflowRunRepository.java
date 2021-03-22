@@ -4,6 +4,7 @@ import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import org.opengroup.osdu.azure.blobstorage.BlobStore;
+import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
@@ -32,6 +33,8 @@ import java.util.Optional;
 public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   private static final String LOGGER_NAME = WorkflowRunRepository.class.getName();
+  private static final int WORKFLOW_RUNS_LIMIT = 50;
+  private static final String INVALID_WORKFLOW_RUN_PREFIX = "backfill";
 
   @Autowired
   private CosmosConfig cosmosConfig;
@@ -84,7 +87,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   @Override
   public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit,
                                                         String cursor) {
-    if(cursor != null) {
+    if (cursor != null) {
       cursor = cursorUtils.decodeCosmosCursor(cursor);
     }
 
@@ -93,14 +96,60 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
       SqlQuerySpec sqlQuerySpec = new SqlQuerySpec(
           "SELECT * from c where c.partitionKey = @workflowName ORDER BY c._ts DESC",
           workflowNameParameter);
-      final Page<WorkflowRunDoc> pagedCustomOperatorDoc =
+      final Page<WorkflowRunDoc> pagedWorkflowRunDoc =
           cosmosStore.queryItemsPage(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
               cosmosConfig.getWorkflowRunCollection(), sqlQuerySpec, WorkflowRunDoc.class,
               limit, cursor);
-      return buildWorkflowRunsPage(pagedCustomOperatorDoc);
+      return buildWorkflowRunsPage(pagedWorkflowRunDoc);
     } catch (CosmosException e) {
       throw new AppException(e.getStatusCode(), e.getMessage(), e.getMessage(), e);
     }
+  }
+
+  @Override
+  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
+                                                        Map<String, Object> params) {
+    String queryText = buildQueryTextForGetAllRunInstances(params);
+    int limit = WORKFLOW_RUNS_LIMIT;
+    if (params.get("limit") != null) {
+      limit = Integer.parseInt((String) params.get("limit"));
+    }
+    String cursor = (String) params.get("cursor");
+    if (cursor != null) {
+      cursor = cursorUtils.decodeCosmosCursor(cursor);
+    }
+    try {
+      SqlParameter workflowNameParameter = new SqlParameter("@workflowName", workflowName);
+      SqlQuerySpec sqlQuerySpec = new SqlQuerySpec(queryText, workflowNameParameter);
+      final Page<WorkflowRunDoc> pagedWorkflowRunDoc =
+          cosmosStore.queryItemsPage(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
+              cosmosConfig.getWorkflowRunCollection(), sqlQuerySpec, WorkflowRunDoc.class,
+              limit, cursor);
+      return buildWorkflowRunsPage(pagedWorkflowRunDoc).getItems();
+    } catch (CosmosException e) {
+      throw new AppException(e.getStatusCode(), e.getMessage(), e.getMessage(), e);
+    }
+  }
+
+  private String buildQueryTextForGetAllRunInstances(Map<String, Object> params) {
+    String queryText = "SELECT * from c where c.partitionKey = @workflowName";
+    String prefix = (String) params.get("prefix");
+    if (prefix != null) {
+      if (prefix.equals(INVALID_WORKFLOW_RUN_PREFIX)) {
+        throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid prefix", "Prefix must not contain the word 'backfill'");
+      }
+      queryText = String.format("%s and c.id like '%s%%'", queryText, prefix);
+    }
+    String startTimeStamp = (String) params.get("startDate");
+    if (startTimeStamp != null) {
+      queryText = String.format("%s and c.startTimeStamp >= %s", queryText, startTimeStamp);
+    }
+    String endTimeStamp = (String) params.get("endDate");
+    if (endTimeStamp != null) {
+      queryText = String.format("%s and c.endTimeStamp <= %s", queryText, endTimeStamp);
+    }
+    queryText = String.format("%s ORDER BY c._ts DESC", queryText);
+    return queryText;
   }
 
   @Override
@@ -131,12 +180,6 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
     }
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
-  }
-
-  @Override
-  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
-                                                        Map<String, Object> params) {
-    return getWorkflowRunsByWorkflowName(workflowName, 50, null).getItems();
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {
