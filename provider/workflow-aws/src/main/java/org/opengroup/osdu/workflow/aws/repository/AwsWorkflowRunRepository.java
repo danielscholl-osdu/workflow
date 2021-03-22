@@ -31,6 +31,7 @@ import org.opengroup.osdu.core.aws.dynamodb.QueryPageResult;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
+import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
@@ -84,6 +85,12 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
     public WorkflowRun getWorkflowRun(String workflowName, String runId) {
 
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
+
+        if(!isValidWorkflowRun(runId, workflowName, dataPartitionId)){
+            throw new AppException(HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "Run id's workflow/data-partition-id doesn't match workflow/data-partition-id in request");
+        }
 
         WorkflowRunDoc doc = queryHelper.loadByPrimaryKey(WorkflowRunDoc.class, runId, dataPartitionId);
 
@@ -189,6 +196,20 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
     }
 
+    private boolean isValidWorkflowRun(String runId, String workflowName, String dataPartitionId) {
+
+        boolean valid = true;
+
+        WorkflowRunDoc workflowRunDoc = queryHelper.loadByPrimaryKey(WorkflowRunDoc.class, runId, dataPartitionId);
+
+        if(workflowRunDoc != null){
+            valid = workflowRunDoc.getWorkflowName().equals(workflowName) && workflowRunDoc.getDataPartitionId().equals(dataPartitionId);
+        }
+
+        return valid;
+
+    }
+
     private boolean workflowRunExists(String runId, String dataPartitionId) {
         // Set GSI hash key
         WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
@@ -196,6 +217,5 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
         // Check if the tenant exists in the table by name
         return queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc, "dataPartitionId", dataPartitionId);
-      }
-
+    }
 }
