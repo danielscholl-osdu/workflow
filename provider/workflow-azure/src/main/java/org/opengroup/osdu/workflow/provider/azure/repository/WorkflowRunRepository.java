@@ -135,7 +135,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     String queryText = "SELECT * from c where c.partitionKey = @workflowName";
     String prefix = (String) params.get("prefix");
     if (prefix != null) {
-      if (prefix.equals(INVALID_WORKFLOW_RUN_PREFIX)) {
+      if (prefix.contains(INVALID_WORKFLOW_RUN_PREFIX)) {
         throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid prefix", "Prefix must not contain the word 'backfill'");
       }
       queryText = String.format("%s and startswith(c.id, '%s')", queryText, prefix);
