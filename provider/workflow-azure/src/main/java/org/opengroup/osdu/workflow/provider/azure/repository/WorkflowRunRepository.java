@@ -138,7 +138,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
       if (prefix.equals(INVALID_WORKFLOW_RUN_PREFIX)) {
         throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid prefix", "Prefix must not contain the word 'backfill'");
       }
-      queryText = String.format("%s and c.id like '%s%%'", queryText, prefix);
+      queryText = String.format("%s and startswith(c.id, '%s')", queryText, prefix);
     }
     String startTimeStamp = (String) params.get("startDate");
     if (startTimeStamp != null) {
