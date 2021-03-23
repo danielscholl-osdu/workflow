@@ -34,6 +34,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   private static final String LOGGER_NAME = WorkflowRunRepository.class.getName();
   private static final int WORKFLOW_RUNS_LIMIT = 50;
+  // As per the api spec, prefix for workflow run id cannot contain the word "backfill".
   private static final String INVALID_WORKFLOW_RUN_PREFIX = "backfill";
 
   @Autowired
