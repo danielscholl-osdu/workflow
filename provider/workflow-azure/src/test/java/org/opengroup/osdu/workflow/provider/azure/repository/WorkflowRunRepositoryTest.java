@@ -327,6 +327,45 @@ public class WorkflowRunRepositoryTest {
     }
   }
 
+  @Test
+  public void testGetAllRunInstancesOfWorkflowTest_whenNoLimitProvided_thenUseDefaultLimit() {
+    Page<WorkflowRunDoc> pagedWorkflowRunDoc = mock(Page.class);
+    CosmosStorePageRequest cosmosStorePageRequest = mock(CosmosStorePageRequest.class);
+
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowRunCollection()).thenReturn(WORKFLOW_RUN_COLLECTION);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    when(pagedWorkflowRunDoc.getPageable()).thenReturn(cosmosStorePageRequest);
+
+    GetAllRunInstancesParams getAllRunInstancesParams = GetAllRunInstancesParams.builder().build();
+
+    ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor = ArgumentCaptor.forClass(SqlQuerySpec.class);
+
+    when(cosmosStore.queryItemsPage(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION),
+        any(SqlQuerySpec.class),
+        eq(WorkflowRunDoc.class),
+        eq(WorkflowRunConstants.WORKFLOW_RUNS_LIMIT),
+        eq(null))).thenReturn(pagedWorkflowRunDoc);
+    workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
+
+    verify(cosmosStore, times(1)).queryItemsPage(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION),
+        sqlQuerySpecArgumentCaptor.capture(),
+        eq(WorkflowRunDoc.class),
+        eq(WorkflowRunConstants.WORKFLOW_RUNS_LIMIT),
+        eq(getAllRunInstancesParams.getCursor())
+    );
+
+    verify(cosmosConfig,times(1)).getDatabase();
+    verify(cosmosConfig, times(1)).getWorkflowRunCollection();
+    verify(dpsHeaders, times(1)).getPartitionId();
+  }
+
   private List<WorkflowRun> verifyAndGetWorkflowRunsByWorkflowName(String workflowId, String cursor,
                                                                    List<WorkflowRunDoc> toBeReturnedWorkflowRunDocs) {
     if(cursor != null) {
