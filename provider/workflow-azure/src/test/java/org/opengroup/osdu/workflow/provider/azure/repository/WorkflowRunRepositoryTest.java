@@ -307,6 +307,26 @@ public class WorkflowRunRepositoryTest {
     verify(cursorUtils, times(1)).decodeCosmosCursor(eq(TEST_CURSOR));
   }
 
+  @Test
+  public void testGetAllRunInstancesOfWorkflow_whenInvalidPrefixProvided_thenThrowsException() {
+    GetAllRunInstancesParams getAllRunInstancesParams = GetAllRunInstancesParams.builder()
+        .limit(TEST_LIMIT)
+        .cursor(TEST_CURSOR)
+        .prefix(WorkflowRunConstants.INVALID_WORKFLOW_RUN_PREFIX)
+        .startDate(TEST_WORKFLOW_RUN_START_DATE)
+        .endDate(TEST_WORKFLOW_RUN_END_DATE)
+        .build();
+
+    try {
+      workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
+    } catch (AppException e) {
+      AppError error = e.getError();
+      assertEquals(error.getCode(), HttpStatus.SC_BAD_REQUEST);
+      assertEquals(error.getReason(), "Invalid prefix");
+      assertEquals(error.getMessage(), "Prefix must not contain the word 'backfill'");
+    }
+  }
+
   private List<WorkflowRun> verifyAndGetWorkflowRunsByWorkflowName(String workflowId, String cursor,
                                                                    List<WorkflowRunDoc> toBeReturnedWorkflowRunDocs) {
     if(cursor != null) {
