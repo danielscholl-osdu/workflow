@@ -16,7 +16,6 @@ import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
-import org.opengroup.osdu.workflow.provider.azure.utils.WorkflowTasksSharingUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,7 +49,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   private CursorUtils cursorUtils;
 
   @Autowired
-  private WorkflowTasksSharingUtils workflowTaskSharingUtils;
+  private WorkflowTasksSharingRepository workflowTasksSharingRepository;
 
   @Autowired
   private BlobStore blobStore;
@@ -129,7 +128,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     // TODO [aaljain]: The feature for deleting container needs to be moved to service folder later
     final WorkflowStatusType currentStatusType = workflowRun.getStatus();
     if (getCompletedStatusTypes().contains(currentStatusType)) {
-        workflowTaskSharingUtils.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
+        workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
     }
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }

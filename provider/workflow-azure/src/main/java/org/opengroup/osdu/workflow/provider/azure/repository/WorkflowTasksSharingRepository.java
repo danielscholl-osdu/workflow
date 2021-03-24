@@ -3,10 +3,11 @@ package org.opengroup.osdu.workflow.provider.azure.repository;
 import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
-import org.opengroup.osdu.workflow.provider.azure.utils.WorkflowTasksSharingUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowTasksSharingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import java.util.UUID;
 
 @Component
 public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepository {
+
+  private static final String LOGGER_NAME = WorkflowTasksSharingRepository.class.getName();
 
   @Autowired
   BlobStore blobStore;
@@ -31,7 +34,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
   CosmosConfig cosmosConfig;
 
   @Autowired
-  WorkflowTasksSharingUtils workflowTasksSharingUtils;
+  private JaxRsDpsLog logger;
 
   @Override
   public String getSignedUrl(String workflowName, String runId) {
@@ -73,5 +76,25 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
         .createdAt(System.currentTimeMillis())
         .createdBy(dpsHeaders.getUserEmail())
         .build();
+  }
+
+  public void deleteTasksSharingInfoContainer(String dataPartitionId, String workflowName, String runId) throws WorkflowNotFoundException {
+    final Optional<WorkflowTasksSharingDoc> optionalWorkflowTasksSharingDoc =
+        cosmosStore.findItem(dataPartitionId, cosmosConfig.getDatabase(), cosmosConfig.getWorkflowTasksSharingCollection(), runId, workflowName, WorkflowTasksSharingDoc.class);
+
+    if (optionalWorkflowTasksSharingDoc.isPresent()) {
+      String containerId = optionalWorkflowTasksSharingDoc.get().getContainerId();
+      blobStore.deleteBlobContainer(dataPartitionId, containerId);
+      cosmosStore.deleteItem(
+          dataPartitionId,
+          cosmosConfig.getDatabase(),
+          cosmosConfig.getWorkflowTasksSharingCollection(),
+          runId,
+          workflowName);
+    } else {
+      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
+      logger.error(LOGGER_NAME, errorMessage);
+      throw new WorkflowNotFoundException(errorMessage);
+    }
   }
 }
