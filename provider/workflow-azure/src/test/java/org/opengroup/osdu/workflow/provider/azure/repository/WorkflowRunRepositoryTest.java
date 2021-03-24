@@ -97,6 +97,9 @@ public class WorkflowRunRepositoryTest {
   @Mock
   private CursorUtils cursorUtils;
 
+  @Mock
+  private WorkflowTasksSharingRepository workflowTasksSharingRepository;
+
   @InjectMocks
   private WorkflowRunRepository workflowRunRepository;
 
@@ -175,9 +178,10 @@ public class WorkflowRunRepositoryTest {
         eq(RUN_ID), eq(WORKFLOW_NAME), eq(WorkflowRunDoc.class));
     verify(cosmosStore).replaceItem(eq(PARTITION_ID), eq(DATABASE_NAME),
         eq(WORKFLOW_RUN_COLLECTION), eq(RUN_ID), eq(WORKFLOW_NAME), any(WorkflowRunDoc.class));
+    verify(workflowTasksSharingRepository, times(1)).deleteTasksSharingInfoContainer(eq(PARTITION_ID), eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(cosmosConfig,times(2)).getDatabase();
     verify(cosmosConfig, times(2)).getWorkflowRunCollection();
-    verify(dpsHeaders, times(2)).getPartitionId();
+    verify(dpsHeaders, times(3)).getPartitionId();
     assertThat(workflowRunDocArgumentCaptor.getValue().getStatus(), equalTo(response.getStatus().toString()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getId(), equalTo(response.getRunId()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getWorkflowName(), equalTo(response.getWorkflowId()));
