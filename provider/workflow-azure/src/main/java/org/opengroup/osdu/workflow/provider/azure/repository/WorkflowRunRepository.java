@@ -21,6 +21,7 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
 
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
@@ -33,9 +34,6 @@ import java.util.Optional;
 public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   private static final String LOGGER_NAME = WorkflowRunRepository.class.getName();
-  private static final int WORKFLOW_RUNS_LIMIT = 50;
-  // As per the api spec, prefix for workflow run id cannot contain the word "backfill".
-  private static final String INVALID_WORKFLOW_RUN_PREFIX = "backfill";
 
   @Autowired
   private CosmosConfig cosmosConfig;
@@ -111,7 +109,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
                                                         Map<String, Object> params) {
     String queryText = buildQueryTextForGetAllRunInstances(params);
-    int limit = WORKFLOW_RUNS_LIMIT;
+    int limit = WorkflowRunConstants.WORKFLOW_RUNS_LIMIT;
     if (params.get("limit") != null) {
       limit = Integer.parseInt((String) params.get("limit"));
     }
@@ -136,7 +134,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     String queryText = "SELECT * from c where c.partitionKey = @workflowName";
     String prefix = (String) params.get("prefix");
     if (prefix != null) {
-      if (prefix.contains(INVALID_WORKFLOW_RUN_PREFIX)) {
+      if (prefix.contains(WorkflowRunConstants.INVALID_WORKFLOW_RUN_PREFIX)) {
         throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid prefix", "Prefix must not contain the word 'backfill'");
       }
       queryText = String.format("%s and startswith(c.id, '%s')", queryText, prefix);
