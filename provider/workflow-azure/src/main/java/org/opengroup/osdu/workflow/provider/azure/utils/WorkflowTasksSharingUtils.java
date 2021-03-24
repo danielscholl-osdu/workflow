@@ -3,6 +3,7 @@ package org.opengroup.osdu.workflow.provider.azure.utils;
 import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class WorkflowTasksSharingUtils {
     @Autowired
     private JaxRsDpsLog logger;
 
-    public void deleteTasksSharingInfoContainer(String dataPartitionId, String workflowName, String runId) {
+    public void deleteTasksSharingInfoContainer(String dataPartitionId, String workflowName, String runId) throws WorkflowNotFoundException {
         final Optional<WorkflowTasksSharingDoc> optionalWorkflowTasksSharingDoc =
             cosmosStore.findItem(dataPartitionId, cosmosConfig.getDatabase(), cosmosConfig.getWorkflowTasksSharingCollection(), runId, workflowName, WorkflowTasksSharingDoc.class);
 
@@ -40,7 +41,9 @@ public class WorkflowTasksSharingUtils {
                 runId,
                 workflowName);
         } else {
-            // throw error (do we require a separate exception class for this?)
+          final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
+          logger.error(LOGGER_NAME, errorMessage);
+          throw new WorkflowNotFoundException(errorMessage);
         }
     }
 }
