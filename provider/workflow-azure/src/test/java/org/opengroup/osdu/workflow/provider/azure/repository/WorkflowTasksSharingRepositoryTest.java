@@ -10,7 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.WorkflowApplication;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
@@ -18,11 +20,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,6 +53,9 @@ public class WorkflowTasksSharingRepositoryTest {
   @Mock
   private DpsHeaders dpsHeaders;
 
+  @Mock
+  private JaxRsDpsLog logger;
+
   @InjectMocks
   private WorkflowTasksSharingRepository sut;
 
@@ -59,7 +67,7 @@ public class WorkflowTasksSharingRepositoryTest {
   }
 
   @Test
-  public void getSignedUrl_whenContainerExists_thenReturnsSignedUrlForExistingContainer() {
+  public void testGetSignedUrl_whenContainerExists_thenReturnsSignedUrlForExistingContainer() {
     WorkflowTasksSharingDoc workflowTasksSharingDoc = mock(WorkflowTasksSharingDoc.class);
 
     doReturn(CONTAINER_ID).when(workflowTasksSharingDoc).getContainerId();
@@ -86,7 +94,7 @@ public class WorkflowTasksSharingRepositoryTest {
   }
 
   @Test
-  public void getSignedUrl_whenContainerDoesNotExist_thenCreateContainerAndReturnSignedUrl() {
+  public void testGetSignedUrl_whenContainerDoesNotExist_thenCreateContainerAndReturnSignedUrl() {
     sut.getSignedUrl(TEST_WORKFLOW_NAME, TEST_RUN_ID);
 
     ArgumentCaptor<String> containerIdCaptor = ArgumentCaptor.forClass(String.class);
@@ -111,6 +119,51 @@ public class WorkflowTasksSharingRepositoryTest {
     assertEquals(workflowTasksSharingDoc.getPartitionKey(), TEST_WORKFLOW_NAME);
     assertEquals(workflowTasksSharingDoc.getId(), TEST_RUN_ID);
     checkBlobContainerSasPermission(blobContainerSasPermission);
+  }
+
+  @Test
+  public void testDeleteTasksSharingInfoContainer() {
+    WorkflowTasksSharingDoc workflowTasksSharingDoc = mock(WorkflowTasksSharingDoc.class);
+
+    doReturn(CONTAINER_ID).when(workflowTasksSharingDoc).getContainerId();
+    doReturn(Optional.of(workflowTasksSharingDoc)).when(cosmosStore).findItem(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_TASKS_SHARING_COLLECTION_NAME),
+        eq(TEST_RUN_ID),
+        eq(TEST_WORKFLOW_NAME),
+        eq(WorkflowTasksSharingDoc.class));
+
+    sut.deleteTasksSharingInfoContainer(PARTITION_ID, TEST_WORKFLOW_NAME, TEST_RUN_ID);
+
+    verify(blobStore, times(1)).deleteBlobContainer(eq(PARTITION_ID), eq(CONTAINER_ID));
+    verify(cosmosStore, times(1)).deleteItem(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_TASKS_SHARING_COLLECTION_NAME),
+        eq(TEST_RUN_ID),
+        eq(TEST_WORKFLOW_NAME)
+    );
+  }
+
+  @Test(expected = WorkflowNotFoundException.class)
+  public void testDeleteTasksSharingInfoContainer_whenContainerDoesNotExist_thenThrowException() {
+
+    doReturn(Optional.empty()).when(cosmosStore).findItem(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_TASKS_SHARING_COLLECTION_NAME),
+        eq(TEST_RUN_ID),
+        eq(TEST_WORKFLOW_NAME),
+        eq(WorkflowTasksSharingDoc.class));
+
+    try {
+      sut.deleteTasksSharingInfoContainer(PARTITION_ID, TEST_WORKFLOW_NAME, TEST_RUN_ID);
+    } catch (WorkflowNotFoundException e) {
+      String errorMessage = String.format("%s doesn't exist", TEST_WORKFLOW_NAME);
+      assertThat(e.getMessage(), containsString(errorMessage));
+      throw(e);
+    }
   }
 
   private void checkBlobContainerSasPermission(BlobContainerSasPermission blobContainerSasPermission) {
