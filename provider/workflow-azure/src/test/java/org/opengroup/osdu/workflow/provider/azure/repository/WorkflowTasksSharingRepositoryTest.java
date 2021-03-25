@@ -12,7 +12,6 @@ import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.WorkflowApplication;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
@@ -20,8 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -144,26 +141,6 @@ public class WorkflowTasksSharingRepositoryTest {
         eq(TEST_RUN_ID),
         eq(TEST_WORKFLOW_NAME)
     );
-  }
-
-  @Test(expected = WorkflowNotFoundException.class)
-  public void testDeleteTasksSharingInfoContainer_whenContainerDoesNotExist_thenThrowException() {
-
-    doReturn(Optional.empty()).when(cosmosStore).findItem(
-        eq(PARTITION_ID),
-        eq(DATABASE_NAME),
-        eq(WORKFLOW_TASKS_SHARING_COLLECTION_NAME),
-        eq(TEST_RUN_ID),
-        eq(TEST_WORKFLOW_NAME),
-        eq(WorkflowTasksSharingDoc.class));
-
-    try {
-      sut.deleteTasksSharingInfoContainer(PARTITION_ID, TEST_WORKFLOW_NAME, TEST_RUN_ID);
-    } catch (WorkflowNotFoundException e) {
-      String errorMessage = String.format("%s doesn't exist", TEST_WORKFLOW_NAME);
-      assertThat(e.getMessage(), containsString(errorMessage));
-      throw(e);
-    }
   }
 
   private void checkBlobContainerSasPermission(BlobContainerSasPermission blobContainerSasPermission) {

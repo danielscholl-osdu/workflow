@@ -91,10 +91,6 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
           cosmosConfig.getWorkflowTasksSharingCollection(),
           runId,
           workflowName);
-    } else {
-      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
-      logger.error(LOGGER_NAME, errorMessage);
-      throw new WorkflowNotFoundException(errorMessage);
     }
   }
 }
