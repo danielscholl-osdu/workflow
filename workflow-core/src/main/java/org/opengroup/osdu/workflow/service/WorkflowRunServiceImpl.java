@@ -34,6 +34,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private static final String KEY_AUTH_TOKEN = "authToken";
   private static final Integer WORKFLOW_RUN_LIMIT = 100;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final String KEY_DAG_NAME = "dagName";
 
   @Autowired
   private IWorkflowMetadataRepository workflowMetadataRepository;
@@ -55,8 +56,9 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
+    String dagName = (String) workflowMetadata.getRegistrationInstructions().get(KEY_DAG_NAME);
 
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName);
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName, dagName);
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
