@@ -50,4 +50,8 @@ public class WorkflowEngineRequest {
   public WorkflowEngineRequest(String runId, String workflowId, String workflowName, String dagName) {
     this(runId, workflowId, workflowName, System.currentTimeMillis(), dagName, null, false);
   }
+
+  public WorkflowEngineRequest(String runId, String workflowId, String workflowName, long executionTimeStamp, String workflowEngineExecutionDate, boolean isDeployedThroughWorkflowService) {
+    this(runId, workflowId, workflowName, executionTimeStamp, null, workflowEngineExecutionDate, isDeployedThroughWorkflowService);
+  }
 }
