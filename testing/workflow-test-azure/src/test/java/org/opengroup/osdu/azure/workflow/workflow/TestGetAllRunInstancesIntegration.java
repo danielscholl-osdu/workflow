@@ -19,6 +19,7 @@ public class TestGetAllRunInstancesIntegration extends GetAllRunInstancesIntegra
   @AfterEach
   @Override
   public void tearDown() throws Exception {
+    super.tearDown();
     this.client = null;
     this.headers = null;
   }
