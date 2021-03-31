@@ -61,7 +61,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   }
 
   @Test
-  public void should_returnNotFound_when_givenInvalidRunId() throws Exception {
+  public void should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), INVALID_WORKFLOW_RUN_ID),
@@ -101,30 +101,6 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
-        null,
-        HTTPClient.overrideHeader(headers, INVALID_PARTITION),
-        client.getAccessToken()
-    );
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
-  }
-
-  @Test
-  public void should_returnForbidden_when_notGivenWorkflowId() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, "", triggeredWorkflow.getRunId()),
-        null,
-        HTTPClient.overrideHeader(headers, INVALID_PARTITION),
-        client.getAccessToken()
-    );
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
-  }
-
-  @Test
-  public void should_returnForbidden_when_notGivenRunId() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), ""),
         null,
         HTTPClient.overrideHeader(headers, INVALID_PARTITION),
         client.getAccessToken()
