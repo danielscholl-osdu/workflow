@@ -213,6 +213,14 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     List<WorkflowRun> responseList = new ArrayList<>();
     Datastore ds = getDatastore();
     EntityQuery.Builder queryBuilder = getBaseQueryBuilder(workflowName);
+    String limit = (String) params.get("limit");
+    String cursor = (String) params.get("cursor");
+    if (Objects.nonNull(limit)) {
+      queryBuilder.setLimit(Integer.valueOf(limit));
+    }
+    if (Objects.nonNull(cursor)) {
+      queryBuilder.setOffset(Integer.valueOf(cursor));
+    }
     QueryResults<Entity> tasks = ds.run(queryBuilder.build());
     while (tasks.hasNext()) {
       responseList.add(buildWorkflowRunFromDataStoreEntity(tasks.next()));
@@ -260,7 +268,6 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     String prefix = (String) params.get("prefix");
     String startDate = (String) params.get("startDate");
     String endDate = (String) params.get("endDate");
-    String limit = (String) params.get("limit");
 
     resultList = workflowRunList.stream().filter(c -> {
       if (INCORRECT_RUN_ID_PREFIX.equals(prefix) || Objects.nonNull(prefix) &&
@@ -275,10 +282,6 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
       }
       return true;
     }).collect(Collectors.toList());
-
-    if (Objects.nonNull(limit) && resultList.size() > Integer.parseInt(limit)) {
-      return resultList.subList(0, Integer.parseInt(limit));
-    }
     return resultList;
   }
 
