@@ -18,7 +18,8 @@ public class TestGetSignedUrlIntegration extends GetSignedUrlIntegrationTests {
 
   @AfterEach
   @Override
-  public void tearDown() {
+  public void tearDown() throws Exception {
+    super.tearDown();
     this.client = null;
     this.headers = null;
   }
