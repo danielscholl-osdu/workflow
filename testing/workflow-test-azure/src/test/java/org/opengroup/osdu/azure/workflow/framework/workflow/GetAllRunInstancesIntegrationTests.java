@@ -11,7 +11,9 @@ import javax.ws.rs.HttpMethod;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -89,11 +91,13 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
   @Test
   public void should_returnForbidden_when_givenInvalidPartition() throws Exception {
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_ALL_WORKFLOW_RUNS_URL, triggeredWorkflow.getWorkflowId()),
         null,
-        HTTPClient.overrideHeader(headers, INVALID_PARTITION),
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getAccessToken()
     );
     assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
