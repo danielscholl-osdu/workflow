@@ -11,6 +11,9 @@ import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
 
 import javax.ws.rs.HttpMethod;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -98,11 +101,13 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
 
   @Test
   public void should_returnForbidden_when_givenInvalidPartition() throws Exception {
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
         null,
-        HTTPClient.overrideHeader(headers, INVALID_PARTITION),
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getAccessToken()
     );
     assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
