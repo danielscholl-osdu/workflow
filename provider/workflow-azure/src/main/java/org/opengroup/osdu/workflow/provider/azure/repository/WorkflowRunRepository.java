@@ -109,9 +109,12 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
                                                         Map<String, Object> params) {
     String queryText = buildQueryTextForGetAllRunInstances(params);
-    int limit = WorkflowRunConstants.WORKFLOW_RUNS_LIMIT;
+    int limit = WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT;
     if (params.get("limit") != null) {
       limit = Integer.parseInt((String) params.get("limit"));
+      if (limit > WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT) {
+        throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid limit", String.format("Maximum limit allowed is %s", WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT));
+      }
     }
     String cursor = (String) params.get("cursor");
     if (cursor != null) {
