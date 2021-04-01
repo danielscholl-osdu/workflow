@@ -1,5 +1,6 @@
 package org.opengroup.osdu.azure.workflow.framework.workflow;
 import com.google.gson.reflect.TypeToken;
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_ALL_WORKFLOW_RUNS_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 
 public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
@@ -145,9 +148,63 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     List<WorkflowRun> workflowRunsList =
         gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
 
-    assertTrue(workflowRunsList.size() == limit);
-    for (int i = 0; i < workflowRunsList.size(); ++i) {
-      assertTrue(workflowRunsList.get(i).getRunId().startsWith(prefix));
+    assertEquals(limit, workflowRunsList.size());
+    for (WorkflowRun workflowRun : workflowRunsList) {
+      assertTrue(workflowRun.getRunId().startsWith(prefix));
     }
+  }
+
+  @Test
+  public void should_returnSuccessAndObtainTriggeredWorkflow_when_givenStartDate() throws Exception {
+    Long startTimeStamp = triggeredWorkflow.getStartTimeStamp();
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?startDate=%s", triggeredWorkflow.getWorkflowId(), startTimeStamp),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
+    List<WorkflowRun> workflowRunsList =
+        gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
+
+    assertTrue(workflowRunsList.size() > 0);
+    for (WorkflowRun workflowRun : workflowRunsList) {
+      assertTrue(workflowRun.getStartTimeStamp() >= startTimeStamp);
+    }
+  }
+
+  @Test
+  public void should_returnSuccess_when_givenEndDateParam() throws Exception {
+    Long endTimestamp = getLatestUpdatedWorkflowRun(triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()).getEndTimeStamp();
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?endDate=%s", triggeredWorkflow.getWorkflowId(), endTimestamp),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.SC_OK, response.getStatus());
+
+    Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
+    List<WorkflowRun> workflowRunsList =
+        gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
+
+    assertTrue(workflowRunsList.size() > 0);
+    for (WorkflowRun workflowRun : workflowRunsList) {
+      assertTrue(workflowRun.getEndTimeStamp() <= endTimestamp);
+    }
+  }
+
+  WorkflowRun getLatestUpdatedWorkflowRun(String workflowId, String runId) throws Exception {
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, workflowId, runId),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+   return gson.fromJson(response.getEntity(String.class), WorkflowRun.class);
   }
 }
