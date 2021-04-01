@@ -155,7 +155,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   }
 
   @Test
-  public void should_returnSuccessAndObtainTriggeredWorkflow_when_givenStartDate() throws Exception {
+  public void should_returnSuccess_when_givenValidStartDateParam() throws Exception {
     Long startTimeStamp = triggeredWorkflow.getStartTimeStamp();
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -176,7 +176,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   }
 
   @Test
-  public void should_returnSuccess_when_givenEndDateParam() throws Exception {
+  public void should_returnSuccess_when_givenValidEndDateParam() throws Exception {
     Long endTimestamp = getLatestUpdatedWorkflowRun(triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()).getEndTimeStamp();
     ClientResponse response = client.send(
         HttpMethod.GET,
