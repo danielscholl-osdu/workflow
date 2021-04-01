@@ -39,6 +39,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.util.Assert.doesNotContain;
 
 /**
  * Tests for {@link WorkflowRunRepository}
@@ -257,7 +258,7 @@ public class WorkflowRunRepositoryTest {
   }
 
   @Test
-  public void testGetAllRunInstancesOfWorkflow() {
+  public void testGetAllRunInstancesOfWorkflow_givenValidParams() {
     Page<WorkflowRunDoc> pagedWorkflowRunDoc = mock(Page.class);
     CosmosStorePageRequest cosmosStorePageRequest = mock(CosmosStorePageRequest.class);
 
@@ -328,7 +329,7 @@ public class WorkflowRunRepositoryTest {
   }
 
   @Test
-  public void testGetAllRunInstancesOfWorkflowTest_whenNoLimitProvided_thenUseDefaultLimit() {
+  public void testGetAllRunInstancesOfWorkflow_whenNoLimitProvided_thenUseDefaultLimit() {
     Page<WorkflowRunDoc> pagedWorkflowRunDoc = mock(Page.class);
     CosmosStorePageRequest cosmosStorePageRequest = mock(CosmosStorePageRequest.class);
 
@@ -347,7 +348,7 @@ public class WorkflowRunRepositoryTest {
         eq(WORKFLOW_RUN_COLLECTION),
         any(SqlQuerySpec.class),
         eq(WorkflowRunDoc.class),
-        eq(WorkflowRunConstants.WORKFLOW_RUNS_LIMIT),
+        eq(WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT),
         eq(null))).thenReturn(pagedWorkflowRunDoc);
     workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
 
@@ -357,10 +358,93 @@ public class WorkflowRunRepositoryTest {
         eq(WORKFLOW_RUN_COLLECTION),
         sqlQuerySpecArgumentCaptor.capture(),
         eq(WorkflowRunDoc.class),
-        eq(WorkflowRunConstants.WORKFLOW_RUNS_LIMIT),
+        eq(WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT),
         eq(getAllRunInstancesParams.getCursor())
     );
 
+    verify(cosmosConfig,times(1)).getDatabase();
+    verify(cosmosConfig, times(1)).getWorkflowRunCollection();
+    verify(dpsHeaders, times(1)).getPartitionId();
+  }
+
+  @Test
+  public void testGetAllRunInstancesOfWorkflow_whenGivenInvalidLimit_thenThrowsException() {
+    final Integer INVALID_LIMIT = WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT + 1;
+
+    GetAllRunInstancesParams getAllRunInstancesParams = GetAllRunInstancesParams.builder()
+        .limit(INVALID_LIMIT)
+        .startDate(TEST_WORKFLOW_RUN_START_DATE)
+        .endDate(TEST_WORKFLOW_RUN_END_DATE)
+        .build();
+
+    try {
+      workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
+    } catch (AppException e) {
+      AppError error = e.getError();
+      assertEquals(error.getCode(), HttpStatus.SC_BAD_REQUEST);
+      assertEquals(error.getReason(), "Invalid limit");
+      assertEquals(error.getMessage(), String.format("Maximum limit allowed is %s", WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT));
+    }
+  }
+
+  @Test
+  public void testGetAllRunInstancesOfWorkflow_whenGivenInvalidLimitAndInvalidPrefix_thenThrowsException() {
+    final Integer INVALID_LIMIT = WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT + 1;
+    GetAllRunInstancesParams getAllRunInstancesParams = GetAllRunInstancesParams.builder()
+        .limit(INVALID_LIMIT)
+        .prefix(WorkflowRunConstants.INVALID_WORKFLOW_RUN_PREFIX)
+        .build();
+
+    try {
+      workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
+    } catch (AppException e) {
+      AppError error = e.getError();
+      assertEquals(error.getCode(), HttpStatus.SC_BAD_REQUEST);
+      assertEquals(error.getReason(), "Invalid prefix");
+      assertEquals(error.getMessage(), "Prefix must not contain the word 'backfill'");
+    }
+  }
+
+  @Test
+  public void testGetAllRunInstancesOfWorkflow_givenOnlyStartDateParam_thenOtherParamsShouldNotBePresentInQueryText() {
+    Page<WorkflowRunDoc> pagedWorkflowRunDoc = mock(Page.class);
+    CosmosStorePageRequest cosmosStorePageRequest = mock(CosmosStorePageRequest.class);
+
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowRunCollection()).thenReturn(WORKFLOW_RUN_COLLECTION);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    when(pagedWorkflowRunDoc.getPageable()).thenReturn(cosmosStorePageRequest);
+
+    GetAllRunInstancesParams getAllRunInstancesParams = GetAllRunInstancesParams.builder()
+        .startDate(TEST_WORKFLOW_RUN_START_DATE)
+        .build();
+
+    ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor = ArgumentCaptor.forClass(SqlQuerySpec.class);
+
+    when(cosmosStore.queryItemsPage(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION),
+        any(SqlQuerySpec.class),
+        eq(WorkflowRunDoc.class),
+        eq(WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT),
+        eq(null))).thenReturn(pagedWorkflowRunDoc);
+    workflowRunRepository.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, getAllRunInstancesParams.getParams());
+
+    verify(cosmosStore, times(1)).queryItemsPage(
+        eq(PARTITION_ID),
+        eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION),
+        sqlQuerySpecArgumentCaptor.capture(),
+        eq(WorkflowRunDoc.class),
+        eq(WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT),
+        eq(null)
+    );
+
+    String queryText = sqlQuerySpecArgumentCaptor.getValue().getQueryText();
+    assertThat(queryText, containsString(String.format("c.startTimeStamp >= %s", TEST_WORKFLOW_RUN_START_DATE)));
+    doesNotContain(queryText, "c.endTimeStamp <=", "Query text should not contain end time related query");
+    doesNotContain(queryText, "startswith", "Query text should not contain prefix related query");
     verify(cosmosConfig,times(1)).getDatabase();
     verify(cosmosConfig, times(1)).getWorkflowRunCollection();
     verify(dpsHeaders, times(1)).getPartitionId();
@@ -403,17 +487,16 @@ public class WorkflowRunRepositoryTest {
 
     return workflowRunsPage.getItems();
   }
-
 }
 
 @Getter
 @Builder
 class GetAllRunInstancesParams {
-  private Integer limit;
-  private String cursor;
-  private String startDate;
-  private String endDate;
-  private String prefix;
+  private final Integer limit;
+  private final String cursor;
+  private final String startDate;
+  private final String endDate;
+  private final String prefix;
 
   public Map<String, Object> getParams() {
     Map<String, Object> params = new HashMap<>();
