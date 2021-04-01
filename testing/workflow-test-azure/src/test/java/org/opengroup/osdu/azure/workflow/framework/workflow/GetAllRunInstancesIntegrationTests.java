@@ -21,9 +21,12 @@ import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.G
 
 public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
-  public static final String INVALID_WORKFLOW_ID = "Invalid-Workflow-ID";
-  public static final String INVALID_PARTITION = "invalid-partition";
-  public static WorkflowRun triggeredWorkflow = null;
+  private static final String INVALID_WORKFLOW_ID = "invalid-workflow-id";
+  private static final String INVALID_PARTITION = "invalid-partition";
+  private static final String INVALID_PREFIX = "backfill";
+  private static final Integer INVALID_LIMIT = 1000;
+
+  private static WorkflowRun triggeredWorkflow = null;
 
   public void initializeTriggeredWorkflow() throws Exception {
     if (triggeredWorkflow == null) {
@@ -51,7 +54,6 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
       assertEquals(workflowRunsList.get(i).getWorkflowId(), triggeredWorkflow.getWorkflowId());
     }
   }
-
 
   @Test
   public void should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
@@ -104,14 +106,48 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   }
 
   @Test
-  public void should_returnForbidden_when_notGivenWorkflowId() throws Exception {
+  public void should_returnBadRequest_when_givenInvalidPrefix() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, ""),
+        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?prefix=%s", triggeredWorkflow.getWorkflowId(), INVALID_PREFIX),
         null,
-        HTTPClient.overrideHeader(headers, INVALID_PARTITION),
+        headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void should_returnBadRequest_when_givenInvalidLimit() throws Exception {
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?limit=%s", triggeredWorkflow.getWorkflowId(), INVALID_LIMIT),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void should_returnSuccess_when_givenValidLimitAndValidPrefix() throws Exception {
+    int limit = 1;
+    String prefix = triggeredWorkflow.getRunId().substring(0, 2);
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?limit=%s&prefix=%s", triggeredWorkflow.getWorkflowId(), limit, prefix),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
+    List<WorkflowRun> workflowRunsList =
+        gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
+
+    assertTrue(workflowRunsList.size() == limit);
+    for (int i = 0; i < workflowRunsList.size(); ++i) {
+      assertTrue(workflowRunsList.get(i).getRunId().startsWith(prefix));
+    }
   }
 }
