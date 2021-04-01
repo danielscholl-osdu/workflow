@@ -28,9 +28,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   private static WorkflowRun triggeredWorkflow = null;
 
   public void initializeTriggeredWorkflow() throws Exception {
-    if (triggeredWorkflow == null) {
-      triggeredWorkflow = triggerDummyWorkflow(client, headers);
-    }
+    triggeredWorkflow = triggerDummyWorkflow(client, headers);
   }
 
   @Test
