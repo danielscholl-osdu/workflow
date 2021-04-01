@@ -8,7 +8,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowTasksSharingRepository;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
