@@ -3,6 +3,7 @@ package org.opengroup.osdu.workflow.provider.azure.repository;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
+import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
@@ -19,6 +20,8 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +47,12 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   @Autowired
   private CursorUtils cursorUtils;
+
+  @Autowired
+  private WorkflowTasksSharingRepository workflowTasksSharingRepository;
+
+  @Autowired
+  private BlobStore blobStore;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
@@ -115,6 +124,12 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         workflowRunDoc);
     logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
         workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
+
+    // TODO [aaljain]: The feature for deleting container needs to be moved to service folder later
+    final WorkflowStatusType currentStatusType = workflowRun.getStatus();
+    if (getCompletedStatusTypes().contains(currentStatusType)) {
+        workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
+    }
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }
 

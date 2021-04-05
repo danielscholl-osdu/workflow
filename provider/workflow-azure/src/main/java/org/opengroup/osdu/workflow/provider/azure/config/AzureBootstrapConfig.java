@@ -45,19 +45,13 @@ public class AzureBootstrapConfig {
   }
 
   @Bean
-  public BlobServiceClient blobServiceClient(SecretClient kv) {
+  public BlobServiceClient buildBlobServiceClient(SecretClient kv) {
     final String partitionId = getPartitionId();
-    final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage", partitionId));
-    final String accountKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-storage-key", partitionId));
-    StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+    final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-ingest-storage", partitionId));
+    final String accountKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-ingest-storage-key", partitionId));
+    final StorageSharedKeyCredential credential = new StorageSharedKeyCredential(accountName, accountKey);
     String endpoint = String.format("https://%s.blob.core.windows.net", accountName);
-
-    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
-        .endpoint(endpoint)
-        .credential(storageSharedKeyCredential)
-        .buildClient();
-
-    return blobServiceClient;
+    return new BlobServiceClientBuilder().endpoint(endpoint).credential(credential).buildClient();
   }
 
   @Bean
