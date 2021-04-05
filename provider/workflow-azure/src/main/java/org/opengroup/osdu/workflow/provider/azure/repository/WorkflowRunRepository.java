@@ -3,6 +3,8 @@ package org.opengroup.osdu.workflow.provider.azure.repository;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
+import org.opengroup.osdu.azure.blobstorage.BlobStore;
+import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
@@ -19,6 +21,9 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
+
+import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +49,12 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   @Autowired
   private CursorUtils cursorUtils;
+
+  @Autowired
+  private WorkflowTasksSharingRepository workflowTasksSharingRepository;
+
+  @Autowired
+  private BlobStore blobStore;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
@@ -75,7 +86,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   @Override
   public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit,
                                                         String cursor) {
-    if(cursor != null) {
+    if (cursor != null) {
       cursor = cursorUtils.decodeCosmosCursor(cursor);
     }
 
@@ -84,14 +95,63 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
       SqlQuerySpec sqlQuerySpec = new SqlQuerySpec(
           "SELECT * from c where c.partitionKey = @workflowName ORDER BY c._ts DESC",
           workflowNameParameter);
-      final Page<WorkflowRunDoc> pagedCustomOperatorDoc =
+      final Page<WorkflowRunDoc> pagedWorkflowRunDoc =
           cosmosStore.queryItemsPage(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
               cosmosConfig.getWorkflowRunCollection(), sqlQuerySpec, WorkflowRunDoc.class,
               limit, cursor);
-      return buildWorkflowRunsPage(pagedCustomOperatorDoc);
+      return buildWorkflowRunsPage(pagedWorkflowRunDoc);
     } catch (CosmosException e) {
       throw new AppException(e.getStatusCode(), e.getMessage(), e.getMessage(), e);
     }
+  }
+
+  @Override
+  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
+                                                        Map<String, Object> params) {
+    String queryText = buildQueryTextForGetAllRunInstances(params);
+    int limit = WorkflowRunConstants.DEFAULT_WORKFLOW_RUNS_LIMIT;
+    if (params.get("limit") != null) {
+      limit = Integer.parseInt((String) params.get("limit"));
+      if (limit > WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT) {
+        throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid limit", String.format("Maximum limit allowed is %s", WorkflowRunConstants.MAX_WORKFLOW_RUNS_LIMIT));
+      }
+    }
+    String cursor = (String) params.get("cursor");
+    if (cursor != null) {
+      cursor = cursorUtils.decodeCosmosCursor(cursor);
+    }
+    try {
+      SqlParameter workflowNameParameter = new SqlParameter("@workflowName", workflowName);
+      SqlQuerySpec sqlQuerySpec = new SqlQuerySpec(queryText, workflowNameParameter);
+      final Page<WorkflowRunDoc> pagedWorkflowRunDoc =
+          cosmosStore.queryItemsPage(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
+              cosmosConfig.getWorkflowRunCollection(), sqlQuerySpec, WorkflowRunDoc.class,
+              limit, cursor);
+      return buildWorkflowRunsPage(pagedWorkflowRunDoc).getItems();
+    } catch (CosmosException e) {
+      throw new AppException(e.getStatusCode(), e.getMessage(), e.getMessage(), e);
+    }
+  }
+
+  private String buildQueryTextForGetAllRunInstances(Map<String, Object> params) {
+    String queryText = "SELECT * from c where c.partitionKey = @workflowName";
+    String prefix = (String) params.get("prefix");
+    if (prefix != null) {
+      if (prefix.contains(WorkflowRunConstants.INVALID_WORKFLOW_RUN_PREFIX)) {
+        throw new AppException(HttpStatus.SC_BAD_REQUEST, "Invalid prefix", "Prefix must not contain the word 'backfill'");
+      }
+      queryText = String.format("%s and startswith(c.id, '%s')", queryText, prefix);
+    }
+    String startTimeStamp = (String) params.get("startDate");
+    if (startTimeStamp != null) {
+      queryText = String.format("%s and c.startTimeStamp >= %s", queryText, startTimeStamp);
+    }
+    String endTimeStamp = (String) params.get("endDate");
+    if (endTimeStamp != null) {
+      queryText = String.format("%s and c.endTimeStamp <= %s", queryText, endTimeStamp);
+    }
+    queryText = String.format("%s ORDER BY c._ts DESC", queryText);
+    return queryText;
   }
 
   @Override
@@ -115,13 +175,13 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         workflowRunDoc);
     logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
         workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
-    return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
-  }
 
-  @Override
-  public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
-                                                        Map<String, Object> params) {
-    return getWorkflowRunsByWorkflowName(workflowName, 50, null).getItems();
+    // TODO [aaljain]: The feature for deleting container needs to be moved to service folder later
+    final WorkflowStatusType currentStatusType = workflowRun.getStatus();
+    if (getCompletedStatusTypes().contains(currentStatusType)) {
+        workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
+    }
+    return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {

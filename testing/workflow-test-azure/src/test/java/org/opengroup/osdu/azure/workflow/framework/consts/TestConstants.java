@@ -28,9 +28,11 @@ public class TestConstants {
       "/workflow/%s/workflowRun/%s/updateStatus";
 	public static final String CUSTOM_OPERATOR_API_ENDPOINT = "/customOperator";
 	public static final String CUSTOM_OPERATOR_BY_ID_API_ENDPOINT = "/customOperator/%s";
+  public static final String GET_SIGNED_URL_API_ENDPOINT = "/workflow/%s/workflowRun/%s/getSignedUrl";
 
   	public static final String WORKFLOW_TYPE_INGEST = "ingest";
 
+  public static final String GET_ALL_WORKFLOW_RUNS_API_ENDPOINT = "/workflow/%s/workflowRun";
 	public static final String WORKFLOW_ID_FIELD = "WorkflowID";
 	public static final String STATUS_FIELD = "Status";
 
@@ -66,6 +68,10 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CUSTOM_OPERATOR_BY_ID_API_ENDPOINT;
 	public static final String UPDATE_WORKFLOW_RUN_STATUS_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_API_ENDPOINT;
+  public static final String GET_SIGNED_URL_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_SIGNED_URL_API_ENDPOINT;
+  public static final String GET_ALL_WORKFLOW_RUNS_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_ALL_WORKFLOW_RUNS_API_ENDPOINT;
 
 	public static final String NON_EXISTING_WORKFLOW_ID = "non-existing-workflow-id";
 

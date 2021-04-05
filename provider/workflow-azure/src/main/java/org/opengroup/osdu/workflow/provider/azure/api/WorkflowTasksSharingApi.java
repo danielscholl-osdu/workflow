@@ -16,10 +16,10 @@ public class WorkflowTasksSharingApi {
   @Autowired
   private IWorkflowTasksSharingService workflowTasksSharingService;
 
-  @GetMapping("/{id}/workflowRun/{runId}/getSignedUrl")
+  @GetMapping("/{workflow_name}/workflowRun/{runId}/getSignedUrl")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
-  public GetSignedUrlResponse create(@PathVariable("id") final String workflowId,
+  public GetSignedUrlResponse create(@PathVariable("workflow_name") final String workflowName,
                                      @PathVariable("runId") final String runId) {
-    return workflowTasksSharingService.getSignedUrl(workflowId, runId);
+    return workflowTasksSharingService.getSignedUrl(workflowName, runId);
   }
 }
