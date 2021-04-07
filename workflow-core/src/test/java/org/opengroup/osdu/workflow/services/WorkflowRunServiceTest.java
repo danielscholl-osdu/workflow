@@ -64,6 +64,9 @@ class WorkflowRunServiceTest {
   private static final String WORKFLOW_METADATA = "{\n" +
       "  \"workflowId\": \"some-dag-name\",\n" +
       "  \"workflowName\": \"some-dag-name\",\n" +
+      " \"registrationInstructions\": {\n" +
+      " \"dagName\": \"dag-name\"\n" +
+      "},\n" +
       "  \"description\": \"This is a test workflow\",\n" +
       "  \"creationTimestamp\": 1600144876028,\n" +
       "  \"createdBy\": \"user@email.com\",\n" +
@@ -549,6 +552,6 @@ class WorkflowRunServiceTest {
   }
 
   private WorkflowEngineRequest workflowEngineRequest() {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, WORKFLOW_RUN_START_TIMESTAMP, null, false);
+    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, WORKFLOW_RUN_START_TIMESTAMP, null, null, false);
   }
 }

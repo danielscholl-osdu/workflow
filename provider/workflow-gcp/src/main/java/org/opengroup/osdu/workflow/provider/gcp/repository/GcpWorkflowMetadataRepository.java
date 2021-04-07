@@ -29,6 +29,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -243,6 +244,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
         .creationTimestamp(entity.getLong(CREATION_TIME_STAMP))
         .description(entity.getString(DESCRIPTION))
         .version(entity.getLong(VERSION))
+        .registrationInstructions(Collections.singletonMap(KEY_DAG_NAME, entity.getString(DAG_NAME)))
         .build();
   }
 

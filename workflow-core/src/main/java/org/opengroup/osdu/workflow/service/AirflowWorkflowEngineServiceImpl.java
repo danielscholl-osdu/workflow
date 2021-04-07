@@ -66,8 +66,8 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
 
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context) {
-    log.info("Submitting ingestion with Airflow with dagName: {}", rq.getWorkflowName());
-    final String url = format(TRIGGER_AIRFLOW_ENDPOINT, rq.getWorkflowName());
+    log.info("Submitting ingestion with Airflow with dagName: {}", rq.getDagName());
+    final String url = format(TRIGGER_AIRFLOW_ENDPOINT, rq.getDagName());
     final JSONObject requestBody = new JSONObject();
     requestBody.put(RUN_ID_PARAMETER_NAME, rq.getRunId());
     requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, context);
