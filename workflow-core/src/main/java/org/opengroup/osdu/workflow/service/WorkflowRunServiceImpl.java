@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,7 +58,14 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
-    String dagName = (String) workflowMetadata.getRegistrationInstructions().get(KEY_DAG_NAME);
+    String dagName = null;
+    Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
+    if (Objects.nonNull(instructions)) {
+      dagName = (String) instructions.get(KEY_DAG_NAME);
+    }
+    if (Objects.isNull(dagName)) {
+      dagName = workflowMetadata.getWorkflowName();
+    }
 
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName, dagName);
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
