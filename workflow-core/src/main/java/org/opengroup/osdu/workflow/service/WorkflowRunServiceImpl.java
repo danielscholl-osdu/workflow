@@ -23,6 +23,7 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
@@ -70,7 +71,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
-    auditLogger.workflowRunEvent(Collections.singletonList(request.toString()));
+    auditLogger.workflowRunEvent(Collections.singletonList(getTruncatedData(request.toString())));
     return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
   }
 
