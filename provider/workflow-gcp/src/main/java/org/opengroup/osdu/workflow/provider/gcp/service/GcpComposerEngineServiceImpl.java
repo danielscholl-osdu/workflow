@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 
 @Service
 @Slf4j
@@ -96,7 +97,7 @@ public class GcpComposerEngineServiceImpl extends AirflowWorkflowEngineServiceIm
       String httpMethod, String url, String stringData, WorkflowEngineRequest rq) {
     log.info(
         "Calling airflow endpoint with Google API. Http method: {}, Endpoint: {}, request body: {}",
-        httpMethod, url, stringData);
+        httpMethod, url, getTruncatedData(stringData));
     String airflowUrl = this.airflowConfig.getUrl();
     String iapClientId = this.googleIapHelper.getIapClientId(airflowUrl);
 
