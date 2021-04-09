@@ -37,14 +37,6 @@ public class AzureBootstrapConfig {
   private String partitionId;
 
   @Bean
-  public CosmosClient buildCosmosClient(SecretClient kv) {
-    final String partitionId = getPartitionId();
-    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-endpoint", partitionId));
-    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-primary-key", partitionId));
-    return new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosPrimaryKey).buildClient();
-  }
-
-  @Bean
   public BlobServiceClient buildBlobServiceClient(SecretClient kv) {
     final String partitionId = getPartitionId();
     final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-ingest-storage", partitionId));
