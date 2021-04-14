@@ -3,6 +3,8 @@ package org.opengroup.osdu.workflow.service;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
@@ -38,6 +40,9 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
   @Override
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
     final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
+    if (StringUtils.isEmpty(workflowMetadata.getWorkflowName())) {
+      throw new BadRequestException("Invalid workflow name provided");
+    }
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
