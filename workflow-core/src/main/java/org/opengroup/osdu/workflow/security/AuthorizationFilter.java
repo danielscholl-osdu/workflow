@@ -19,6 +19,7 @@ package org.opengroup.osdu.workflow.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -55,7 +56,7 @@ public class AuthorizationFilter {
       throw new UnauthorizedException("Authorization header is mandatory");
     }
     if (StringUtils.isEmpty(this.headers.getPartitionId())) {
-      throw new UnauthorizedException("data-partition-id header is mandatory");
+      throw new BadRequestException("data-partition-id header is mandatory");
     }
   }
 }
