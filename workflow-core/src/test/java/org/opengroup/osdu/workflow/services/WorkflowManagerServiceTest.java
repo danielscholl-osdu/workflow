@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -52,6 +53,14 @@ class WorkflowManagerServiceTest {
 
   private static final String CREATE_WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
+      "  \"description\": \"This is a test workflow\",\n" +
+      "  \"registrationInstructions\": {\n" +
+      "    \"dagContent\": \"sample-dag-content\"\n" +
+      "  }\n" +
+      "}";
+
+  private static final String CREATE_WORKFLOW_REQUEST_WITH_INVALID_WORKFLOW_NAME = "{\n" +
+      "  \"workflowName\": \"\",\n" +
       "  \"description\": \"This is a test workflow\",\n" +
       "  \"registrationInstructions\": {\n" +
       "    \"dagContent\": \"sample-dag-content\"\n" +
@@ -149,6 +158,16 @@ class WorkflowManagerServiceTest {
         equalTo(request.getDescription()));
     assertThat(workflowMetadataCaptor.getValue().getCreatedBy(), equalTo(USER_EMAIL));
     assertThat(workflowMetadataCaptor.getValue().getVersion(), equalTo(SEED_VERSION));
+  }
+
+  @Test
+  public void testCreateWorkflowWithInvalidWorkflowName() throws Exception {
+    final CreateWorkflowRequest request =
+        OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST_WITH_INVALID_WORKFLOW_NAME, CreateWorkflowRequest.class);
+    Assertions.assertThrows(BadRequestException.class, () -> {
+      workflowManagerService.createWorkflow(request);
+    });
+    verify(dpsHeaders, times(1)).getUserEmail();
   }
 
   @Test
