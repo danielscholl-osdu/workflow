@@ -39,10 +39,10 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   @Override
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
-    final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
-    if (StringUtils.isEmpty(workflowMetadata.getWorkflowName())) {
+    if (StringUtils.isEmpty(request.getWorkflowName())) {
       throw new BadRequestException("Invalid workflow name provided");
     }
+    final WorkflowMetadata workflowMetadata = getWorkflowMetadata(request, dpsHeaders.getUserEmail());
     final WorkflowMetadata savedMetadata = workflowMetadataRepository.createWorkflow(workflowMetadata);
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
