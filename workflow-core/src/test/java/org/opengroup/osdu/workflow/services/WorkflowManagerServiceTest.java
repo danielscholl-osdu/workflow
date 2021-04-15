@@ -167,7 +167,6 @@ class WorkflowManagerServiceTest {
     Assertions.assertThrows(BadRequestException.class, () -> {
       workflowManagerService.createWorkflow(request);
     });
-    verify(dpsHeaders, times(1)).getUserEmail();
   }
 
   @Test
