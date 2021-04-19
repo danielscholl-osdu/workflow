@@ -95,6 +95,23 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
+  public void shouldContainCorrelationIdInResponseHeadersWhenGetListWorkflowForTenant() throws Exception {
+    String responseBody = createWorkflow();
+    Map<String, String> workflowInfo =
+        new ObjectMapper().readValue(responseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        GET_ALL_WORKFLOW_URL,
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertTrue(response.getHeaders().containsKey("correlation-id"));
+  }
+
+  @Test
   public void shouldReturn200WhenGetCompleteDetailsForWorkflow() throws Exception {
     String responseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);
