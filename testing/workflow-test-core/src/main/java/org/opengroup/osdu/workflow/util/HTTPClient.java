@@ -20,6 +20,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import lombok.ToString;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 @Log
 @ToString
@@ -62,9 +63,11 @@ public abstract class HTTPClient {
 	public ClientResponse send(String httpMethod, String url, String payLoad, Map<String, String> headers, String token) {
 		ClientResponse response;
 		try {
-			String correlationId = java.util.UUID.randomUUID().toString();
-			log.info(String.format("Request correlation id: %s", correlationId));
-			headers.put(HEADER_CORRELATION_ID, correlationId);
+      if (StringUtils.isBlank(headers.get(HEADER_CORRELATION_ID))) {
+        String correlationId = java.util.UUID.randomUUID().toString();
+        headers.put(HEADER_CORRELATION_ID, correlationId);
+      }
+      log.info(String.format("Request correlation id: %s", headers.get(HEADER_CORRELATION_ID)));
 			Client client = getClient();
 			client.setReadTimeout(180000);
 			client.setConnectTimeout(10000);

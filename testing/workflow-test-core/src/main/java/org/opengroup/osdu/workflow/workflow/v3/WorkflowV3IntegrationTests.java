@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_ALL_WORKFLOW_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATION_ID;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithIncorrectDag;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithIncorrectWorkflowName;
 
@@ -32,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.HttpMethod;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
@@ -40,6 +43,7 @@ import org.springframework.http.HttpStatus;
 public abstract class WorkflowV3IntegrationTests extends TestBase {
 
   protected static List<Map<String, String>> createdWorkflows = new ArrayList<>();
+  private static String CORRELATION_ID = "test-correlation-id";
 
   @Test
   public void shouldReturnSuccessWhenGivenValidRequestWorkflowCreate() throws Exception {
@@ -95,7 +99,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void shouldContainCorrelationIdInResponseHeadersWhenGetListWorkflowForTenant() throws Exception {
+  public void shouldContainCorrelationIdInResponseHeaders_whenGetListWorkflowForTenant_givenNoCorrelationIdInHeaders() throws Exception {
     String responseBody = createWorkflow();
     Map<String, String> workflowInfo =
         new ObjectMapper().readValue(responseBody, HashMap.class);
@@ -108,7 +112,26 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertTrue(response.getHeaders().containsKey("correlation-id"));
+    assertTrue(response.getHeaders().containsKey(HEADER_CORRELATION_ID));
+    assertTrue(StringUtils.isNotBlank(response.getHeaders().get(HEADER_CORRELATION_ID).get(0)));
+  }
+
+  @Test
+  public void shouldContainCorrelationIdInResponseHeaders_whenGetListWorkflowForTenant_givenCorrelationIdInHeaders() throws Exception {
+    String responseBody = createWorkflow();
+    Map<String, String> workflowInfo =
+        new ObjectMapper().readValue(responseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+    Map<String, String> headersWithCorrelationId = new HashMap<>(headers);
+    headersWithCorrelationId.put(HEADER_CORRELATION_ID, CORRELATION_ID);
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        GET_ALL_WORKFLOW_URL,
+        null,
+        headersWithCorrelationId,
+        client.getAccessToken()
+    );
+    assertEquals(CORRELATION_ID, response.getHeaders().get(HEADER_CORRELATION_ID).get(0));
   }
 
   @Test
