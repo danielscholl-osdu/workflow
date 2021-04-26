@@ -151,8 +151,8 @@ The following software have components provided under the terms of this license:
 - Microsoft Azure Java Core Library (from https://github.com/Azure/azure-sdk-for-java)
 - Microsoft Azure Netty HTTP Client Library (from https://github.com/Azure/azure-sdk-for-java)
 - Microsoft Azure SDK for SQL API of Azure Cosmos DB Service (from https://github.com/Azure/azure-sdk-for-java)
-- Mockito (from http://www.mockito.org)
 - Mockito (from http://mockito.org)
+- Mockito (from http://www.mockito.org)
 - Netty Reactive Streams HTTP support (from )
 - Netty Reactive Streams Implementation (from )
 - Netty/Buffer (from http://netty.io/)
@@ -213,7 +213,6 @@ The following software have components provided under the terms of this license:
 - Spring Boot Web Starter (from http://projects.spring.io/spring-boot/)
 - Spring Cloud Commons (from )
 - Spring Cloud Context (from )
-- Spring Cloud GCP Datastore Starter (from https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-gcp-starter-data-datastore)
 - Spring Commons Logging Bridge (from https://github.com/spring-projects/spring-framework)
 - Spring Context (from https://github.com/spring-projects/spring-framework)
 - Spring Core (from https://github.com/spring-projects/spring-framework)
@@ -660,5 +659,4 @@ The following software have components provided under the terms of this license:
 - org.junit.platform:junit-platform-commons (from http://junit.org/junit5/)
 - org.junit.platform:junit-platform-engine (from http://junit.org/junit5/)
 - org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
-
 
