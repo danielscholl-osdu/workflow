@@ -39,6 +39,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}/{{ .Chart.Name }}-{{ .Values.image.branch }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
           ports:
             - containerPort: 80
           readinessProbe:
