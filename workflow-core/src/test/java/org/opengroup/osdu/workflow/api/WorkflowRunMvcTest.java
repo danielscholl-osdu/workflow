@@ -105,7 +105,8 @@ class WorkflowRunMvcTest {
   private IAuthorizationService authorizationService;
   @MockBean
   private RestExceptionHandler restExceptionHandler;
-
+  @MockBean
+  private DpsHeaders dpsHeaders;
   @Mock
   private AuthorizationResponse authorizationResponse;
 
@@ -118,6 +119,8 @@ class WorkflowRunMvcTest {
     when(workflowRunService.triggerWorkflow(eq(WORKFLOW_NAME), eq(request)))
         .thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         post(TRIGGER_WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -128,6 +131,8 @@ class WorkflowRunMvcTest {
         .andReturn();
     verify(workflowRunService, times(1)).triggerWorkflow(eq(WORKFLOW_NAME), eq(request));
     verify(authorizationService, times(1)).authorizeAny(any(), any());
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowRunResponse response = mapper
         .readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRunResponse, equalTo(response));
@@ -140,6 +145,8 @@ class WorkflowRunMvcTest {
     when(workflowRunService.getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         get("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -149,6 +156,8 @@ class WorkflowRunMvcTest {
         .andReturn();
     verify(workflowRunService).getWorkflowRunByName(eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(authorizationService).authorizeAny(any(), any());
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowRunResponse responseWorkflowRun =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
@@ -165,6 +174,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()))).thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -177,6 +188,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()));
     verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowRunResponse responseWorkflowRun =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
@@ -192,6 +205,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()))).thenReturn(workflowRunResponse);
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -204,6 +219,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()));
     verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowRunResponse responseWorkflowRun =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowRunResponse.class);
     assertThat(workflowRunResponse, equalTo(responseWorkflowRun));
@@ -217,6 +234,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()))).thenThrow(new WorkflowRunCompletedException(WORKFLOW_NAME,RUN_ID));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -229,6 +248,8 @@ class WorkflowRunMvcTest {
         eq(request.getStatus()));
     verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER),
         eq(WorkflowRole.CREATOR));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     assertTrue(mvcResult.getResolvedException() instanceof WorkflowRunCompletedException);
   }
 
