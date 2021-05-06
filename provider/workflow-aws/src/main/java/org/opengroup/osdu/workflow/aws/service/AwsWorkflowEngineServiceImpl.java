@@ -34,6 +34,7 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsAirflowApiMode;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
+import org.opengroup.osdu.workflow.aws.repository.AwsWorkflowRunRepository;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
@@ -77,12 +78,8 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   final ObjectMapper objectMapper = new ObjectMapper();
 
-  private DynamoDBQueryHelper queryHelper;
-
-  @PostConstruct
-  public void init() {
-      queryHelper = new DynamoDBQueryHelper(config.dynamoDbEndpoint, config.dynamoDbRegion, config.dynamoDbTablePrefix);
-  }
+  @Inject
+  AwsWorkflowRunRepository awsWorkflowRunRepository;
 
   // @Autowired
   // @Qualifier("dags")
@@ -157,9 +154,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
    * @param runId
    */
   private void validateRunId(final String runId) {
-    WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
-    workflowRunDoc.setRunId(runId);
-    if(queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc)){
+    if(awsWorkflowRunRepository.runExists(runId)){
       throw new AppException(HttpStatus.BAD_REQUEST.value(),
           HttpStatus.BAD_REQUEST.getReasonPhrase(), "Cannot kick off workflow with duplicate runId");
     }

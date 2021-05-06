@@ -27,6 +27,8 @@ import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
+import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
+import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
 import org.opengroup.osdu.core.aws.dynamodb.QueryPageResult;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -38,10 +40,13 @@ import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.context.annotation.RequestScope;
 
 @Repository
+@RequestScope
 public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
     @Inject
@@ -50,14 +55,19 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
     @Inject
     DpsHeaders headers;
 
-    private DynamoDBQueryHelper queryHelper;
+    @Inject
+    private DynamoDBQueryHelperFactory dynamoDBQueryHelperFactory;
+
+    private DynamoDBQueryHelperV2 queryHelper;
+
+    @Value("${aws.dynamodb.workflowRunTable.ssm.relativePath}")
+    String workflowRunTableParameterRelativePath;
 
     private final String workflowRunHashKey = "runId";
 
     @PostConstruct
     public void init() {
-        queryHelper = new DynamoDBQueryHelper(config.dynamoDbEndpoint, config.dynamoDbRegion,
-                config.dynamoDbTablePrefix);
+        queryHelper = dynamoDBQueryHelperFactory.getQueryHelperForPartition(headers, workflowRunTableParameterRelativePath);
     }
 
     @Override
@@ -194,6 +204,12 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
         return runs;
 
+    }
+
+    public boolean runExists(String runId){
+        WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
+        workflowRunDoc.setRunId(runId);
+        return queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc);
     }
 
     private boolean isValidWorkflowRun(String runId, String workflowName, String dataPartitionId) {

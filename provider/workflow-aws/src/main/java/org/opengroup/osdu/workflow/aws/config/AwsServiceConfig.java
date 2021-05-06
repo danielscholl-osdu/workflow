@@ -44,21 +44,6 @@ public class AwsServiceConfig {
   @Setter(AccessLevel.PROTECTED)
   public String environment;
 
-  @Value("${aws.dynamodb.table.prefix}")
-  @Getter()
-  @Setter(AccessLevel.PROTECTED)
-  public String dynamoDbTablePrefix;
-
-  @Value("${aws.dynamodb.endpoint}")
-  @Getter()
-  @Setter(AccessLevel.PROTECTED)
-  public String dynamoDbEndpoint;
-
-  @Value("${aws.dynamodb.region}")
-  @Getter()
-  @Setter(AccessLevel.PROTECTED)
-  public String dynamoDbRegion;
-
   @Value("${aws.airflow.api.mode}")
   @Getter()
   @Setter(AccessLevel.PROTECTED)
@@ -73,7 +58,7 @@ public class AwsServiceConfig {
   @Getter()
   @Setter(AccessLevel.PROTECTED)
   public String airflowBaseUrl;
-  
+
 
   // @Value("${aws.ssm}")
   // @Getter()
@@ -87,11 +72,11 @@ public class AwsServiceConfig {
   public void init() throws PropertyException {
     // if (ssmEnabled) {
     //   SSMConfig ssmConfig = new SSMConfig();
-    //   ParameterStorePropertySource ssm = ssmConfig.amazonSSM();      
-      
+    //   ParameterStorePropertySource ssm = ssmConfig.amazonSSM();
+
     //   try {
     //    //set properties from SSM here
-    //   } catch (Exception e) {        
+    //   } catch (Exception e) {
     //     System.out.println(String.format("SSM property %s not found", parameter));
     //   }
     // }

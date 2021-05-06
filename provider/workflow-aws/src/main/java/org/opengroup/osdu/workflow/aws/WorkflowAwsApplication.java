@@ -17,7 +17,7 @@ package org.opengroup.osdu.workflow.aws;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "org.opengroup")
+@SpringBootApplication(scanBasePackages = "org.opengroup.osdu")
 public class WorkflowAwsApplication {
 
   public static void main(String[] args) {
