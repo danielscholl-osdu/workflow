@@ -100,6 +100,9 @@ class WorkflowManagerMvcTest {
   @MockBean
   private JaxRsDpsLog log;
 
+  @MockBean
+  private DpsHeaders dpsHeaders;
+
   @Mock
   private AuthorizationResponse authorizationResponse;
 
@@ -111,6 +114,8 @@ class WorkflowManagerMvcTest {
     when(workflowManagerService.createWorkflow(eq(request))).thenReturn(metadata);
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
         .thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -121,6 +126,8 @@ class WorkflowManagerMvcTest {
         .andReturn();
     verify(workflowManagerService, times(1)).createWorkflow(eq(request));
     verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
     assertThat(metadata, equalTo(responseMetadata));
@@ -132,6 +139,8 @@ class WorkflowManagerMvcTest {
     when(workflowManagerService.createWorkflow(eq(request)))
         .thenThrow(new ResourceConflictException(EXISTING_WORKFLOW_ID, "conflict"));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -142,6 +151,8 @@ class WorkflowManagerMvcTest {
         .andReturn();
     verify(workflowManagerService, times(1)).createWorkflow(eq(request));
     verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final ConflictApiError response =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ConflictApiError.class);
     Assertions.assertEquals(EXISTING_WORKFLOW_ID, response.getConflictId());
@@ -152,6 +163,8 @@ class WorkflowManagerMvcTest {
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
     when(workflowManagerService.getWorkflowByName(eq(WORKFLOW_NAME))).thenReturn(metadata);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     final MvcResult mvcResult = mockMvc.perform(
         get(WORKFLOW_ENDPOINT + "/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -161,6 +174,8 @@ class WorkflowManagerMvcTest {
         .andReturn();
     verify(workflowManagerService).getWorkflowByName(eq(WORKFLOW_NAME));
     verify(authorizationService).authorizeAny(any(), any());
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
     assertThat(metadata, equalTo(responseMetadata));
@@ -171,6 +186,8 @@ class WorkflowManagerMvcTest {
     doNothing().when(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
         .thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -180,6 +197,8 @@ class WorkflowManagerMvcTest {
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.ADMIN));
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
   }
 
   @Test
@@ -187,6 +206,8 @@ class WorkflowManagerMvcTest {
     doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService)
         .deleteWorkflow(eq(WORKFLOW_NAME));
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
+    when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -196,6 +217,8 @@ class WorkflowManagerMvcTest {
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     verify(authorizationService).authorizeAny(any(), any());
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
   }
 
    @Test
@@ -206,6 +229,8 @@ class WorkflowManagerMvcTest {
          thenReturn(workflowMetadataList);
      when(authorizationService.authorizeAny(any(), eq(WorkflowRole.VIEWER), eq(WorkflowRole.CREATOR),
          eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
+     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
+     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
      final MvcResult mvcResult = mockMvc.perform(
          get( String.format("/v1/workflow/?prefix=%s","Hello"))
              .contentType(MediaType.APPLICATION_JSON)
@@ -216,6 +241,8 @@ class WorkflowManagerMvcTest {
      verify(workflowManagerService).getAllWorkflowForTenant(eq("Hello"));
      verify(authorizationService).authorizeAny(any(), eq(WorkflowRole.VIEWER), eq(WorkflowRole.CREATOR),
          eq(WorkflowRole.ADMIN));
+     verify(dpsHeaders).getAuthorization();
+     verify(dpsHeaders).getPartitionId();
      final List<WorkflowMetadata> responseWorkflowMetadataList =
          mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class);
      assertThat(workflowMetadataList,equalTo(responseWorkflowMetadataList));
