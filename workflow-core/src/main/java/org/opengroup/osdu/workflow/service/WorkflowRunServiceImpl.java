@@ -78,10 +78,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   @Override
   public WorkflowRunResponse getWorkflowRunByName(final String workflowName, final String runId) {
     WorkflowRun workflowRun = workflowRunRepository.getWorkflowRun(workflowName, runId);
-    if (getActiveStatusTypes().contains(workflowRun.getStatus())) {
-      return buildWorkflowRunResponse(fetchAndUpdateWorkflowRunStatus(workflowRun));
-    }
-    return buildWorkflowRunResponse(workflowRun);
+    return buildWorkflowRunResponse(fetchAndUpdateWorkflowRunStatus(workflowRun));
   }
 
   @Override
@@ -129,10 +126,10 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   private boolean isActiveRunsPresent(List<WorkflowRun> workflowRuns) {
     List<WorkflowStatusType> activeStatusTypes = WorkflowStatusType.getActiveStatusTypes();
-    for(WorkflowRun workflowRun: workflowRuns) {
-      if(activeStatusTypes.contains(workflowRun.getStatus())) {
+    for (WorkflowRun workflowRun : workflowRuns) {
+      WorkflowRun updatedWorkflowRun = fetchAndUpdateWorkflowRunStatus(workflowRun);
+      if (activeStatusTypes.contains(updatedWorkflowRun.getStatus()))
         return true;
-      }
     }
     return false;
   }
@@ -165,21 +162,24 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   }
 
   private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {
-    final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
-    final String workflowName = workflowMetadata.getWorkflowName();
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName,
-        workflowRun.getStartTimeStamp(), workflowRun.getWorkflowEngineExecutionDate());
-    final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
-    if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
-      if (getCompletedStatusTypes().contains(currentStatusType)) {
-        // Setting EndTimeStamp with the timestamp of Instant when this API is called.
-        // Currently no EndTimeStamp is returned in the response from Workflow engine.
-        // Going forward with the endTimeStamp response from airflow the value can be changed.
-        return workflowRunRepository.updateWorkflowRun(buildUpdatedWorkflowRun(workflowRun,
-            currentStatusType, System.currentTimeMillis()));
-      } else {
-        return workflowRunRepository.updateWorkflowRun(buildUpdatedWorkflowRun(workflowRun,
-            currentStatusType, null));
+    List<WorkflowStatusType> activeStatusTypes = WorkflowStatusType.getActiveStatusTypes();
+    if (activeStatusTypes.contains(workflowRun.getStatus())) {
+      final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
+      final String workflowName = workflowMetadata.getWorkflowName();
+      final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName,
+          workflowRun.getStartTimeStamp(), workflowRun.getWorkflowEngineExecutionDate());
+      final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
+      if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
+        if (getCompletedStatusTypes().contains(currentStatusType)) {
+          // Setting EndTimeStamp with the timestamp of Instant when this API is called.
+          // Currently no EndTimeStamp is returned in the response from Workflow engine.
+          // Going forward with the endTimeStamp response from airflow the value can be changed.
+          return workflowRunRepository.updateWorkflowRun(buildUpdatedWorkflowRun(workflowRun,
+              currentStatusType, System.currentTimeMillis()));
+        } else {
+          return workflowRunRepository.updateWorkflowRun(buildUpdatedWorkflowRun(workflowRun,
+              currentStatusType, null));
+        }
       }
     }
     return workflowRun;

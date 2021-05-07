@@ -464,12 +464,23 @@ class WorkflowRunServiceTest {
         WorkflowRun.class);
     final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
         WorkflowRun.class);
+    final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(WORKFLOW_METADATA,
+        WorkflowMetadata.class);
+    final ArgumentCaptor<WorkflowEngineRequest> requestArgumentCaptor = ArgumentCaptor
+        .forClass(WorkflowEngineRequest.class);
+    final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
+        .forClass(WorkflowRun.class);
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null)))
         .thenReturn(new WorkflowRunsPage(Arrays.asList(finishedWorkflowRun, submittedWorkflowRun),
             TEST_CURSOR));
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(),
-        eq(TEST_CURSOR))).thenReturn(new WorkflowRunsPage(Arrays.asList(runningWorkflowRun),
+        eq(TEST_CURSOR))).thenReturn(new WorkflowRunsPage(Arrays.asList(submittedWorkflowRun),
         null));
+    when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
+    when(workflowEngineService.getWorkflowRunStatus(requestArgumentCaptor.capture()))
+        .thenReturn(WorkflowStatusType.RUNNING);
+    when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture()))
+        .thenReturn(runningWorkflowRun);
     boolean isExceptionThrown = false;
     try {
       workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
@@ -484,6 +495,81 @@ class WorkflowRunServiceTest {
     verify(workflowRunRepository).getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(),
         eq(TEST_CURSOR));
     verify(workflowRunRepository, times(0)).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
+    verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
+    verify(workflowEngineService).getWorkflowRunStatus(any(WorkflowEngineRequest.class));
+    verify(workflowRunRepository).updateWorkflowRun(any(WorkflowRun.class));
+
+    WorkflowEngineRequest workflowEngineRequest = requestArgumentCaptor.getValue();
+    assertThat(workflowEngineRequest.getWorkflowName(),equalTo(submittedWorkflowRun.getWorkflowName()));
+    assertThat(workflowEngineRequest.getExecutionTimeStamp(),
+        equalTo(submittedWorkflowRun.getStartTimeStamp()));
+    assertThat(workflowEngineRequest.getWorkflowEngineExecutionDate(),
+        equalTo(submittedWorkflowRun.getWorkflowEngineExecutionDate()));
+
+    WorkflowRun workflowRun = workflowRunArgumentCaptor.getValue();
+    assertThat(workflowRun.getStatus(), equalTo(WorkflowStatusType.RUNNING));
+    assertThat(workflowRun.getWorkflowId(), equalTo(submittedWorkflowRun.getWorkflowId()));
+    assertThat(workflowRun.getSubmittedBy(), equalTo(submittedWorkflowRun.getSubmittedBy()));
+    assertThat(workflowRun.getStartTimeStamp(), equalTo(submittedWorkflowRun.getStartTimeStamp()));
+    assertThat(workflowRun.getEndTimeStamp(), equalTo(submittedWorkflowRun.getEndTimeStamp()));
+    assertThat(workflowRun.getRunId(), equalTo(submittedWorkflowRun.getRunId()));
+  }
+
+  @Test
+  void testDeleteWorkflowRunsByWorkflowIdWithFinishedWorkflowRunsInIncompleteState()
+      throws Exception {
+    final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
+        WorkflowRun.class);
+    final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
+        WorkflowRun.class);
+    final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(WORKFLOW_METADATA,
+        WorkflowMetadata.class);
+    final ArgumentCaptor<WorkflowEngineRequest> requestArgumentCaptor = ArgumentCaptor
+        .forClass(WorkflowEngineRequest.class);
+    final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
+        .forClass(WorkflowRun.class);
+    when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null)))
+        .thenReturn(new WorkflowRunsPage(Arrays.asList(finishedWorkflowRun, runningWorkflowRun), TEST_CURSOR));
+    when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(),
+        eq(TEST_CURSOR))).thenReturn(new WorkflowRunsPage(Arrays.asList(runningWorkflowRun),
+        null));
+    when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
+    when(workflowEngineService.getWorkflowRunStatus(requestArgumentCaptor.capture()))
+        .thenReturn(WorkflowStatusType.FINISHED);
+    when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture()))
+        .thenReturn(finishedWorkflowRun);
+    ArgumentCaptor<List<String>> runIdListCaptor = ArgumentCaptor.forClass(List.class);
+    doNothing().when(workflowRunRepository).deleteWorkflowRuns(eq(WORKFLOW_NAME),
+        runIdListCaptor.capture());
+    workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
+
+    verify(workflowRunRepository).getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null));
+    verify(workflowRunRepository).getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(),
+        eq(TEST_CURSOR));
+    verify(workflowRunRepository).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
+    verify(workflowMetadataRepository, times(2)).getWorkflow(eq(WORKFLOW_NAME));
+    verify(workflowEngineService, times(2))
+        .getWorkflowRunStatus(any(WorkflowEngineRequest.class));
+    verify(workflowRunRepository, times(2))
+        .updateWorkflowRun(any(WorkflowRun.class));
+
+    List<WorkflowEngineRequest> workflowEngineRequestList = requestArgumentCaptor.getAllValues();
+    for(WorkflowEngineRequest workflowEngineRequest: workflowEngineRequestList){
+      assertThat(workflowEngineRequest.getWorkflowName(),equalTo(runningWorkflowRun.getWorkflowName()));
+      assertThat(workflowEngineRequest.getExecutionTimeStamp(),
+          equalTo(runningWorkflowRun.getStartTimeStamp()));
+      assertThat(workflowEngineRequest.getWorkflowEngineExecutionDate(),
+          equalTo(runningWorkflowRun.getWorkflowEngineExecutionDate()));
+    }
+    List<WorkflowRun> workflowRunList = workflowRunArgumentCaptor.getAllValues();
+    for(WorkflowRun workflowRun: workflowRunList){
+      assertThat(workflowRun.getStatus(), equalTo(WorkflowStatusType.FINISHED));
+      assertThat(workflowRun.getWorkflowId(), equalTo(runningWorkflowRun.getWorkflowId()));
+      assertThat(workflowRun.getSubmittedBy(), equalTo(runningWorkflowRun.getSubmittedBy()));
+      assertThat(workflowRun.getStartTimeStamp(), equalTo(runningWorkflowRun.getStartTimeStamp()));
+      assertThat(workflowRun.getRunId(), equalTo(runningWorkflowRun.getRunId()));
+    }
+
   }
 
   @Test
