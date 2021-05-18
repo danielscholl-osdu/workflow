@@ -1,5 +1,4 @@
 /*
-  Copyright © 2021 Amazon Web Services 
   Copyright 2020 Google LLC
   Copyright 2020 EPAM Systems, Inc
 
