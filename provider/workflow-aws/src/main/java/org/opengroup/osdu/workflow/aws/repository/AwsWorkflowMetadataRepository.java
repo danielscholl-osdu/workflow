@@ -27,10 +27,7 @@ import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
@@ -39,37 +36,28 @@ import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.context.annotation.RequestScope;
 
 @Repository
-@RequestScope
 public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
     @Inject
     private AwsServiceConfig config;
 
-    @Inject
+    @Inject 
     DpsHeaders headers;
 
-    @Inject
-    private DynamoDBQueryHelperFactory dynamoDBQueryHelperFactory;
-
-    private DynamoDBQueryHelperV2 queryHelper;
-
-    @Value("${aws.dynamodb.workflowMetadataTable.ssm.relativePath}")
-    String workflowMetadataTableParameterRelativePath;
+    private DynamoDBQueryHelper queryHelper;
 
     @PostConstruct
     public void init() {
-      queryHelper = dynamoDBQueryHelperFactory.getQueryHelperForPartition(headers, workflowMetadataTableParameterRelativePath);
+      queryHelper = new DynamoDBQueryHelper(config.dynamoDbEndpoint, config.dynamoDbRegion, config.dynamoDbTablePrefix);
     }
 
 
     @Override
-    public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {
+    public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {   
 
       //should be removed once the validation occurs in common code
       if (!workflowMetadata.getWorkflowName().matches("^[a-zA-Z0-9._-]{1,64}$")) {
@@ -77,25 +65,25 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
         String.format("Invalid workflowName. Must match pattern '%s'", "^[a-zA-Z0-9._-]{1,64}$"));
       }
 
-      String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
+      String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();     
       workflowMetadata.setWorkflowId(generateWorkflowId(workflowMetadata.getWorkflowName(), dataPartitionId)); //name should be unique. Enforce it via using name/id as same field
-
+      
       if (workflowExists(workflowMetadata.getWorkflowName(), dataPartitionId)) { //don't update if workflow already exists
         throw new ResourceConflictException(workflowMetadata.getWorkflowName(), "Workflow with same name already exists");
       }
 
       WorkflowMetadataDoc doc = WorkflowMetadataDoc.create(workflowMetadata, dataPartitionId);
-
+      
       try {
         queryHelper.save(doc);
       }
       catch(Exception e) {
         throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                              HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                              HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), 
                               "Failed to save workflowMetadata to db");
       }
-
-
+      
+      
       return doc.convertToWorkflowMetadata(); //eliminate fields that might exist that aren't stored
     }
 
@@ -136,7 +124,7 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     public void deleteWorkflow(String workflowName) {
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
         String workflowId = generateWorkflowId(workflowName, dataPartitionId);
-
+        
         queryHelper.deleteByPrimaryKey(WorkflowMetadataDoc.class, workflowId, dataPartitionId);
 
     }
@@ -146,29 +134,20 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
         String filterExpression = "dataPartitionId = :partitionId";
-
-        AttributeValue dataPartitionAttributeValue = new AttributeValue(dataPartitionId);
-
-
+        AttributeValue attributeValue = new AttributeValue(dataPartitionId);
         Map<String, AttributeValue> eav = new HashMap<>();
-        eav.put(":partitionId", dataPartitionAttributeValue);
-
-        if (StringUtils.isNotBlank(prefix)) {
-          filterExpression += " AND begins_with ( workflowName, :workflowNamePrefix )";
-          AttributeValue workflowNamePrefixAttributeValue = new AttributeValue(prefix);
-          eav.put(":workflowNamePrefix", workflowNamePrefixAttributeValue);
-        }
+        eav.put(":partitionId", attributeValue);
 
         ArrayList<WorkflowMetadataDoc> docs = queryHelper.scanTable(WorkflowMetadataDoc.class, filterExpression, eav);
 
         if (docs.size() > 0) {
-          List<WorkflowMetadata> metadatas = docs.stream().map(x -> x.convertToWorkflowMetadata()).collect(Collectors.toList());
+          List<WorkflowMetadata> metadatas = docs.stream().map(x -> x.convertToWorkflowMetadata()).collect(Collectors.toList());  
           return metadatas;
         }
         else {
           return new ArrayList<WorkflowMetadata>();
-        }
-
+        }        
+        
     }
-
+    
 }

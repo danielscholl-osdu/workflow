@@ -1,5 +1,5 @@
 <!--
-  Copyright © 2021 Amazon Web Services
+  Copyright © 2020 Amazon Web Services
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@
     <dependency>
       <groupId>org.opengroup.osdu.core.aws</groupId>
       <artifactId>os-core-lib-aws</artifactId>
-      <version>0.9.1-SNAPSHOT</version>
+      <version>0.3.17</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-cognitoidp</artifactId>
-      <version>1.11.1018</version>
+      <version>1.11.676</version>
     </dependency>
   </dependencies>
 
