@@ -31,6 +31,8 @@ import javax.inject.Inject;
 @RequiredArgsConstructor
 @Component
 public class EntitlementsClientFactory extends AbstractFactoryBean<IEntitlementsFactory> {
+  @Autowired
+  private HttpResponseBodyMapper httpResponseBodyMapper;
 
   final EntitlementProperties entitlementProperties;
 
@@ -42,8 +44,7 @@ public class EntitlementsClientFactory extends AbstractFactoryBean<IEntitlements
     return new EntitlementsFactory(EntitlementsAPIConfig.builder()
         .rootUrl(entitlementProperties.getUrl())
         .apiKey(entitlementProperties.getAppKey())
-        .build(),
-        bodyMapper);
+        .build(), httpResponseBodyMapper);
   }
 
   @Override
