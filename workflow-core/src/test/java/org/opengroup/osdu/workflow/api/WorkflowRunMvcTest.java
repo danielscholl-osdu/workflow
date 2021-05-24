@@ -3,6 +3,7 @@ package org.opengroup.osdu.workflow.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
@@ -53,6 +54,7 @@ class WorkflowRunMvcTest {
   private static final String PARTITION = "partition";
   private static final String WORKFLOW_NAME = "test-dag-name";
   private static final String RUN_ID = "d13f7fd0-d27e-4176-8d60-6e9aad86e347";
+  private static final String CORRELATION_ID = "sample-correlation-id";
   private static final String TRIGGER_WORKFLOW_ENDPOINT = String
       .format("/v1/workflow/%s/workflowRun", WORKFLOW_NAME);
   private static final String TRIGGER_WORKFLOW_REQUEST = "{\n" +
@@ -107,6 +109,8 @@ class WorkflowRunMvcTest {
   private RestExceptionHandler restExceptionHandler;
   @MockBean
   private DpsHeaders dpsHeaders;
+  @MockBean
+  private JaxRsDpsLog logger;
   @Mock
   private AuthorizationResponse authorizationResponse;
 
@@ -121,6 +125,7 @@ class WorkflowRunMvcTest {
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         post(TRIGGER_WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -147,6 +152,7 @@ class WorkflowRunMvcTest {
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         get("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -176,6 +182,7 @@ class WorkflowRunMvcTest {
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -207,6 +214,7 @@ class WorkflowRunMvcTest {
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -236,6 +244,7 @@ class WorkflowRunMvcTest {
         eq(WorkflowRole.CREATOR))).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         put("/v1/workflow/{workflow_name}/workflowRun/{runId}", WORKFLOW_NAME, RUN_ID)
             .contentType(MediaType.APPLICATION_JSON)
