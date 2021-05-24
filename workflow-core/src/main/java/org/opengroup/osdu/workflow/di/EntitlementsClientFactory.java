@@ -20,9 +20,13 @@ import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.entitlements.EntitlementsAPIConfig;
 import org.opengroup.osdu.core.common.entitlements.EntitlementsFactory;
 import org.opengroup.osdu.core.common.entitlements.IEntitlementsFactory;
+import org.opengroup.osdu.core.common.http.json.HttpResponseBodyMapper;
 import org.opengroup.osdu.workflow.model.property.EntitlementProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @RequiredArgsConstructor
 @Component
@@ -30,12 +34,16 @@ public class EntitlementsClientFactory extends AbstractFactoryBean<IEntitlements
 
   final EntitlementProperties entitlementProperties;
 
+  @Inject
+  private HttpResponseBodyMapper bodyMapper;
+
   @Override
   protected IEntitlementsFactory createInstance() {
     return new EntitlementsFactory(EntitlementsAPIConfig.builder()
         .rootUrl(entitlementProperties.getUrl())
         .apiKey(entitlementProperties.getAppKey())
-        .build());
+        .build(),
+        bodyMapper);
   }
 
   @Override
