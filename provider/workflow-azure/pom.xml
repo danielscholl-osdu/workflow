@@ -132,6 +132,17 @@
       <groupId>com.azure</groupId>
       <artifactId>azure-storage-file-share</artifactId>
       <version>12.6.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.azure</groupId>
+          <artifactId>azure-storage-common</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-common</artifactId>
+      <version>12.10.1</version> <!-- {x-version-update;com.azure:azure-storage-common;current} -->
     </dependency>
 
 
