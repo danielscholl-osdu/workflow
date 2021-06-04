@@ -36,7 +36,7 @@ import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTes
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
 
 public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
-  public static final String CREATE_WORKFLOW_INVALID_REQUEST_MESSAGE = "Invalid JSON input: Unrecognized field";
+  public static final String CREATE_WORKFLOW_INVALID_REQUEST_MESSAGE = "Unrecognized field";
   public static final String WORKFLOW_NAME_CONFLICT_MESSAGE = "ResourceConflictException: Workflow with name %s already exists";
   public static final String TEST_WORKFLOW_FILE_NAME = "test_dummy_dag.py";
 
