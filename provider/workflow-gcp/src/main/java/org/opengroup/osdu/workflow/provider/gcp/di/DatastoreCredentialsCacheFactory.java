@@ -1,5 +1,3 @@
-package org.opengroup.osdu.workflow.provider.gcp.di;
-
 /*
  * Copyright 2020 Google LLC
  * Copyright 2020 EPAM Systems, Inc
@@ -16,6 +14,8 @@ package org.opengroup.osdu.workflow.provider.gcp.di;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.opengroup.osdu.workflow.provider.gcp.di;
 
 import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.cache.VmCache;

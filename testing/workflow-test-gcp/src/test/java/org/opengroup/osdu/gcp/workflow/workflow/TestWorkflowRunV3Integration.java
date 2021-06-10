@@ -17,6 +17,21 @@
 
 package org.opengroup.osdu.gcp.workflow.workflow;
 
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.sun.jersey.api.client.ClientResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.ws.rs.HttpMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opengroup.osdu.gcp.workflow.util.HTTPClientGCP;
@@ -24,11 +39,20 @@ import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
 
+  private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+  private List<String> activeWorkflowStatusTypes = Arrays.asList("submitted", "running");
+
   @BeforeEach
   @Override
-  public void setup() {
+  public void setup() throws Exception {
     this.client = new HTTPClientGCP();
     this.headers = client.getCommonHeader();
+
+    try {
+      deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+    } catch (Exception e) {
+      throw e;
+    }
   }
 
   @AfterEach
@@ -44,8 +68,61 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
       try {
         deleteTestWorkflows(c.get(WORKFLOW_NAME));
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     });
+  }
+
+  @Override
+  protected void deleteTestWorkflows(String workflowName) throws Exception {
+
+    List<String> runIds = getWorkflowRuns(workflowName);
+
+    for (String runId : runIds) {
+      sendWorkflowRunFinishedUpdateRequest(workflowName, runId);
+    }
+
+    String url = CREATE_WORKFLOW_URL + "/" + workflowName;
+    sendDeleteRequest(url);
+  }
+
+  protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId) throws Exception {
+    return client.send(
+        HttpMethod.PUT,
+        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowName,
+            runId),
+        buildUpdateWorkflowPayload(),
+        headers,
+        client.getAccessToken()
+    );
+  }
+
+  private List<String> getWorkflowRuns(String workflowName) throws Exception {
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, workflowName),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+
+    String respBody = response.getEntity(String.class);
+
+    JsonElement responseDataArr = gson.fromJson(respBody, JsonElement.class);
+    ArrayList<String> runIds = new ArrayList<>();
+
+    if (responseDataArr instanceof JsonArray) {
+
+      for (JsonElement responseData : (JsonArray) responseDataArr) {
+        String workflowStatus = responseData.getAsJsonObject().get("status").getAsString();
+
+        if (activeWorkflowStatusTypes.contains(workflowStatus)) {
+          runIds.add(responseData.getAsJsonObject().get("runId").getAsString());
+        }
+      }
+    }
+
+    return runIds;
+
   }
 }
