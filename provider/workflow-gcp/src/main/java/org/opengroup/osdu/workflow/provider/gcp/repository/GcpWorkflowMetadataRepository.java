@@ -203,7 +203,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
         txn.commit();
         workflowMetadata.setWorkflowId(entity.getKey().getName());
       } else {
-        workflowMetadata.setWorkflowId(tasks.next().getKey().getName());
+        throw new AppException(HttpStatus.CONFLICT.value(), "Conflict", String.format("Workflow with name %s already exists.", workflowName));
       }
     } catch (DatastoreException ex) {
       throw new PersistenceException(ex.getCode(), ex.getMessage(), ex.getReason());

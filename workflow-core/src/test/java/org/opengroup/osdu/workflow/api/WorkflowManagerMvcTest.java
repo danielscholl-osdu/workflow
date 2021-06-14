@@ -52,6 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class WorkflowManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
+  private static final String CORRELATION_ID = "sample-correlation-id";
   private static final String WORKFLOW_RESPONSE = "{\n" +
       "  \"workflowId\": \"2afccfb8-1351-41c6-9127-61f2d7f22ff8\",\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
@@ -116,6 +117,7 @@ class WorkflowManagerMvcTest {
         .thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -141,6 +143,7 @@ class WorkflowManagerMvcTest {
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -165,6 +168,7 @@ class WorkflowManagerMvcTest {
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         get(WORKFLOW_ENDPOINT + "/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -188,6 +192,7 @@ class WorkflowManagerMvcTest {
         .thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -208,6 +213,7 @@ class WorkflowManagerMvcTest {
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+    when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
@@ -231,6 +237,7 @@ class WorkflowManagerMvcTest {
          eq(WorkflowRole.ADMIN))).thenReturn(authorizationResponse);
      when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
      when(dpsHeaders.getPartitionId()).thenReturn(PARTITION);
+     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
      final MvcResult mvcResult = mockMvc.perform(
          get( String.format("/v1/workflow/?prefix=%s","Hello"))
              .contentType(MediaType.APPLICATION_JSON)

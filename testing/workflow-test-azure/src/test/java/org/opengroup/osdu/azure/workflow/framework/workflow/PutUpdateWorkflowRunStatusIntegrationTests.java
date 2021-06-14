@@ -31,8 +31,8 @@ public abstract class PutUpdateWorkflowRunStatusIntegrationTests extends TestBas
   public static final String WORKFLOW_RUN_NOT_FOUND_MESSAGE = "WorkflowRun: %s for Workflow: %s doesn't exist";
   public static final String WORKFLOW_COMPLETED_EXCEPTION_MESSAGE = "WorkflowRunCompletedException: " +
       "WorkflowRun with name %s and for Run Id %s already completed";
-  public static final String INVALID_REQUEST_FIELD_MESSAGE = "Invalid JSON input: Unrecognized field ";
-  public static final String INVALID_STATUS_MESSAGE = "Invalid JSON input: Cannot deserialize value";
+  public static final String INVALID_REQUEST_FIELD_MESSAGE = "Unrecognized field ";
+  public static final String INVALID_STATUS_MESSAGE = "Cannot deserialize value";
   public static final String INVALID_WORKFLOW_ID = "Invalid-Workflow-ID";
   public static final String INVALID_WORKFLOW_RUN_ID = "Invalid-WorkflowRun-ID";
   public static final String INVALID_PARTITION = "invalid-partition";
