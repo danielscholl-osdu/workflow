@@ -14,13 +14,6 @@
 
 package org.opengroup.osdu.workflow.provider.azure.config;
 
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.security.keyvault.secrets.SecretClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.common.StorageSharedKeyCredential;
-import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,16 +28,6 @@ public class AzureBootstrapConfig {
 
   @Value("${osdu.azure.partitionId}")
   private String partitionId;
-
-  @Bean
-  public BlobServiceClient buildBlobServiceClient(SecretClient kv) {
-    final String partitionId = getPartitionId();
-    final String accountName = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-ingest-storage", partitionId));
-    final String accountKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-ingest-storage-key", partitionId));
-    final StorageSharedKeyCredential credential = new StorageSharedKeyCredential(accountName, accountKey);
-    String endpoint = String.format("https://%s.blob.core.windows.net", accountName);
-    return new BlobServiceClientBuilder().endpoint(endpoint).credential(credential).buildClient();
-  }
 
   @Bean
   @Named("KEY_VAULT_URL")
