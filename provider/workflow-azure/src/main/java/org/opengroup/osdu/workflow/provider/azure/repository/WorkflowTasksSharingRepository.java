@@ -7,9 +7,10 @@ import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
-import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingRepository;
+import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -22,6 +23,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
   private static final String LOGGER_NAME = WorkflowTasksSharingRepository.class.getName();
 
   @Autowired
+  @Qualifier("IngestBlobStore")
   BlobStore blobStore;
 
   @Autowired
@@ -40,6 +42,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
   public String getSignedUrl(String workflowName, String runId) {
     final String dataPartitionId = dpsHeaders.getPartitionId();
     // TODO : Add support for using user provided expiry time and permissions (?)
+    final OffsetDateTime startTime = OffsetDateTime.now();
     final int expiryDays = 7;
     final OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(expiryDays);
     // TODO : Add support for custom permission (?)
@@ -63,7 +66,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
       cosmosStore.createItem(dataPartitionId, cosmosConfig.getDatabase(),
           cosmosConfig.getWorkflowTasksSharingCollection(), workflowTasksSharingDocNewContainer.getPartitionKey(), workflowTasksSharingDocNewContainer);
     }
-    return blobStore.generatePreSignedURL(dataPartitionId, containerId, expiryTime, permissions);
+    return blobStore.generatePreSignedUrlWithUserDelegationSas(dataPartitionId, containerId, startTime, expiryTime, permissions);
   }
 
   WorkflowTasksSharingDoc workflowTasksSharingDocBuilder(String workflowName, String runId, String containerId) {
