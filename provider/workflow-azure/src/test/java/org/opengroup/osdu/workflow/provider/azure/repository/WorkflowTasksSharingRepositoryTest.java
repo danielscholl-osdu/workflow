@@ -81,7 +81,7 @@ public class WorkflowTasksSharingRepositoryTest {
     ArgumentCaptor<String> containerIdCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<BlobContainerSasPermission> blobContainerSasPermissionArgumentCaptor = ArgumentCaptor.forClass(BlobContainerSasPermission.class);
 
-    verify(blobStore).generatePreSignedURL(eq(PARTITION_ID), containerIdCaptor.capture(), any(), blobContainerSasPermissionArgumentCaptor.capture());
+    verify(blobStore).generatePreSignedUrlWithUserDelegationSas(eq(PARTITION_ID), containerIdCaptor.capture(), any(), any(), blobContainerSasPermissionArgumentCaptor.capture());
 
     String containerId = containerIdCaptor.getValue();
     BlobContainerSasPermission blobContainerSasPermission = blobContainerSasPermissionArgumentCaptor.getValue();
@@ -100,7 +100,7 @@ public class WorkflowTasksSharingRepositoryTest {
 
     verify(blobStore).createBlobContainer(eq(PARTITION_ID), containerIdCaptor.capture());
     String containerId = containerIdCaptor.getValue();
-    verify(blobStore).generatePreSignedURL(eq(PARTITION_ID), eq(containerId), any(), blobContainerSasPermissionArgumentCaptor.capture());
+    verify(blobStore).generatePreSignedUrlWithUserDelegationSas(eq(PARTITION_ID), eq(containerId), any(), any(), blobContainerSasPermissionArgumentCaptor.capture());
     BlobContainerSasPermission blobContainerSasPermission = blobContainerSasPermissionArgumentCaptor.getValue();
     verify(cosmosStore).createItem(
         eq(PARTITION_ID),
