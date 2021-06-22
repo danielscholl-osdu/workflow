@@ -21,7 +21,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HomeController {
 	@RequestMapping(value = "/swagger")
 	public String swagger() {
-		System.out.println("swagger-ui.html");
-		return "redirect:swagger-ui.html";
+		return "redirect:swagger-ui/index.html";
+	}
+
+	@RequestMapping(value = "/swagger-ui.html")
+	public String swaggerhtml() {
+		return "redirect:swagger-ui/index.html";
 	}
 }

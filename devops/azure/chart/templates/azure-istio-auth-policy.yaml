@@ -34,5 +34,7 @@ spec:
                         "*/actuator/health", "*/health",
                         "*/configuration/ui","*/configuration/security",
                         "/api/workflow/swagger-resources/*",
-                        "/api/workflow/webjars/*"
+                        "/api/workflow/webjars/*",
+                        "/api/workflow/swagger-ui/*",
+                        "*/v3/api-docs"
             ]
