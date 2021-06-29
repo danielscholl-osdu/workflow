@@ -13,9 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -90,6 +92,7 @@ public class WorkflowEngineServiceImplTest {
   private static final String FILE_NAME = WORKFLOW_NAME + ".py";
   private static final Long EXECUTION_TIMESTAMP = 1609932804071L;
   private static final String EXECUTION_DATE = "2021-01-05T11:36:45+00:00";
+  private static final String TEST_PARTITION = "test-partition";
 
   @Mock
   private FileShareStore dagsFileShareStore;
@@ -99,6 +102,12 @@ public class WorkflowEngineServiceImplTest {
 
   @Mock
   private AirflowConfig airflowConfig;
+
+  @Mock
+  private AirflowConfigResolver airflowConfigResolver;
+
+  @Mock
+  private DpsHeaders dpsHeaders;
 
   @Mock
   private Client restClient;
@@ -149,6 +158,8 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello","World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(airflowConfig.isDagRunAbstractionEnabled()).thenReturn(false);
@@ -178,6 +189,8 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello","World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(airflowConfig.isDagRunAbstractionEnabled()).thenReturn(false);
@@ -207,6 +220,8 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello","World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(airflowConfig.isDagRunAbstractionEnabled()).thenReturn(true);
@@ -234,6 +249,8 @@ public class WorkflowEngineServiceImplTest {
   @Test
   public void testDeleteWorkflowWithSuccess() {
     doNothing().when(dagsFileShareStore).deleteFile(eq(FILE_NAME));
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
@@ -258,6 +275,8 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testDeleteWorkflowWithFailure() {
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
@@ -287,6 +306,8 @@ public class WorkflowEngineServiceImplTest {
     final ShareStorageException exception = mock(ShareStorageException.class);
     when(exception.getStatusCode()).thenReturn(404);
     doThrow(exception).when(dagsFileShareStore).deleteFile(eq(FILE_NAME));
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_URL))).thenReturn(webResource);
@@ -335,6 +356,8 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testGetWorkflowRunStatusWithSuccess() {
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_GET_STATUS_URL))).thenReturn(webResource);
@@ -359,6 +382,8 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testGetWorkflowRunStatusWithFailure() {
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
     when(restClient.resource(eq(AIRFLOW_DAG_GET_STATUS_URL))).thenReturn(webResource);
