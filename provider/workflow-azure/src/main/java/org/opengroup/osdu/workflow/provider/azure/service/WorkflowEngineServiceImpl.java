@@ -16,6 +16,7 @@ import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
+import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.slf4j.Logger;
@@ -62,18 +63,17 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private Client restClient;
 
   @Autowired
-  @Qualifier("dags")
-  private FileShareStore dagsFileShareStore;
+  private FileShareConfig fileShareConfig;
 
   @Autowired
-  @Qualifier("customOperators")
-  private FileShareStore customOperatorsFileShareStore;
+  @Qualifier("IngestFileShareStore")
+  private FileShareStore fileShareStore;
 
   @Autowired
   private DpsHeaders dpsHeaders;
 
- @Autowired
- private AzureWorkflowEngineConfig workflowEngineConfig;
+  @Autowired
+  private AzureWorkflowEngineConfig workflowEngineConfig;
 
 
   @Override
@@ -81,8 +81,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
     String dagContent = (String) registrationInstruction.get(KEY_DAG_CONTENT);
     if(dagContent != null && !dagContent.isEmpty()) {
-      dagsFileShareStore.createFile(dagContent,
-          getFileNameFromWorkflow(rq.getWorkflowName()));
+      fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
+          fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
+          dagContent);
     }
   }
 
@@ -108,7 +109,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       String fileName = getFileNameFromWorkflow(workflowName);
       LOGGER.info("Deleting DAG file {} from file share", fileName);
       try {
-        dagsFileShareStore.deleteFile(fileName);
+        fileShareStore.deleteFromFileShare(dpsHeaders.getPartitionId(),
+            fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
       } catch (final ShareStorageException e) {
         if (e.getStatusCode() != 404) {
           throw e;
@@ -119,7 +121,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Override
   public void saveCustomOperator(final String customOperatorDefinition, final String fileName) {
-    customOperatorsFileShareStore.createFile(customOperatorDefinition, fileName);
+    fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
+        fileShareConfig.getCustomOperatorsFolder(), fileName, customOperatorDefinition);
   }
 
   private ClientResponse triggerWorkflowBase(AirflowConfig airflowConfig, final String runId,
@@ -161,7 +164,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
-      Map<String, Object> inputData) {
+                                                 Map<String, Object> inputData) {
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
     String workflowId = rq.getWorkflowId();

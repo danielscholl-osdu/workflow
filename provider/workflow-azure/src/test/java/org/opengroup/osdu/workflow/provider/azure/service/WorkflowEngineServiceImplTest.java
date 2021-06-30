@@ -5,7 +5,6 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,6 +16,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -27,13 +27,12 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -89,16 +88,20 @@ public class WorkflowEngineServiceImplTest {
   private static final String WORKFLOW_DEFINITION = "Hello World";
   private static final String AIRFLOW_GET_STATUS_RESPONSE = "{\"state\":\"success\"}" ;
   private static final String CUSTOM_OPERATOR_DEFINITION = "This is a sample content";
-  private static final String FILE_NAME = WORKFLOW_NAME + ".py";
   private static final Long EXECUTION_TIMESTAMP = 1609932804071L;
   private static final String EXECUTION_DATE = "2021-01-05T11:36:45+00:00";
   private static final String TEST_PARTITION = "test-partition";
+  private static final String FILE_SHARE_NAME = "fileShare";
+  private static final String FILE_SHARE_DAGS_FOLDER = "dagsFolder";
+  private static final String FILE_SHARE_CUSTOM_OPERATORS_FOLDER = "customOperatorsFolder";
+  private static final String FILE_NAME = WORKFLOW_NAME + ".py";
+  private static final String FILE_CONTENT = "content";
 
   @Mock
-  private FileShareStore dagsFileShareStore;
+  private FileShareStore fileShareStore;
 
   @Mock
-  private FileShareStore customOperatorsFileShareStore;
+  private FileShareConfig fileShareConfig;
 
   @Mock
   private AirflowConfig airflowConfig;
@@ -126,31 +129,39 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testCreateWorkflowWithDagContent() {
-    doNothing().when(dagsFileShareStore).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
+    doReturn(TEST_PARTITION).when(dpsHeaders).getPartitionId();
+    doReturn(FILE_SHARE_NAME).when(fileShareConfig).getShareName();
+    doReturn(FILE_SHARE_DAGS_FOLDER).when(fileShareConfig).getDagsFolder();
+    doNothing().when(fileShareStore).writeToFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME), eq(WORKFLOW_DEFINITION));
+
     workflowEngineService.createWorkflow(workflowEngineRequest(null, true),
         registrationInstructions(WORKFLOW_DEFINITION));
-    verify(dagsFileShareStore, times(1)).createFile(eq(WORKFLOW_DEFINITION), eq(FILE_NAME));
+    verify(fileShareStore, times(1)).writeToFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME), eq(WORKFLOW_DEFINITION));
   }
 
   @Test
   public void testCreateWorkflowWithNullDagContent() {
     workflowEngineService.createWorkflow(workflowEngineRequest(null, false),
         registrationInstructions(null));
-    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
+    verify(fileShareStore, times(0)).writeToFileShare(any(), any(), any(), any(), any());
   }
 
   @Test
   public void testCreateWorkflowWithEmptyDagContent() {
     workflowEngineService.createWorkflow(workflowEngineRequest(null, false),
         registrationInstructions(""));
-    verify(dagsFileShareStore, never()).createFile(any(), eq(FILE_NAME));
+    verify(fileShareStore, times(0)).writeToFileShare(any(), any(), any(), any(), any());
   }
 
   @Test
   public void testStoreCustomOperator() {
-    doNothing().when(customOperatorsFileShareStore).createFile(eq(CUSTOM_OPERATOR_DEFINITION), eq(FILE_NAME));
+    doReturn(TEST_PARTITION).when(dpsHeaders).getPartitionId();
+    doReturn(FILE_SHARE_NAME).when(fileShareConfig).getShareName();
+    doReturn(FILE_SHARE_CUSTOM_OPERATORS_FOLDER).when(fileShareConfig).getCustomOperatorsFolder();
+    doNothing().when(fileShareStore).writeToFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_CUSTOM_OPERATORS_FOLDER), eq(FILE_NAME), eq(CUSTOM_OPERATOR_DEFINITION));
+
     workflowEngineService.saveCustomOperator(CUSTOM_OPERATOR_DEFINITION, FILE_NAME);
-    verify(customOperatorsFileShareStore).createFile(eq(CUSTOM_OPERATOR_DEFINITION), eq(FILE_NAME));
+    verify(fileShareStore, times(1)).writeToFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_CUSTOM_OPERATORS_FOLDER), eq(FILE_NAME), eq(CUSTOM_OPERATOR_DEFINITION));
   }
 
   @Test
@@ -248,8 +259,10 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testDeleteWorkflowWithSuccess() {
-    doNothing().when(dagsFileShareStore).deleteFile(eq(FILE_NAME));
-    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    doReturn(TEST_PARTITION).when(dpsHeaders).getPartitionId();
+    doReturn(FILE_SHARE_NAME).when(fileShareConfig).getShareName();
+    doReturn(FILE_SHARE_DAGS_FOLDER).when(fileShareConfig).getDagsFolder();
+    doNothing().when(fileShareStore).deleteFromFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME));
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
@@ -263,7 +276,7 @@ public class WorkflowEngineServiceImplTest {
 
     workflowEngineService.deleteWorkflow(workflowEngineRequest(null, true));
 
-    verify(dagsFileShareStore).deleteFile(eq(FILE_NAME));
+    verify(fileShareStore, times(1)).deleteFromFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME));
     verify(restClient).resource(eq(AIRFLOW_DAG_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -291,7 +304,7 @@ public class WorkflowEngineServiceImplTest {
       workflowEngineService.deleteWorkflow(workflowEngineRequest(null, true));
     });
 
-    verify(dagsFileShareStore, times(0)).deleteFile(eq(FILE_NAME));
+    verify(fileShareStore, times(0)).deleteFromFileShare(any(), any(), any(), any());
     verify(restClient).resource(eq(AIRFLOW_DAG_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -303,10 +316,12 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testDeleteWorkflowShouldSucceedWhenFileShareReturningNotFound() {
+    doReturn(TEST_PARTITION).when(dpsHeaders).getPartitionId();
+    doReturn(FILE_SHARE_NAME).when(fileShareConfig).getShareName();
+    doReturn(FILE_SHARE_DAGS_FOLDER).when(fileShareConfig).getDagsFolder();
     final ShareStorageException exception = mock(ShareStorageException.class);
     when(exception.getStatusCode()).thenReturn(404);
-    doThrow(exception).when(dagsFileShareStore).deleteFile(eq(FILE_NAME));
-    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    doThrow(exception).when(fileShareStore).deleteFromFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME));
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
     when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
@@ -320,7 +335,7 @@ public class WorkflowEngineServiceImplTest {
 
     workflowEngineService.deleteWorkflow(workflowEngineRequest(null, true));
 
-    verify(dagsFileShareStore).deleteFile(eq(FILE_NAME));
+    verify(fileShareStore).deleteFromFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME));
     verify(restClient).resource(eq(AIRFLOW_DAG_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
@@ -344,7 +359,7 @@ public class WorkflowEngineServiceImplTest {
 
     workflowEngineService.deleteWorkflow(workflowEngineRequest(null, false));
 
-    verify(dagsFileShareStore, times(0)).deleteFile(eq(FILE_NAME));
+    verify(fileShareStore, times(0)).deleteFromFileShare(eq(TEST_PARTITION), eq(FILE_SHARE_NAME), eq(FILE_SHARE_DAGS_FOLDER), eq(FILE_NAME));
     verify(restClient, times(0)).resource(eq(AIRFLOW_DAG_URL));
     verify(webResource, times(0)).type(eq(MediaType.APPLICATION_JSON));
     verify(webResourceBuilder, times(0)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
