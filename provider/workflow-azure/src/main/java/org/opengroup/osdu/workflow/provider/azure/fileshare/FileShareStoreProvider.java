@@ -1,24 +1,24 @@
 package org.opengroup.osdu.workflow.provider.azure.fileshare;
 
-import com.azure.storage.file.share.ShareClient;
-import com.azure.storage.file.share.ShareDirectoryClient;
+import org.opengroup.osdu.azure.partition.PartitionServiceClient;
+import org.opengroup.osdu.core.common.logging.ILogger;
+import org.opengroup.osdu.workflow.provider.azure.cache.FileShareServiceClientCache;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class FileShareStoreProvider {
-  @Bean
-  @Qualifier("dags")
-  public FileShareStore buildDagsStore(ShareClient shareClient, FileShareConfig config) {
-    ShareDirectoryClient client = shareClient.getDirectoryClient(config.getDagsFolder());
-    return new FileShareStore(client);
+
+  @Bean("IngestFileShareServiceClientFactory")
+  public IFileShareServiceClientFactory buildFileShareClientFactory(final PartitionServiceClient partitionServiceClient,
+                                                                    final FileShareServiceClientCache fileShareServiceClientCache) {
+    return new DAGFileShareServiceClientFactoryImpl(partitionServiceClient, fileShareServiceClientCache);
   }
 
   @Bean
-  @Qualifier("customOperators")
-  public FileShareStore buildCustomOperatorsStore(ShareClient shareClient, FileShareConfig config) {
-    ShareDirectoryClient client = shareClient.getDirectoryClient(config.getCustomOperatorsFolder());
-    return new FileShareStore(client);
+  @Qualifier("IngestFileShareStore")
+  public FileShareStore buildFileShareStore(@Qualifier("IngestFileShareServiceClientFactory") final IFileShareServiceClientFactory fileShareServiceClientFactory, final ILogger logger) {
+    return new FileShareStore(fileShareServiceClientFactory, logger);
   }
 }
