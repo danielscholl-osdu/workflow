@@ -132,3 +132,5 @@ spec:
               value: "http://partition/api/partition/v1"
             - name: dp_airflow_for_system_dag
               value: "false"
+            - name: ignore_dagContent
+              value: "false"

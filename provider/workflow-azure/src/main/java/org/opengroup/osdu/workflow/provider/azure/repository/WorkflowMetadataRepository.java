@@ -11,6 +11,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
@@ -39,6 +40,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Autowired
   private JaxRsDpsLog logger;
+
+  @Autowired
+  private AzureWorkflowEngineConfig workflowEngineConfig;
 
   @Override
   public WorkflowMetadata createWorkflow(final WorkflowMetadata workflowMetadata) {
@@ -124,6 +128,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
         new HashMap<>(workflowMetadata.getRegistrationInstructions());
     String dagContent =
         (String) registrationInstructionForMetadata.remove(KEY_DAG_CONTENT);
+    if (workflowEngineConfig.getIgnoreDagContent()) {
+      dagContent = "";
+    }
 
     return WorkflowMetadataDoc.builder()
         .id(workflowMetadata.getWorkflowName())

@@ -18,6 +18,7 @@ import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -107,6 +108,9 @@ public class WorkflowEngineServiceImplTest {
   private AirflowConfig airflowConfig;
 
   @Mock
+  private AzureWorkflowEngineConfig workflowEngineConfig;
+
+  @Mock
   private AirflowConfigResolver airflowConfigResolver;
 
   @Mock
@@ -129,6 +133,7 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testCreateWorkflowWithDagContent() {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     doReturn(TEST_PARTITION).when(dpsHeaders).getPartitionId();
     doReturn(FILE_SHARE_NAME).when(fileShareConfig).getShareName();
     doReturn(FILE_SHARE_DAGS_FOLDER).when(fileShareConfig).getDagsFolder();
@@ -140,7 +145,16 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
+  public void testCreateWorkflowWithDagContentIgnored() {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(true);
+    workflowEngineService.createWorkflow(workflowEngineRequest(null, true),
+            registrationInstructions(WORKFLOW_DEFINITION));
+    verify(fileShareStore, times(0)).writeToFileShare(any(), any(), any(), any(), any());
+  }
+
+  @Test
   public void testCreateWorkflowWithNullDagContent() {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     workflowEngineService.createWorkflow(workflowEngineRequest(null, false),
         registrationInstructions(null));
     verify(fileShareStore, times(0)).writeToFileShare(any(), any(), any(), any(), any());
@@ -148,6 +162,7 @@ public class WorkflowEngineServiceImplTest {
 
   @Test
   public void testCreateWorkflowWithEmptyDagContent() {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     workflowEngineService.createWorkflow(workflowEngineRequest(null, false),
         registrationInstructions(""));
     verify(fileShareStore, times(0)).writeToFileShare(any(), any(), any(), any(), any());
