@@ -11,4 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class AzureWorkflowEngineConfig {
   private Boolean isDPAirflowUsedForSystemDAG;
+
+  private Boolean ignoreDagContent;
 }

@@ -80,6 +80,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
     String dagContent = (String) registrationInstruction.get(KEY_DAG_CONTENT);
+    if(workflowEngineConfig.getIgnoreDagContent()) {
+      LOGGER.info("Ignoring input DAG content: {}", dagContent);
+      dagContent = "";
+    }
     if(dagContent != null && !dagContent.isEmpty()) {
       fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
           fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
