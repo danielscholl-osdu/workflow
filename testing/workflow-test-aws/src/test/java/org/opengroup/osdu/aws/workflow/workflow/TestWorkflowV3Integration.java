@@ -70,21 +70,13 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
   }
 
   @Override
-	@Test
-	@Disabled
-	public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception {
-		// Validation logic is missing in core. issue raised to opengroup
-		//super.shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate();
-	}
-
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate() throws Exception {
-		// Validation logic is missing in core. issue raised to opengroup
-		//super.shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate();
-	}
-
+  @Test
+  @Disabled
+    public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception {
+    // Validation logic is missing in core. issue raised to opengroup
+    //super.shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate();
+  }
+  
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
       try {        
