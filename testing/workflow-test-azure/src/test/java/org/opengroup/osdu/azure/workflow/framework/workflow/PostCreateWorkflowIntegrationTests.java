@@ -1,8 +1,10 @@
 package org.opengroup.osdu.azure.workflow.framework.workflow;
 
 import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder;
 import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
@@ -10,12 +12,15 @@ import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
 
 import javax.ws.rs.HttpMethod;
 
+import java.util.Map;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.INVALID_PARTITION;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_CUSTOM_OPERATOR_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
@@ -34,11 +39,14 @@ import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTes
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getInvalidCreateWorkflowRequest;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getValidCreateWorkflowRequest;
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
+import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildTriggerWorkflowPayload;
 
 public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
   public static final String CREATE_WORKFLOW_INVALID_REQUEST_MESSAGE = "Unrecognized field";
+  public static final String CREATE_WORKFLOW_IGNORE_CONTENT_MESSAGE = "not found in DagModel";
   public static final String WORKFLOW_NAME_CONFLICT_MESSAGE = "ResourceConflictException: Workflow with name %s already exists";
   public static final String TEST_WORKFLOW_FILE_NAME = "test_dummy_dag.py";
+  public static final String TEST_SIMPLE_WORKFLOW_FILE_NAME = "test_simple_python_dag.py";
 
   @Test
   public void should_returnSuccess_when_givenValidRequest() {
@@ -202,5 +210,49 @@ public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
     );
 
     assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+  }
+
+  @Test
+  @Ignore("Enable this test to test the ignore DAG content functionality")
+  public void should_ignoreDagcontent_when_givenValidRequest() throws Exception {
+    String createWorkflowRequestBody = getValidCreateWorkflowRequest(TEST_SIMPLE_PYTHON_DAG,
+            TEST_SIMPLE_WORKFLOW_FILE_NAME);
+
+    ClientResponse response = client.send(
+            HttpMethod.POST,
+            CREATE_WORKFLOW_URL,
+            createWorkflowRequestBody,
+            headers,
+            client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.SC_OK, response.getStatus());
+
+    String workflowId = new Gson().fromJson(createWorkflowRequestBody, JsonObject.class).get(WORKFLOW_NAME_FIELD)
+            .getAsString();
+    Map<String, Object> triggerWorkflowRequestPayload = buildTriggerWorkflowPayload();
+
+    ClientResponse triggerResponse = client.send(
+            HttpMethod.POST,
+            String.format(TRIGGER_WORKFLOW_URL, workflowId),
+            gson.toJson(triggerWorkflowRequestPayload),
+            headers,
+            client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.SC_NOT_FOUND, triggerResponse.getStatus());
+
+    String error = triggerResponse.getEntity(String.class);
+    assertTrue(error.contains(CREATE_WORKFLOW_IGNORE_CONTENT_MESSAGE));
+
+    ClientResponse deleteResponse = client.send(
+            HttpMethod.DELETE,
+            String.format(GET_WORKFLOW_BY_ID_URL, workflowId),
+            null,
+            headers,
+            client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.SC_NO_CONTENT, deleteResponse.getStatus());
   }
 }

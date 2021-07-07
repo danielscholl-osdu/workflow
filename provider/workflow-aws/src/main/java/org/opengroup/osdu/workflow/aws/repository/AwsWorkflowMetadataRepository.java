@@ -70,13 +70,6 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
     @Override
     public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {
-
-      //should be removed once the validation occurs in common code
-      if (!workflowMetadata.getWorkflowName().matches("^[a-zA-Z0-9._-]{1,64}$")) {
-        throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid workflow name",
-        String.format("Invalid workflowName. Must match pattern '%s'", "^[a-zA-Z0-9._-]{1,64}$"));
-      }
-
       String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
       workflowMetadata.setWorkflowId(generateWorkflowId(workflowMetadata.getWorkflowName(), dataPartitionId)); //name should be unique. Enforce it via using name/id as same field
 

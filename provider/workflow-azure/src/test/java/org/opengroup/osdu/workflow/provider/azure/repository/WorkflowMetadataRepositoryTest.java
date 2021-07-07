@@ -17,6 +17,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 
@@ -160,6 +161,9 @@ public class WorkflowMetadataRepositoryTest {
   private CosmosConfig cosmosConfig;
 
   @Mock
+  private AzureWorkflowEngineConfig workflowEngineConfig;
+
+  @Mock
   private CosmosStore cosmosStore;
 
   @Mock
@@ -173,12 +177,24 @@ public class WorkflowMetadataRepositoryTest {
 
   @Test
   public void testCreateWorkflowWithDAGContent() throws Exception {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
     testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
   }
+
+  @Test
+  public void testCreateWorkflowWithDAGContentIgnored() throws Exception {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(true);
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
+    final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
+    final WorkflowMetadataDoc expectedDocToBeStored =
+            OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
+    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+  }
+
 
   @Test
   public void testCreateWorkflowWithoutDAGContent() throws Exception {

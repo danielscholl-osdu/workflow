@@ -3,7 +3,6 @@ package org.opengroup.osdu.workflow.provider.azure.repository;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
-import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
@@ -15,20 +14,20 @@ import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
+import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
-
-import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
 @Component
 public class WorkflowRunRepository implements IWorkflowRunRepository {
@@ -52,9 +51,6 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   @Autowired
   private WorkflowTasksSharingRepository workflowTasksSharingRepository;
-
-  @Autowired
-  private BlobStore blobStore;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {

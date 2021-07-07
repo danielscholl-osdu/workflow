@@ -5,10 +5,12 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("azure.storage")
+@ConfigurationProperties("osdu.azure.airflow")
 @Configuration
-@Getter
 @Setter
-public class BlobConfig {
-  private String tasksSharingStorageAccount;
+@Getter
+public class AzureWorkflowEngineConfig {
+  private Boolean isDPAirflowUsedForSystemDAG;
+
+  private Boolean ignoreDagContent;
 }

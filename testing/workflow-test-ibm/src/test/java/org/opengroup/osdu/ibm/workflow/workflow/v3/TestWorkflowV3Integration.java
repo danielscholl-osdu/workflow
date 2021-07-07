@@ -1,6 +1,7 @@
 
 package org.opengroup.osdu.ibm.workflow.workflow.v3;
 
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -12,9 +13,14 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
 
 	@BeforeEach
 	@Override
-	public void setup() {
+	public void setup() throws Exception {
 		this.client = new HTTPClientIBM();
 		this.headers = client.getCommonHeader();
+		try {
+		  deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+		} catch (Exception e) {
+		  throw e;
+		}
 	}
 
 	@AfterEach
@@ -25,23 +31,13 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
 		this.headers = null;
 	}
 
-
 	@Override
 	@Test
 	@Disabled
-	public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception {
+		public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception {
 		// Validation logic is missing in core. issue raised to opengroup
 		//super.shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate();
 	}
-
-	@Override
-	@Test
-	@Disabled
-	public void shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate() throws Exception {
-		// Validation logic is missing in core. issue raised to opengroup
-		//super.shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate();
-	}
-
 
 	private void deleteAllTestWorkflowRecords() {
 		createdWorkflows.stream().forEach(c -> {

@@ -99,6 +99,10 @@ spec:
               value: http://entitlements/api/entitlements/v2
             - name: OSDU_ENTITLEMENTS_APPKEY
               value: "OBSOLETE"
+            - name: authorizeAPI
+              value: http://entitlements/api/entitlements/v2
+            - name: authorizeAPIKey
+              value: "OBSOLETE"
             - name: OSDU_AIRFLOW_URL
               value: "http://airflow-web:8080/airflow"
             - name: OSDU_AIRFLOW_USERNAME
@@ -126,3 +130,7 @@ spec:
               value: "true"
             - name: partition_service_endpoint
               value: "http://partition/api/partition/v1"
+            - name: dp_airflow_for_system_dag
+              value: "false"
+            - name: ignore_dagContent
+              value: "false"
