@@ -3,6 +3,7 @@ package org.opengroup.osdu.ibm.workflow.workflow.v3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
 import java.util.UUID;
 
@@ -23,9 +24,14 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
 
 	@BeforeEach
 	@Override
-	public void setup() {
+	public void setup() throws Exception {
 		this.client = new HTTPClientIBM();
 		this.headers = client.getCommonHeader();
+		try {
+		  deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+		} catch (Exception e) {
+		  throw e;
+		}
 	}
 
 	@AfterEach

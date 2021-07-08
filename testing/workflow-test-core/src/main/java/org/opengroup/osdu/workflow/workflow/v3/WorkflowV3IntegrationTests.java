@@ -64,7 +64,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void shouldReturnInternalServerErrorWhenIncorrectWorkflowNameWorkflowCreate()
+  public void shouldReturnBadRequestErrorWhenIncorrectWorkflowNameWorkflowCreate()
       throws Exception {
     ClientResponse response = client.send(
         HttpMethod.POST,
@@ -73,7 +73,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test

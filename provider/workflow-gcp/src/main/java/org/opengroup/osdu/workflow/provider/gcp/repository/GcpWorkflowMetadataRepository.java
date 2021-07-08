@@ -90,10 +90,7 @@ public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepositor
   @Override
   public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {
     log.info("Saving workflow : {}", workflowMetadata);
-    if (!workflowMetadata.getWorkflowName().matches("^[a-zA-Z0-9._-]{1,64}$")) {
-      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unknown error",
-          "Unknown error happened when validating workflow name");
-    }
+
     String dagName = null;
     Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
     if (Objects.nonNull(instructions)) {
