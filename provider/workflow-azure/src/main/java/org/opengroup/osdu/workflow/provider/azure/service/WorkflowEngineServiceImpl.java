@@ -6,19 +6,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
-import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
+import org.opengroup.osdu.workflow.provider.azure.utils.ThreadLocalUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,6 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Autowired
   private AzureWorkflowEngineConfig workflowEngineConfig;
 
-
   @Override
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
@@ -85,9 +84,16 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       dagContent = "";
     }
     if(dagContent != null && !dagContent.isEmpty()) {
-      fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
-          fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
-          dagContent);
+      if(!StringUtils.isEmpty(dpsHeaders.getPartitionId())) {
+        fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
+            fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
+            dagContent);
+      }
+      else{
+        fileShareStore.writeToFileShare(fileShareConfig.getShareName(),
+            fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
+            dagContent);
+      }
     }
   }
 
@@ -102,7 +108,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       // Because in repeated delete create fashion the dag will not appear for a while
       try {
         String deleteDAGEndpoint = String.format("api/experimental/dags/%s", workflowName);
-        callAirflowApi(getAirflowConfig(false), deleteDAGEndpoint, HttpMethod.DELETE, null,
+
+        callAirflowApi(getAirflowConfig(ThreadLocalUtils.getSystemDagFlag()), deleteDAGEndpoint, HttpMethod.DELETE, null,
             String.format(AIRFLOW_DELETE_DAG_ERROR_MESSAGE, workflowName));
       } catch (AppException e) {
         if (e.getError().getCode() != 404) {
@@ -113,8 +120,13 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       String fileName = getFileNameFromWorkflow(workflowName);
       LOGGER.info("Deleting DAG file {} from file share", fileName);
       try {
-        fileShareStore.deleteFromFileShare(dpsHeaders.getPartitionId(),
-            fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
+        if(!StringUtils.isEmpty(dpsHeaders.getPartitionId())) {
+          fileShareStore.deleteFromFileShare(dpsHeaders.getPartitionId(),
+              fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
+        }
+        else{
+          fileShareStore.deleteFromFileShare(fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
+        }
       } catch (final ShareStorageException e) {
         if (e.getStatusCode() != 404) {
           throw e;
@@ -148,7 +160,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
                                                         String workflowName,
                                                         Map<String, Object> inputData) {
     String triggerDAGEndpoint = String
-        .format("api/experimental/dags/%s/dag_runs", getAirflowConfig(false).getControllerDagId());
+        .format("api/experimental/dags/%s/dag_runs", getAirflowConfig(ThreadLocalUtils.getSystemDagFlag()).getControllerDagId());
 
     JSONObject requestBody = new JSONObject();
     String parentRunId = "PARENT_" + runId;
@@ -174,7 +186,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     String workflowId = rq.getWorkflowId();
     LOGGER.info("Submitting ingestion with Airflow with dagName: {}", workflowName);
     ClientResponse response = null;
-    AirflowConfig airflowConfig = getAirflowConfig(false);
+    AirflowConfig airflowConfig = getAirflowConfig(ThreadLocalUtils.getSystemDagFlag());
     if (airflowConfig.isDagRunAbstractionEnabled()) {
       response = triggerWorkflowUsingController(airflowConfig, runId, workflowId,
           workflowName, inputData);
@@ -223,7 +235,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
         executionDate);
     String getDAGRunStatusEndpoint = String.format("api/experimental/dags/%s/dag_runs/%s",
         workflowName, executionDate);
-    ClientResponse response = callAirflowApi(getAirflowConfig(false),
+    ClientResponse response = callAirflowApi(getAirflowConfig(ThreadLocalUtils.getSystemDagFlag()),
         getDAGRunStatusEndpoint, HttpMethod.GET, null,
         String.format(AIRFLOW_WORKFLOW_RUN_NOT_FOUND, workflowName, executionDate));
     try {

@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.config;
 
+import com.azure.cosmos.implementation.apachecommons.lang.NotImplementedException;
 import com.azure.identity.DefaultAzureCredential;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
@@ -8,7 +9,7 @@ import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
 import org.opengroup.osdu.azure.partition.PartitionServiceClient;
 import org.opengroup.osdu.common.Validators;
 import org.opengroup.osdu.workflow.provider.azure.cache.IngestBlobServiceClientCache;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 class BlobServiceIngestClientFactory implements IBlobServiceClientFactory {
 
@@ -51,6 +52,6 @@ class BlobServiceIngestClientFactory implements IBlobServiceClientFactory {
 
   @Override
   public BlobServiceClient getSystemBlobServiceClient() {
-    throw new NotImplementedException();
+    throw new NotImplementedException("getSystemBlobServiceClient method is not implemented");
   }
 }
