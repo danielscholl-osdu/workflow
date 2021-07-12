@@ -91,7 +91,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
         headers,
         null
     );
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
   }
 
   @Test

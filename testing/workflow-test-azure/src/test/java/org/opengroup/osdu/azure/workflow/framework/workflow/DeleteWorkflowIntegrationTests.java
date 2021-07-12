@@ -11,6 +11,7 @@ import javax.ws.rs.HttpMethod;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
@@ -106,7 +107,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
         null
     );
 
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
   }
 
   @Test

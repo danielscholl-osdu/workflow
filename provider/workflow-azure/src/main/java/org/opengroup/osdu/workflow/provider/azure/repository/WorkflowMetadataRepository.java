@@ -17,6 +17,8 @@ import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.apache.commons.lang3.StringUtils;
+import org.opengroup.osdu.workflow.provider.azure.utils.ThreadLocalUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private static final String LOGGER_NAME = WorkflowMetadataRepository.class.getName();
   private static final String KEY_DAG_CONTENT = "dagContent";
+  private static final String KEY_DAG_TYPE = "dagType";
 
   @Autowired
   private CosmosConfig cosmosConfig;
@@ -48,9 +51,16 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   public WorkflowMetadata createWorkflow(final WorkflowMetadata workflowMetadata) {
     final WorkflowMetadataDoc workflowMetadataDoc = buildWorkflowMetadataDoc(workflowMetadata);
     try {
+      if(StringUtils.isEmpty(dpsHeaders.getPartitionId())) {
+        cosmosStore.createItem( cosmosConfig.getSystemdatabase(),
+            cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getPartitionKey(),
+            workflowMetadataDoc);
+      }
+      else {
       cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
           cosmosConfig.getWorkflowMetadataCollection(), workflowMetadataDoc.getPartitionKey(),
           workflowMetadataDoc);
+      }
       return buildWorkflowMetadata(workflowMetadataDoc);
     } catch (AppException e) {
       if(e.getError().getCode() == 409) {
@@ -66,6 +76,43 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Override
   public WorkflowMetadata getWorkflow(final String workflowName) {
+    Optional<WorkflowMetadataDoc> workflowMetadataDoc=null;
+    //this means this call is from deleteWorkflow system endpoint
+     if(StringUtils.isEmpty(dpsHeaders.getPartitionId())) {
+       workflowMetadataDoc= getSystemWorkflow(workflowName);
+     }
+    else {
+       workflowMetadataDoc= getPrivateWorkflow(workflowName);
+       if(null == workflowMetadataDoc || !workflowMetadataDoc.isPresent()) {
+         workflowMetadataDoc= getSystemWorkflow(workflowName);
+       }
+     }
+    if (null == workflowMetadataDoc || !workflowMetadataDoc.isPresent()) {
+      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
+      logger.error(LOGGER_NAME, errorMessage);
+      throw new WorkflowNotFoundException(errorMessage);
+    }
+    WorkflowMetadata workflowMetadata= buildWorkflowMetadata(workflowMetadataDoc.get());
+    return workflowMetadata;
+  }
+
+  private  Optional<WorkflowMetadataDoc> getSystemWorkflow(final String workflowName) {
+    final Optional<WorkflowMetadataDoc> workflowSystemMetadataDoc =
+        cosmosStore.findItem(
+            cosmosConfig.getSystemdatabase(),
+            cosmosConfig.getWorkflowMetadataCollection(),
+            workflowName,
+            workflowName,
+            WorkflowMetadataDoc.class);
+    if(null != workflowSystemMetadataDoc && workflowSystemMetadataDoc.isPresent()) {
+      ThreadLocalUtils.setSystemDagFlag(true);
+      Map<String, Object> registrationInstructions =  workflowSystemMetadataDoc.get().getRegistrationInstructions();
+      registrationInstructions.put(KEY_DAG_TYPE, "system");
+    }
+    return workflowSystemMetadataDoc;
+  }
+
+  private  Optional<WorkflowMetadataDoc> getPrivateWorkflow(final String workflowName) {
     final Optional<WorkflowMetadataDoc> workflowMetadataDoc =
         cosmosStore.findItem(dpsHeaders.getPartitionId(),
             cosmosConfig.getDatabase(),
@@ -73,33 +120,36 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
             workflowName,
             workflowName,
             WorkflowMetadataDoc.class);
-    if (!workflowMetadataDoc.isPresent()) {
-      final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
-      logger.error(LOGGER_NAME, errorMessage);
-      throw new WorkflowNotFoundException(errorMessage);
-    } else {
-      return buildWorkflowMetadata(workflowMetadataDoc.get());
+    if(null != workflowMetadataDoc && workflowMetadataDoc.isPresent()) {
+      ThreadLocalUtils.setSystemDagFlag(false);
+      Map<String, Object> registrationInstructions =  workflowMetadataDoc.get().getRegistrationInstructions();
+      registrationInstructions.put(KEY_DAG_TYPE, "private");
     }
+    return workflowMetadataDoc;
   }
-
   @Override
   public void deleteWorkflow(String workflowName) {
-    cosmosStore.deleteItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
-        cosmosConfig.getWorkflowMetadataCollection(), workflowName, workflowName);
+    if(StringUtils.isEmpty(dpsHeaders.getPartitionId())) {
+      cosmosStore.deleteItem( cosmosConfig.getSystemdatabase(),
+          cosmosConfig.getWorkflowMetadataCollection(), workflowName, workflowName);
+    }
+    else {
+        cosmosStore.deleteItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),
+            cosmosConfig.getWorkflowMetadataCollection(), workflowName, workflowName);
+      }
   }
 
   @Override
   public List<WorkflowMetadata> getAllWorkflowForTenant(String prefix) {
     try {
       SqlQuerySpec sqlQuerySpec;
-      if (prefix != null && !(prefix.isEmpty())){
+      if(prefix != null && !(prefix.isEmpty())) {
         SqlParameter prefixParameter = new SqlParameter("@prefix", prefix);
         sqlQuerySpec = new SqlQuerySpec("SELECT * FROM c " +
                 "where STARTSWITH(c.workflowName, @prefix, true) " +
                 "ORDER BY c._ts DESC", prefixParameter);
       }
-      else
-      {
+      else {
         sqlQuerySpec = new SqlQuerySpec("SELECT * FROM c " +
             "ORDER BY c._ts DESC");
       }
@@ -110,6 +160,15 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
               sqlQuerySpec,
               new CosmosQueryRequestOptions(),
               WorkflowMetadataDoc.class);
+      //looking for shared workflows
+
+      final List<WorkflowMetadataDoc> workflowSystemMetadataDocs = cosmosStore.queryItems(
+          cosmosConfig.getSystemdatabase(),
+          cosmosConfig.getWorkflowMetadataCollection(),
+          sqlQuerySpec,
+          new CosmosQueryRequestOptions(),
+          WorkflowMetadataDoc.class);
+      workflowMetadataDocs.addAll(workflowSystemMetadataDocs);
       List<WorkflowMetadata> workflowMetadataList = new ArrayList<>();
       for(WorkflowMetadataDoc workflowMetadataDoc: workflowMetadataDocs)
       {

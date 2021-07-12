@@ -12,6 +12,7 @@ import org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil;
 
 import javax.ws.rs.HttpMethod;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CUSTOM_OPERATOR_BY_ID_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestOperatorNames.SIMPLE_CUSTOM_OPERATOR;
@@ -64,7 +65,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
         null
     );
 
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
   }
 
   @Test
