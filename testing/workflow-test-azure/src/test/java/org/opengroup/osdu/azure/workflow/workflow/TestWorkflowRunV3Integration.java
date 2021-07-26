@@ -10,17 +10,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-
 @Slf4j
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
 
   @BeforeEach
   @Override
-  public void setup() throws Exception {
+  public void setup() {
     this.client = new HTTPClientAzureV3();
     this.headers = client.getCommonHeader();
-    deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
   }
 
   @AfterEach

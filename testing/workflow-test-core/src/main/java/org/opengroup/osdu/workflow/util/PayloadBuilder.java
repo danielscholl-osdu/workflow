@@ -1,5 +1,7 @@
 package org.opengroup.osdu.workflow.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -123,6 +125,25 @@ public class PayloadBuilder {
   public static String buildUpdateWorkflowPayload() {
     Map<String, Object> payload = new HashMap<>();
     payload.put("status", "finished");
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowRunValidPayloadWithGivenRunId(String runId) throws JsonProcessingException {
+    String payload = buildCreateWorkflowRunValidPayload();
+    Map<String, Object> requestBody = new ObjectMapper().readValue(payload, HashMap.class);
+    requestBody.put("runId", runId);
+    return new Gson().toJson(requestBody);
+  }
+
+  public static String buildUpdateWorkflowRunValidPayloadWithGivenStatus(String status) {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("status", status);
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildUpdateWorkflowRunInvalidPayloadStatus(){
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("status", "invalid-status");
     return new Gson().toJson(payload);
   }
 }
