@@ -31,19 +31,20 @@ public abstract class TestBase {
 
   protected HTTPClient client;
   protected Map<String, String> headers;
-  private Map<String, Set<String>> trackedWorkflowRuns;
+  protected Map<String, Set<String>> trackedWorkflowRuns;
+  protected Set<String> completedWorkflowRunIds;
   private Long integrationTestStartTime;
 
   public void setup() throws Exception {
     integrationTestStartTime = System.currentTimeMillis();
     log.info("Starting integration test at {}", integrationTestStartTime);
     trackedWorkflowRuns = new HashMap<>();
+    completedWorkflowRunIds = new HashSet<>();
   }
 
   public void tearDown() throws Exception {
     try {
       if(trackedWorkflowRuns.size() > 0) {
-        Set<String> completedWorkflowRunIds = new HashSet<>();
         executeWithWaitAndRetry(() -> {
           waitForWorkflowRunsToComplete(trackedWorkflowRuns, completedWorkflowRunIds);
           return null;
@@ -57,8 +58,8 @@ public abstract class TestBase {
     }
   }
 
-  private void waitForWorkflowRunsToComplete(Map<String, Set<String>> workflowIdToRunId,
-                                             Set<String> completedWorkflowRunIds) throws Exception {
+  protected void waitForWorkflowRunsToComplete(Map<String, Set<String>> workflowIdToRunId,
+                                               Set<String> completedWorkflowRunIds) throws Exception {
     for(Map.Entry<String, Set<String>> entry: workflowIdToRunId.entrySet()) {
       String workflowId = entry.getKey();
 
@@ -90,7 +91,6 @@ public abstract class TestBase {
 
     trackedWorkflowRuns.get(workflowId).add(workflowRunId);
   }
-
 
   public <T> T executeWithWaitAndRetry(Callable<T> callable, int noOfRetries,
                                        long timeToWait, TimeUnit timeUnit) throws Exception {

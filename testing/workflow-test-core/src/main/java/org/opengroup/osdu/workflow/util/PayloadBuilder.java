@@ -1,5 +1,10 @@
 package org.opengroup.osdu.workflow.util;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.util.Collections.singletonList;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT1;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.DOMAIN;
@@ -8,10 +13,6 @@ import static org.opengroup.osdu.workflow.consts.DefaultVariable.OTHER_RELEVANT_
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.DATA_PARTITION_ID_TENANT;
-
-import com.google.gson.Gson;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PayloadBuilder {
 
@@ -94,6 +95,13 @@ public class PayloadBuilder {
     payload.put("workflowName", "-абвгд-");
     payload.put("description", "Test workflow record for integration tests.");
 
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowPayloadWithNoWorkflowName() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("registrationInstructions", new HashMap<String, String>());
+    payload.put("description", "Test workflow record for integration tests.");
     return new Gson().toJson(payload);
   }
 

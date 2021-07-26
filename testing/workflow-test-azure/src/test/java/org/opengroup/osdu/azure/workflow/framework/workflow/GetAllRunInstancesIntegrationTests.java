@@ -1,22 +1,17 @@
 package org.opengroup.osdu.azure.workflow.framework.workflow;
 import com.google.gson.reflect.TypeToken;
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.models.WorkflowRun;
-import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
 import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
 
 import javax.ws.rs.HttpMethod;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_ALL_WORKFLOW_RUNS_URL;
@@ -35,77 +30,6 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     if (triggeredWorkflow == null) {
       triggeredWorkflow = triggerDummyWorkflow(client, headers);
     }
-  }
-
-  @Test
-  public void should_returnSuccess_when_givenValidRequest() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL,
-            triggeredWorkflow.getWorkflowId()),
-        null,
-        headers,
-        client.getAccessToken()
-    );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
-    Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
-    List<WorkflowRun> workflowRunsList =
-        gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
-
-    assertTrue(workflowRunsList.size() > 0);
-    for (int i = 0; i < workflowRunsList.size(); ++i) {
-      assertEquals(workflowRunsList.get(i).getWorkflowId(), triggeredWorkflow.getWorkflowId());
-    }
-  }
-
-  @Test
-  public void should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, INVALID_WORKFLOW_ID),
-        null,
-        headers,
-        client.getAccessToken()
-    );
-    assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatus());
-  }
-
-  @Test
-  public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, triggeredWorkflow.getWorkflowId()),
-        null,
-        headers,
-        client.getNoDataAccessToken()
-    );
-    assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
-  }
-
-  @Test
-  public void should_returnForbidden_when_notGivenAccessToken() throws Exception {
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, triggeredWorkflow.getWorkflowId()),
-        null,
-        headers,
-        null
-    );
-    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
-  }
-
-  @Test
-  public void should_returnForbidden_when_givenInvalidPartition() throws Exception {
-    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
-
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, triggeredWorkflow.getWorkflowId()),
-        null,
-        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
-        client.getAccessToken()
-    );
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
   }
 
   @Test
@@ -198,6 +122,10 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   }
 
   WorkflowRun getLatestUpdatedWorkflowRun(String workflowId, String runId) throws Exception {
+    executeWithWaitAndRetry(() -> {
+      waitForWorkflowRunsToComplete(trackedWorkflowRuns, completedWorkflowRunIds);
+      return null;
+    }, 10, 30, TimeUnit.SECONDS);
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_WORKFLOW_RUN_URL, workflowId, runId),
@@ -205,6 +133,10 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-   return gson.fromJson(response.getEntity(String.class), WorkflowRun.class);
+    if (response.getStatus() == HttpStatus.SC_OK) {
+      return gson.fromJson(response.getEntity(String.class), WorkflowRun.class);
+    } else {
+      throw new Exception(String.format("Error getting status for workflow run id %s", runId));
+    }
   }
 }
