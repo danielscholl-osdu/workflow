@@ -50,7 +50,7 @@ The following software have components provided under the terms of this license:
 - Adapter: RxJava (from https://repo1.maven.org/maven2/com/squareup/retrofit2/adapter-rxjava)
 - Apache Commons Codec (from https://commons.apache.org/proper/commons-codec/)
 - Apache Commons Collections (from https://commons.apache.org/proper/commons-collections/)
-- Apache Commons Lang (from http://commons.apache.org/proper/commons-lang/)
+- Apache Commons Lang (from https://commons.apache.org/proper/commons-lang/)
 - Apache Commons Logging (from http://commons.apache.org/proper/commons-logging/)
 - Apache Geronimo JMS Spec 2.0 (from http://geronimo.apache.org/maven/${siteId}/${version})
 - Apache HttpAsyncClient (from http://hc.apache.org/httpcomponents-asyncclient)
