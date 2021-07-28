@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -83,7 +84,8 @@ public abstract class GetAllWorkflowsForTenantIntegrationTests extends TestBase 
         null
     );
 
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
+
   }
 
   @Test

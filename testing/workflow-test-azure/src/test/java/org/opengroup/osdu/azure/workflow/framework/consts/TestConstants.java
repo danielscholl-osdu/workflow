@@ -20,19 +20,21 @@ public class TestConstants {
 	public static final String GET_STATUS_API_ENDPOINT = "/getStatus";
 	public static final String UPDATE_STATUS_API_ENDPOINT = "/updateStatus";
 	public static final String CREATE_WORKFLOW_API_ENDPOINT = "/workflow";
+  	public static final String CREATE_SYSTEM_WORKFLOW_API_ENDPOINT ="/workflow/system";
 	public static final String TRIGGER_WORKFLOW_API_ENDPOINT = "/workflow/%s/workflowRun";
 	public static final String GET_WORKFLOWS_FOR_TENANT_API_ENDPOINT = "/workflow/?prefix=%s";
 	public static final String GET_WORKFLOW_BY_ID_API_ENDPOINT = "/workflow/%s";
+ 	public static final String GET_SYSTEM_WORKFLOW_BY_ID_API_ENDPOINT = "/workflow/system/%s";
 	public static final String GET_WORKFLOW_RUN_API_ENDPOINT = "/workflow/%s/workflowRun/%s";
 	public static final String UPDATE_WORKFLOW_RUN_STATUS_API_ENDPOINT =
       "/workflow/%s/workflowRun/%s/updateStatus";
 	public static final String CUSTOM_OPERATOR_API_ENDPOINT = "/customOperator";
 	public static final String CUSTOM_OPERATOR_BY_ID_API_ENDPOINT = "/customOperator/%s";
-  public static final String GET_SIGNED_URL_API_ENDPOINT = "/workflow/%s/workflowRun/%s/getSignedUrl";
+  	public static final String GET_SIGNED_URL_API_ENDPOINT = "/workflow/%s/workflowRun/%s/getSignedUrl";
 
   	public static final String WORKFLOW_TYPE_INGEST = "ingest";
 
-  public static final String GET_ALL_WORKFLOW_RUNS_API_ENDPOINT = "/workflow/%s/workflowRun";
+  	public static final String GET_ALL_WORKFLOW_RUNS_API_ENDPOINT = "/workflow/%s/workflowRun";
 	public static final String WORKFLOW_ID_FIELD = "WorkflowID";
 	public static final String STATUS_FIELD = "Status";
 
@@ -41,7 +43,7 @@ public class TestConstants {
 	public static final String WORKFLOW_STATUS_TYPE_SUBMITTED = "submitted";
 	public static final String WORKFLOW_STATUS_TYPE_RUNNING = "running";
 	public static final String WORKFLOW_STATUS_TYPE_FAILED = "failed";
-  public static final List<String> FINISHED_WORKFLOW_RUN_STATUSES =
+ 	public static final List<String> FINISHED_WORKFLOW_RUN_STATUSES =
       Arrays.asList(WORKFLOW_STATUS_TYPE_FINISHED, WORKFLOW_STATUS_TYPE_FAILED,
           WORKFLOW_STATUS_TYPE_SUCCESS);
 
@@ -54,10 +56,14 @@ public class TestConstants {
 			getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + UPDATE_STATUS_API_ENDPOINT;
 	public static final String CREATE_WORKFLOW_URL =
 		getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT;
+  	public static final String CREATE_SYSTEM_WORKFLOW_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_SYSTEM_WORKFLOW_API_ENDPOINT;
 	public static final String TRIGGER_WORKFLOW_URL =
 		getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + TRIGGER_WORKFLOW_API_ENDPOINT;
-  	public static final String GET_WORKFLOW_BY_ID_URL =
+	public static final String GET_WORKFLOW_BY_ID_URL =
       	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_BY_ID_API_ENDPOINT;
+  	public static final String GET_SYSTEMWORKFLOW_BY_ID_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_SYSTEM_WORKFLOW_BY_ID_API_ENDPOINT;
   	public static final String GET_WORKFLOWS_FOR_TENANT_URL =
       	getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOWS_FOR_TENANT_API_ENDPOINT;
   	public static final String GET_WORKFLOW_RUN_URL =
@@ -68,9 +74,9 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CUSTOM_OPERATOR_BY_ID_API_ENDPOINT;
 	public static final String UPDATE_WORKFLOW_RUN_STATUS_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_API_ENDPOINT;
-  public static final String GET_SIGNED_URL_URL =
+  	public static final String GET_SIGNED_URL_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_SIGNED_URL_API_ENDPOINT;
-  public static final String GET_ALL_WORKFLOW_RUNS_URL =
+  	public static final String GET_ALL_WORKFLOW_RUNS_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_ALL_WORKFLOW_RUNS_API_ENDPOINT;
 
 	public static final String NON_EXISTING_WORKFLOW_ID = "non-existing-workflow-id";
@@ -79,7 +85,7 @@ public class TestConstants {
 	public static final String WORKFLOW_TYPE_NOT_NULL_MESSAGE = "WorkflowType: must not be null";
 	public static final String WORKFLOW_ALREADY_HAS_STATUS_MESSAGE = "Workflow status for workflow id: %s already has status:%s and can not be updated";
 	public static final String WORKFLOW_STATUS_NOT_ALLOWED_MESSAGE = "Status: Not allowed workflow status type: SUBMITTED, Should be one of: [RUNNING, FINISHED, FAILED]";
-  public static final String WORKFLOW_NOT_FOUND_MESSAGE = "Workflow: %s doesn't exist";
+  	public static final String WORKFLOW_NOT_FOUND_MESSAGE = "Workflow: %s doesn't exist";
 
 	public static String getValidWorkflowPayload(){
 		return buildStartWorkflow(buildContext(), WORKFLOW_TYPE_INGEST);

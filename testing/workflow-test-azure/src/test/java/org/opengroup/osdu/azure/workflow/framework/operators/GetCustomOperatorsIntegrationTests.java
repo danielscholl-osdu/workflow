@@ -176,7 +176,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
         null
     );
 
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
   }
 
   @Test

@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>os-workflow</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -31,11 +31,12 @@
 
   <properties>
     <azure.version>2.1.7</azure.version>
-    <osdu.corelibazure.version>0.10.0-rc10</osdu.corelibazure.version>
+    <osdu.corelibazure.version>0.10.0</osdu.corelibazure.version>
     <azure.appservice.resourcegroup />
     <azure.appservice.plan />
     <azure.appservice.appname />
     <azure.appservice.subscription />
+
   </properties>
 
   <dependencyManagement>
@@ -57,10 +58,6 @@
       <artifactId>azure-active-directory-spring-boot-starter</artifactId>
       <version>${azure.version}</version>
       <exclusions>
-        <exclusion>
-          <groupId>org.springframework.security</groupId>
-          <artifactId>spring-security-web</artifactId>
-        </exclusion>
         <exclusion>
           <groupId>org.springframework</groupId>
           <artifactId>spring-web</artifactId>
@@ -114,7 +111,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-core</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.11.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.springframework.security</groupId>
@@ -188,6 +185,7 @@
       <groupId>com.azure</groupId>
       <artifactId>azure-storage-file-share</artifactId>
     </dependency>
+
 
     <!-- WhiteSource updates -->
     <dependency>

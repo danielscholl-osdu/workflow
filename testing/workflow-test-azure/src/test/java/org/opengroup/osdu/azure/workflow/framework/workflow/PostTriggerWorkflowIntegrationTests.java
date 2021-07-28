@@ -3,6 +3,7 @@ package org.opengroup.osdu.azure.workflow.framework.workflow;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.exception.RetryException;
 import org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder;
@@ -220,8 +221,7 @@ public abstract class PostTriggerWorkflowIntegrationTests extends TestBase {
         headers,
         null
     );
-
-    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(response.getStatus()== HttpStatus.SC_FORBIDDEN || response.getStatus()== HttpStatus.SC_UNAUTHORIZED) ;
   }
 
   @Test

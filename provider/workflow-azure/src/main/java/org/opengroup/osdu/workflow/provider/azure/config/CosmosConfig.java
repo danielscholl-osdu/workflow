@@ -17,4 +17,5 @@ public class CosmosConfig {
   private String workflowRunCollection;
   private String workflowTasksSharingCollection;
   private String customOperatorCollection;
+  private String systemdatabase;
 }
