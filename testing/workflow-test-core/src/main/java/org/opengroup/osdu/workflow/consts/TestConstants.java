@@ -54,6 +54,8 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_BY_ID_API_ENDPOINT;
   public static final String GET_WORKFLOW_RUN_BY_ID_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
+  public static final String GET_DETAILS_WORKFLOW_RUN_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_RUN_API_ENDPOINT;
   public static final String NON_EXISTING_WORKFLOW_ID = "non-existing-workflow-id";
 
   public static final String WORKFLOW_ID_NOT_BLANK_MESSAGE = "WorkflowID: must not be blank";
