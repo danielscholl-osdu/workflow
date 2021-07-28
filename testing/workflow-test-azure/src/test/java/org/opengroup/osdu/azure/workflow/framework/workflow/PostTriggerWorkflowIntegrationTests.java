@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
 import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildInvalidTriggerWorkflowRunPayload;
@@ -33,7 +33,7 @@ public abstract class PostTriggerWorkflowIntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.POST,
-        String.format(TRIGGER_WORKFLOW_URL, workflowId),
+        String.format(CREATE_WORKFLOW_RUN_URL, workflowId),
         gson.toJson(triggerWorkflowRequestPayload),
         headers,
         client.getAccessToken()

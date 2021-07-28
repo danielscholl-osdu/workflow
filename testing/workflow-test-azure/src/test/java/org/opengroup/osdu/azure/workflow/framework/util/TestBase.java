@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.FINISHED_WORKFLOW_RUN_STATUSES;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
 import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildTriggerWorkflowPayload;
@@ -48,7 +48,7 @@ public abstract class TestBase {
         executeWithWaitAndRetry(() -> {
           waitForWorkflowRunsToComplete(trackedWorkflowRuns, completedWorkflowRunIds);
           return null;
-        }, 10, 30, TimeUnit.SECONDS);
+        }, 20, 15, TimeUnit.SECONDS);
       }
     } finally {
       Long integrationTestEndTime = System.currentTimeMillis();
@@ -130,7 +130,7 @@ public abstract class TestBase {
   public String getWorkflowRunStatus(String workflowId, String workflowRunId) throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_WORKFLOW_RUN_URL, workflowId, workflowRunId),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowId, workflowRunId),
         null,
         headers,
         client.getAccessToken()
@@ -154,7 +154,7 @@ public abstract class TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.POST,
-        String.format(TRIGGER_WORKFLOW_URL, workflowId),
+        String.format(CREATE_WORKFLOW_RUN_URL, workflowId),
         gson.toJson(triggerWorkflowPayload),
         headers,
         client.getAccessToken()

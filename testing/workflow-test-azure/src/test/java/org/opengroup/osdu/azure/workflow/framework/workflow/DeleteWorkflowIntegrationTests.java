@@ -9,7 +9,7 @@ import javax.ws.rs.HttpMethod;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD;
@@ -25,7 +25,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.POST,
-        String.format(TRIGGER_WORKFLOW_URL, existingWorkflowId),
+        String.format(CREATE_WORKFLOW_RUN_URL, existingWorkflowId),
         gson.toJson(triggerWorkflowPayload),
         headers,
         client.getAccessToken()

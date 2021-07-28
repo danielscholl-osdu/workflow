@@ -1,8 +1,9 @@
 package org.opengroup.osdu.azure.workflow.workflow;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzureV3;
+import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzure;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
   @BeforeEach
   @Override
   public void setup() {
-    this.client = new HTTPClientAzureV3();
+    this.client = new HTTPClientAzure();
     this.headers = client.getCommonHeader();
   }
 

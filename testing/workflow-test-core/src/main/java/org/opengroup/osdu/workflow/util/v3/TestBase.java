@@ -37,7 +37,7 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_R
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.FINISHED_WORKFLOW_RUN_STATUSES;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
 
@@ -155,7 +155,7 @@ public abstract class TestBase {
   public String getWorkflowRunStatus(String workflowId, String workflowRunId) throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowId, workflowRunId),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowId, workflowRunId),
         null,
         headers,
         client.getAccessToken()

@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_ALL_WORKFLOW_RUNS_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
 
 public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
@@ -36,7 +36,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   public void should_returnBadRequest_when_givenInvalidPrefix() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?prefix=%s", triggeredWorkflow.getWorkflowId(), INVALID_PREFIX),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?prefix=%s", triggeredWorkflow.getWorkflowId(), INVALID_PREFIX),
         null,
         headers,
         client.getAccessToken()
@@ -48,7 +48,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   public void should_returnBadRequest_when_givenInvalidLimit() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?limit=%s", triggeredWorkflow.getWorkflowId(), INVALID_LIMIT),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s", triggeredWorkflow.getWorkflowId(), INVALID_LIMIT),
         null,
         headers,
         client.getAccessToken()
@@ -62,7 +62,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     String prefix = triggeredWorkflow.getRunId().substring(0, 2);
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?limit=%s&prefix=%s", triggeredWorkflow.getWorkflowId(), limit, prefix),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s&prefix=%s", triggeredWorkflow.getWorkflowId(), limit, prefix),
         null,
         headers,
         client.getAccessToken()
@@ -83,7 +83,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     Long startTimeStamp = triggeredWorkflow.getStartTimeStamp();
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?startDate=%s", triggeredWorkflow.getWorkflowId(), startTimeStamp),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?startDate=%s", triggeredWorkflow.getWorkflowId(), startTimeStamp),
         null,
         headers,
         client.getAccessToken()
@@ -104,7 +104,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     Long endTimestamp = getLatestUpdatedWorkflowRun(triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()).getEndTimeStamp();
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL + "?endDate=%s", triggeredWorkflow.getWorkflowId(), endTimestamp),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?endDate=%s", triggeredWorkflow.getWorkflowId(), endTimestamp),
         null,
         headers,
         client.getAccessToken()
@@ -125,10 +125,10 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     executeWithWaitAndRetry(() -> {
       waitForWorkflowRunsToComplete(trackedWorkflowRuns, completedWorkflowRunIds);
       return null;
-    }, 10, 30, TimeUnit.SECONDS);
+    }, 20, 15, TimeUnit.SECONDS);
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_WORKFLOW_RUN_URL, workflowId, runId),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowId, runId),
         null,
         headers,
         client.getAccessToken()

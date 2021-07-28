@@ -146,4 +146,10 @@ public class PayloadBuilder {
     payload.put("status", "invalid-status");
     return new Gson().toJson(payload);
   }
+
+  public static String buildUpdateWorkflowRunInvalidRequestPayload(){
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("sTaTus", "running");
+    return new Gson().toJson(payload);
+  }
 }

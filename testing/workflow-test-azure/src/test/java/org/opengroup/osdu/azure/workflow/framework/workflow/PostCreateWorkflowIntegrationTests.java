@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.TRIGGER_WORKFLOW_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_CUSTOM_OPERATOR_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
@@ -116,7 +116,7 @@ public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
 
     ClientResponse triggerResponse = client.send(
             HttpMethod.POST,
-            String.format(TRIGGER_WORKFLOW_URL, workflowId),
+            String.format(CREATE_WORKFLOW_RUN_URL, workflowId),
             gson.toJson(triggerWorkflowRequestPayload),
             headers,
             client.getAccessToken()

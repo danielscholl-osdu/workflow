@@ -20,6 +20,7 @@ package org.opengroup.osdu.workflow.workflow.v3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
 import org.junit.jupiter.api.Test;
+import org.opengroup.osdu.workflow.consts.TestConstants;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 import org.springframework.http.HttpStatus;
@@ -33,13 +34,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_ALL_WORKFLOW_RUNS_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_RUNNING;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayloadWithGivenRunId;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidPayloadStatus;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidRequestPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 public abstract class WorkflowRunV3IntegrationTests extends TestBase {
@@ -81,7 +82,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getAccessToken()
@@ -95,7 +96,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID, INVALID_WORKFLOW_RUN_ID),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, INVALID_WORKFLOW_ID, INVALID_WORKFLOW_RUN_ID),
         null,
         headers,
         client.getAccessToken()
@@ -111,7 +112,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), INVALID_WORKFLOW_RUN_ID),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), INVALID_WORKFLOW_RUN_ID),
         null,
         headers,
         client.getAccessToken()
@@ -132,7 +133,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         null
@@ -152,7 +153,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getNoDataAccessToken()
@@ -175,7 +176,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getNoDataAccessToken()
@@ -312,7 +313,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, workflowRunInfo.get(WORKFLOW_ID_FIELD)),
+        String.format(TestConstants.CREATE_WORKFLOW_RUN_URL, workflowRunInfo.get(WORKFLOW_ID_FIELD)),
         null,
         headers,
         client.getAccessToken()
@@ -338,7 +339,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, INVALID_WORKFLOW_ID),
+        String.format(TestConstants.CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID),
         null,
         headers,
         client.getAccessToken()
@@ -358,7 +359,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, INVALID_WORKFLOW_ID),
+        String.format(TestConstants.CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID),
         null,
         headers,
         client.getNoDataAccessToken()
@@ -378,7 +379,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, INVALID_WORKFLOW_ID),
+        String.format(TestConstants.CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID),
         null,
         headers,
         null
@@ -401,7 +402,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_ALL_WORKFLOW_RUNS_URL, INVALID_WORKFLOW_ID),
+        String.format(TestConstants.CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID),
         null,
         HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getAccessToken()
@@ -424,11 +425,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
     createdWorkflowRuns.add(workflowRunInfo);
 
-    String workflowRunStatus = "running";
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_RUNNING;
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -456,11 +457,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
     createdWorkflowRuns.add(workflowRunInfo);
 
-    String workflowRunStatus = "finished";
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -490,8 +491,29 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunInvalidPayloadStatus(),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidRequestPayload() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunInvalidRequestPayload(),
         headers,
         client.getAccessToken()
     );
@@ -509,11 +531,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
     createdWorkflowRuns.add(workflowRunInfo);
 
-    String workflowRunStatus = "finished";
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -528,7 +550,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -547,12 +569,12 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
     createdWorkflowRuns.add(workflowRunInfo);
 
-    String workflowRunStatus = "finished";
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
     Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, INVALID_WORKFLOW_ID, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, INVALID_WORKFLOW_ID, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -576,7 +598,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), INVALID_WORKFLOW_RUN_ID),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), INVALID_WORKFLOW_RUN_ID),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getAccessToken()
@@ -599,7 +621,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         null
@@ -622,7 +644,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         headers,
         client.getNoDataAccessToken()
@@ -646,7 +668,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowInfo.get(WORKFLOW_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
         HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getAccessToken()
