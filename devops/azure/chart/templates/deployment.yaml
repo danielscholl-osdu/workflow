@@ -42,10 +42,10 @@ spec:
           resources:
             requests:
               cpu: "1000m"
-              memory: "2Gi"
+              memory: "4Gi"
             limits:
               cpu: "1000m"
-              memory: "2Gi"
+              memory: "4Gi"
           ports:
             - containerPort: 80
           readinessProbe:
@@ -95,6 +95,8 @@ spec:
                   key: ENV_KEYVAULT
             - name: cosmosdb_database
               value: osdu-db
+            - name:  cosmosdb_system_database
+              value: osdu-system-db
             - name: OSDU_ENTITLEMENTS_URL
               value: http://entitlements/api/entitlements/v2
             - name: OSDU_ENTITLEMENTS_APPKEY

@@ -92,6 +92,12 @@ public abstract class HTTPClient {
 		return headers;
 	}
 
+	public Map<String, String> getCommonHeaderWithoutPartition() {
+		Map<String, String> headers = new HashMap<>();
+		headers.put(HEADER_DATA_PARTITION_ID, "");
+		return headers;
+	}
+
 	public static Map<String, String> overrideHeader(Map<String, String> currentHeaders, String... partitions) {
 		String value = String.join(",", partitions);
 		currentHeaders.put(HEADER_DATA_PARTITION_ID, value);

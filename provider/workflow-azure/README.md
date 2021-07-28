@@ -190,6 +190,19 @@ $ (cd testing/storage-test-core/ && mvn clean install)
 #       above are already exported in your environment.
 $ (cd testing/storage-test-azure/ && mvn clean test)
 ```
+### Azure Specific Endpoints
+We have added new endpoint to handle System workflows.We plan to move these APIs to workflow-core in future once the [ADR](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/issues/118) is approved.
+- The new API shall be termed as workflow/system
+- To create/delete Public workflows - **/workflow/system** endpoint shall be used
+- To Get/Trigger Public workflows, existing workflow service endpoint must be used.
+- The authorization of new end point shall be different from existing groups. We are  using service principal based authorization.
+- The new API shall not accept data-partition-id as a header. Service is aware where the public workflows are located.
+- This API should interact only with Public workflows. It should not have access to other workflows.
+- Since we don't have uniqueness check for workflow names, if there are 2 workflows(one system and other private) with same name then the private workflow will get priority while returning response of Get API call.
+- While deleting the system workflows via this new endpoint, currently we don't delete workflow run data since it will have to be deleted from all the partitions. 
+- GetAll api will return the combined list of system as well as private workflows.
+
+
 ## License
 Copyright © Microsoft Corporation
 
