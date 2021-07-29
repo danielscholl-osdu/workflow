@@ -7,9 +7,6 @@ import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzure;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
@@ -31,18 +28,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
   @AfterEach
   @Override
   public void tearDown() throws Exception {
-    try {
-      Set<String> completedWorkflowRunIds = new HashSet<>();
-      if(createdWorkflowRuns.size() != completedWorkflowRunIds.size()) {
-        executeWithWaitAndRetry(() -> {
-          waitForWorkflowRunsToComplete(createdWorkflowRuns, completedWorkflowRunIds);
-          return null;
-        }, 20, 15, TimeUnit.SECONDS);
-      }
-    } finally {
-      Long integrationTestEndTime = System.currentTimeMillis();
-      log.info("Completed integration test at {}", integrationTestEndTime);
-    }
+    waitForWorkflowRunsToComplete();
     deleteAllTestWorkflowRecords();
     this.client = null;
     this.headers = null;

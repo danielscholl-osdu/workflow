@@ -36,8 +36,8 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
 
 	@AfterEach
 	@Override
-	public void tearDown() throws InterruptedException {
-		Thread.sleep(30000);
+	public void tearDown() throws Exception {
+		waitForWorkflowRunsToComplete();
 		deleteAllTestWorkflowRecords();
 		this.client = null;
 		this.headers = null;
