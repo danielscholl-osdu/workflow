@@ -42,6 +42,7 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_BY_I
 import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATION_ID;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithIncorrectDag;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithIncorrectWorkflowName;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithNoWorkflowName;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
 
 public abstract class WorkflowV3IntegrationTests extends TestBase {
@@ -327,17 +328,17 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
     assertEquals(workflowInfo.get("workflowId"), duplicateWorkflowInfo.get("conflictId"));
   }
 
-//  @Test
-//  public void createWorkflow_should_returnBadRequest_when_givenInvalidRequestWithNoWorkflowName() throws Exception{
-//    ClientResponse response = client.send(
-//        HttpMethod.POST,
-//        CREATE_WORKFLOW_URL,
-//        buildCreateWorkflowPayloadWithNoWorkflowName(),
-//        headers,
-//        client.getAccessToken()
-//    );
-//    assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-//  }
+  @Test
+  public void createWorkflow_should_returnBadRequest_when_givenInvalidRequestWithNoWorkflowName() throws Exception{
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        CREATE_WORKFLOW_URL,
+        buildCreateWorkflowPayloadWithNoWorkflowName(),
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
 
   @Test
   public void createWorkflow_should_returnForbidden_when_notGivenAccessToken() throws Exception {
