@@ -9,6 +9,8 @@ import org.opengroup.osdu.workflow.workflow.v3.WorkflowV3IntegrationTests;
 
 import java.util.ArrayList;
 
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+
 public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
 
   @BeforeEach
@@ -16,6 +18,11 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
   public void setup() {
     this.client = new HTTPClientAzure();
     this.headers = client.getCommonHeader();
+    try {
+      deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @AfterEach
