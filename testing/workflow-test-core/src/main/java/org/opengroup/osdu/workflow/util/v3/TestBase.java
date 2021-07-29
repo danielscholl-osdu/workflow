@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import javax.ws.rs.HttpMethod;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,6 +168,21 @@ public abstract class TestBase {
     } else {
       throw new Exception(String.format("Error getting status for workflow run id %s",
           workflowRunId));
+    }
+  }
+
+  protected void waitForWorkflowRunsToComplete() throws Exception {
+    try {
+      Set<String> completedWorkflowRunIds = new HashSet<>();
+      if(createdWorkflowRuns.size() != completedWorkflowRunIds.size()) {
+        executeWithWaitAndRetry(() -> {
+          waitForWorkflowRunsToComplete(createdWorkflowRuns, completedWorkflowRunIds);
+          return null;
+        }, 20, 15, TimeUnit.SECONDS);
+      }
+    } finally {
+      Long integrationTestEndTime = System.currentTimeMillis();
+      log.info("Completed integration test at {}", integrationTestEndTime);
     }
   }
 }
