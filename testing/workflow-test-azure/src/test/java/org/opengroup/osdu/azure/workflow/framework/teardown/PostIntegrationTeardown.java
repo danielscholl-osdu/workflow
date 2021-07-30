@@ -35,7 +35,7 @@ public class PostIntegrationTeardown {
       try {
         ClientResponse response = client.send(
             HttpMethod.DELETE,
-            String.format(TestConstants.GET_WORKFLOW_BY_ID_URL, workflowId),
+            String.format(TestConstants.GET_WORKFLOW_URL, workflowId),
             null,
             client.getCommonHeader(),
             client.getAccessToken()

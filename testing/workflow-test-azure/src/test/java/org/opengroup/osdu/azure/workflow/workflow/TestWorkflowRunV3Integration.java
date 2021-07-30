@@ -39,7 +39,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
       try {
-        deleteTestWorkflows(c.get(WORKFLOW_ID_FIELD));
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         e.printStackTrace();
       }

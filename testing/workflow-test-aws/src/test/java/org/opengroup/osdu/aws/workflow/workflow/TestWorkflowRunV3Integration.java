@@ -57,7 +57,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     // cleanup any leftover workflows from previous int test runs
     try {
       deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
-    } catch (Exception e) {      
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -91,8 +91,8 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
 
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
-      try {        
-        deleteTestWorkflows(c.get(WORKFLOW_NAME));
+      try {
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -112,7 +112,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
   }
 
   protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId) throws Exception {
-    
+
     return client.send(
         HttpMethod.PUT,
         String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowName,
@@ -142,7 +142,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     for (JsonElement responseData: responseDataArr) {
         runIds.add(responseData.getAsJsonObject().get("runId").getAsString());
     }
-    
+
 
     return runIds;
 

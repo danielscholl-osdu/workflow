@@ -50,9 +50,9 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT;
   public static final String CREATE_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_RUN_API_ENDPOINT;
-  public static final String GET_WORKFLOW_BY_ID_URL =
+  public static final String GET_WORKFLOW_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_BY_ID_API_ENDPOINT;
-  public static final String GET_WORKFLOW_RUN_BY_ID_URL =
+  public static final String GET_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
   public static final String GET_DETAILS_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_RUN_API_ENDPOINT;

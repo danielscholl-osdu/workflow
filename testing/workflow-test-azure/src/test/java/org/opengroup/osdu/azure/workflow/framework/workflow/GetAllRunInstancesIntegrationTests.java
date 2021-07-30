@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 
 public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
@@ -128,7 +128,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     }, 20, 15, TimeUnit.SECONDS);
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowId, runId),
+        String.format(GET_WORKFLOW_RUN_URL, workflowId, runId),
         null,
         headers,
         client.getAccessToken()

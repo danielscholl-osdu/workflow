@@ -38,7 +38,7 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_R
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.FINISHED_WORKFLOW_RUN_STATUSES;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_BY_ID_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
 
@@ -48,7 +48,7 @@ public abstract class TestBase {
   protected Map<String, String> headers;
   protected List<Map<String, String>> createdWorkflows = new ArrayList<>();
   protected List<Map<String, String>> createdWorkflowRuns = new ArrayList<>();
-  protected static final String WORKFLOW_NAME = "workflowName";
+  protected static final String WORKFLOW_NAME_FIELD = "workflowName";
   protected static final String WORKFLOW_ID_FIELD = "workflowId";
   protected static final String WORKFLOW_RUN_ID_FIELD = "runId";
   protected static final String WORKFLOW_RUN_STATUS_FIELD = "status";
@@ -153,10 +153,10 @@ public abstract class TestBase {
     throw new Exception("Execution failed even after retries");
   }
 
-  public String getWorkflowRunStatus(String workflowId, String workflowRunId) throws Exception {
+  public String getWorkflowRunStatus(String workflowName, String workflowRunId) throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_WORKFLOW_RUN_BY_ID_URL, workflowId, workflowRunId),
+        String.format(GET_WORKFLOW_RUN_URL, workflowName, workflowRunId),
         null,
         headers,
         client.getAccessToken()

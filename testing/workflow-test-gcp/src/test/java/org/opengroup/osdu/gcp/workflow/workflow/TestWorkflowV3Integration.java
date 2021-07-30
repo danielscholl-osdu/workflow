@@ -66,7 +66,7 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
       try {
-        deleteTestWorkflows(c.get(WORKFLOW_NAME));
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
