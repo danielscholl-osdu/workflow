@@ -98,12 +98,12 @@ public abstract class TestBase {
   protected void waitForWorkflowRunsToComplete(List<Map<String, String>> createdWorkflowRuns,
                                                Set<String> completedWorkflowRunIds) throws Exception {
     for(Map<String, String> createdWorkflow: createdWorkflowRuns) {
-      String workflowId = createdWorkflow.get(WORKFLOW_ID_FIELD);
+      String workflowName = createdWorkflow.get(WORKFLOW_NAME_FIELD);
       String workflowRunId = createdWorkflow.get(WORKFLOW_RUN_ID_FIELD);
       if(!completedWorkflowRunIds.contains(workflowRunId)) {
         String workflowRunStatus;
         try {
-          workflowRunStatus = getWorkflowRunStatus(workflowId, workflowRunId);
+          workflowRunStatus = getWorkflowRunStatus(workflowName, workflowRunId);
         } catch (Exception e) {
           throw new RetryException(e.getMessage());
         }
