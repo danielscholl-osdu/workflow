@@ -98,7 +98,7 @@ public abstract class TestBase {
   protected void waitForWorkflowRunsToComplete(List<Map<String, String>> createdWorkflowRuns,
                                                Set<String> completedWorkflowRunIds) throws Exception {
     for(Map<String, String> createdWorkflow: createdWorkflowRuns) {
-      String workflowName = createdWorkflow.get(WORKFLOW_NAME_FIELD);
+      String workflowName = CREATE_WORKFLOW_WORKFLOW_NAME;
       String workflowRunId = createdWorkflow.get(WORKFLOW_RUN_ID_FIELD);
       if(!completedWorkflowRunIds.contains(workflowRunId)) {
         String workflowRunStatus;
