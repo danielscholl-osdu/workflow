@@ -102,6 +102,7 @@ public class PayloadBuilder {
 
   public static String buildCreateWorkflowPayloadWithNoWorkflowName() {
     Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", "");
     payload.put("registrationInstructions", new HashMap<String, String>());
     payload.put("description", "Test workflow record for integration tests.");
     return new Gson().toJson(payload);
