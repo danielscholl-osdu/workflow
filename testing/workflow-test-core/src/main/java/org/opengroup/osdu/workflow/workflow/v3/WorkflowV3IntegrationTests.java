@@ -48,8 +48,6 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflo
 public abstract class WorkflowV3IntegrationTests extends TestBase {
 
   public static final String WORKFLOW_NOT_FOUND_MESSAGE = "Workflow: %s doesn't exist";
-  public static final String INVALID_WORKFLOW_ID = "Invalid-Workflow-ID";
-  public static final String INVALID_PARTITION = "invalid-partition";
   private static String CORRELATION_ID = "test-correlation-id";
 
   @Test
@@ -244,10 +242,10 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void getWorkflowById_should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void getWorkflowById_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_WORKFLOW_URL, INVALID_WORKFLOW_ID),
+        String.format(GET_WORKFLOW_URL, INVALID_WORKFLOW_NAME),
         null,
         headers,
         client.getAccessToken()
@@ -394,10 +392,10 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void deleteWorkflow_shouldReturnNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void deleteWorkflow_shouldReturnNotFound_when_givenInvalidWorkflowName() throws Exception {
     ClientResponse deleteResponse = client.send(
         HttpMethod.DELETE,
-        String.format(GET_WORKFLOW_URL, INVALID_WORKFLOW_ID),
+        String.format(GET_WORKFLOW_URL, INVALID_WORKFLOW_NAME),
         null,
         headers,
         client.getAccessToken()

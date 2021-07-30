@@ -44,10 +44,6 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflo
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 public abstract class WorkflowRunV3IntegrationTests extends TestBase {
-
-  private static final String INVALID_WORKFLOW_NAME = "invalid-workflow-name";
-  private static final String INVALID_WORKFLOW_RUN_ID = "invalid-workflow-run-id";
-  private static final String INVALID_PARTITION = "invalid-partition";
   private static final String INVALID_PREFIX = "backfill";
   private static final Integer INVALID_LIMIT = 1000;
 
@@ -92,7 +88,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
         String.format(GET_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
@@ -181,7 +177,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
         client.getNoDataAccessToken()
     );
 
-    assertEquals(org.apache.http.HttpStatus.SC_FORBIDDEN, response.getStatus());
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
   }
 
   /**
@@ -232,7 +228,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void triggerWorkflowRun_should_return_WorkflowNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void triggerWorkflowRun_should_return_WorkflowNotFound_when_givenInvalidWorkflowName() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.POST,
         String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
@@ -324,7 +320,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void getAllRunInstances_should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void getAllRunInstances_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
     String workflowResponseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
@@ -553,7 +549,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
   }
 
   @Test
-  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
+  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
     String workflowResponseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
@@ -563,7 +559,6 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     createdWorkflowRuns.add(workflowRunInfo);
 
     String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
-    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
     ClientResponse response = client.send(
         HttpMethod.PUT,
@@ -587,7 +582,6 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     createdWorkflowRuns.add(workflowRunInfo);
 
     String workflowRunStatus = "finished";
-    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
     ClientResponse response = client.send(
         HttpMethod.PUT,

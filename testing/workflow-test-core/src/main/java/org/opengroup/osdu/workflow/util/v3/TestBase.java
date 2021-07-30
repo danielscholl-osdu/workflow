@@ -52,6 +52,9 @@ public abstract class TestBase {
   protected static final String WORKFLOW_ID_FIELD = "workflowId";
   protected static final String WORKFLOW_RUN_ID_FIELD = "runId";
   protected static final String WORKFLOW_RUN_STATUS_FIELD = "status";
+  protected static final String INVALID_WORKFLOW_NAME = "this-is-an-invalid-workflow-name";
+  protected static final String INVALID_WORKFLOW_RUN_ID = "invalid-workflow-run-id";
+  protected static final String INVALID_PARTITION = "invalid-partition";
 
   public abstract void setup() throws Exception;
   public abstract void tearDown() throws Exception;
