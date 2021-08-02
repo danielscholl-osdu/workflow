@@ -205,14 +205,6 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
     createdWorkflowRuns.add(workflowRunInfo);
 
-    ClientResponse response = client.send(
-        HttpMethod.POST,
-        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
-        buildCreateWorkflowRunValidPayload(),
-        headers,
-        client.getAccessToken()
-    );
-
     String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
 
     ClientResponse duplicateRunIdResponse = client.send(
@@ -223,7 +215,6 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
     assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, duplicateRunIdResponse.getStatus());
   }
 

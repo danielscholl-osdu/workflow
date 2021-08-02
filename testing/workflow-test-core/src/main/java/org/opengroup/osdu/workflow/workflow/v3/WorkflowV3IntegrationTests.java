@@ -128,7 +128,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        CREATE_WORKFLOW_URL,
+        CREATE_WORKFLOW_URL + "?prefix=",
         null,
         headers,
         client.getAccessToken()
