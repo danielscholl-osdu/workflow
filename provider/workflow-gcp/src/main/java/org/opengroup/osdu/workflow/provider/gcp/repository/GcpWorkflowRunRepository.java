@@ -39,7 +39,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.Strings;
-import org.opengroup.osdu.core.common.exception.BadRequestException;
+import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
@@ -121,7 +121,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     if (tasks.hasNext()) {
       return buildWorkflowRunFromDataStoreEntity(tasks.next());
     }
-    throw new BadRequestException(
+    throw new NotFoundException(
         String.format("Workflow entity for workflow name: %s and run id: %s not found.",
             workflowName,
             runId));
