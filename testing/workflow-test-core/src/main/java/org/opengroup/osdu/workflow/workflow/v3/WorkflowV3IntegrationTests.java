@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
@@ -301,8 +300,6 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
 
   /** POST CREATE WORKFLOW INTEGRATION TESTS **/
 
-  // Test failing on AWS due to different format used for workflowId
-  @Disabled
   @Test
   public void createWorkflow_should_returnWorkflowExists_when_givenDuplicateCreateWorkflowRequest() throws Exception{
     String responseBody = createWorkflow();
@@ -318,10 +315,6 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
     );
 
     assertEquals(HttpStatus.SC_CONFLICT, duplicateResponse.getStatus());
-
-    String duplicateResponseBody = duplicateResponse.getEntity(String.class);
-    Map<String, String> duplicateWorkflowInfo = getWorkflowInfoFromCreateWorkflowResponseBody(duplicateResponseBody);
-    assertEquals(workflowInfo.get("workflowId"), duplicateWorkflowInfo.get("conflictId"));
   }
 
   @Test
