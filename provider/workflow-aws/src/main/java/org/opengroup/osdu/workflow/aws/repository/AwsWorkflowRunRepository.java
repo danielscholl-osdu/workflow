@@ -168,8 +168,8 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
 
         if (!workflowRunExists(workflowRun.getRunId(), dataPartitionId)) {
-            throw new AppException(HttpStatus.BAD_REQUEST.value(),
-                                   HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            throw new AppException(HttpStatus.NOT_FOUND.value(),
+                                   HttpStatus.NOT_FOUND.getReasonPhrase(),
                                    "WorkflowRun not found, cannot update");
         }
 
