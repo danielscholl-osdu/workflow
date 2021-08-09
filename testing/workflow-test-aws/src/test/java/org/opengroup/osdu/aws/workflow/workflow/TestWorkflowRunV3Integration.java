@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import javax.ws.rs.HttpMethod;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -37,12 +38,20 @@ import org.opengroup.osdu.aws.workflow.util.HTTPClientAWS;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
 
