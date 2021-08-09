@@ -17,6 +17,7 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
 
+import com.google.api.client.http.HttpResponseException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +126,10 @@ public class GcpComposerEngineServiceImpl extends AirflowWorkflowEngineServiceIm
           .statusCode(response.getStatusCode())
           .statusMessage(response.getStatusMessage())
           .build();
+    } catch (HttpResponseException e){
+      String errorMessage = format("Unable to send request to Airflow. %s", e.getMessage());
+      log.error(errorMessage, e);
+      throw new AppException(e.getStatusCode(), "Failed to send request.", errorMessage);
     } catch (IOException e) {
       String errorMessage = format("Unable to send request to Airflow. %s", e.getMessage());
       log.error(errorMessage, e);

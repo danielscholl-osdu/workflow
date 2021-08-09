@@ -1,5 +1,12 @@
 package org.opengroup.osdu.workflow.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.util.Collections.singletonList;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT1;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.DOMAIN;
@@ -8,10 +15,6 @@ import static org.opengroup.osdu.workflow.consts.DefaultVariable.OTHER_RELEVANT_
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.DATA_PARTITION_ID_TENANT;
-
-import com.google.gson.Gson;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PayloadBuilder {
 
@@ -97,6 +100,14 @@ public class PayloadBuilder {
     return new Gson().toJson(payload);
   }
 
+  public static String buildCreateWorkflowPayloadWithNoWorkflowName() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", "");
+    payload.put("registrationInstructions", new HashMap<String, String>());
+    payload.put("description", "Test workflow record for integration tests.");
+    return new Gson().toJson(payload);
+  }
+
   public static String buildCreateWorkflowRunValidPayload() {
     Map<String, Object> requestBody = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();
@@ -115,6 +126,31 @@ public class PayloadBuilder {
   public static String buildUpdateWorkflowPayload() {
     Map<String, Object> payload = new HashMap<>();
     payload.put("status", "finished");
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowRunValidPayloadWithGivenRunId(String runId) throws JsonProcessingException {
+    String payload = buildCreateWorkflowRunValidPayload();
+    Map<String, Object> requestBody = new ObjectMapper().readValue(payload, HashMap.class);
+    requestBody.put("runId", runId);
+    return new Gson().toJson(requestBody);
+  }
+
+  public static String buildUpdateWorkflowRunValidPayloadWithGivenStatus(String status) {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("status", status);
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildUpdateWorkflowRunInvalidPayloadStatus(){
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("status", "invalid-status");
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildUpdateWorkflowRunInvalidRequestPayload(){
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("sTaTus", "running");
     return new Gson().toJson(payload);
   }
 }

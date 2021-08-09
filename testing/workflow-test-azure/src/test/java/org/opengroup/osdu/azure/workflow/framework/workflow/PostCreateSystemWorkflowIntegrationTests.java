@@ -5,7 +5,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder;
-import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
 import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
 
 import javax.ws.rs.HttpMethod;
@@ -13,10 +12,7 @@ import javax.ws.rs.HttpMethod;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_SYSTEM_WORKFLOW_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.INVALID_PARTITION;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_BY_ID_URL;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_CUSTOM_OPERATOR_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
@@ -30,10 +26,8 @@ import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTes
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION_FIELD;
-import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_NAME_FIELD;
 import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getInvalidCreateWorkflowRequest;
-import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.getValidCreateWorkflowRequest;
 import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
 
 public abstract class PostCreateSystemWorkflowIntegrationTests extends TestBase {

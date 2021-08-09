@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import javax.ws.rs.HttpMethod;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -37,12 +38,20 @@ import org.opengroup.osdu.aws.workflow.util.HTTPClientAWS;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
 
@@ -57,14 +66,16 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     // cleanup any leftover workflows from previous int test runs
     try {
       deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
-    } catch (Exception e) {      
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   @AfterEach
   @Override
-  public void tearDown() {
+  public void tearDown() throws Exception {
+    // waitForWorkflowRunsToComplete();
+    Thread.sleep(30000);
     deleteAllTestWorkflowRecords();
     this.client = null;
     this.headers = null;
@@ -90,12 +101,36 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
 
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
-      try {        
-        deleteTestWorkflows(c.get(WORKFLOW_NAME));
+      try {
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         e.printStackTrace();
       }
     });
+  }
+
+  @Test
+  @Override
+  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   protected void deleteTestWorkflows(String workflowName) throws Exception {
@@ -111,7 +146,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
   }
 
   protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId) throws Exception {
-    
+
     return client.send(
         HttpMethod.PUT,
         String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowName,
@@ -141,7 +176,7 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     for (JsonElement responseData: responseDataArr) {
         runIds.add(responseData.getAsJsonObject().get("runId").getAsString());
     }
-    
+
 
     return runIds;
 
