@@ -100,6 +100,30 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     });
   }
 
+  @Test
+  @Override
+  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+  }
+
   protected void deleteTestWorkflows(String workflowName) throws Exception {
 
     List<String> runIds = getWorkflowRuns(workflowName);
