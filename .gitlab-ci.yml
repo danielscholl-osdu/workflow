@@ -54,5 +54,5 @@ include:
     file: "cloud-providers/aws.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "ingestion-workflow-IT"
+    ref: "master"
     file: "cloud-providers/azure.yml"
