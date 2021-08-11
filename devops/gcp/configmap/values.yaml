@@ -1,0 +1,15 @@
+# Default values for ingestion-workflow-configmap.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+data:
+  log_level: "INFO"
+  partition_api: "http://partition/api/partition/v1/"
+  google_audiences: ""
+  osdu_entitlements_url: "http://entitlements/api/entitlements/v2/"
+  osdu_entitlements_appkey: ""
+  gcp_airflow_url: ""
+
+conf:
+  configmap: "workflow-config"
+  app_name: "workflow"
