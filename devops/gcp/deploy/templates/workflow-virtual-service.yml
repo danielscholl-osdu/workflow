@@ -11,7 +11,7 @@ spec:
   http:
     - match:
         - uri:
-            prefix: "/v1/workflow"
+            prefix: "/api/workflow"
       route:
         - destination:
             port:
