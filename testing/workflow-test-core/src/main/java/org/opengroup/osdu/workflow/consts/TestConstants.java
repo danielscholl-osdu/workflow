@@ -26,6 +26,7 @@ public class TestConstants {
   public static final String CREATE_WORKFLOW_RUN_API_ENDPOINT = CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun";
   public static final String GET_WORKFLOW_BY_ID_API_ENDPOINT = "v1/workflow/%s";
   public static final String GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT = CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun/%s";
+  public static final String GET_SERVICE_INFO_API_ENDPOINT = "info";
   public static final String GET_ALL_WORKFLOW_PREFIX = "?prefix=";
   public static final String WORKFLOW_TYPE_INGEST = "ingest";
 
@@ -56,6 +57,8 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
   public static final String GET_DETAILS_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
+  public static final String GET_SERVICE_INFO_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_SERVICE_INFO_API_ENDPOINT;
   public static final String NON_EXISTING_WORKFLOW_ID = "non-existing-workflow-id";
 
   public static final String WORKFLOW_ID_NOT_BLANK_MESSAGE = "WorkflowID: must not be blank";
