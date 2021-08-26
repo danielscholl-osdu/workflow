@@ -50,17 +50,18 @@ public class WorkflowMetadataDoc {
     @DynamoDBAttribute(attributeName = "createdBy")
     private String createdBy;
 
-    @DynamoDBAttribute(attributeName = "creationTimestamp")    
+    @DynamoDBAttribute(attributeName = "creationTimestamp")
     private Long creationTimestamp;
-    
+
     @DynamoDBAttribute(attributeName = "version")
     private Long version;
 
     @DynamoDBAttribute(attributeName = "isDeployedThroughWorkflowService")
     private Boolean isDeployedThroughWorkflowService;
 
-    @DynamoDBAttribute(attributeName = "registrationInstructions")
-    private Map<String,Object> registrationInstructions;
+    // This breaks workflow service, throws dynamo mapping exception
+//    @DynamoDBAttribute(attributeName = "registrationInstructions")
+//    private Map<String,Object> registrationInstructions;
 
 
     public static WorkflowMetadataDoc create(WorkflowMetadata workflowMetadata, String dataPartitionId) {
@@ -73,7 +74,6 @@ public class WorkflowMetadataDoc {
             .creationTimestamp(workflowMetadata.getCreationTimestamp())
             .version(workflowMetadata.getCreationTimestamp())
             .isDeployedThroughWorkflowService(false) //we dont support deployment right now
-            .registrationInstructions(workflowMetadata.getRegistrationInstructions())
             .build();
 
         return doc;
@@ -89,7 +89,6 @@ public class WorkflowMetadataDoc {
             .creationTimestamp(creationTimestamp)
             .version(version)
             .isDeployedThroughWorkflowService(isDeployedThroughWorkflowService)
-            .registrationInstructions(registrationInstructions)
             .build();
 
         return metadata;

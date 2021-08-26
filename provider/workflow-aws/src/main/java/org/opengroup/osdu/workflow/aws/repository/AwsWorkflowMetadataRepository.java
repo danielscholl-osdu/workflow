@@ -79,14 +79,16 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
       WorkflowMetadataDoc doc = WorkflowMetadataDoc.create(workflowMetadata, dataPartitionId);
 
-      try {
+      // try {
         queryHelper.save(doc);
-      }
-      catch(Exception e) {
-        throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                              HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                              "Failed to save workflowMetadata to db");
-      }
+      // }
+      // catch(Exception e) {
+      //   System.out.println(">>>>>>>>>>>>>")
+      //   System.out.println
+      //   throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+      //                         HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+      //                         "Failed to save workflowMetadata to db");
+      // }
 
 
       return doc.convertToWorkflowMetadata(); //eliminate fields that might exist that aren't stored
