@@ -1,11 +1,5 @@
 package org.opengroup.osdu.workflow.services;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,15 +11,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.core.common.model.status.Status;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
+import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
-import org.opengroup.osdu.workflow.model.*;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
+import org.opengroup.osdu.workflow.model.UpdateWorkflowRunRequest;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.model.WorkflowRun;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
+import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.opengroup.osdu.workflow.service.WorkflowRunServiceImpl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,17 +54,16 @@ import static org.mockito.Mockito.when;
  * Tests for {@link WorkflowRunServiceImpl}
  */
 @ExtendWith(MockitoExtension.class)
-class WorkflowRunServiceTest {
+public class WorkflowRunServiceTest {
+
   private static final String KEY_RUN_ID = "run_id";
   private static final String KEY_AUTH_TOKEN = "authToken";
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
   private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
   private static final String AUTH_TOKEN = "Bearer Dummy";
-  private static final String WORKFLOW_ID = "some-workflow-id";
   private static final String WORKFLOW_NAME = "some-dag-name";
   private static final String CORRELATION_ID = "some-correlation-id";
-  private static final long WORKFLOW_RUN_START_TIMESTAMP = 1236331L;
   private static final String RUN_ID = "d13f7fd0-d27e-4176-8d60-6e9aad86e347";
   private static final String USER_EMAIL = "user@email.com";
   private static final String TEST_CURSOR = "test-cursor";
@@ -133,16 +142,19 @@ class WorkflowRunServiceTest {
   @Mock
   private AuditLogger auditLogger;
 
+  @Mock
+  private WorkflowStatusPublisher statusPublisher;
+
   @InjectMocks
   private WorkflowRunServiceImpl workflowRunService;
 
   @Test
   void testTriggerWorkflowWithExistingWorkflowId() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER
         .readValue(WORKFLOW_METADATA, WorkflowMetadata.class);
 	  final TriggerWorkflowResponse triggerWorkflowResponse = OBJECT_MAPPER
       .readValue(WORKFLOW_TRIGGER_RESPONSE, TriggerWorkflowResponse.class);
-    final ArgumentCaptor<Long> startTimeStampArgumentCaptor = ArgumentCaptor.forClass(Long.class);
     final TriggerWorkflowRequest request =
         OBJECT_MAPPER.readValue(WORKFLOW_TRIGGER_REQUEST_DATA, TriggerWorkflowRequest.class);
     when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
@@ -159,9 +171,11 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.saveWorkflowRun(workflowRunArgumentCaptor.capture()))
         .thenReturn(responseWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .triggerWorkflow(WORKFLOW_NAME, request);
 
+    //then
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
     verify(workflowEngineService)
         .triggerWorkflow(any(WorkflowEngineRequest.class), eq(createWorkflowPayload(RUN_ID, request)));
@@ -174,6 +188,7 @@ class WorkflowRunServiceTest {
 	  verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
+    verify(statusPublisher).publishStatusWithNoErrors(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
 	  assertThat(returnedWorkflowRun, equalTo(buildWorkflowRunResponse(responseWorkflowRun)));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowName(), equalTo(WORKFLOW_NAME));
@@ -185,10 +200,13 @@ class WorkflowRunServiceTest {
 
   @Test
   void testTriggerWorkflowWithNonExistingWorkflowId() throws Exception {
+    //given
     when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME)))
         .thenThrow(WorkflowNotFoundException.class);
     final TriggerWorkflowRequest request =
         OBJECT_MAPPER.readValue(WORKFLOW_TRIGGER_REQUEST_DATA, TriggerWorkflowRequest.class);
+
+    //when and then
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowRunService.triggerWorkflow(WORKFLOW_NAME, request);
     });
@@ -197,6 +215,7 @@ class WorkflowRunServiceTest {
 
   @Test
   public void testTriggerWorkflowFailedWhenSubmitIngestThrowsException() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(WORKFLOW_METADATA, WorkflowMetadata.class);
     final TriggerWorkflowRequest request =
         OBJECT_MAPPER.readValue(WORKFLOW_TRIGGER_REQUEST_DATA, TriggerWorkflowRequest.class);
@@ -209,6 +228,7 @@ class WorkflowRunServiceTest {
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
 
+    //when and then
     Assertions.assertThrows(CoreException.class, () -> {
       workflowRunService.triggerWorkflow(WORKFLOW_NAME, request);
     });
@@ -228,6 +248,7 @@ class WorkflowRunServiceTest {
 
   @Test
   void testGetWorkflowRunByIdWhenExistingWorkflowRunFinished() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER
         .readValue(WORKFLOW_METADATA, WorkflowMetadata.class);
     final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER
@@ -247,8 +268,11 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(finishedWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse = workflowRunService.
         getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
+
+    //then
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(workflowEngineService).getWorkflowRunStatus(any(WorkflowEngineRequest.class));
@@ -273,6 +297,7 @@ class WorkflowRunServiceTest {
 
   @Test
   void testGetWorkflowRunByIdWhenExistingWorkflowRunRunning() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER
         .readValue(WORKFLOW_METADATA, WorkflowMetadata.class);
     final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER
@@ -293,9 +318,11 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).
         thenReturn(runningWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse =
         workflowRunService.getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
+    //then
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(workflowEngineService).getWorkflowRunStatus(any(WorkflowEngineRequest.class));
@@ -323,9 +350,9 @@ class WorkflowRunServiceTest {
 
   @Test
   public void testGetWorkflowRunByIdWhenWorkflowRunStatusUpToDate() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(WORKFLOW_METADATA, WorkflowMetadata.class);
     final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN, WorkflowRun.class);
-    final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor.forClass(WorkflowRun.class);
 
     when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID))).
@@ -335,9 +362,11 @@ class WorkflowRunServiceTest {
     when(workflowEngineService.getWorkflowRunStatus(workflowEngineRequestArgumentCaptor.capture())).
         thenReturn(WorkflowStatusType.RUNNING);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse =
         workflowRunService.getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
+    //then
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
     verify(workflowEngineService).getWorkflowRunStatus(any(WorkflowEngineRequest.class));
@@ -352,23 +381,29 @@ class WorkflowRunServiceTest {
 
   @Test
   void testGetWorkflowRunByIdWhenExistingFinishedWorkflowRun() throws Exception {
+    //given
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER
         .readValue(FINISHED_WORKFLOW_RUN, WorkflowRun.class);
 
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenReturn(finishedWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse =
         workflowRunService.getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
 
+    //then
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
 	  assertThat(returnedWorkflowRunResponse, equalTo(buildWorkflowRunResponse(finishedWorkflowRun)));
   }
 
   @Test
-  void testGetWorkflowRunByIdWhenNonExistingWorkflowRun() throws Exception {
+  void testGetWorkflowRunByIdWhenNonExistingWorkflowRun() {
+    //given
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID)))
         .thenThrow(WorkflowRunNotFoundException.class);
+
+    //when and then
     Assertions.assertThrows(WorkflowRunNotFoundException.class, () -> {
       workflowRunService.getWorkflowRunByName(WORKFLOW_NAME, RUN_ID);
     });
@@ -377,6 +412,7 @@ class WorkflowRunServiceTest {
 
   @Test
   public void testUpdateWorkflowRunStatusRunningWithExistingWorkflowRun() throws Exception {
+    //given
     final UpdateWorkflowRunRequest request = OBJECT_MAPPER
         .readValue(WORKFLOW_RUN_UPDATE_RUNNING_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor.forClass(WorkflowRun.class);
@@ -385,9 +421,11 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID))).thenReturn(submittedWorkflowRun);
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).thenReturn(runningWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse = workflowRunService
         .updateWorkflowRunStatus(WORKFLOW_NAME, RUN_ID, request.getStatus());
 
+    //then
     verify(workflowRunRepository).updateWorkflowRun(any(WorkflowRun.class));
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getStatus(), equalTo(WorkflowStatusType.RUNNING));
@@ -401,6 +439,7 @@ class WorkflowRunServiceTest {
 
   @Test
   public void testUpdateWorkflowRunStatusFinishedWithExistingWorkflowRun() throws Exception {
+    //given
     final UpdateWorkflowRunRequest request = OBJECT_MAPPER
         .readValue(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor.forClass(WorkflowRun.class);
@@ -409,9 +448,11 @@ class WorkflowRunServiceTest {
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID))).thenReturn(submittedWorkflowRun);
     when(workflowRunRepository.updateWorkflowRun(workflowRunArgumentCaptor.capture())).thenReturn(finishedWorkflowRun);
 
+    //when
     final WorkflowRunResponse returnedWorkflowRunResponse = workflowRunService
         .updateWorkflowRunStatus(WORKFLOW_NAME, RUN_ID, request.getStatus());
 
+    //then
     verify(workflowRunRepository).updateWorkflowRun(any(WorkflowRun.class));
     verify(workflowRunRepository).getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getStatus(), equalTo(WorkflowStatusType.FINISHED));
@@ -424,10 +465,13 @@ class WorkflowRunServiceTest {
 
   @Test
   public void testUpdateWorkflowRunStatusWithFinishedWorkflowRun() throws Exception {
+    //given
     final UpdateWorkflowRunRequest request = OBJECT_MAPPER
         .readValue(WORKFLOW_RUN_UPDATE_FINISHED_STATUS_REQUEST_DATA, UpdateWorkflowRunRequest.class);
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN, WorkflowRun.class);
     when(workflowRunRepository.getWorkflowRun(eq(WORKFLOW_NAME), eq(RUN_ID))).thenReturn(finishedWorkflowRun);
+
+    //when and then
     Assertions.assertThrows(WorkflowRunCompletedException.class, () -> {
       workflowRunService.updateWorkflowRunStatus(WORKFLOW_NAME, RUN_ID, request.getStatus());
     });
@@ -436,6 +480,7 @@ class WorkflowRunServiceTest {
 
   @Test
   void testDeleteWorkflowRunsByWorkflowIdWithInActiveWorkflowRuns() throws Exception {
+    //given
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null)))
@@ -445,8 +490,10 @@ class WorkflowRunServiceTest {
     doNothing().when(workflowRunRepository).deleteWorkflowRuns(eq(WORKFLOW_NAME),
         runIdListCaptor.capture());
 
+    //when
     workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
 
+    //then
     verify(workflowRunRepository)
         .getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null));
     verify(workflowRunRepository).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
@@ -458,6 +505,7 @@ class WorkflowRunServiceTest {
 
   @Test
   void testDeleteWorkflowRunsByWorkflowIdWithActiveWorkflowRuns() throws Exception {
+    //given
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
 	  final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
@@ -483,8 +531,10 @@ class WorkflowRunServiceTest {
         .thenReturn(runningWorkflowRun);
     boolean isExceptionThrown = false;
     try {
+      //when
       workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
     } catch (AppException e) {
+      //then
       isExceptionThrown = true;
       Assertions.assertEquals(412, e.getError().getCode());
     }
@@ -518,6 +568,7 @@ class WorkflowRunServiceTest {
   @Test
   void testDeleteWorkflowRunsByWorkflowIdWithFinishedWorkflowRunsInIncompleteState()
       throws Exception {
+    //given
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
     final WorkflowRun runningWorkflowRun = OBJECT_MAPPER.readValue(RUNNING_WORKFLOW_RUN,
@@ -541,8 +592,11 @@ class WorkflowRunServiceTest {
     ArgumentCaptor<List<String>> runIdListCaptor = ArgumentCaptor.forClass(List.class);
     doNothing().when(workflowRunRepository).deleteWorkflowRuns(eq(WORKFLOW_NAME),
         runIdListCaptor.capture());
+
+    //when
     workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
 
+    //then
     verify(workflowRunRepository).getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null));
     verify(workflowRunRepository).getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(),
         eq(TEST_CURSOR));
@@ -574,11 +628,14 @@ class WorkflowRunServiceTest {
 
   @Test
   void testDeleteWorkflowRunsByWorkflowIdWithZeroWorkflowRuns() {
+    //given
     when(workflowRunRepository.getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null)))
         .thenReturn(new WorkflowRunsPage(new ArrayList<>(), null));
 
+    //when
     workflowRunService.deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
 
+    //then
     verify(workflowRunRepository)
         .getWorkflowRunsByWorkflowName(eq(WORKFLOW_NAME), anyInt(), eq(null));
     verify(workflowRunRepository, times(0)).deleteWorkflowRuns(eq(WORKFLOW_NAME), any(List.class));
@@ -586,6 +643,7 @@ class WorkflowRunServiceTest {
 
   @Test
   void testGetAllRunInstancesOfWorkflowForExistentWorkflowName() throws Exception {
+    //given
     final WorkflowRun finishedWorkflowRun = OBJECT_MAPPER.readValue(FINISHED_WORKFLOW_RUN,
         WorkflowRun.class);
     final WorkflowRun submittedWorkflowRun = OBJECT_MAPPER.readValue(SUBMITTED_WORKFLOW_RUN,
@@ -598,6 +656,8 @@ class WorkflowRunServiceTest {
     final WorkflowMetadata workflowMetadata = mock(WorkflowMetadata.class);
     when(workflowMetadataRepository.getWorkflow(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
     when(workflowRunRepository.getAllRunInstancesOfWorkflow(eq(WORKFLOW_NAME), eq(config))).thenReturn(workflowRuns);
+
+    //when and then
     Assertions.assertEquals(workflowRuns, workflowRunService.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, config));
     verify(workflowRunRepository).getAllRunInstancesOfWorkflow(eq(WORKFLOW_NAME), eq(config));
     verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
@@ -605,7 +665,10 @@ class WorkflowRunServiceTest {
 
   @Test
   void testGetAllRunInstancesOfWorkflowForNonExistentWorkflowName() {
+    //given
     when(workflowMetadataRepository.getWorkflow(WORKFLOW_NAME)).thenThrow(WorkflowNotFoundException.class);
+
+    //when and then
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowRunService.getAllRunInstancesOfWorkflow(WORKFLOW_NAME, new HashMap<>());
     });
@@ -635,9 +698,5 @@ class WorkflowRunServiceTest {
         .submittedBy(workflowRun.getSubmittedBy())
         .status(workflowRun.getStatus())
         .build();
-  }
-
-  private WorkflowEngineRequest workflowEngineRequest() {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, WORKFLOW_RUN_START_TIMESTAMP, null, null, false);
   }
 }

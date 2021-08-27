@@ -1,9 +1,7 @@
 package org.opengroup.osdu.workflow.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +14,7 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
+import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -43,7 +42,8 @@ import static org.mockito.Mockito.when;
  * Tests for {@link WorkflowManagerServiceImpl}
  */
 @ExtendWith(MockitoExtension.class)
-class WorkflowManagerServiceTest {
+public class WorkflowManagerServiceTest {
+
   private static final String WORKFLOW_NAME = "test_dag_name";
   private static final String INVALID_WORKFLOW_NAME = "invalid-workflow-name";
   private static final String USER_EMAIL = "user@email.com";
@@ -96,12 +96,9 @@ class WorkflowManagerServiceTest {
   @InjectMocks
   private WorkflowManagerServiceImpl workflowManagerService;
 
-  @BeforeEach
-  public void setup() {
-  }
-
   @Test
   void testCreateWorkflowWithValidData() throws Exception {
+    // given
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
     final CreateWorkflowRequest request =
         OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST, CreateWorkflowRequest.class);
@@ -116,8 +113,10 @@ class WorkflowManagerServiceTest {
         .createWorkflow(workflowEngineRequestArgumentCaptor.capture(),
             eq(request.getRegistrationInstructions()));
 
+    //when
     final WorkflowMetadata returnedMetadata = workflowManagerService.createWorkflow(request);
 
+    //then
     verify(workflowMetadataRepository).createWorkflow(any(WorkflowMetadata.class));
     verify(workflowEngineService).createWorkflow(any(WorkflowEngineRequest.class),
         eq(request.getRegistrationInstructions()));
@@ -135,6 +134,7 @@ class WorkflowManagerServiceTest {
 
   @Test
   void testCreateWorkflowWithConflict() throws Exception {
+    //given
     final CreateWorkflowRequest request =
         OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST, CreateWorkflowRequest.class);
     final ArgumentCaptor<WorkflowMetadata> workflowMetadataCaptor = ArgumentCaptor
@@ -144,6 +144,7 @@ class WorkflowManagerServiceTest {
         .thenThrow(new ResourceConflictException("conflictId", "conflicted"));
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
 
+    //when and then
     Assertions.assertThrows(CoreException.class, () -> {
       workflowManagerService.createWorkflow(request);
     });
@@ -162,31 +163,42 @@ class WorkflowManagerServiceTest {
 
   @Test
   public void testCreateWorkflowWithInvalidWorkflowName() throws Exception {
+    //given
     final CreateWorkflowRequest request =
         OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST_WITH_INVALID_WORKFLOW_NAME, CreateWorkflowRequest.class);
+
+    //when and then
     Assertions.assertThrows(BadRequestException.class, () -> {
       workflowManagerService.createWorkflow(request);
     });
   }
 
   @Test
-  void testGetWorkflowByIdWithExistingWorkflow() throws Exception {
+  void testGetWorkflowByIdWithExistingWorkflow() {
+    //given
     final WorkflowMetadata responseMetadata = mock(WorkflowMetadata.class);
     final ArgumentCaptor<String> workflowIdCaptor = ArgumentCaptor.forClass(String.class);
     when(workflowMetadataRepository.getWorkflow(workflowIdCaptor.capture()))
         .thenReturn(responseMetadata);
+
+    //when
     final WorkflowMetadata returnedMetadata = workflowManagerService
         .getWorkflowByName(WORKFLOW_NAME);
+
+    //then
     verify(workflowMetadataRepository).getWorkflow(anyString());
     assertThat(returnedMetadata, equalTo(responseMetadata));
     assertThat(workflowIdCaptor.getValue(), equalTo(WORKFLOW_NAME));
   }
 
   @Test
-  void testGetWorkflowByIdWithNonExistingWorkflow() throws Exception {
+  void testGetWorkflowByIdWithNonExistingWorkflow() {
+    //given
     final ArgumentCaptor<String> workflowIdCaptor = ArgumentCaptor.forClass(String.class);
     when(workflowMetadataRepository.getWorkflow(workflowIdCaptor.capture()))
         .thenThrow(WorkflowNotFoundException.class);
+
+    //when and then
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowManagerService.getWorkflowByName(WORKFLOW_NAME);
     });
@@ -196,6 +208,7 @@ class WorkflowManagerServiceTest {
 
   @Test
   void testDeleteWorkflowWithValidId() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(GET_WORKFLOW_RESPONSE,
         WorkflowMetadata.class);
     when(workflowMetadataRepository.getWorkflow(WORKFLOW_NAME)).thenReturn(workflowMetadata);
@@ -205,8 +218,10 @@ class WorkflowManagerServiceTest {
         ArgumentCaptor.forClass(WorkflowEngineRequest.class);
     doNothing().when(workflowEngineService).deleteWorkflow(workflowEngineRequestCaptor.capture());
 
+    //when
     workflowManagerService.deleteWorkflow(WORKFLOW_NAME);
 
+    //then
     verify(workflowMetadataRepository).deleteWorkflow(WORKFLOW_NAME);
     verify(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
     verify(workflowEngineService).deleteWorkflow(any());
@@ -214,10 +229,12 @@ class WorkflowManagerServiceTest {
   }
 
   @Test
-  public void testDeleteWorkflowWithInvalidId() throws Exception {
+  public void testDeleteWorkflowWithInvalidId() {
+    //given
     when(workflowMetadataRepository.getWorkflow(INVALID_WORKFLOW_NAME))
         .thenThrow(new WorkflowNotFoundException("not found"));
 
+    //when and then
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowManagerService.deleteWorkflow(INVALID_WORKFLOW_NAME);
     });
@@ -230,12 +247,14 @@ class WorkflowManagerServiceTest {
 
   @Test
   public void testDeleteWorkflowIfException() throws Exception {
+    //given
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(GET_WORKFLOW_RESPONSE,
         WorkflowMetadata.class);
     when(workflowMetadataRepository.getWorkflow(WORKFLOW_NAME)).thenReturn(workflowMetadata);
     doThrow(new AppException(419, "error", "error"))
         .when(workflowRunService).deleteWorkflowRunsByWorkflowName(WORKFLOW_NAME);
 
+    //when and then
     Assertions.assertThrows(AppException.class, () -> {
       workflowManagerService.deleteWorkflow(WORKFLOW_NAME);
     });
@@ -248,11 +267,16 @@ class WorkflowManagerServiceTest {
 
    @Test
    public void testGetAllWorkflowsSuccess() {
+    //given
      final List<WorkflowMetadata> mockedWorkflowMetadataList = mock(List.class);
      when(workflowMetadataRepository.getAllWorkflowForTenant(eq(PREFIX_INPUT))).
          thenReturn(mockedWorkflowMetadataList);
+
+     //when
      List<WorkflowMetadata> responseWorkflowMetadataList =
          workflowManagerService.getAllWorkflowForTenant(PREFIX_INPUT);
+
+     //then
      verify(workflowMetadataRepository).getAllWorkflowForTenant(eq(PREFIX_INPUT));
      assertThat(responseWorkflowMetadataList, equalTo(mockedWorkflowMetadataList));
    }
