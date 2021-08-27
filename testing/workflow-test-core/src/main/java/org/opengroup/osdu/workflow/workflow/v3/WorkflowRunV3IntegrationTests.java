@@ -17,111 +17,641 @@
 
 package org.opengroup.osdu.workflow.workflow.v3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
-import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
+import org.junit.jupiter.api.Test;
+import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.opengroup.osdu.workflow.util.v3.TestBase;
+import org.springframework.http.HttpStatus;
+
+import javax.ws.rs.HttpMethod;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import javax.ws.rs.HttpMethod;
-import org.junit.jupiter.api.Test;
-import org.opengroup.osdu.workflow.util.v3.TestBase;
-import org.springframework.http.HttpStatus;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_RUNNING;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayloadWithGivenRunId;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidPayloadStatus;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidRequestPayload;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 public abstract class WorkflowRunV3IntegrationTests extends TestBase {
+  private static final String INVALID_PREFIX = "backfill";
+  private static final Integer INVALID_LIMIT = 1000;
 
-  protected static List<Map<String, String>> createdWorkflows = new ArrayList<>();
 
-  @Test
-  public void shouldReturn200WhenTriggerNewWorkflow() throws Exception {
-    String responseBody = createWorkflow();
-    Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);
-    createdWorkflows.add(workflowInfo);
-
-    createWorkflowRun(String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME));
-  }
+  /** Old methods. Needs to be removed **/
 
   @Test
-  public void shouldReturn200WhenGetAllRunInstances() throws Exception {
-    String responseBody = createWorkflow();
-    Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);
+  public void shouldReturn200WhenTriggerNewWorkflow() throws Exception { }
+
+  @Test
+  public void shouldReturn200WhenGetAllRunInstances() throws Exception { }
+
+  @Test
+  public void shouldReturn400WhenGetDetailsForSpecificWorkflowRunInstance() throws Exception { }
+
+  @Test
+  public void shouldReturn200WhenUpdateWorkflowRunInstance() throws Exception { }
+
+  /**
+   * GET WORKFLOW RUN BY ID INTEGRATION TESTS
+   **/
+
+  @Test
+  public void getWorkflowRunById_should_returnSuccess_when_givenValidRequest() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
 
-    String url = String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME);
-    createWorkflowRun(url);
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        url,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-    responseBody = response.getEntity(String.class);
-    List<Object> list =
-        new ObjectMapper().readValue(responseBody, ArrayList.class);
-    assertTrue(!list.isEmpty());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
   }
 
   @Test
-  public void shouldReturn400WhenGetDetailsForSpecificWorkflowRunInstance() throws Exception {
-    String workflowId = UUID
-        .randomUUID().toString().replace("-", "");
-    String runId = UUID
-        .randomUUID().toString().replace("-", "");
-
-    ClientResponse getResponse = client.send(
+  public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
+    ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowId, runId),
+        String.format(GET_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
         null,
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.BAD_REQUEST.value(), getResponse.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
   }
 
   @Test
-  public void shouldReturn200WhenUpdateWorkflowRunInstance() throws Exception {
-    String responseBody = createWorkflow();
-    Map<String, String> workflowInfo = new ObjectMapper().readValue(responseBody, HashMap.class);
+  public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
 
-    String url = String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME);
-    String response = createWorkflowRun(url);
-
-    Map<String, Object> responseDetails = new ObjectMapper().readValue(response, HashMap.class);
-
-    ClientResponse getResponse = client.send(
-        HttpMethod.PUT,
-        String.format(GET_DETAILS_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME,
-            responseDetails.get("runId")),
-        buildUpdateWorkflowPayload(),
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
+        null,
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.OK.value(), getResponse.getStatus());
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
   }
 
-  private String createWorkflowRun(String url) throws Exception {
+  @Test
+  public void getWorkflowRunById_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        null,
+        headers,
+        null
+    );
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  @Test
+  public void getWorkflowRunById_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        null,
+        headers,
+        client.getNoDataAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+  }
+
+  @Test
+  public void getWorkflowRunById_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        null,
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
+        client.getNoDataAccessToken()
+    );
+
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  /**
+   * POST TRIGGER WORKFLOW RUN INTEGRATION TESTS
+   **/
+
+  @Test
+  public void triggerWorkflowRun_should_returnSuccessAndCompleteExecution_when_givenValidTriggerRequest() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+  }
+
+  @Test
+  public void triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId() throws  Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    ClientResponse duplicateRunIdResponse = client.send(
+        HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        duplicateRunIdPayload,
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, duplicateRunIdResponse.getStatus());
+  }
+
+  @Test
+  public void triggerWorkflowRun_should_return_WorkflowNotFound_when_givenInvalidWorkflowName() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.POST,
-        url,
+        String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
         buildCreateWorkflowRunValidPayload(),
         headers,
         client.getAccessToken()
     );
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
+  @Test
+  public void triggerWorkflowRun_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        buildCreateWorkflowRunValidPayload(),
+        headers,
+        null
+    );
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  @Test
+  public void triggerWorkflowRun_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        buildCreateWorkflowRunValidPayload(),
+        headers,
+        client.getNoDataAccessToken()
+    );
+    assertEquals(org.apache.http.HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+  }
+
+  @Test
+  public void triggerWorkflowRun_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        buildCreateWorkflowRunValidPayload(),
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
+        null
+    );
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  /**
+   * GET ALL RUN INSTANCES INTEGRATION TESTS
+   **/
+
+  @Test
+  public void getAllRunInstances_should_returnSuccess_when_givenValidRequest() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        null,
+        headers,
+        client.getAccessToken()
+    );
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    return response.getEntity(String.class);
+
+    workflowResponseBody = response.getEntity(String.class);
+    List<Object> list =
+        new ObjectMapper().readValue(workflowResponseBody, ArrayList.class);
+    assertTrue(!list.isEmpty());
+  }
+
+  @Test
+  public void getAllRunInstances_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
+  @Test
+  public void getAllRunInstances_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
+        null,
+        headers,
+        client.getNoDataAccessToken()
+    );
+    assertEquals(org.apache.http.HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+  }
+
+  @Test
+  public void getAllRunInstances_should_returnForbidden_when_notGivenAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
+        null,
+        headers,
+        null
+    );
+
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  @Test
+  public void getAllRunInstances_should_returnForbidden_when_givenInvalidPartition() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME),
+        null,
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
+        client.getAccessToken()
+    );
+
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  /**
+   * PUT UPDATE WORKFLOW RUN STATUS INTEGRATION TESTS
+   **/
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusRunning() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_RUNNING;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_RUNNING);
+
+    String obtainedWorkflowRunStatus = getWorkflowRunStatus(CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusFinished() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
+
+    String obtainedWorkflowRunStatus = getWorkflowRunStatus(CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidStatus() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunInvalidPayloadStatus(),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidRequestPayload() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunInvalidRequestPayload(),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenCompletedWorkflowRun() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
+
+    response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = "finished";
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = "finished";
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        null
+    );
+
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = "finished";
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getNoDataAccessToken()
+    );
+
+    assertEquals(org.apache.http.HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+  }
+
+  @Test
+  public void updateWorkflowRunStatus_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = "finished";
+    Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
+        client.getAccessToken()
+    );
+
+    assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
   }
 }
