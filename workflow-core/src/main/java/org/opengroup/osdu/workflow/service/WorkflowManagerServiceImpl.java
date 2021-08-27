@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,28 +14,23 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
+import org.springframework.stereotype.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
+@Service
+@RequiredArgsConstructor
 public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
+
   private static final long START_VERSION = 1;
 
-  @Autowired
-  private DpsHeaders dpsHeaders;
+  private final DpsHeaders dpsHeaders;
 
-  @Autowired
-  private IWorkflowMetadataRepository workflowMetadataRepository;
+  private final IWorkflowMetadataRepository workflowMetadataRepository;
 
-  @Autowired
-  private IWorkflowEngineService workflowEngineService;
+  private final IWorkflowEngineService workflowEngineService;
 
-  @Autowired
-  private IWorkflowRunService workflowRunService;
+  private final IWorkflowRunService workflowRunService;
 
-  @Autowired
-  private AuditLogger auditLogger;
+  private final AuditLogger auditLogger;
 
   @Override
   public WorkflowMetadata createWorkflow(final CreateWorkflowRequest request) {
@@ -47,6 +43,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
     final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName());
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
     auditLogger.workflowCreateEvent(Collections.singletonList(savedMetadata.toString()));
+
     return savedMetadata;
   }
 

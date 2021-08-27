@@ -14,6 +14,10 @@
 
 package org.opengroup.osdu.workflow.provider.azure.config;
 
+import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.security.keyvault.secrets.SecretClient;
+import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +37,16 @@ public class AzureBootstrapConfig {
   @Named("KEY_VAULT_URL")
   public String keyVaultURL() {
     return keyVaultURL;
+  }
+
+
+  /*This is done to support Single partition support for slb. Once implementation is complete for multi-partition we can remove this method */
+  @Bean
+  public CosmosClient buildCosmosClient(SecretClient kv) {
+    final String partitionId = getPartitionId();
+    final String cosmosEndpoint = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-endpoint", partitionId));
+    final String cosmosPrimaryKey = KeyVaultFacade.getSecretWithValidation(kv, String.format("%s-cosmos-primary-key", partitionId));
+    return new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosPrimaryKey).buildClient();
   }
 
   public String getPartitionId() {

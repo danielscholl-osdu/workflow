@@ -9,10 +9,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
+import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
@@ -20,38 +22,47 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataReposito
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
+import static org.opengroup.osdu.core.common.model.status.Status.IN_PROGRESS;
+import static org.opengroup.osdu.core.common.model.status.Status.SUBMITTED;
+import static org.opengroup.osdu.core.common.model.status.Status.SUCCESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.USER_MADE_CHANGE;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FAILED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FINISHED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_IN_PROGRESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUBMITTED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUCCESS;
 import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class WorkflowRunServiceImpl implements IWorkflowRunService {
+
   private static final String KEY_RUN_ID = "run_id";
   private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
   private static final String KEY_AUTH_TOKEN = "authToken";
-  private static final Integer WORKFLOW_RUN_LIMIT = 100;
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String KEY_DAG_NAME = "dagName";
+  private static final Integer WORKFLOW_RUN_LIMIT = 100;
 
-  @Autowired
-  private IWorkflowMetadataRepository workflowMetadataRepository;
+  private final IWorkflowMetadataRepository workflowMetadataRepository;
 
-  @Autowired
-  private IWorkflowRunRepository workflowRunRepository;
+  private final IWorkflowRunRepository workflowRunRepository;
 
-  @Autowired
-  private DpsHeaders dpsHeaders;
+  private final DpsHeaders dpsHeaders;
 
-  @Autowired
-  private IWorkflowEngineService workflowEngineService;
+  private final IWorkflowEngineService workflowEngineService;
 
-  @Autowired
-  private AuditLogger auditLogger;
+  private final AuditLogger auditLogger;
+
+  private final WorkflowStatusPublisher statusPublisher;
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
   public WorkflowRunResponse triggerWorkflow(final String workflowName, final TriggerWorkflowRequest request) {
@@ -72,7 +83,10 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
     auditLogger.workflowRunEvent(Collections.singletonList(getTruncatedData(request.toString())));
-    return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
+    final WorkflowRunResponse workflowRunResponse = buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
+    statusPublisher.publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED, SUBMITTED);
+
+    return workflowRunResponse;
   }
 
   @Override
@@ -111,16 +125,52 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   public WorkflowRunResponse updateWorkflowRunStatus(String workflowName, String runId,
                                              WorkflowStatusType status) {
     WorkflowRun workflowRun = workflowRunRepository.getWorkflowRun(workflowName, runId);
-    if (getCompletedStatusTypes().contains(workflowRun.getStatus())) {
+    WorkflowStatusType oldStatus = workflowRun.getStatus();
+    if (getCompletedStatusTypes().contains(oldStatus)) {
       throw new WorkflowRunCompletedException(workflowName, runId);
     } else {
+      WorkflowRunResponse result = null;
       if (getActiveStatusTypes().contains(status)) {
-        return buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
+        result = buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
             buildUpdatedWorkflowRun(workflowRun, status, null)));
       } else {
-        return buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
+        result = buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
             buildUpdatedWorkflowRun(workflowRun, status, System.currentTimeMillis())));
       }
+        logUpdatedStatus(status, oldStatus, runId);
+
+      return result;
+    }
+  }
+
+  private void logUpdatedStatus(WorkflowStatusType newStatus, WorkflowStatusType oldStatus, String runId) {
+    if (newStatus.equals(oldStatus)) {
+      return;
+    }
+
+    switch (newStatus) {
+      case SUBMITTED:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED + USER_MADE_CHANGE, SUBMITTED);
+        break;
+      case RUNNING:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_IN_PROGRESS + USER_MADE_CHANGE, IN_PROGRESS);
+        break;
+      case FINISHED:
+        statusPublisher
+            .publishStatusWithUnexpectedErrors(runId, dpsHeaders, WORKFLOW_FINISHED + USER_MADE_CHANGE, FAILED);
+        break;
+      case FAILED:
+        statusPublisher
+            .publishStatusWithUnexpectedErrors(runId, dpsHeaders, WORKFLOW_FAILED + USER_MADE_CHANGE, FAILED);
+        break;
+      case SUCCESS:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUCCESS + USER_MADE_CHANGE, SUCCESS);
+        break;
+      default:
+        break;
     }
   }
 

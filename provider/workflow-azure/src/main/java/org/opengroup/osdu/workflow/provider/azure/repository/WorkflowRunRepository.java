@@ -3,10 +3,11 @@ package org.opengroup.osdu.workflow.provider.azure.repository;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
-import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
@@ -18,9 +19,8 @@ import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,28 +29,20 @@ import java.util.Optional;
 
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
-@Component
+@Slf4j
+@Repository
+@RequiredArgsConstructor
 public class WorkflowRunRepository implements IWorkflowRunRepository {
 
-  private static final String LOGGER_NAME = WorkflowRunRepository.class.getName();
+  private final CosmosConfig cosmosConfig;
 
-  @Autowired
-  private CosmosConfig cosmosConfig;
+  private final CosmosStore cosmosStore;
 
-  @Autowired
-  private CosmosStore cosmosStore;
+  private final DpsHeaders dpsHeaders;
 
-  @Autowired
-  private DpsHeaders dpsHeaders;
+  private final CursorUtils cursorUtils;
 
-  @Autowired
-  private JaxRsDpsLog logger;
-
-  @Autowired
-  private CursorUtils cursorUtils;
-
-  @Autowired
-  private WorkflowTasksSharingRepository workflowTasksSharingRepository;
+  private final WorkflowTasksSharingRepository workflowTasksSharingRepository;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
@@ -72,7 +64,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     if (!workflowRunDoc.isPresent()) {
       final String errorMessage = String.format("WorkflowRun: %s for Workflow: %s doesn't exist",
           runId, workflowName);
-      logger.error(LOGGER_NAME, errorMessage);
+      log.error(errorMessage);
       throw new WorkflowRunNotFoundException(errorMessage);
     } else {
       return buildWorkflowRun(workflowRunDoc.get());
@@ -160,7 +152,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 
   @Override
   public WorkflowRun updateWorkflowRun(final WorkflowRun workflowRun) {
-    logger.info(LOGGER_NAME, String.format("Update called for workflow id: %s,  run id: %s",
+    log.info(String.format("Update called for workflow id: %s,  run id: %s",
         workflowRun.getWorkflowId(), workflowRun.getRunId()));
     final WorkflowRunDoc workflowRunDoc = buildWorkflowRunDoc(workflowRun);
     cosmosStore.replaceItem(dpsHeaders.getPartitionId(),
@@ -169,14 +161,16 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
         workflowRunDoc.getId(),
         workflowRunDoc.getPartitionKey(),
         workflowRunDoc);
-    logger.info(LOGGER_NAME, String.format("Updated workflowRun with id : %s of workflowId: %s",
+    log.info(String.format("Updated workflowRun with id : %s of workflowId: %s",
         workflowRunDoc.getId(), workflowRunDoc.getWorkflowName()));
 
-    // TODO [aaljain]: The feature for deleting container needs to be moved to service folder later
+    // TODO 19.03.2021 (expires after 19.09.2021)[aaljain]:
+    //  The feature for deleting container needs to be moved to service folder later
     final WorkflowStatusType currentStatusType = workflowRun.getStatus();
     if (getCompletedStatusTypes().contains(currentStatusType)) {
         workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
     }
+
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
   }
 
