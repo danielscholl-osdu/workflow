@@ -805,8 +805,6 @@ The following software have components provided under the terms of this license:
 - JUnit Platform Commons (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Logback Classic Module (from https://repo1.maven.org/maven2/ch/qos/logback/logback-classic)
 - Logback Contrib :: JSON :: Classic (from https://repo1.maven.org/maven2/ch/qos/logback/contrib/logback-json-classic)
@@ -819,6 +817,8 @@ The following software have components provided under the terms of this license:
 - Microsoft Application Insights Log4j 2 Appender (from https://github.com/Microsoft/ApplicationInsights-Java)
 - SnakeYAML (from http://www.snakeyaml.org)
 - SnakeYAML (from http://www.snakeyaml.org)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
 
 ========================================================================
 EPL-2.0
@@ -837,9 +837,9 @@ The following software have components provided under the terms of this license:
 - JUnit Platform Commons (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
 
 ========================================================================
 GPL-2.0-only
@@ -1128,10 +1128,10 @@ The following software have components provided under the terms of this license:
 - JUnit Platform Commons (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
 - JUnit Platform Engine API (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
-- JUnit Vintage Engine (from https://junit.org/junit5/)
 - Jakarta Activation API jar (from https://repo1.maven.org/maven2/jakarta/activation/jakarta.activation-api)
 - Jakarta XML Binding API (from https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api)
 - Spongy Castle (from http://rtyley.github.io/spongycastle/)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
+- org.junit.vintage:junit-vintage-engine (from http://junit.org/junit5/)
 
 
