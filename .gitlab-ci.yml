@@ -5,6 +5,12 @@ variables:
   OSDU_GCP_APPLICATION_NAME: os-workflow
   OSDU_GCP_ENV_VARS: OSDU_ENTITLEMENTS_URL=$OSDU_GCP_ENTITLEMENTS_V2_URL,PARTITION_API=$OSDU_GCP_PARTITION_API,GOOGLE_AUDIENCES=$GOOGLE_AUDIENCE,OSDU_ENTITLEMENTS_APPKEY=$OSDU_GCP_ENTITLEMENTS_APPKEY,GCP_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL,OSDU_AIRFLOW_URL=$OSDU_GCP_AIRFLOW_URL --vpc-connector=$OSDU_GCP_VPC_CONNECTOR
   OSDU_GCP_TEST_SUBDIR: testing/$OSDU_GCP_SERVICE-test-$OSDU_GCP_VENDOR
+  OSDU_GCP_HELM_PACKAGE_CHARTS: "devops/gcp/deploy devops/gcp/configmap"
+  OSDU_GCP_HELM_CONFIG_SERVICE: workflow-config
+  OSDU_GCP_HELM_DEPLOYMENT_SERVICE: workflow-deploy
+  OSDU_GCP_HELM_CONFIG_SERVICE_VARS: "--set data.google_audiences=$GOOGLE_AUDIENCE --set data.osdu_entitlements_appkey=workflow-service --set data.gcp_airflow_url=$OSDU_GCP_AIRFLOW_URL --set data.osdu_airflow_url=$OSDU_GCP_AIRFLOW_URL"
+  OSDU_GCP_HELM_DEPLOYMENT_SERVICE_VARS: "--set data.image=$CI_REGISTRY_IMAGE/osdu-gcp:$CI_COMMIT_SHORT_SHA --set data.serviceAccountName=workload-identity-workflow"
+
   # --- end of osdu gcp specific variables ---
 
   IBM_BUILD_SUBDIR: provider/workflow-ibm
