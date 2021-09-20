@@ -31,7 +31,7 @@
 
   <properties>
     <azure.version>2.1.7</azure.version>
-    <osdu.corelibazure.version>0.11.0-rc4</osdu.corelibazure.version>
+    <osdu.corelibazure.version>0.11.0</osdu.corelibazure.version>
     <azure.appservice.resourcegroup />
     <azure.appservice.plan />
     <azure.appservice.appname />
