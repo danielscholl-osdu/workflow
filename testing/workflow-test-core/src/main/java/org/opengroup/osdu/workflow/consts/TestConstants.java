@@ -26,6 +26,9 @@ public class TestConstants {
   public static final String CREATE_WORKFLOW_RUN_API_ENDPOINT = CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun";
   public static final String GET_WORKFLOW_BY_ID_API_ENDPOINT = "v1/workflow/%s";
   public static final String GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT = CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun/%s";
+  public static final String CREATE_SYSTEM_WORKFLOW_API_ENDPOINT ="v1/workflow/system";
+  public static final String GET_SYSTEM_WORKFLOW_BY_ID_API_ENDPOINT = "v1/workflow/system/%s";
+
   public static final String GET_SERVICE_INFO_API_ENDPOINT = "info";
   public static final String GET_ALL_WORKFLOW_PREFIX = "?prefix=";
   public static final String WORKFLOW_TYPE_INGEST = "ingest";
@@ -51,10 +54,14 @@ public class TestConstants {
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_API_ENDPOINT;
   public static final String CREATE_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_WORKFLOW_RUN_API_ENDPOINT;
+  public static final String CREATE_SYSTEM_WORKFLOW_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_SYSTEM_WORKFLOW_API_ENDPOINT;
   public static final String GET_WORKFLOW_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_BY_ID_API_ENDPOINT;
   public static final String GET_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
+  public static final String GET_SYSTEM_WORKFLOW_BY_ID_URL =
+      getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_SYSTEM_WORKFLOW_BY_ID_API_ENDPOINT;
   public static final String GET_DETAILS_WORKFLOW_RUN_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + GET_WORKFLOW_RUN_BY_ID_API_ENDPOINT;
   public static final String GET_SERVICE_INFO_URL =

@@ -14,7 +14,6 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
-import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -22,6 +21,7 @@ import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
 import org.opengroup.osdu.workflow.service.WorkflowManagerServiceImpl;
 
 import java.util.List;
@@ -82,6 +82,9 @@ public class WorkflowManagerServiceTest {
   private IWorkflowMetadataRepository workflowMetadataRepository;
 
   @Mock
+  private IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
+
+  @Mock
   private DpsHeaders dpsHeaders;
 
   @Mock
@@ -133,6 +136,44 @@ public class WorkflowManagerServiceTest {
   }
 
   @Test
+  void testCreateSystemWorkflowWithValidData() throws Exception {
+    //given
+    when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
+    final CreateWorkflowRequest request =
+        OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST, CreateWorkflowRequest.class);
+    final ArgumentCaptor<WorkflowMetadata> workflowMetadataCaptor = ArgumentCaptor
+        .forClass(WorkflowMetadata.class);
+    final WorkflowMetadata responseMetadata = mock(WorkflowMetadata.class);
+    when(workflowSystemMetadataRepository.createSystemWorkflow(workflowMetadataCaptor.capture()))
+        .thenReturn(responseMetadata);
+    final ArgumentCaptor<WorkflowEngineRequest> workflowEngineRequestArgumentCaptor =
+        ArgumentCaptor.forClass(WorkflowEngineRequest.class);
+    doNothing().when(workflowEngineService)
+        .createWorkflow(workflowEngineRequestArgumentCaptor.capture(),
+            eq(request.getRegistrationInstructions()));
+
+    //when
+    final WorkflowMetadata returnedMetadata = workflowManagerService.createSystemWorkflow(request);
+
+    //then
+    verify(workflowSystemMetadataRepository).createSystemWorkflow(any(WorkflowMetadata.class));
+    verify(workflowEngineService).createWorkflow(any(WorkflowEngineRequest.class),
+        eq(request.getRegistrationInstructions()));
+    verify(dpsHeaders).getUserEmail();
+    assertThat(returnedMetadata, equalTo(responseMetadata));
+    assertThat(workflowEngineRequestArgumentCaptor.getValue().getWorkflowName(),
+        equalTo(workflowMetadataCaptor.getValue().getWorkflowName()));
+    assertThat(workflowEngineRequestArgumentCaptor.getValue().isSystemWorkflow(),
+        equalTo(true));
+    assertThat(workflowMetadataCaptor.getValue().getWorkflowName(),
+        equalTo(request.getWorkflowName()));
+    assertThat(workflowMetadataCaptor.getValue().getDescription(),
+        equalTo(request.getDescription()));
+    assertThat(workflowMetadataCaptor.getValue().getCreatedBy(), equalTo(USER_EMAIL));
+    assertThat(workflowMetadataCaptor.getValue().getVersion(), equalTo(SEED_VERSION));
+  }
+
+  @Test
   void testCreateWorkflowWithConflict() throws Exception {
     //given
     final CreateWorkflowRequest request =
@@ -162,6 +203,35 @@ public class WorkflowManagerServiceTest {
   }
 
   @Test
+  void testCreateSystemWorkflowWithConflict() throws Exception {
+    //given
+    final CreateWorkflowRequest request =
+        OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST, CreateWorkflowRequest.class);
+    final ArgumentCaptor<WorkflowMetadata> workflowMetadataCaptor = ArgumentCaptor
+        .forClass(WorkflowMetadata.class);
+    final WorkflowMetadata responseMetadata = mock(WorkflowMetadata.class);
+    when(workflowSystemMetadataRepository.createSystemWorkflow(workflowMetadataCaptor.capture()))
+        .thenThrow(new ResourceConflictException("conflictId", "conflicted"));
+    when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
+
+    //when and then
+    Assertions.assertThrows(CoreException.class, () -> {
+      workflowManagerService.createSystemWorkflow(request);
+    });
+    verify(workflowSystemMetadataRepository, times(1)).createSystemWorkflow(any(WorkflowMetadata.class));
+    verify(workflowEngineService, times(0))
+        .createWorkflow(any(WorkflowEngineRequest.class),
+            eq(request.getRegistrationInstructions()));
+    verify(dpsHeaders, times(1)).getUserEmail();
+    assertThat(workflowMetadataCaptor.getValue().getWorkflowName(),
+        equalTo(request.getWorkflowName()));
+    assertThat(workflowMetadataCaptor.getValue().getDescription(),
+        equalTo(request.getDescription()));
+    assertThat(workflowMetadataCaptor.getValue().getCreatedBy(), equalTo(USER_EMAIL));
+    assertThat(workflowMetadataCaptor.getValue().getVersion(), equalTo(SEED_VERSION));
+  }
+
+  @Test
   public void testCreateWorkflowWithInvalidWorkflowName() throws Exception {
     //given
     final CreateWorkflowRequest request =
@@ -170,6 +240,18 @@ public class WorkflowManagerServiceTest {
     //when and then
     Assertions.assertThrows(BadRequestException.class, () -> {
       workflowManagerService.createWorkflow(request);
+    });
+  }
+
+  @Test
+  public void testCreateSystemWorkflowWithInvalidWorkflowName() throws Exception {
+    //given
+    final CreateWorkflowRequest request =
+        OBJECT_MAPPER.readValue(CREATE_WORKFLOW_REQUEST_WITH_INVALID_WORKFLOW_NAME, CreateWorkflowRequest.class);
+
+    //when and then
+    Assertions.assertThrows(BadRequestException.class, () -> {
+      workflowManagerService.createSystemWorkflow(request);
     });
   }
 
@@ -192,17 +274,41 @@ public class WorkflowManagerServiceTest {
   }
 
   @Test
+  void testGetWorkflowByIdWithNonExistingPrivateWorkflowExistingSystemWorkflow() {
+    //given
+    final WorkflowMetadata responseMetadata = mock(WorkflowMetadata.class);
+    final ArgumentCaptor<String> workflowIdCaptor = ArgumentCaptor.forClass(String.class);
+    when(workflowMetadataRepository.getWorkflow(workflowIdCaptor.capture()))
+        .thenThrow(WorkflowNotFoundException.class);
+    when(workflowSystemMetadataRepository.getSystemWorkflow(workflowIdCaptor.capture()))
+        .thenReturn(responseMetadata);
+
+    //when
+    final WorkflowMetadata returnedMetadata = workflowManagerService
+        .getWorkflowByName(WORKFLOW_NAME);
+
+    //then
+    verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
+    verify(workflowSystemMetadataRepository).getSystemWorkflow(eq(WORKFLOW_NAME));
+    assertThat(returnedMetadata, equalTo(responseMetadata));
+    assertThat(workflowIdCaptor.getValue(), equalTo(WORKFLOW_NAME));
+  }
+
+  @Test
   void testGetWorkflowByIdWithNonExistingWorkflow() {
     //given
     final ArgumentCaptor<String> workflowIdCaptor = ArgumentCaptor.forClass(String.class);
     when(workflowMetadataRepository.getWorkflow(workflowIdCaptor.capture()))
+        .thenThrow(WorkflowNotFoundException.class);
+    when(workflowSystemMetadataRepository.getSystemWorkflow(workflowIdCaptor.capture()))
         .thenThrow(WorkflowNotFoundException.class);
 
     //when and then
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowManagerService.getWorkflowByName(WORKFLOW_NAME);
     });
-    verify(workflowMetadataRepository).getWorkflow(anyString());
+    verify(workflowMetadataRepository).getWorkflow(eq(WORKFLOW_NAME));
+    verify(workflowSystemMetadataRepository).getSystemWorkflow(eq(WORKFLOW_NAME));
     assertThat(workflowIdCaptor.getValue(), equalTo(WORKFLOW_NAME));
   }
 
@@ -269,8 +375,11 @@ public class WorkflowManagerServiceTest {
    public void testGetAllWorkflowsSuccess() {
     //given
      final List<WorkflowMetadata> mockedWorkflowMetadataList = mock(List.class);
+     final List<WorkflowMetadata> mockedSystemWorkflowMetadataList = mock(List.class);
      when(workflowMetadataRepository.getAllWorkflowForTenant(eq(PREFIX_INPUT))).
          thenReturn(mockedWorkflowMetadataList);
+     when(workflowSystemMetadataRepository.getAllSystemWorkflow(eq(PREFIX_INPUT))).
+         thenReturn(mockedSystemWorkflowMetadataList);
 
      //when
      List<WorkflowMetadata> responseWorkflowMetadataList =
@@ -278,6 +387,8 @@ public class WorkflowManagerServiceTest {
 
      //then
      verify(workflowMetadataRepository).getAllWorkflowForTenant(eq(PREFIX_INPUT));
+     verify(mockedWorkflowMetadataList).addAll(eq(mockedSystemWorkflowMetadataList));
+     verify(workflowSystemMetadataRepository).getAllSystemWorkflow(eq(PREFIX_INPUT));
      assertThat(responseWorkflowMetadataList, equalTo(mockedWorkflowMetadataList));
    }
 }

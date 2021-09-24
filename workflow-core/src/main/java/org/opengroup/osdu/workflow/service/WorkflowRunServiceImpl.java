@@ -1,13 +1,5 @@
 package org.opengroup.osdu.workflow.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -16,13 +8,28 @@ import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
 import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
 import org.opengroup.osdu.workflow.logging.AuditLogger;
-import org.opengroup.osdu.workflow.model.*;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.model.WorkflowRun;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
+import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
-
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
 import static org.opengroup.osdu.core.common.model.status.Status.IN_PROGRESS;
@@ -52,6 +59,8 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   private final IWorkflowMetadataRepository workflowMetadataRepository;
 
+  private final IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
+
   private final IWorkflowRunRepository workflowRunRepository;
 
   private final DpsHeaders dpsHeaders;
@@ -66,7 +75,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   @Override
   public WorkflowRunResponse triggerWorkflow(final String workflowName, final TriggerWorkflowRequest request) {
-    final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
+    final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
     String dagName = null;
@@ -78,7 +87,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
       dagName = workflowMetadata.getWorkflowName();
     }
 
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName, dagName);
+    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName, dagName, workflowMetadata.isSystemWorkflow());
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
@@ -116,8 +125,8 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
                                                         Map<String, Object> params)
       throws WorkflowNotFoundException {
-    // Calling getWorkflow will throw WorkflowNotFoundException
-    workflowMetadataRepository.getWorkflow(workflowName);
+    // Calling getWorkflowByName will throw WorkflowNotFoundException
+    getWorkflowByName(workflowName);
     return workflowRunRepository.getAllRunInstancesOfWorkflow(workflowName, params);
   }
 
@@ -184,6 +193,16 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return false;
   }
 
+  // The below code is borrowed from WorkflowManagerServiceImpl
+  // Can't directly consume WorkflowManagerServiceImpl here as it will lead to cyclic dependency
+  private WorkflowMetadata getWorkflowByName(String workflowName) {
+    try {
+      return workflowMetadataRepository.getWorkflow(workflowName);
+    } catch (WorkflowNotFoundException e) {
+      return workflowSystemMetadataRepository.getSystemWorkflow(workflowName);
+    }
+  }
+
   private List<WorkflowRun> getAllWorkflowRuns(String workflowName) {
     String cursor = null;
     List<WorkflowRun> workflowRuns = new ArrayList<>();
@@ -214,10 +233,10 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {
     List<WorkflowStatusType> activeStatusTypes = WorkflowStatusType.getActiveStatusTypes();
     if (activeStatusTypes.contains(workflowRun.getStatus())) {
-      final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
+      final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowRun.getWorkflowName());
       final String workflowName = workflowMetadata.getWorkflowName();
       final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName,
-          workflowRun.getStartTimeStamp(), workflowRun.getWorkflowEngineExecutionDate());
+          workflowRun.getStartTimeStamp(), workflowRun.getWorkflowEngineExecutionDate(), workflowMetadata.isSystemWorkflow());
       final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
       if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
         if (getCompletedStatusTypes().contains(currentStatusType)) {

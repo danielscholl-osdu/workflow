@@ -2,7 +2,7 @@ package org.opengroup.osdu.workflow.provider.azure.service;
 
 
 import com.microsoft.azure.spring.autoconfigure.aad.UserPrincipal;
-import org.opengroup.osdu.workflow.provider.azure.interfaces.IAuthorizationServiceSP;
+import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class AuthorizationServiceSPImpl implements IAuthorizationServiceSP {
+public class AdminAuthorizationServiceImpl implements IAdminAuthorizationService {
   enum UserType {
     REGULAR_USER,
     GUEST_USER,

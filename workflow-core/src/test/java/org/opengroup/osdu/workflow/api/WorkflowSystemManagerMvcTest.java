@@ -1,22 +1,21 @@
-package org.opengroup.osdu.workflow.provider.azure;
+package org.opengroup.osdu.workflow.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.provider.azure.interfaces.IAuthorizationServiceSP;
+import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.exception.handler.ConflictApiError;
-import org.opengroup.osdu.workflow.provider.azure.security.AuthorizationFilterSP;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
-import  org.opengroup.osdu.workflow.provider.azure.api.WorkflowSystemManagerApi;
-import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowSystemManagerService;
+import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
+import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,20 +35,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests for {@link WorkflowSystemManagerApi}
  */
-@WebMvcTest({WorkflowSystemManagerApi.class})
+@WebMvcTest(WorkflowSystemManagerApi.class)
 @AutoConfigureMockMvc
-@Import({AuthorizationFilterSP.class, DpsHeaders.class})
-@Disabled
+@Import({AuthorizationFilter.class, DpsHeaders.class})
 class WorkflowSystemManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
-  private static final String PARTITION = "partition";
   private static final String CORRELATION_ID = "sample-correlation-id";
   private static final String WORKFLOW_RESPONSE = "{\n" +
       "  \"workflowId\": \"2afccfb8-1351-41c6-9127-61f2d7f22ff8\",\n" +
@@ -59,30 +60,13 @@ class WorkflowSystemManagerMvcTest {
       "  \"createdBy\": \"user@email.com\",\n" +
       "  \"version\": 1\n" +
       "}";
-  private static final String WORKFLOW_METADATA_LIST_RESPONSE = "[\n" +
-      "    {\n" +
-      "        \"workflowId\": \"2afccfb8-1351-41c6-9127-61f2d7f22ff8\",\n" +
-      "        \"workflowName\": \"HelloWorld\",\n" +
-      "        \"description\": \"This is a test workflow\",\n" +
-      "        \"creationTimestamp\": 1600144876028,\n" +
-      "        \"version\": 1,\n" +
-      "        \"registrationInstructions\": {\n" +
-      "            \"active\": true,\n" +
-      "            \"concurrentWorkflowRun\": 5,\n" +
-      "            \"concurrentTaskRun\": 5\n" +
-      "        }\n" +
-      "    }\n" +
-      "]";
   private static final String WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
       "  \"description\": \"This is a test workflow\"\n" +
       "}";
-  private static final String WORKFLOW_ENDPOINT = "/v1/workflow/system";
+  private static final String SYSTEM_WORKFLOW_ENDPOINT = "/v1/workflow/system";
   private static final String EXISTING_WORKFLOW_ID = "existing-id";
   private static final String WORKFLOW_NAME = "test-dag-name";
-  private static final String WORKFLOW_ID = "2afccfb8-1351-41c6-9127-61f2d7f22ff8";
-  private static final String EMPTY_PREFIX_ERROR =
-      "Prefix cannot be Null or Empty. Please provide a value.";
 
   @Autowired
   private MockMvc mockMvc;
@@ -91,10 +75,13 @@ class WorkflowSystemManagerMvcTest {
   private ObjectMapper mapper;
 
   @MockBean
-  private IWorkflowSystemManagerService workflowSystemManagerService;
+  private IWorkflowManagerService workflowManagerService;
 
   @MockBean
-  private IAuthorizationServiceSP authorizationServiceSP;
+  private IAuthorizationService authorizationService;
+
+  @MockBean
+  private IAdminAuthorizationService adminAuthorizationService;
 
   @MockBean
   private JaxRsDpsLog log;
@@ -106,26 +93,26 @@ class WorkflowSystemManagerMvcTest {
   private AuthorizationResponse authorizationResponse;
 
   @Test
-  void testCreateApiWithSuccess() throws Exception {
+  void testCreateSystemApiWithSuccess() throws Exception {
     final CreateWorkflowRequest request = mapper
         .readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
-    when(workflowSystemManagerService.createSystemWorkflow(eq(request))).thenReturn(metadata);
-    when(authorizationServiceSP.isDomainAdminServiceAccount())
+    when(workflowManagerService.createSystemWorkflow(eq(request))).thenReturn(metadata);
+    when(adminAuthorizationService.isDomainAdminServiceAccount())
         .thenReturn(true);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn("");
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
-        post(WORKFLOW_ENDPOINT)
+        post(SYSTEM_WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
+            .headers(getHttpHeadersWithoutDataPartitionId())
             .with(SecurityMockMvcRequestPostProcessors.csrf())
             .content(WORKFLOW_REQUEST))
         .andExpect(status().isOk())
         .andReturn();
-    verify(workflowSystemManagerService, times(1)).createSystemWorkflow(eq(request));
-    verify(authorizationServiceSP, times(1)).isDomainAdminServiceAccount();
+    verify(workflowManagerService).createSystemWorkflow(eq(request));
+    verify(adminAuthorizationService).isDomainAdminServiceAccount();
     verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getPartitionId();
     final WorkflowMetadata responseMetadata =
@@ -136,23 +123,23 @@ class WorkflowSystemManagerMvcTest {
   @Test
   public void testCreateSystemApiWithConflict() throws Exception {
     final CreateWorkflowRequest request = mapper.readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
-    when(workflowSystemManagerService.createSystemWorkflow(eq(request)))
+    when(workflowManagerService.createSystemWorkflow(eq(request)))
         .thenThrow(new ResourceConflictException(EXISTING_WORKFLOW_ID, "conflict"));
-    when(authorizationServiceSP.isDomainAdminServiceAccount())
+    when(adminAuthorizationService.isDomainAdminServiceAccount())
         .thenReturn(true);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn("");
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
-        post(WORKFLOW_ENDPOINT)
+        post(SYSTEM_WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
+            .headers(getHttpHeadersWithoutDataPartitionId())
             .with(SecurityMockMvcRequestPostProcessors.csrf())
             .content(WORKFLOW_REQUEST))
         .andExpect(status().isConflict())
         .andReturn();
-    verify(workflowSystemManagerService, times(1)).createSystemWorkflow(eq(request));
-    when(authorizationServiceSP.isDomainAdminServiceAccount())
+    verify(workflowManagerService).createSystemWorkflow(eq(request));
+    when(adminAuthorizationService.isDomainAdminServiceAccount())
         .thenReturn(true);
     verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getPartitionId();
@@ -163,30 +150,28 @@ class WorkflowSystemManagerMvcTest {
 
   @Test
   void testDeleteSystemApiWithSuccess() throws Exception {
-    doNothing().when(workflowSystemManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
-    when(authorizationServiceSP.isDomainAdminServiceAccount())
+    doNothing().when(workflowManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
+    when(adminAuthorizationService.isDomainAdminServiceAccount())
         .thenReturn(true);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
-    when(dpsHeaders.getPartitionId()).thenReturn("");
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     mockMvc.perform(
         delete("/v1/workflow/system/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
+            .headers(getHttpHeadersWithoutDataPartitionId())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().is(204))
         .andReturn();
-    verify(workflowSystemManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
-    verify(authorizationServiceSP, times(1)).isDomainAdminServiceAccount();
+    verify(workflowManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
+    verify(adminAuthorizationService).isDomainAdminServiceAccount();
     verify(dpsHeaders).getAuthorization();
-    verify(dpsHeaders).getPartitionId();
   }
 
   @Test
-  void testDeleteApiWithError() throws Exception {
-    doThrow(new WorkflowNotFoundException("not found")).when(workflowSystemManagerService)
+  void testDeleteSystemApiWithError() throws Exception {
+    doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService)
         .deleteSystemWorkflow(eq(WORKFLOW_NAME));
-    when(authorizationServiceSP.isDomainAdminServiceAccount())
+    when(adminAuthorizationService.isDomainAdminServiceAccount())
         .thenReturn(true);
     when(dpsHeaders.getAuthorization()).thenReturn(TEST_AUTH);
     when(dpsHeaders.getPartitionId()).thenReturn("");
@@ -194,20 +179,19 @@ class WorkflowSystemManagerMvcTest {
     mockMvc.perform(
         delete("/v1/workflow/system/{workflow_name}", WORKFLOW_NAME)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
+            .headers(getHttpHeadersWithoutDataPartitionId())
             .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isNotFound())
         .andReturn();
-    verify(workflowSystemManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
-    verify(authorizationServiceSP, times(1)).isDomainAdminServiceAccount();
+    verify(workflowManagerService).deleteSystemWorkflow(eq(WORKFLOW_NAME));
+    verify(adminAuthorizationService).isDomainAdminServiceAccount();
     verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getPartitionId();
   }
 
-  private HttpHeaders getHttpHeaders() {
+  private HttpHeaders getHttpHeadersWithoutDataPartitionId() {
     HttpHeaders headers = new HttpHeaders();
     headers.add(DpsHeaders.AUTHORIZATION, TEST_AUTH);
-    //headers.add(DpsHeaders.DATA_PARTITION_ID, PARTITION);
     return headers;
   }
 

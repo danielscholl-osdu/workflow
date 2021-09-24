@@ -12,6 +12,7 @@ import org.opengroup.osdu.workflow.exception.handler.RestExceptionHandler;
 import org.opengroup.osdu.workflow.model.UpdateWorkflowRunRequest;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
+import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.opengroup.osdu.workflow.security.AuthorizationFilter;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
@@ -105,6 +106,8 @@ class WorkflowRunMvcTest {
   private IWorkflowRunService workflowRunService;
   @MockBean
   private IAuthorizationService authorizationService;
+  @MockBean
+  private IAdminAuthorizationService adminAuthorizationService;
   @MockBean
   private RestExceptionHandler restExceptionHandler;
   @MockBean

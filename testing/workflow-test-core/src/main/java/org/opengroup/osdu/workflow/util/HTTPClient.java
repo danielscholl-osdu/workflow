@@ -1,26 +1,27 @@
 package org.opengroup.osdu.workflow.util;
 
-import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT1;
-import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
-import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATION_ID;
-import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_DATA_PARTITION_ID;
-import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_USER;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.ToString;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
-import lombok.ToString;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.DEFAULT_DATA_PARTITION_ID_TENANT1;
+import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATION_ID;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_DATA_PARTITION_ID;
+import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_USER;
 
 @Log
 @ToString
@@ -101,4 +102,11 @@ public abstract class HTTPClient {
 		currentHeaders.put(HEADER_DATA_PARTITION_ID, value);
 		return currentHeaders;
 	}
+
+  public Map<String, String> getCommonHeaderWithoutPartition() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put(HEADER_DATA_PARTITION_ID, "");
+    headers.put(HEADER_USER, "testUser");
+    return headers;
+  }
 }

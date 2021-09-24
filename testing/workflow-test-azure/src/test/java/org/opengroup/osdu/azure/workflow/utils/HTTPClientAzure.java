@@ -57,4 +57,10 @@ public class HTTPClientAzure extends HTTPClient {
     headers.put(HEADER_DATA_PARTITION_ID, getEnvironmentVariableOrDefaultKey(DEFAULT_DATA_PARTITION_ID_TENANT1));
     return headers;
   }
+
+  public Map<String, String> getCommonHeaderWithoutPartition() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put(HEADER_DATA_PARTITION_ID, "");
+    return headers;
+  }
 }
