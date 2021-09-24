@@ -12,9 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
-import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
@@ -30,7 +27,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +35,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link WorkflowMetadataRepository}
  */
 @ExtendWith(MockitoExtension.class)
-public class WorkflowMetadataRepositoryTest {
-  private static final String PARTITION_ID = "someId";
+public class WorkflowSystemMetadataRepositoryTest {
   private static final String DATABASE_NAME = "someDbName";
   private static final String WORKFLOW_METADATA_COLLECTION = "someCollection";
   private static final String WORKFLOW_NAME = "HelloWorld";
@@ -182,154 +177,91 @@ public class WorkflowMetadataRepositoryTest {
   private CosmosStore cosmosStore;
 
   @Mock
-  private DpsHeaders dpsHeaders;
-
-  @Mock
   private JaxRsDpsLog jaxRsDpsLog;
 
   @InjectMocks
-  private WorkflowMetadataRepository workflowMetadataRepository;
+  private WorkflowSystemMetadataRepository workflowSystemMetadataRepository;
 
   @Test
-  public void testCreateWorkflowWithDAGContent() throws Exception {
+  public void testCreateSystemWorkflowWithDAGContent() throws Exception {
     when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
-    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+    testCreateWorkflowWithoutPartitionId(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
   }
 
   @Test
-  public void testCreateWorkflowWithDAGContentIgnored() throws Exception {
-    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(true);
-    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
-    final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
-    final WorkflowMetadataDoc expectedDocToBeStored =
-            OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
-    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
-  }
-
-
-  @Test
-  public void testCreateWorkflowWithoutDAGContent() throws Exception {
+  public void testCreateSystemWorkflowWithoutDAGContent() throws Exception {
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
-    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
+    testCreateWorkflowWithoutPartitionId(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
   }
 
   @Test
-  public void testCreateWorkflowWithEmptyDAGContent() throws Exception {
+  public void testCreateSystemWorkflowWithEmptyDAGContent() throws Exception {
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_EMPTY_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
-    testCreateWorkflow(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
-  }
-
-  private void testCreateWorkflow(WorkflowMetadata inputWorkflowMetadata,
-                                  WorkflowMetadata expectedOutputWorkflowMetadata,
-                                  WorkflowMetadataDoc expectedDocToBeStored) {
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
-    when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
-    doNothing().when(cosmosStore)
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
-    final WorkflowMetadata response = workflowMetadataRepository.createWorkflow(inputWorkflowMetadata);
-    verify(cosmosStore)
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
-    verify(cosmosConfig).getDatabase();
-    verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders).getPartitionId();
-    assertThat(response, equalTo(expectedOutputWorkflowMetadata));
+    testCreateWorkflowWithoutPartitionId(inputWorkflowMetadata, expectedOutputWorkflowMetadata, expectedDocToBeStored);
   }
 
   @Test
-  public void testCreateWorkflowWithExistingId() throws Exception {
-    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
-    final WorkflowMetadataDoc workflowMetadataDoc =
-        OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
-    when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
-    doThrow(new AppException(409, "conflict", "conflict")).when(cosmosStore)
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(workflowMetadataDoc));
-    boolean isExceptionThrown = false;
-
-    try {
-      workflowMetadataRepository.createWorkflow(inputWorkflowMetadata);
-    } catch (ResourceConflictException r) {
-      isExceptionThrown = true;
-    }
-
-    assertThat(isExceptionThrown, equalTo(true));
-    verify(cosmosStore)
-        .createItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(workflowMetadataDoc));
-    verify(cosmosConfig).getDatabase();
-    verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders).getPartitionId();
-  }
-
-  @Test
-  public void testGetWorkflowWithExistingWorkflowId() throws Exception {
+  public void testGetSystemWorkflowWithExistingWorkflowId() throws Exception {
     final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_GET_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc workflowMetadataDoc =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
-    when(cosmosStore.findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    when(cosmosStore.findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class)))
         .thenReturn(Optional.of(workflowMetadataDoc));
-    final WorkflowMetadata response = workflowMetadataRepository.getWorkflow(WORKFLOW_NAME);
-    verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    final WorkflowMetadata response = workflowSystemMetadataRepository.getSystemWorkflow(WORKFLOW_NAME);
+    verify(cosmosStore).findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
-    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
     assertThat(response, equalTo(workflowMetadata));
   }
 
   @Test
   public void testGetWorkflowWithNonExistingWorkflowId() throws Exception {
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
-    when(cosmosStore.findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    when(cosmosStore.findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class)))
         .thenReturn(Optional.empty());
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
-      workflowMetadataRepository.getWorkflow(WORKFLOW_NAME);
+      workflowSystemMetadataRepository.getSystemWorkflow(WORKFLOW_NAME);
     });
-    verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    verify(cosmosStore, times(1)).findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
-    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders).getPartitionId();
   }
 
   @Test
-  public void testGetAllWorkflowForTenant() throws Exception {
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+  public void testGetAllSystemWorkflow() throws Exception {
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
     final WorkflowMetadataDoc workflowMetadataDoc =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
     List<WorkflowMetadataDoc> workflowMetadataDocList = Arrays.asList(workflowMetadataDoc);
     ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor =
         ArgumentCaptor.forClass(SqlQuerySpec.class);
-    when(cosmosStore.queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    when(cosmosStore.queryItems(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         sqlQuerySpecArgumentCaptor.capture(), any(CosmosQueryRequestOptions.class),
         eq(WorkflowMetadataDoc.class))).thenReturn(workflowMetadataDocList);
     List<WorkflowMetadata> responseWorkflowMetadataList =
-        workflowMetadataRepository.getAllWorkflowForTenant(PREFIX_VALUE);
-    verify(cosmosStore).queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        workflowSystemMetadataRepository.getAllSystemWorkflow(PREFIX_VALUE);
+    verify(cosmosStore).queryItems( eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         any(SqlQuerySpec.class), any(CosmosQueryRequestOptions.class), eq(WorkflowMetadataDoc.class));
-    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
     assertThat(responseWorkflowMetadataList.size(), equalTo(1));
     WorkflowMetadata workflowMetadata =
         OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
@@ -338,45 +270,55 @@ public class WorkflowMetadataRepositoryTest {
   }
 
   @Test
-  public void testGetAllWorkflowForTenantEmptyPrefix() throws Exception {
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+  public void testGetAllSystemWorkflowEmptyPrefix() throws Exception {
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
     final WorkflowMetadataDoc workflowMetadataDoc =
         OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITH_DAG_CONTENT, WorkflowMetadataDoc.class);
     List<WorkflowMetadataDoc> workflowMetadataDocList = Arrays.asList(workflowMetadataDoc);
     ArgumentCaptor<SqlQuerySpec> sqlQuerySpecArgumentCaptor =
         ArgumentCaptor.forClass(SqlQuerySpec.class);
-    when(cosmosStore.queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    when(cosmosStore.queryItems(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         sqlQuerySpecArgumentCaptor.capture(), any(CosmosQueryRequestOptions.class),
         eq(WorkflowMetadataDoc.class))).thenReturn(workflowMetadataDocList);
     List<WorkflowMetadata> responseWorkflowMetadataList =
-        workflowMetadataRepository.getAllWorkflowForTenant("");
-    verify(cosmosStore).queryItems(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+        workflowSystemMetadataRepository.getAllSystemWorkflow("");
+    verify(cosmosStore).queryItems( eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         any(SqlQuerySpec.class), any(CosmosQueryRequestOptions.class), eq(WorkflowMetadataDoc.class));
-    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
     assertThat(responseWorkflowMetadataList.size(), equalTo(1));
     WorkflowMetadata workflowMetadata =
         OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
     assertThat(workflowMetadata, equalTo(responseWorkflowMetadataList.get(0)));
-    assertThat(sqlQuerySpecArgumentCaptor.getValue().getQueryText(),
-        equalTo(SQL_QUERY_SPEC_QUERY_TEXT_WITHOUT_PREFIX));
+    assertThat(sqlQuerySpecArgumentCaptor.getValue().getQueryText(), equalTo(SQL_QUERY_SPEC_QUERY_TEXT_WITHOUT_PREFIX));
   }
 
   @Test
-  public void testDeleteWorkflow() {
-    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+  public void testDeleteWorkflowWithEmptyPartitionId() {
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
     when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
-    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
-    doNothing().when(cosmosStore).deleteItem(eq(PARTITION_ID), eq(DATABASE_NAME),
+    doNothing().when(cosmosStore).deleteItem(eq(DATABASE_NAME),
         eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(WORKFLOW_NAME));
-    workflowMetadataRepository.deleteWorkflow(WORKFLOW_NAME);
-    verify(cosmosStore).deleteItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
+    workflowSystemMetadataRepository.deleteSystemWorkflow(WORKFLOW_NAME);
+    verify(cosmosStore).deleteItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME));
-    verify(cosmosConfig).getDatabase();
+    verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
+  }
+
+  private void testCreateWorkflowWithoutPartitionId(WorkflowMetadata inputWorkflowMetadata,
+                                                    WorkflowMetadata expectedOutputWorkflowMetadata,
+                                                    WorkflowMetadataDoc expectedDocToBeStored) {
+    when(cosmosConfig.getSystemdatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowMetadataCollection()).thenReturn(WORKFLOW_METADATA_COLLECTION);
+    doNothing().when(cosmosStore)
+        .createItem( eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
+    final WorkflowMetadata response = workflowSystemMetadataRepository.createSystemWorkflow(inputWorkflowMetadata);
+    verify(cosmosStore, times(1))
+        .createItem( eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION), eq(WORKFLOW_NAME), eq(expectedDocToBeStored));
+    verify(cosmosConfig, times(1)).getSystemdatabase();
+    verify(cosmosConfig, times(1)).getWorkflowMetadataCollection();
+    assertThat(response, equalTo(expectedOutputWorkflowMetadata));
   }
 }

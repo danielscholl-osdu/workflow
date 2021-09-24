@@ -24,6 +24,7 @@ import org.opengroup.osdu.core.common.exception.UnauthorizedException;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
+import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -37,6 +38,8 @@ public class AuthorizationFilter {
 
   final DpsHeaders headers;
 
+  final IAdminAuthorizationService adminAuthorizationService;
+
   /**
    * Check the access permission for provided Authorization header and the required roles.
    *
@@ -46,17 +49,26 @@ public class AuthorizationFilter {
    */
   public boolean hasPermission(String... requiredRoles) {
     validateMandatoryHeaders();
+    if (StringUtils.isEmpty(this.headers.getPartitionId())) {
+      throw new BadRequestException("data-partition-id header is mandatory");
+    }
     AuthorizationResponse authResponse = authorizationService.authorizeAny(headers, requiredRoles);
     headers.put(DpsHeaders.USER_EMAIL, authResponse.getUser());
     return true;
   }
 
+  public boolean hasRootPermission() {
+    validateMandatoryHeaders();
+    if (!StringUtils.isEmpty(this.headers.getPartitionId())) {
+      throw new BadRequestException("data-partition-id header should not be passed");
+    }
+    headers.put(DpsHeaders.USER_EMAIL, "RootUser");
+    return adminAuthorizationService.isDomainAdminServiceAccount();
+  }
+
   private void validateMandatoryHeaders() {
     if (StringUtils.isEmpty(this.headers.getAuthorization())) {
       throw new UnauthorizedException("Authorization header is mandatory");
-    }
-    if (StringUtils.isEmpty(this.headers.getPartitionId())) {
-      throw new BadRequestException("data-partition-id header is mandatory");
     }
   }
 }

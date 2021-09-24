@@ -17,6 +17,7 @@
 
 package org.opengroup.osdu.workflow.util.v3;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_SYSTEM_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
@@ -71,6 +73,18 @@ public abstract class TestBase {
     return response.getEntity(String.class);
   }
 
+  protected String createSystemWorkflow() throws Exception {
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        CREATE_SYSTEM_WORKFLOW_URL,
+        buildCreateWorkflowValidPayload(),
+        headers,
+        client.getAccessToken()
+    );
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    return response.getEntity(String.class);
+  }
+
   protected String createWorkflowRun() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.POST,
@@ -95,6 +109,12 @@ public abstract class TestBase {
 
   protected void deleteTestWorkflows(String workflowName) throws Exception {
     String url = CREATE_WORKFLOW_URL + "/" + workflowName;
+    sendDeleteRequest(url);
+  }
+
+
+  protected void deleteTestSystemWorkflows(String workflowName) throws Exception {
+    String url = CREATE_SYSTEM_WORKFLOW_URL + "/" + workflowName;
     sendDeleteRequest(url);
   }
 
@@ -187,5 +207,9 @@ public abstract class TestBase {
       Long integrationTestEndTime = System.currentTimeMillis();
       log.info("Completed integration test at {}", integrationTestEndTime);
     }
+  }
+
+  protected Map<String, String> getWorkflowInfoFromCreateWorkflowResponseBody(String responseBody) throws JsonProcessingException {
+    return new ObjectMapper().readValue(responseBody, HashMap.class);
   }
 }
