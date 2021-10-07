@@ -19,18 +19,14 @@ package org.opengroup.osdu.workflow.provider.gcp.config;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("gcp.datastore.conf")
-public class WorkflowPropertiesConfiguration {
-  private String workflowRunKind;
-  private String workflowKind;
-  private String systemWorkflowKind;
-  private String workflowStatusKind;
-  private String sharedTenantName;
+@ConfigurationProperties
+public class GcpPropertiesConfiguration {
+  private String googleAudiences;
+  private String workflowAdminAccount;
 }

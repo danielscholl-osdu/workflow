@@ -27,6 +27,7 @@ In order to run the service locally, you will need to have the following environ
 | `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
 | `osdu.entitlements.url` | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint | no | output of infrastructure deployment |
 | `osdu.entitlements.app-key` | ex `test` | Entitlements app key | no | - |
+| `WORKFLOW_ADMIN_ACCOUNT` | ex `admin@domain.iam.gserviceaccount.com` | Admin account for using root endpoints | yes | - |
 | `gcp.airflow.url` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
 | `GOOGLE_AUDIENCES` | ex `*****.apps.googleusercontent.com` | Client ID for getting access to cloud resources | yes | https://console.cloud.google.com/apis/credentials |
 | `GOOGLE_APPLICATION_CREDENTIALS` | ex `/path/to/directory/service-key.json` | Service account credentials, you only need this if running locally | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
@@ -34,6 +35,7 @@ In order to run the service locally, you will need to have the following environ
 | `OSDU_AIRFLOW_USERNAME` | ex `******` | Username for access Apache Airflow | yes | - |
 | `OSDU_AIRFLOW_PASSWORD` | ex `******` | Password for access Apache Airflow | yes | - |
 | `PARTITION_API` | ex `http://localhost:8081/api/partition/v1` | Partition service endpoint | no | - |
+| `SHARED_TENANT_NAME` | ex `common` or `opendes` | the name of the shared tenant | yes | - |
 | `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows to configure message publishing about schemas changes to Pub/Sub | no | - |
 | `STATUS_CHANGED_TOPIC_NAME` | ex `status-changed` | Allows to subscribe a specific Pub/Sub topic | no | - |
 
