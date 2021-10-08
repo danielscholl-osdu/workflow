@@ -54,10 +54,14 @@ spec:
             - containerPort: 80
           readinessProbe:
             httpGet:
-              path: /api/workflow/swagger-ui.html
-              port: 80
-            initialDelaySeconds: 100
-            timeoutSeconds: 30
+              path: /actuator/health
+              port: 8081
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 250
+            periodSeconds: 10
           volumeMounts:
             - name: azure-keyvault
               mountPath: "/mnt/azure-keyvault"
