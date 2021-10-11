@@ -1,5 +1,7 @@
 package org.opengroup.osdu.workflow.service;
 
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
@@ -15,9 +17,6 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataReposito
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +105,11 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
     } else {
       savedMetadata = workflowSystemMetadataRepository.createSystemWorkflow(workflowMetadata);
     }
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowMetadata.getWorkflowName(), false, isSystemWorkflow);
+    final WorkflowEngineRequest rq =
+        WorkflowEngineRequest.builder()
+            .workflowName(workflowMetadata.getWorkflowName())
+            .isSystemWorkflow(isSystemWorkflow)
+            .build();
     workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
     auditLogger.workflowCreateEvent(Collections.singletonList(savedMetadata.toString()));
     return savedMetadata;
@@ -120,7 +123,11 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
     } else {
       workflowMetadata = workflowSystemMetadataRepository.getSystemWorkflow(workflowName);
     }
-    WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName, workflowMetadata.isDeployedThroughWorkflowService(), isSystemWorkflow);
+    WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
+        .workflowName(workflowName)
+        .isDeployedThroughWorkflowService(workflowMetadata.isDeployedThroughWorkflowService())
+        .isSystemWorkflow(isSystemWorkflow)
+        .build();
     workflowEngineService.deleteWorkflow(rq);
     if (!isSystemWorkflow) {
       workflowMetadataRepository.deleteWorkflow(workflowName);

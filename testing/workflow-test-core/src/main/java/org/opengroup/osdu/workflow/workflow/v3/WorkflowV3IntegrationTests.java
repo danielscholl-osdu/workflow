@@ -131,7 +131,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     responseBody = response.getEntity(String.class);
     List<Object> list =
@@ -153,7 +153,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     responseBody = response.getEntity(String.class);
     List<Object> list =
@@ -233,7 +233,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     responseBody = response.getEntity(String.class);
     Map<String, Object> result = new ObjectMapper().readValue(responseBody, HashMap.class);
     assertTrue(!result.isEmpty());

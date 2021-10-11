@@ -108,7 +108,7 @@ public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
             client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     String workflowId = new Gson().fromJson(createWorkflowRequestBody, JsonObject.class).get(WORKFLOW_NAME_FIELD)
             .getAsString();

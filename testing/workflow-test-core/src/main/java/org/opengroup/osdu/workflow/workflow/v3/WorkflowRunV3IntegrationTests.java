@@ -84,7 +84,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
   }
 
   @Test
@@ -420,7 +420,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_RUNNING);
 
@@ -451,7 +451,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
 
@@ -524,7 +524,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
 

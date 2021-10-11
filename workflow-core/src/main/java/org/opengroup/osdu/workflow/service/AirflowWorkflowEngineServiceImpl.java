@@ -96,7 +96,7 @@ public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService 
     log.info("getting status of WorkflowRun of Workflow {} executed on {}", rq.getWorkflowName(),
         rq.getExecutionTimeStamp());
     final String executionDate = executionDate(rq.getExecutionTimeStamp());
-    final String url = format(AIRFLOW_RUN_ENDPOINT, rq.getWorkflowName(), executionDate);
+    final String url = format(AIRFLOW_RUN_ENDPOINT, rq.getDagName(), executionDate);
     final String errMsg = String.format(AIRFLOW_WORKFLOW_RUN_NOT_FOUND, rq.getWorkflowName(), executionDate);
     final ClientResponse response = callAirflow(
         HttpMethod.GET,

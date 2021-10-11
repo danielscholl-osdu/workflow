@@ -134,7 +134,7 @@ public class PreIntegrationSetup {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     return gson.fromJson(response.getEntity(String.class), Map.class);
   }
 }

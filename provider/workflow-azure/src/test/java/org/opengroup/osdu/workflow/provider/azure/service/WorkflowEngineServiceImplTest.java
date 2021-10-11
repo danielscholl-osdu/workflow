@@ -437,8 +437,14 @@ public class WorkflowEngineServiceImplTest {
 
   private WorkflowEngineRequest workflowEngineRequest(String workflowEngineExecutionDate,
                                                       boolean isDeployedThroughWorkflowService) {
-    return new WorkflowEngineRequest(RUN_ID, WORKFLOW_ID, WORKFLOW_NAME, EXECUTION_TIMESTAMP,
-        workflowEngineExecutionDate, isDeployedThroughWorkflowService);
+    return WorkflowEngineRequest.builder()
+        .runId(RUN_ID)
+        .workflowId(WORKFLOW_ID)
+        .workflowName(WORKFLOW_NAME)
+        .executionTimeStamp(EXECUTION_TIMESTAMP)
+        .workflowEngineExecutionDate(workflowEngineExecutionDate)
+        .isDeployedThroughWorkflowService(isDeployedThroughWorkflowService)
+        .build();
   }
 
   private Map<String, Object> registrationInstructions(String dagContent) {

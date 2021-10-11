@@ -17,23 +17,6 @@
 
 package org.opengroup.osdu.workflow.util.v3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.api.client.ClientResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.workflow.util.HTTPClient;
-import org.springframework.http.HttpStatus;
-
-import javax.ws.rs.HttpMethod;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_SYSTEM_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
@@ -43,6 +26,22 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.FINISHED_WORKFLOW
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.ClientResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.HttpMethod;
+import lombok.extern.slf4j.Slf4j;
+import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.springframework.http.HttpStatus;
 
 @Slf4j
 public abstract class TestBase {
@@ -69,7 +68,7 @@ public abstract class TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(HttpStatus.OK.value(), response.getStatus(), response.toString());
     return response.getEntity(String.class);
   }
 
@@ -185,12 +184,15 @@ public abstract class TestBase {
         client.getAccessToken()
     );
 
-    if(response.getStatus() == org.apache.http.HttpStatus.SC_OK) {
-      Map<String, String> workflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
-      return workflowRunInfo.get("status");
+    if (response.getStatus() == org.apache.http.HttpStatus.SC_OK) {
+      Map<String, String> workflowRunInfo =
+          new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
+      return workflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD);
     } else {
-      throw new Exception(String.format("Error getting status for workflow run id %s",
-          workflowRunId));
+      throw new Exception(
+          String.format(
+              "Error getting status for workflow run id %s. Status code: %s. Response: %s",
+              workflowRunId, response.getStatus(), response));
     }
   }
 
