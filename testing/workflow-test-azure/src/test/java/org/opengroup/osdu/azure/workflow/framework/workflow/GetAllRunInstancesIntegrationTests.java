@@ -67,7 +67,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
     List<WorkflowRun> workflowRunsList =
         gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
@@ -88,7 +88,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
     List<WorkflowRun> workflowRunsList =
         gson.fromJson(response.getEntity(String.class), WorkflowRunsListType);
@@ -109,7 +109,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     Type WorkflowRunsListType = new TypeToken<ArrayList<WorkflowRun>>(){}.getType();
     List<WorkflowRun> workflowRunsList =

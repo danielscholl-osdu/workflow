@@ -30,7 +30,7 @@ public abstract class PostGetStatusIntegrationTests extends TestBase {
 				client.getAccessToken()
 		);
 
-		assertEquals(HttpStatus.SC_OK, response.getStatus());
+		assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
 		String responseBody = response.getEntity(String.class);
 
