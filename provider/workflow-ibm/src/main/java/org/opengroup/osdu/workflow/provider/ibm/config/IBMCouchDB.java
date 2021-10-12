@@ -41,7 +41,7 @@ public class IBMCouchDB {
 	public Database getDatabase(String tenant, String collectionName) {
 		String fullyColletionName = ibmCouchDBConfig.getDbNamePrefix() + "-" + tenant + "-" + collectionName;
 		if (databaseRepoCache.get(fullyColletionName) != null) {
-			log.info("Cache hit, Database configuration found in cache");
+			log.info(String.format("Cache hit, Database %s configuration found in cache", fullyColletionName));
 			return databaseRepoCache.get(fullyColletionName);
 		}
 		Database db = null;
