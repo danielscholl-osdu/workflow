@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.ibm.config.IBMCouchDB;
 import org.opengroup.osdu.workflow.provider.ibm.model.WorkflowMetadataDoc;
@@ -84,7 +85,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 			throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unexpected error", "Workflow doesn't exist", e);
 		}
 		if(result != null && result.getDocs().isEmpty()) {
-			throw new AppException(HttpStatus.SC_NOT_FOUND, "workflow not found", String.format("Workflow: %s doesn't exist", workflowName));			
+			final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
+			log.error(errorMessage);
+			throw new WorkflowNotFoundException(errorMessage);			
 		} else
 			return result.getDocs().get(0).getWorkflowMetadata();
 	}
