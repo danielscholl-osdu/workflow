@@ -53,7 +53,7 @@ include:
 
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
-    file: "cloud-providers/osdu-gcp-cloudrun.yml"
+    file: "cloud-providers/osdu-gcp-gke.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
