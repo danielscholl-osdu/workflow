@@ -27,8 +27,8 @@ import org.springframework.stereotype.Service;
 import static java.lang.String.format;
 
 
-@Service
-@Primary
+//@Service
+//@Primary
 @Slf4j
 public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final String RUN_ID_PARAMETER_NAME = "run_id";

@@ -20,7 +20,7 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +28,7 @@ import static java.lang.String.format;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "osdu.airflow.version2", havingValue = "false", matchIfMissing=true)
 public class AirflowWorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final String RUN_ID_PARAMETER_NAME = "run_id";
   private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
