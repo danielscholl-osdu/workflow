@@ -241,13 +241,16 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     if (activeStatusTypes.contains(workflowRun.getStatus())) {
       final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowRun.getWorkflowName());
       final String workflowName = workflowMetadata.getWorkflowName();
+
       final WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
+    	  .runId(workflowRun.getRunId())
           .workflowName(workflowName)
           .executionTimeStamp(workflowRun.getStartTimeStamp())
           .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
           .dagName(getDagName(workflowMetadata))
           .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
           .build();
+
       final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
       if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
         if (getCompletedStatusTypes().contains(currentStatusType)) {

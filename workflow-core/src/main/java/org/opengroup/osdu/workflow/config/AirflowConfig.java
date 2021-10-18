@@ -24,6 +24,7 @@ public class AirflowConfig {
   private String password;
   private boolean dagRunAbstractionEnabled;
   private String controllerDagId;
+  private boolean version2;
 
   public String getAppKey() {
     if (Objects.isNull(username)) {

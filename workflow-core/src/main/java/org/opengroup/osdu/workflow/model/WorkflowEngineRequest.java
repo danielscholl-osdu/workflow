@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class WorkflowEngineRequest {
+
   private String runId;
   private String workflowId;
   private String workflowName;
@@ -15,4 +16,5 @@ public class WorkflowEngineRequest {
   private long executionTimeStamp = System.currentTimeMillis();
   private boolean isDeployedThroughWorkflowService;
   private final boolean isSystemWorkflow;
+
 }
