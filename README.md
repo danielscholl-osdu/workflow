@@ -13,6 +13,7 @@
     * [GET /v1/workflow/{workflow_name}/workflowRun](#get-v1workflowworkflow_nameworkflowrun)
     * [GET /v1/workflow/{workflow_name}/workflowRun/{runId}](#get-v1workflowworkflow_nameworkflowrunrunid)
     * [PUT /v1/workflow/{workflow_name}/workflowRun/{runId}](#put-v1workflowworkflow_nameworkflowrunrunid)
+* [Airflow 2.0 support](#airflow-2-support)
 * [Service Provider Interfaces](#workflow-service-provider-interfaces)
 * [GCP implementation](#gcp-implementation)
 * [Firestore](#firestore-collections)
@@ -343,6 +344,22 @@ curl --location --request PUT 'https://{path}/v1/workflow/{workflow_name}/workfl
 | endTimestamp | `long` | Workflow run end date |
 | status | `String` | Workflow status |
 | submittedBy | `String` | User Id who started the workflow |
+
+## Airflow 2 support
+as per airflow community, airflow experimnetal API will be discontinued. with help of MR 160 we added airflow 2.0 stable api support. for more details please check mentioned MR. 160
+
+#### Procedure to switch airflow 2.0 :
+- add following properties 
+
+| Key | Value | Decription |
+| ------ | ------ | ------ |
+| osdu.airflow.version2  | true | if this property is missing or false, airflow 1 experimental api will be called
+| osdu.airflow.username| `<_airflow_username_>` | airflow username if basic auth is enabled
+| osdu.airflow.password | `<_airflow-password_>` | airflow password if basic auth is enabled
+
+- override and disable integration test case ` org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId()` in provider level.
+- override and enable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()` in provider level
+
 
 ## Workflow Service Provider Interfaces
 

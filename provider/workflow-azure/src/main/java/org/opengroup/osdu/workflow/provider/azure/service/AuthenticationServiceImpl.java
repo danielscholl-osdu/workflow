@@ -39,7 +39,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     checkPreconditions(authorizationToken, partitionID);
 
-    // TODO: add check of user permissions
+    // TODO 22.06.21 (expires at 22.12.21): add check of user permissions
 
     logger.log(Level.INFO, "Finished checking authentication.");
   }

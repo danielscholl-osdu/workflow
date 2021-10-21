@@ -17,7 +17,6 @@
 
 package org.opengroup.osdu.workflow.workflow.v3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -132,7 +131,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     responseBody = response.getEntity(String.class);
     List<Object> list =
@@ -154,7 +153,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         headers,
         client.getAccessToken()
     );
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     responseBody = response.getEntity(String.class);
     List<Object> list =
@@ -234,7 +233,7 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     responseBody = response.getEntity(String.class);
     Map<String, Object> result = new ObjectMapper().readValue(responseBody, HashMap.class);
     assertTrue(!result.isEmpty());
@@ -440,9 +439,5 @@ public abstract class WorkflowV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
     assertTrue(HttpStatus.SC_FORBIDDEN == response.getStatus() || HttpStatus.SC_UNAUTHORIZED == response.getStatus());
-  }
-
-  private Map<String, String> getWorkflowInfoFromCreateWorkflowResponseBody(String responseBody) throws JsonProcessingException {
-    return new ObjectMapper().readValue(responseBody, HashMap.class);
   }
 }

@@ -31,7 +31,7 @@ public abstract class DeleteWorkflowIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     trackTriggeredWorkflowRun(existingWorkflowId,
         getWorkflowRunIdFromPayload(triggerWorkflowPayload));

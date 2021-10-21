@@ -35,7 +35,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     JsonObject responseData = gson.fromJson(response.getEntity(String.class), JsonObject.class);
     assertEquals(testOperatorData, responseData);
   }

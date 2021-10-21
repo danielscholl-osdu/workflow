@@ -1,5 +1,28 @@
 package org.opengroup.osdu.workflow.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
+import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
+import org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher;
+import org.opengroup.osdu.workflow.logging.AuditLogger;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowRequest;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.model.WorkflowRun;
+import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
+import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
+import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,54 +31,51 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
-import org.opengroup.osdu.workflow.exception.WorkflowRunCompletedException;
-import org.opengroup.osdu.workflow.logging.AuditLogger;
-import org.opengroup.osdu.workflow.model.*;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
+import static org.opengroup.osdu.core.common.model.status.Status.IN_PROGRESS;
+import static org.opengroup.osdu.core.common.model.status.Status.SUBMITTED;
+import static org.opengroup.osdu.core.common.model.status.Status.SUCCESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.USER_MADE_CHANGE;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FAILED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FINISHED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_IN_PROGRESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUBMITTED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUCCESS;
 import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class WorkflowRunServiceImpl implements IWorkflowRunService {
+
   private static final String KEY_RUN_ID = "run_id";
   private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
   private static final String KEY_AUTH_TOKEN = "authToken";
-  private static final Integer WORKFLOW_RUN_LIMIT = 100;
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String KEY_DAG_NAME = "dagName";
+  private static final Integer WORKFLOW_RUN_LIMIT = 100;
 
-  @Autowired
-  private IWorkflowMetadataRepository workflowMetadataRepository;
+  private final IWorkflowMetadataRepository workflowMetadataRepository;
 
-  @Autowired
-  private IWorkflowRunRepository workflowRunRepository;
+  private final IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
 
-  @Autowired
-  private DpsHeaders dpsHeaders;
+  private final IWorkflowRunRepository workflowRunRepository;
 
-  @Autowired
-  private IWorkflowEngineService workflowEngineService;
+  private final DpsHeaders dpsHeaders;
 
-  @Autowired
-  private AuditLogger auditLogger;
+  private final IWorkflowEngineService workflowEngineService;
+
+  private final AuditLogger auditLogger;
+
+  private final WorkflowStatusPublisher statusPublisher;
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
   public WorkflowRunResponse triggerWorkflow(final String workflowName, final TriggerWorkflowRequest request) {
-    final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowName);
+    final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
     String dagName = null;
@@ -67,12 +87,21 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
       dagName = workflowMetadata.getWorkflowName();
     }
 
-    final WorkflowEngineRequest rq = new WorkflowEngineRequest(runId, workflowId, workflowName, dagName);
+    final WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
+        .runId(runId)
+        .workflowId(workflowId)
+        .workflowName(workflowName)
+        .dagName(dagName)
+        .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
+        .build();
     final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
     TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
     auditLogger.workflowRunEvent(Collections.singletonList(getTruncatedData(request.toString())));
-    return buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
+    final WorkflowRunResponse workflowRunResponse = buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
+    statusPublisher.publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED, SUBMITTED);
+
+    return workflowRunResponse;
   }
 
   @Override
@@ -102,8 +131,8 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
                                                         Map<String, Object> params)
       throws WorkflowNotFoundException {
-    // Calling getWorkflow will throw WorkflowNotFoundException
-    workflowMetadataRepository.getWorkflow(workflowName);
+    // Calling getWorkflowByName will throw WorkflowNotFoundException
+    getWorkflowByName(workflowName);
     return workflowRunRepository.getAllRunInstancesOfWorkflow(workflowName, params);
   }
 
@@ -111,16 +140,52 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   public WorkflowRunResponse updateWorkflowRunStatus(String workflowName, String runId,
                                              WorkflowStatusType status) {
     WorkflowRun workflowRun = workflowRunRepository.getWorkflowRun(workflowName, runId);
-    if (getCompletedStatusTypes().contains(workflowRun.getStatus())) {
+    WorkflowStatusType oldStatus = workflowRun.getStatus();
+    if (getCompletedStatusTypes().contains(oldStatus)) {
       throw new WorkflowRunCompletedException(workflowName, runId);
     } else {
+      WorkflowRunResponse result = null;
       if (getActiveStatusTypes().contains(status)) {
-        return buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
+        result = buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
             buildUpdatedWorkflowRun(workflowRun, status, null)));
       } else {
-        return buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
+        result = buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
             buildUpdatedWorkflowRun(workflowRun, status, System.currentTimeMillis())));
       }
+        logUpdatedStatus(status, oldStatus, runId);
+
+      return result;
+    }
+  }
+
+  private void logUpdatedStatus(WorkflowStatusType newStatus, WorkflowStatusType oldStatus, String runId) {
+    if (newStatus.equals(oldStatus)) {
+      return;
+    }
+
+    switch (newStatus) {
+      case SUBMITTED:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED + USER_MADE_CHANGE, SUBMITTED);
+        break;
+      case RUNNING:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_IN_PROGRESS + USER_MADE_CHANGE, IN_PROGRESS);
+        break;
+      case FINISHED:
+        statusPublisher
+            .publishStatusWithUnexpectedErrors(runId, dpsHeaders, WORKFLOW_FINISHED + USER_MADE_CHANGE, FAILED);
+        break;
+      case FAILED:
+        statusPublisher
+            .publishStatusWithUnexpectedErrors(runId, dpsHeaders, WORKFLOW_FAILED + USER_MADE_CHANGE, FAILED);
+        break;
+      case SUCCESS:
+        statusPublisher
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUCCESS + USER_MADE_CHANGE, SUCCESS);
+        break;
+      default:
+        break;
     }
   }
 
@@ -132,6 +197,16 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
         return true;
     }
     return false;
+  }
+
+  // The below code is borrowed from WorkflowManagerServiceImpl
+  // Can't directly consume WorkflowManagerServiceImpl here as it will lead to cyclic dependency
+  private WorkflowMetadata getWorkflowByName(String workflowName) {
+    try {
+      return workflowMetadataRepository.getWorkflow(workflowName);
+    } catch (WorkflowNotFoundException e) {
+      return workflowSystemMetadataRepository.getSystemWorkflow(workflowName);
+    }
   }
 
   private List<WorkflowRun> getAllWorkflowRuns(String workflowName) {
@@ -164,10 +239,18 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {
     List<WorkflowStatusType> activeStatusTypes = WorkflowStatusType.getActiveStatusTypes();
     if (activeStatusTypes.contains(workflowRun.getStatus())) {
-      final WorkflowMetadata workflowMetadata = workflowMetadataRepository.getWorkflow(workflowRun.getWorkflowName());
+      final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowRun.getWorkflowName());
       final String workflowName = workflowMetadata.getWorkflowName();
-      final WorkflowEngineRequest rq = new WorkflowEngineRequest(workflowName,
-          workflowRun.getStartTimeStamp(), workflowRun.getWorkflowEngineExecutionDate());
+
+      final WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
+    	  .runId(workflowRun.getRunId())
+          .workflowName(workflowName)
+          .executionTimeStamp(workflowRun.getStartTimeStamp())
+          .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
+          .dagName(getDagName(workflowMetadata))
+          .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
+          .build();
+
       final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
       if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
         if (getCompletedStatusTypes().contains(currentStatusType)) {
@@ -183,6 +266,13 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
       }
     }
     return workflowRun;
+  }
+
+  private String getDagName(WorkflowMetadata workflowMetadata) {
+    Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
+    return instructions != null && instructions.get(KEY_DAG_NAME) != null
+        ? instructions.get(KEY_DAG_NAME).toString()
+        : workflowMetadata.getWorkflowName();
   }
 
   private WorkflowRun buildWorkflowRun(final WorkflowEngineRequest rq,

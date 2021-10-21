@@ -19,7 +19,12 @@ package org.opengroup.osdu.workflow.workflow.v3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 import org.springframework.http.HttpStatus;
@@ -84,7 +89,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
   }
 
   @Test
@@ -195,6 +200,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     createdWorkflowRuns.add(workflowRunInfo);
   }
 
+	/*
+	 * after switch to airflow 2.0 stable API, this has to be marked as ignore or
+	 * removed. Airflow 2.x stable API will always throw 409 Conflicts instead of 400
+	 * BAD REQUEST when you pass duplicate run id
+	 */
   @Test
   public void triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId() throws  Exception {
     String workflowResponseBody = createWorkflow();
@@ -217,6 +227,34 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, duplicateRunIdResponse.getStatus());
   }
+  
+	/*
+	 * Enable this Integration test for airflow 2.0 stable API by removing 
+	 * '@Disbaled'
+	 */
+  @Test
+  @Disabled("Until switch to airflow 2.0 stable api")
+  public void triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API() throws  Exception {
+	    String workflowResponseBody = createWorkflow();
+	    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+	    createdWorkflows.add(workflowInfo);
+
+	    String workflowRunResponseBody = createWorkflowRun();
+	    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+	    createdWorkflowRuns.add(workflowRunInfo);
+
+	    String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+	    ClientResponse duplicateRunIdResponse = client.send(
+	        HttpMethod.POST,
+	        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+	        duplicateRunIdPayload,
+	        headers,
+	        client.getAccessToken()
+	    );
+
+	    assertEquals(org.apache.http.HttpStatus.SC_CONFLICT, duplicateRunIdResponse.getStatus());
+	  }
 
   @Test
   public void triggerWorkflowRun_should_return_WorkflowNotFound_when_givenInvalidWorkflowName() throws Exception {
@@ -420,7 +458,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_RUNNING);
 
@@ -451,7 +489,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
 
@@ -524,7 +562,7 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
 
-    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus());
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
     assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_FINISHED);
 

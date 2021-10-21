@@ -30,8 +30,8 @@ spec:
     spec:
 {{- if .Values.global.isAutoscalingEnabled }}
       nodeSelector:
-        nodepool: {{ .Values.global.nodepool }} 
-{{- end }}  
+        nodepool: {{ .Values.global.nodepool }}
+{{- end }}
       volumes:
         - name: azure-keyvault
           csi:
@@ -54,10 +54,14 @@ spec:
             - containerPort: 80
           readinessProbe:
             httpGet:
-              path: /api/workflow/swagger-ui.html
-              port: 80
-            initialDelaySeconds: 100
-            timeoutSeconds: 30
+              path: /actuator/health
+              port: 8081
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 250
+            periodSeconds: 10
           volumeMounts:
             - name: azure-keyvault
               mountPath: "/mnt/azure-keyvault"
@@ -67,21 +71,6 @@ spec:
               value: ingestion-workflow
             - name: server.servlet.contextPath
               value: /api/workflow/
-            - name: AZURE_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: active-directory
-                  key: tenantid
-            - name: AZURE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: active-directory
-                  key: principal-clientid
-            - name: AZURE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: active-directory
-                  key: principal-clientpassword
             - name: aad_client_id
               valueFrom:
                 secretKeyRef:

@@ -30,5 +30,7 @@ import org.springframework.context.annotation.Configuration;
 public class WorkflowPropertiesConfiguration {
   private String workflowRunKind;
   private String workflowKind;
+  private String systemWorkflowKind;
   private String workflowStatusKind;
+  private String sharedTenantName;
 }

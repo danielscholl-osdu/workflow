@@ -42,7 +42,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     JsonObject workflowResponse = new Gson().fromJson(response.getEntity(String.class), JsonObject.class);
     assertTrue(workflowResponse.has(SIGNED_URL_FIELD));
     String signedUrl = workflowResponse.get(SIGNED_URL_FIELD).getAsString();

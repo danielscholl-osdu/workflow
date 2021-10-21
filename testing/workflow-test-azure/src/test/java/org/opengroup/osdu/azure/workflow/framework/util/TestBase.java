@@ -160,7 +160,7 @@ public abstract class TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     trackTriggeredWorkflowRun(workflowId, getWorkflowRunIdFromPayload(triggerWorkflowPayload));
 

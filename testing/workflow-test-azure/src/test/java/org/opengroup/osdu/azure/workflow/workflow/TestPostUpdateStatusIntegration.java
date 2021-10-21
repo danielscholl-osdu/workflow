@@ -74,7 +74,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
 				PayloadBuilder.buildUpdateStatus(expectedWorkflowId, WORKFLOW_STATUS_TYPE_FINISHED),
 				headers,client.getAccessToken()
     );
-        assertEquals(HttpStatus.SC_OK, response.getStatus());
+        assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
     JsonObject responseBody = new Gson().fromJson(response.getEntity(String.class), JsonObject.class);
 
@@ -141,7 +141,7 @@ public  class TestPostUpdateStatusIntegration extends PostUpdateStatusIntegratio
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
   }
 
 

@@ -59,7 +59,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     JsonObject responseData = gson.fromJson(response.getEntity(String.class), JsonObject.class);
     assertTrue(responseData.has(RESPONSE_ITEMS_KEY));
     if(testDataOperatorNameToInfo.size() < DEFAULT_LIMIT) {
@@ -80,7 +80,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     JsonObject responseData = gson.fromJson(response.getEntity(String.class), JsonObject.class);
     assertTrue(responseData.has(RESPONSE_ITEMS_KEY));
     assertEquals(limit, responseData.getAsJsonArray(RESPONSE_ITEMS_KEY).size());
@@ -98,7 +98,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     JsonObject responseData = gson.fromJson(response.getEntity(String.class), JsonObject.class);
     assertTrue(responseData.has(RESPONSE_ITEMS_KEY));
     assertTrue(responseData.has(RESPONSE_CURSOR_KEY));
@@ -115,7 +115,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
         client.getAccessToken()
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus());
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
     responseData = gson.fromJson(response.getEntity(String.class), JsonObject.class);
     assertTrue(responseData.has(RESPONSE_ITEMS_KEY));
     assertEquals(limit, responseData.getAsJsonArray(RESPONSE_ITEMS_KEY).size());
