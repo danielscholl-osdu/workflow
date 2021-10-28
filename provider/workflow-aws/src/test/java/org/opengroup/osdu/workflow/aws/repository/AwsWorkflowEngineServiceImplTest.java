@@ -1,7 +1,5 @@
 package org.opengroup.osdu.workflow.aws.repository;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,30 +7,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.configuration.injection.MockInjection;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.opengroup.osdu.core.aws.s3.IS3ClientFactory;
-import org.opengroup.osdu.core.aws.s3.S3ClientWithBucket;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.service.AwsWorkflowEngineServiceImpl;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
 import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
-import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.aws.config.AwsAirflowApiMode;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
-import org.opengroup.osdu.workflow.aws.repository.AwsWorkflowRunRepository;
-import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
-import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-
-import javax.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,8 +76,9 @@ public class AwsWorkflowEngineServiceImplTest {
         String partitionId = "test-partition";
         String ref = "test-ref";
 
-        WorkflowEngineRequest request = new WorkflowEngineRequest(runId, "workflowId", dagName, 1l,
-            dagName, "date", false);
+
+        WorkflowEngineRequest request = WorkflowEngineRequest.builder().runId(runId).workflowId("workflowId").dagName(dagName).workflowName(dagName).workflowEngineExecutionDate("date")
+          .isSystemWorkflow(false).isDeployedThroughWorkflowService(false).build();
 
         Map<String, Object> inputData = new HashMap<>();
 
