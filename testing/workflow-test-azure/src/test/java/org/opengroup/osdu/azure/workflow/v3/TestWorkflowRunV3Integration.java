@@ -1,22 +1,25 @@
-package org.opengroup.osdu.azure.workflow.workflow;
+package org.opengroup.osdu.azure.workflow.v3;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzure;
-import org.opengroup.osdu.workflow.workflow.v3.PostCreateSystemWorkflowV3IntegrationTests;
+import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 
 import java.util.ArrayList;
 
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
-public class TestPostCreateSystemWorkflowV3Integration extends PostCreateSystemWorkflowV3IntegrationTests {
+@Slf4j
+public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
+
   @BeforeEach
   @Override
   public void setup() {
     this.client = new HTTPClientAzure();
-    this.headers = client.getCommonHeaderWithoutPartition();
+    this.headers = client.getCommonHeader();
     try {
-      deleteTestSystemWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+      deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -24,17 +27,19 @@ public class TestPostCreateSystemWorkflowV3Integration extends PostCreateSystemW
 
   @AfterEach
   @Override
-  public void tearDown() {
+  public void tearDown() throws Exception {
+    waitForWorkflowRunsToComplete();
     deleteAllTestWorkflowRecords();
     this.client = null;
     this.headers = null;
     this.createdWorkflows = new ArrayList<>();
+    this.createdWorkflowRuns = new ArrayList<>();
   }
 
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
       try {
-        deleteTestSystemWorkflows(c.get(WORKFLOW_NAME_FIELD));
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         e.printStackTrace();
       }

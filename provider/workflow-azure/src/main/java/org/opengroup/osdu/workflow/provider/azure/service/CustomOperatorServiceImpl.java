@@ -1,8 +1,12 @@
 package org.opengroup.osdu.workflow.provider.azure.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.common.exception.BadRequestException;
+import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorMetadataRepository;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorService;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperator;
@@ -27,8 +31,16 @@ public class CustomOperatorServiceImpl implements ICustomOperatorService {
   @Autowired
   private IWorkflowEngineService workflowEngineService;
 
+  @Autowired
+  private AzureWorkflowEngineConfig workflowEngineConfig;
+
   @Override
   public CustomOperator registerNewOperator(RegisterCustomOperatorRequest customOperatorRequest) {
+    if (workflowEngineConfig.getIgnoreCustomOperatorContent()) {
+      if (!StringUtils.isEmpty(customOperatorRequest.getContent())) {
+        throw new AppException(HttpStatus.SC_FORBIDDEN, "Non empty dag content obtained", "Setting dag content not allowed");
+      }
+    }
     final CustomOperator customOperator = customOperatorMetadataRepository
         .saveMetadata(createCustomOperatorFromRequest(customOperatorRequest));
     workflowEngineService.saveCustomOperator(customOperatorRequest.getContent(),

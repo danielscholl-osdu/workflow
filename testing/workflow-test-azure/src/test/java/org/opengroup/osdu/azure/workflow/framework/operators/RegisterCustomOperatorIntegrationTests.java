@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.util.CustomOperatorTestsBuilder;
 import org.opengroup.osdu.azure.workflow.framework.util.CustomOperatorUtil;
@@ -44,6 +45,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
   @Test
+  @Disabled
   public void should_return_success_when_given_valid_request() {
     JsonObject responseData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
 
@@ -62,6 +64,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_return_badRequest_given_invalid_request() throws Exception {
     String operatorContent = TestResourceProvider
         .getOperatorFileContent(SIMPLE_CUSTOM_OPERATOR_FILE);
@@ -81,6 +84,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_return_conflict_given_valid_request_with_existing_operator()
       throws Exception {
     JsonObject testOperatorData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
@@ -112,6 +116,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
     String operatorContent = TestResourceProvider
         .getOperatorFileContent(SIMPLE_CUSTOM_OPERATOR_FILE);
@@ -131,6 +136,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     String operatorContent = TestResourceProvider
         .getOperatorFileContent(SIMPLE_CUSTOM_OPERATOR_FILE);
@@ -150,6 +156,7 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     String operatorContent = TestResourceProvider
         .getOperatorFileContent(SIMPLE_CUSTOM_OPERATOR_FILE);
@@ -162,6 +169,25 @@ public abstract class RegisterCustomOperatorIntegrationTests extends TestBase {
         CUSTOM_OPERATOR_URL,
         gson.toJson(payload),
         HTTPClient.overrideHeader(headers, "invalid-partition"),
+        client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatus());
+  }
+
+  @Test
+  public void should_returnForbidden_when_givenCustomOperatorContentWithIgnoreCustomOperatorContentAsTrue() throws Exception {
+    String operatorContent = TestResourceProvider
+        .getOperatorFileContent(SIMPLE_CUSTOM_OPERATOR_FILE);
+    Map<String, Object> payload =
+        CustomOperatorTestsBuilder.buildRegisterCustomOperatorPayload(
+            CustomOperatorUtil.getUniqueOperatorName(SIMPLE_CUSTOM_OPERATOR), "SampleClass",
+            operatorContent);
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        CUSTOM_OPERATOR_URL,
+        gson.toJson(payload),
+        headers,
         client.getAccessToken()
     );
 

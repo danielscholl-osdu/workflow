@@ -13,4 +13,6 @@ public class AzureWorkflowEngineConfig {
   private Boolean isDPAirflowUsedForSystemDAG;
 
   private Boolean ignoreDagContent;
+
+  private Boolean ignoreCustomOperatorContent;
 }

@@ -7,15 +7,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
 import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
-import org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil;
 
 import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +36,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
 
   private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
+  /*
   @BeforeAll
   public static void initialize() {
     testDataOperatorNameToInfo = new HashMap<>();
@@ -48,8 +47,10 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
           operatorData);
     }
   }
+  */
 
   @Test
+  @Disabled
   public void should_return_operators_when_valid_request() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -70,6 +71,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_return_operators_when_valid_request_with_limit() throws Exception {
     final int limit  = 1;
     ClientResponse response = client.send(
@@ -88,6 +90,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_return_operators_when_valid_request_with_limit_and_cursor() throws Exception {
     final int limit  = 1;
     ClientResponse response = client.send(
@@ -125,6 +128,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnBadRequest_when_request_with_invalid_limit() throws Exception {
     for(Integer invalidLimit: INVALID_LIMITS) {
       ClientResponse response = client.send(
@@ -139,6 +143,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnBadRequest_when_request_with_invalid_cursor() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -152,6 +157,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
 
 
   @Test
+  @Disabled
   public void should_returnBadRequest_when_request_with_invalid_limit_and_cursor()
       throws Exception {
     for(Integer invalidLimit: INVALID_LIMITS) {
@@ -167,6 +173,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_notGivenAccessToken() {
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -180,6 +187,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -193,6 +201,7 @@ public abstract class GetCustomOperatorsIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
