@@ -1,140 +1,76 @@
 package org.opengroup.osdu.azure.workflow.framework.workflow;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
-import org.apache.http.HttpStatus;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
-import org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder;
-import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
+import org.opengroup.osdu.azure.workflow.framework.util.AzureTestBase;
+import org.springframework.http.HttpStatus;
 
 import javax.ws.rs.HttpMethod;
+import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_DUMMY_DAG;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_CUSTOM_OPERATOR_DAG;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_HTTP_DAG;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_KUBERNETES_DAG;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_PYTHON_DAG;
-import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.*;
-import static org.opengroup.osdu.azure.workflow.framework.util.TestDataUtil.getWorkflow;
-import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildTriggerWorkflowPayload;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ACTIVE;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_TASK_RUN;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_WORKFLOW_RUN;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION_FIELD;
+import static org.opengroup.osdu.azure.workflow.utils.AzurePayLoadBuilder.buildCreateWorkflowRequestWithRegistrationInstructions;
+import static org.opengroup.osdu.azure.workflow.utils.AzurePayLoadBuilder.buildCreateWorkflowValidPayloadWithDagContent;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
-public abstract class PostCreateWorkflowIntegrationTests extends TestBase {
-  public static final String CREATE_WORKFLOW_INVALID_REQUEST_MESSAGE = "Unrecognized field";
-  public static final String CREATE_WORKFLOW_IGNORE_CONTENT_MESSAGE = "not found in DagModel";
-  public static final String WORKFLOW_NAME_CONFLICT_MESSAGE = "ResourceConflictException: Workflow with name %s already exists";
-  public static final String TEST_WORKFLOW_FILE_NAME = "test_dummy_dag.py";
-  public static final String TEST_SIMPLE_WORKFLOW_FILE_NAME = "test_simple_python_dag.py";
+public abstract class PostCreateWorkflowIntegrationTests extends AzureTestBase {
+
+  private static final String INVALID_PREFIX = "backfill";
+  private static final Integer INVALID_LIMIT = 1000;
+  public static final Gson gson = new Gson();
 
   @Test
-  public void should_returnSuccess_when_givenValidRequest() {
-    JsonObject workflowResponse = getWorkflow(TEST_SIMPLE_PYTHON_DAG);
-
-    assertTrue(isNotBlank(workflowResponse.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()));
-    assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_NAME_FIELD).getAsString()));
-    assertEquals(workflowResponse.get(WORKFLOW_DESCRIPTION_FIELD).getAsString(), WORKFLOW_DESCRIPTION);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD).getAsInt(), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_TASK_RUN_FIELD).getAsInt(),WORKFLOW_CONCURRENT_TASK_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_ACTIVE_FIELD).getAsBoolean(), WORKFLOW_ACTIVE);
-  }
-
-  @Test
-  public void should_returnSuccess_when_givenValidRequest_httpOperator() {
-    JsonObject workflowResponse = getWorkflow(TEST_SIMPLE_HTTP_DAG);
-
-    assertTrue(isNotBlank(workflowResponse.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()));
-    assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_NAME_FIELD).getAsString()));
-    assertEquals(workflowResponse.get(WORKFLOW_DESCRIPTION_FIELD).getAsString(), WORKFLOW_DESCRIPTION);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD).getAsInt(), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_TASK_RUN_FIELD).getAsInt(),WORKFLOW_CONCURRENT_TASK_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_ACTIVE_FIELD).getAsBoolean(), WORKFLOW_ACTIVE);
-  }
-
-  @Test
-  public void should_returnSuccess_when_givenValidRequest_kubernetesOperator() {
-    JsonObject workflowResponse = getWorkflow(TEST_SIMPLE_KUBERNETES_DAG);
-
-    assertTrue(isNotBlank(workflowResponse.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()));
-    assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_NAME_FIELD).getAsString()));
-    assertEquals(workflowResponse.get(WORKFLOW_DESCRIPTION_FIELD).getAsString(), WORKFLOW_DESCRIPTION);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD).getAsInt(), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_TASK_RUN_FIELD).getAsInt(),WORKFLOW_CONCURRENT_TASK_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_ACTIVE_FIELD).getAsBoolean(), WORKFLOW_ACTIVE);
-  }
-
-  @Test
-  public void should_returnSuccess_when_givenValidRequest_customOperator_dag() {
-    JsonObject workflowResponse = getWorkflow(TEST_SIMPLE_CUSTOM_OPERATOR_DAG);
-
-    assertTrue(isNotBlank(workflowResponse.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()));
-    assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_NAME_FIELD).getAsString()));
-    assertEquals(workflowResponse.get(WORKFLOW_DESCRIPTION_FIELD).getAsString(), WORKFLOW_DESCRIPTION);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD).getAsInt(), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_TASK_RUN_FIELD).getAsInt(),WORKFLOW_CONCURRENT_TASK_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_ACTIVE_FIELD).getAsBoolean(), WORKFLOW_ACTIVE);
-  }
-
-  @Test
-  public void should_returnSuccess_when_givenValidRequest_dummy_dag() {
-    JsonObject workflowResponse = getWorkflow(TEST_DUMMY_DAG);
-
-    assertTrue(isNotBlank(workflowResponse.get(CreateWorkflowTestsBuilder.WORKFLOW_ID_FIELD).getAsString()));
-    assertTrue(isNotBlank(workflowResponse.get(WORKFLOW_NAME_FIELD).getAsString()));
-    assertEquals(workflowResponse.get(WORKFLOW_DESCRIPTION_FIELD).getAsString(), WORKFLOW_DESCRIPTION);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_WORKFLOW_RUN_FIELD).getAsInt(), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_CONCURRENT_TASK_RUN_FIELD).getAsInt(),WORKFLOW_CONCURRENT_TASK_RUN);
-    assertEquals(workflowResponse.get("registrationInstructions").getAsJsonObject().get(WORKFLOW_ACTIVE_FIELD).getAsBoolean(), WORKFLOW_ACTIVE);
-  }
-
-  @Test
-  @Ignore("Enable this test to test the ignore DAG content functionality")
-  public void should_ignoreDagcontent_when_givenValidRequest() throws Exception {
-    String createWorkflowRequestBody = getValidCreateWorkflowRequest(TEST_SIMPLE_PYTHON_DAG,
-            TEST_SIMPLE_WORKFLOW_FILE_NAME);
+  public void shouldReturnForbidden_whenGivenDagContent_withIgnoreDagContentAsTrue() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
 
     ClientResponse response = client.send(
-            HttpMethod.POST,
-            CREATE_WORKFLOW_URL,
-            createWorkflowRequestBody,
-            headers,
-            client.getAccessToken()
+        HttpMethod.POST,
+        CREATE_WORKFLOW_URL,
+        buildCreateWorkflowValidPayloadWithDagContent(),
+        headers,
+        client.getAccessToken()
     );
+    assertEquals(org.springframework.http.HttpStatus.FORBIDDEN.value(), response.getStatus());
+  }
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
+  @Test
+  public void should_returnBadRequest_when_givenInvalidPrefix() throws Exception {
+    String workflowResponseBody = createWorkflowWithRegistrationInstructions();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
 
-    String workflowId = new Gson().fromJson(createWorkflowRequestBody, JsonObject.class).get(WORKFLOW_NAME_FIELD)
-            .getAsString();
-    Map<String, Object> triggerWorkflowRequestPayload = buildTriggerWorkflowPayload();
+    assertEquals(workflowInfo.get(WORKFLOW_DESCRIPTION_FIELD), WORKFLOW_DESCRIPTION);
+    assertEquals(workflowInfo.get(WORKFLOW_ID_FIELD), CREATE_WORKFLOW_WORKFLOW_NAME);
+    assertEquals(workflowInfo.get(WORKFLOW_NAME_FIELD), CREATE_WORKFLOW_WORKFLOW_NAME);
 
-    ClientResponse triggerResponse = client.send(
-            HttpMethod.POST,
-            String.format(CREATE_WORKFLOW_RUN_URL, workflowId),
-            gson.toJson(triggerWorkflowRequestPayload),
-            headers,
-            client.getAccessToken()
+    Map<String, String> registrationInstructions = new ObjectMapper().readValue(new Gson().toJson(workflowInfo.get("registrationInstructions")), HashMap.class);
+
+    assertEquals(registrationInstructions.get("dagName"), CREATE_WORKFLOW_WORKFLOW_NAME);
+    assertEquals(registrationInstructions.get("active"), WORKFLOW_ACTIVE);
+    assertEquals(registrationInstructions.get("concurrentWorkflowRun"), WORKFLOW_CONCURRENT_WORKFLOW_RUN);
+    assertEquals(registrationInstructions.get("concurrentTaskRun"), WORKFLOW_CONCURRENT_TASK_RUN);
+  }
+
+  private String createWorkflowWithRegistrationInstructions() throws Exception {
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        CREATE_WORKFLOW_URL,
+        new Gson().toJson(buildCreateWorkflowRequestWithRegistrationInstructions(CREATE_WORKFLOW_WORKFLOW_NAME)),
+        headers,
+        client.getAccessToken()
     );
-
-    assertEquals(HttpStatus.SC_NOT_FOUND, triggerResponse.getStatus());
-
-    String error = triggerResponse.getEntity(String.class);
-    assertTrue(error.contains(CREATE_WORKFLOW_IGNORE_CONTENT_MESSAGE));
-
-    ClientResponse deleteResponse = client.send(
-            HttpMethod.DELETE,
-            String.format(GET_WORKFLOW_URL, workflowId),
-            null,
-            headers,
-            client.getAccessToken()
-    );
-
-    assertEquals(HttpStatus.SC_NO_CONTENT, deleteResponse.getStatus());
+    assertEquals(HttpStatus.OK.value(), response.getStatus(), response.toString());
+    return response.getEntity(String.class);
   }
 }

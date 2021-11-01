@@ -5,6 +5,8 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.SqlQuerySpec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -28,6 +30,7 @@ import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataU
 @RequiredArgsConstructor
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private static final String LOGGER_NAME = WorkflowMetadataRepository.class.getName();
+  private static final String KEY_DAG_CONTENT = "dagContent";
 
   private final CosmosConfig cosmosConfig;
 
@@ -41,6 +44,12 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Override
   public WorkflowMetadata createWorkflow(final WorkflowMetadata workflowMetadata) {
+    String dagContent = (String) workflowMetadata.getRegistrationInstructions().get(KEY_DAG_CONTENT);
+    if (workflowEngineConfig.getIgnoreDagContent()) {
+      if (!StringUtils.isEmpty(dagContent)) {
+        throw new AppException(HttpStatus.SC_FORBIDDEN, "Non empty dag content obtained", "Setting dag content not allowed");
+      }
+    }
     final WorkflowMetadataDoc workflowMetadataDoc = buildWorkflowMetadataDoc(workflowEngineConfig, workflowMetadata);
     try {
       cosmosStore.createItem(dpsHeaders.getPartitionId(), cosmosConfig.getDatabase(),

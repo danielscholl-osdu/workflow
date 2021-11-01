@@ -1,42 +1,42 @@
 package org.opengroup.osdu.azure.workflow.framework.workflow;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.models.WorkflowRun;
-import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
+import org.opengroup.osdu.azure.workflow.framework.util.AzureTestBase;
 
 import javax.ws.rs.HttpMethod;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 
-public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
+public abstract class GetAllRunInstancesIntegrationTests extends AzureTestBase {
 
-  private static final String INVALID_WORKFLOW_ID = "invalid-workflow-id";
-  private static final String INVALID_PARTITION = "invalid-partition";
   private static final String INVALID_PREFIX = "backfill";
   private static final Integer INVALID_LIMIT = 1000;
+  public static final Gson gson = new Gson();
 
-  private static WorkflowRun triggeredWorkflow = null;
-
-  public void initializeTriggeredWorkflow() throws Exception {
-    if (triggeredWorkflow == null) {
-      triggeredWorkflow = triggerDummyWorkflow(client, headers);
-    }
-  }
+  protected Map<String, String> workflowInfo = null;
+  protected Map<String, String> workflowRunInfo = null;
 
   @Test
   public void should_returnBadRequest_when_givenInvalidPrefix() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(CREATE_WORKFLOW_RUN_URL + "?prefix=%s", triggeredWorkflow.getWorkflowId(), INVALID_PREFIX),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?prefix=%s", CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_PREFIX),
         null,
         headers,
         client.getAccessToken()
@@ -48,7 +48,7 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   public void should_returnBadRequest_when_givenInvalidLimit() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s", triggeredWorkflow.getWorkflowId(), INVALID_LIMIT),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s", CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_LIMIT),
         null,
         headers,
         client.getAccessToken()
@@ -59,10 +59,11 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
   @Test
   public void should_returnSuccess_when_givenValidLimitAndValidPrefix() throws Exception {
     int limit = 1;
-    String prefix = triggeredWorkflow.getRunId().substring(0, 2);
+    String prefix = workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD).substring(0, 2);
+
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s&prefix=%s", triggeredWorkflow.getWorkflowId(), limit, prefix),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?limit=%s&prefix=%s", CREATE_WORKFLOW_WORKFLOW_NAME, limit, prefix),
         null,
         headers,
         client.getAccessToken()
@@ -80,10 +81,10 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
   @Test
   public void should_returnSuccess_when_givenValidStartDateParam() throws Exception {
-    Long startTimeStamp = triggeredWorkflow.getStartTimeStamp();
+    Long startTimeStamp = Long.parseLong(Objects.toString(workflowInfo.get("creationTimestamp")));
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(CREATE_WORKFLOW_RUN_URL + "?startDate=%s", triggeredWorkflow.getWorkflowId(), startTimeStamp),
+        String.format(CREATE_WORKFLOW_RUN_URL + "?startDate=%s", CREATE_WORKFLOW_WORKFLOW_NAME, startTimeStamp),
         null,
         headers,
         client.getAccessToken()
@@ -101,10 +102,20 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
 
   @Test
   public void should_returnSuccess_when_givenValidEndDateParam() throws Exception {
-    Long endTimestamp = getLatestUpdatedWorkflowRun(triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()).getEndTimeStamp();
+    waitForWorkflowRunsToComplete();
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(CREATE_WORKFLOW_RUN_URL + "?endDate=%s", triggeredWorkflow.getWorkflowId(), endTimestamp),
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        null,
+        headers,
+        client.getAccessToken()
+    );
+    String completedWorkflowRunResponse = response.getEntity(String.class);
+    Map<String, Object> completedWorkflowRunInfo = new ObjectMapper().readValue(completedWorkflowRunResponse, HashMap.class);
+    Long endTimestamp = (Long) completedWorkflowRunInfo.get("endTimeStamp");
+    response = client.send(
+        HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL + "?endDate=%s", CREATE_WORKFLOW_WORKFLOW_NAME, endTimestamp),
         null,
         headers,
         client.getAccessToken()
@@ -121,22 +132,4 @@ public abstract class GetAllRunInstancesIntegrationTests extends TestBase {
     }
   }
 
-  WorkflowRun getLatestUpdatedWorkflowRun(String workflowId, String runId) throws Exception {
-    executeWithWaitAndRetry(() -> {
-      waitForWorkflowRunsToComplete(trackedWorkflowRuns, completedWorkflowRunIds);
-      return null;
-    }, 20, 15, TimeUnit.SECONDS);
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        String.format(GET_WORKFLOW_RUN_URL, workflowId, runId),
-        null,
-        headers,
-        client.getAccessToken()
-    );
-    if (response.getStatus() == HttpStatus.SC_OK) {
-      return gson.fromJson(response.getEntity(String.class), WorkflowRun.class);
-    } else {
-      throw new Exception(String.format("Error getting status for workflow run id %s", runId));
-    }
-  }
 }

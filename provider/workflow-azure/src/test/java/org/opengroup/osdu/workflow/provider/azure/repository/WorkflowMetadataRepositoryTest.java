@@ -201,9 +201,19 @@ public class WorkflowMetadataRepositoryTest {
   }
 
   @Test
-  public void testCreateWorkflowWithDAGContentIgnored() throws Exception {
+  public void testCreateWorkflowWithDAGContent_whenIgnoreDagContentIsTrue_thenThrowsError() throws Exception {
     when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(true);
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
+    Assertions.assertThrows(AppException.class, () -> {
+      workflowMetadataRepository.createWorkflow(inputWorkflowMetadata);
+    });
+    verify(workflowEngineConfig, times(1)).getIgnoreDagContent();
+  }
+
+  @Test
+  public void testCreateWorkflowWithoutDAGContent_whenIgnoreDagContentIsTrue_thenSuccess() throws Exception {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(true);
+    final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
             OBJECT_MAPPER.readValue(WORKFLOW_METADATA_DOC_WITHOUT_OR_EMPTY_DAG_CONTENT, WorkflowMetadataDoc.class);
@@ -212,7 +222,8 @@ public class WorkflowMetadataRepositoryTest {
 
 
   @Test
-  public void testCreateWorkflowWithoutDAGContent() throws Exception {
+  public void testCreateWorkflowWithoutDAGContent_whenIgnoreDagContentIsFalse_thenSuccess() throws Exception {
+    when(workflowEngineConfig.getIgnoreDagContent()).thenReturn(false);
     final WorkflowMetadata inputWorkflowMetadata = OBJECT_MAPPER.readValue(INPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadata expectedOutputWorkflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_WORKFLOW_METADATA_WITHOUT_DAG_CONTENT, WorkflowMetadata.class);
     final WorkflowMetadataDoc expectedDocToBeStored =
