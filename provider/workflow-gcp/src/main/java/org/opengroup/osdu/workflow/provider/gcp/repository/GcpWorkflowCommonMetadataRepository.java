@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@Service
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 public class GcpWorkflowCommonMetadataRepository {
