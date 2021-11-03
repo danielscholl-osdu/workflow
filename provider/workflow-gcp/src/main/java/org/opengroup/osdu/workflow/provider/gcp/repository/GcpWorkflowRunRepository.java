@@ -54,7 +54,7 @@ import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-@Service
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 public class GcpWorkflowRunRepository implements IWorkflowRunRepository {

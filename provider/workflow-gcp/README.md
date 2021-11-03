@@ -38,6 +38,11 @@ In order to run the service locally, you will need to have the following environ
 | `SHARED_TENANT_NAME` | ex `common` or `opendes` | the name of the shared tenant | yes | - |
 | `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows to configure message publishing about schemas changes to Pub/Sub | no | - |
 | `STATUS_CHANGED_TOPIC_NAME` | ex `status-changed` | Allows to subscribe a specific Pub/Sub topic | no | - |
+| `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
+| `DATASTORE_LEGACY_DATA_STRUCTURE` | `false` OR `true` | Serves to use already existing data structure, by default true | no | - |
+| `SPRING_DATASTOURCE_URL` | `jdbc:postgresql://127.0.0.1:5432/postgres` | Postgres connection URL | no | - |
+| `SPRING_DATASTOURCE_USERNAME` | `postgres` | Postgres username | yes | - |
+| `SPRING_DATASTOURCE_PASSWORD` | `postgres` | Postgres password | yes | - |
 
 **Required to run integration tests**
 
@@ -62,14 +67,47 @@ In order to run the service locally, you will need to have the following environ
 
 
 ### Persistence layer
+### Database structure for OSMDRIVER=postgres
+```
+DROP TABLE IF EXISTS opendes.workflow;
+CREATE TABLE IF NOT EXISTS opendes.workflow
+(
+	id text COLLATE pg_catalog."default" NOT NULL,
+	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	data jsonb NOT NULL,
+	CONSTRAINT workflow_id UNIQUE (id)
+)
+TABLESPACE pg_default;
+ALTER TABLE opendes.workflow
+    OWNER to postgres;
 
-The GCP implementation contains two mutually exclusive modules to work with the persistence layer.
-Presently, OSDU R2 connects to legacy Cloud Datastore for compatibility with the current OpenDES
-implementation. In the future OSDU releases, Cloud Datastore will be replaced by the existing Cloud
-Firestore implementation that's already available in the project.
 
-The Cloud Datastore implementation is located in the **provider/workflow-gcp-datastore** folder.
+DROP TABLE IF EXISTS opendes.workflow_run;
+CREATE TABLE IF NOT EXISTS opendes.workflow_run
+(
+	id text COLLATE pg_catalog."default" NOT NULL,
+	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	data jsonb NOT NULL,
+	CONSTRAINT workflow_run_id UNIQUE (id)
+)
+TABLESPACE pg_default;
+ALTER TABLE opendes.workflow_run
+    OWNER to postgres;
 
+
+DROP TABLE IF EXISTS opendes.workflow_status;
+CREATE TABLE IF NOT EXISTS opendes.workflow_status
+(
+	id text COLLATE pg_catalog."default" NOT NULL,
+	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	data jsonb NOT NULL,
+	CONSTRAINT workflow_status_id UNIQUE (id)
+)
+TABLESPACE pg_default;
+ALTER TABLE opendes.workflow_status
+    OWNER to postgres;
+
+```
 ### Run Locally
 Check that maven is installed:
 
