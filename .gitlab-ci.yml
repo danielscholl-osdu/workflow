@@ -57,7 +57,7 @@ include:
 
   - project: "osdu/platform/ci-cd-pipelines"
     ref: "master"
-    file: "cloud-providers/ibm-java-git.yml"
+    file: "cloud-providers/ibm.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
     file: "cloud-providers/aws.yml"
