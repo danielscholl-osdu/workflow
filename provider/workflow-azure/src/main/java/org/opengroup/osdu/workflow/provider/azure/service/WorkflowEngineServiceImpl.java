@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
@@ -55,6 +57,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
   private static final String KEY_DAG_CONTENT = "dagContent";
+  private static final String ACTIVE_DAG_RUNS_CACHE_KEY = "active-dag-runs-count";
+  private Integer THRESHOLD = 20;
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -74,6 +78,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Autowired
   private AzureWorkflowEngineConfig workflowEngineConfig;
+
+  @Autowired
+  @Qualifier("ActiveDagRunsCache")
+  private ICache<String, Integer> activeDagRunsCache;
 
   @Override
   public void createWorkflow(
@@ -179,6 +187,17 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
                                                  Map<String, Object> inputData) {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_CACHE_KEY);
+    if (numberOfActiveDagRuns == null) {
+      numberOfActiveDagRuns = getActiveDagRunsCount();
+      System.out.println("Not found in cache. Setting the value of numberOfActiveDagRuns in cache to: " + numberOfActiveDagRuns);
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
+    } else {
+      System.out.println("Found in cache");
+    }
+    if (numberOfActiveDagRuns >= THRESHOLD) {
+      throw new AppException(HttpStatus.SC_FORBIDDEN, "Threshold exceed", "Exceeding threshold not allowed");
+    }
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
     String workflowId = rq.getWorkflowId();
@@ -269,5 +288,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     } else {
       return airflowConfigResolver.getAirflowConfig(dpsHeaders.getPartitionId());
     }
+  }
+
+  private Integer getActiveDagRunsCount() {
+    return 10;
   }
 }
