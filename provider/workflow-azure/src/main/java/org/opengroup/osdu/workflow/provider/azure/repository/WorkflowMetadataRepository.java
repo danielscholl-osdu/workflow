@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -18,6 +19,7 @@ import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConf
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,6 +43,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   private final JaxRsDpsLog logger;
 
   private final AzureWorkflowEngineConfig workflowEngineConfig;
+
+  @Qualifier("WorkflowMetadataCache")
+  private final ICache<String, WorkflowMetadata> workflowMetadataCache;
 
   @Override
   public WorkflowMetadata createWorkflow(final WorkflowMetadata workflowMetadata) {
@@ -70,6 +75,14 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Override
   public WorkflowMetadata getWorkflow(final String workflowName) {
+    String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
+    WorkflowMetadata workflowMetadata = workflowMetadataCache.get(cacheKey);
+    if (workflowMetadata != null) {
+      System.out.println("####### Found in cache #######");
+      return workflowMetadata;
+    } else {
+      System.out.println("####### Not found in cache #######");
+    }
     Optional<WorkflowMetadataDoc> workflowMetadataDoc =
       cosmosStore.findItem(
         dpsHeaders.getPartitionId(),
@@ -84,11 +97,16 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
       logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowNotFoundException(errorMessage);
     }
-    return buildWorkflowMetadata(workflowMetadataDoc.get());
+    workflowMetadata = buildWorkflowMetadata(workflowMetadataDoc.get());
+    workflowMetadataCache.put(cacheKey, workflowMetadata);
+    return workflowMetadata;
   }
 
   @Override
   public void deleteWorkflow(String workflowName) {
+    String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
+    workflowMetadataCache.delete(cacheKey);
+    System.out.println("Removed " + cacheKey + " from cache");
       cosmosStore.deleteItem(
           dpsHeaders.getPartitionId(),
           cosmosConfig.getDatabase(),
