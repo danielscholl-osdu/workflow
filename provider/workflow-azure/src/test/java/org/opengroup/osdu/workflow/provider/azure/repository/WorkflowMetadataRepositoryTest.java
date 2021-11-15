@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -187,6 +188,9 @@ public class WorkflowMetadataRepositoryTest {
   @Mock
   private JaxRsDpsLog jaxRsDpsLog;
 
+  @Mock
+  private ICache<String, WorkflowMetadata> workflowMetadataCache;
+
   @InjectMocks
   private WorkflowMetadataRepository workflowMetadataRepository;
 
@@ -299,7 +303,7 @@ public class WorkflowMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getDatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
+    verify(dpsHeaders,times(2)).getPartitionId();
     assertThat(response, equalTo(workflowMetadata));
   }
 
@@ -318,7 +322,7 @@ public class WorkflowMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getDatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders).getPartitionId();
+    verify(dpsHeaders, times(2)).getPartitionId();
   }
 
   @Test
@@ -388,6 +392,6 @@ public class WorkflowMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME));
     verify(cosmosConfig).getDatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
-    verify(dpsHeaders,times(1)).getPartitionId();
+    verify(dpsHeaders,times(2)).getPartitionId();
   }
 }
