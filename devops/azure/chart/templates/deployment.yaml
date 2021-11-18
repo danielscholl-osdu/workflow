@@ -138,9 +138,9 @@ spec:
             - name: airflowdb_username
               value: "osdu_admin@{{ .Values.global.base_name_sr }}"
             - name: airflowdb_database
-                value: "airflow"
+              value: "airflow"
             - name: airflowdb_password
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres
-                    key: postgres-password
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-password
