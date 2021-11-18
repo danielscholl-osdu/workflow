@@ -131,3 +131,16 @@ spec:
               value: "true"
             - name: ignore_customOperatorContent
               value: "true"
+            - name: airflowdb_host
+              value: "{{ .Values.global.base_name_sr }}-pg.postgres.database.azure.com"
+            - name: airflowdb_port
+              value: "5432"
+            - name: airflowdb_username
+              value: "osdu_admin@{{ .Values.global.base_name_sr }}"
+            - name: airflowdb_database
+                value: "airflow"
+            - name: airflowdb_password
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres
+                    key: postgres-password

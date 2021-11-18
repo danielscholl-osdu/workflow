@@ -16,6 +16,7 @@ global:
   replicaCount: 1
   nodepool: services
   isAutoscalingEnabled: false
+  base_name_sr: osdu-mvp-srglab-o44y
 
 image:
   repository: community.opengroup.org:5555/osdu/platform/data-flow/ingestion/ingestion-workflow
