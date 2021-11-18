@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.HttpMethod;
@@ -58,7 +59,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
   private static final String KEY_DAG_CONTENT = "dagContent";
   private static final String ACTIVE_DAG_RUNS_CACHE_KEY = "active-dag-runs-count";
-  private Integer THRESHOLD = 20;
+  private static final Integer THRESHOLD = 10000;
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -82,6 +83,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Autowired
   @Qualifier("ActiveDagRunsCache")
   private ICache<String, Integer> activeDagRunsCache;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @Override
   public void createWorkflow(
@@ -190,13 +194,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_CACHE_KEY);
     if (numberOfActiveDagRuns == null) {
       numberOfActiveDagRuns = getActiveDagRunsCount();
-      System.out.println("Not found in cache. Setting the value of numberOfActiveDagRuns in cache to: " + numberOfActiveDagRuns);
       activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
-    } else {
-      System.out.println("Found in cache");
     }
     if (numberOfActiveDagRuns >= THRESHOLD) {
-      throw new AppException(HttpStatus.SC_FORBIDDEN, "Threshold exceed", "Exceeding threshold not allowed");
+      throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
     }
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
@@ -291,6 +292,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   }
 
   private Integer getActiveDagRunsCount() {
-    return 10;
+    String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
+    return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
   }
 }
