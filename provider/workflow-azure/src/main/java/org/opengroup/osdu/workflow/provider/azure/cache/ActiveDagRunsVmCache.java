@@ -9,6 +9,5 @@ import org.springframework.stereotype.Component;
 public class ActiveDagRunsVmCache extends VmCache<String, Integer> {
   public ActiveDagRunsVmCache() {
     super(20, 1000);
-    System.out.println("########################### USING LOCAL CACHE ###########################");
   }
 }

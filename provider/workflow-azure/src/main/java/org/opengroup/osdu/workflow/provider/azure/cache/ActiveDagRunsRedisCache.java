@@ -15,8 +15,7 @@ public class ActiveDagRunsRedisCache extends RedisCache<String, Integer> {
       final @Named("REDIS_HOST") String host,
       final @Named("REDIS_PORT") int port,
       final @Named("REDIS_PASSWORD") String password,
-      final @Named("CURSOR_REDIS_TTL") int timeout,
       @Value("${redis.database}") final int database) {
-    super(host, port, password, timeout, database, String.class, Integer.class);
+    super(host, port, password, 20, database, String.class, Integer.class);
   }
 }
