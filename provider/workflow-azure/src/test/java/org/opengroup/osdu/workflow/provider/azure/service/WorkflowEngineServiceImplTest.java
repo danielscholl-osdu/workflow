@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
@@ -21,6 +22,7 @@ import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
@@ -128,6 +130,12 @@ public class WorkflowEngineServiceImplTest {
   @Mock
   private ClientResponse clientResponse;
 
+  @Mock
+  private ICache<String, Integer> activeDagRunsCache;
+
+  @Mock
+  private JdbcTemplate jdbcTemplate;
+
   @InjectMocks
   private WorkflowEngineServiceImpl workflowEngineService;
 
@@ -197,6 +205,7 @@ public class WorkflowEngineServiceImplTest {
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
+    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
     workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false), INPUT_DATA);
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
@@ -227,6 +236,7 @@ public class WorkflowEngineServiceImplTest {
     when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class),
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(INTERNAL_SERVER_ERROR_STATUS_CODE);
+    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
     Assertions.assertThrows(AppException.class, () -> {
       workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false), INPUT_DATA);
     });
@@ -259,6 +269,7 @@ public class WorkflowEngineServiceImplTest {
     when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class), airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
+    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
     workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false), INPUT_DATA);
     verify(restClient).resource(eq(AIRFLOW_CONTROLLER_DAG_TRIGGER_URL));
     verify(webResource).type(eq(MediaType.APPLICATION_JSON));
