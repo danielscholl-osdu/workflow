@@ -28,13 +28,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
 import org.opengroup.osdu.core.gcp.osm.service.Context;
 import org.opengroup.osdu.core.gcp.osm.service.Results;
 import org.opengroup.osdu.core.gcp.osm.translate.TranslatorException;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
@@ -80,7 +80,7 @@ public class GcpOsmWorkflowRunRepository implements IWorkflowRunRepository {
             workflowConfig.getWorkflowRunKind())).toBuilder();
     queryBuilder.where(and(eq(WORKFLOW_NAME, workflowName), eq(RUN_ID, runId))).build();
     return context.getResultsAsList(queryBuilder.build()).stream().findFirst()
-        .orElseThrow(() -> new NotFoundException(
+        .orElseThrow(() -> new WorkflowNotFoundException(
             String.format("Workflow entity for workflow name: %s and run id: %s not found.",
                 workflowName,
                 runId)));

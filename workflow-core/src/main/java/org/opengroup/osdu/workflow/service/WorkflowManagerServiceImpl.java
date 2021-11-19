@@ -93,6 +93,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
         .version(WorkflowManagerServiceImpl.START_VERSION)
         .registrationInstructions(request.getRegistrationInstructions())
         .workflowName(request.getWorkflowName())
+        .isSystemWorkflow(isSystemWorkflow)
         .build();
   }
 
