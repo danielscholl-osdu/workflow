@@ -17,17 +17,10 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.osm.repository;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opengroup.osdu.core.gcp.osm.model.where.predicate.Eq.eq;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpStatusCodes;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,10 +29,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.tomcat.util.json.JSONParser;
-import org.apache.tomcat.util.json.ParseException;
-import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
@@ -47,14 +36,11 @@ import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
 import org.opengroup.osdu.core.gcp.osm.service.Context;
 import org.opengroup.osdu.core.gcp.osm.translate.TranslatorException;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.exception.IntegrationException;
-import org.opengroup.osdu.workflow.exception.RuntimeException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
 import org.opengroup.osdu.workflow.provider.gcp.osm.config.IDestinationProvider;
 import org.opengroup.osdu.workflow.provider.gcp.repository.ICommonMetadataRepository;
-import org.opengroup.osdu.workflow.provider.gcp.service.GoogleIapHelper;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -68,11 +54,10 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
 
   private static final String KEY_DAG_NAME = "dagName";
   private final WorkflowPropertiesConfiguration workflowConfig;
+  private final IWorkflowEngineService workflowEngineService;
   private final IDestinationProvider destinationProvider;
   private final Context context;
   private final TenantInfo tenantInfo;
-  private final GoogleIapHelper googleIapHelper;
-  private final AirflowConfig airflowConfig;
   private Class clazz = WorkflowMetadata.class;
 
   @Override
@@ -84,11 +69,10 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
 
     if (Objects.nonNull(instructions.get(KEY_DAG_NAME))) {
       dagName = (String) instructions.get(KEY_DAG_NAME);
-    }else {
+    } else {
       dagName = workflowName;
     }
 
-    verifyDagExist(dagName);
     if (Objects.isNull(workflowMetadata.getWorkflowId()) || workflowMetadata.getWorkflowId()
         .isEmpty()) {
       workflowMetadata.setWorkflowId(UUID.randomUUID().toString());
@@ -145,9 +129,9 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
             destinationProvider.getDestination(tenant, workflowConfig.getWorkflowKind()));
     List<WorkflowMetadata> workflowMetadataList = context.getResultsAsList(getQuery);
 
-    return workflowMetadataList.stream().filter(c -> {
-      return Objects.isNull(prefix) || c.getWorkflowName().startsWith(prefix);
-    }).collect(Collectors.toList());
+    return workflowMetadataList.stream().filter(c ->
+            Objects.isNull(prefix) || c.getWorkflowName().startsWith(prefix))
+        .collect(Collectors.toList());
   }
 
   private List<WorkflowMetadata> getWorkflowMetadataByWorkflowName(String workflowName,
@@ -163,33 +147,5 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
 
   private String getTenantName(boolean isSystemWorkflow) {
     return isSystemWorkflow ? workflowConfig.getSharedTenantName() : this.tenantInfo.getName();
-  }
-
-  private void verifyDagExist(String dagName) {
-    try {
-      String airflowUrl = this.airflowConfig.getUrl();
-      String iapClientId = this.googleIapHelper.getIapClientId(airflowUrl);
-      String webServerUrl = String.format("%s/api/experimental/latest_runs", airflowUrl);
-
-      HttpRequest httpRequest = this.googleIapHelper.buildIapGetRequest(webServerUrl, iapClientId);
-      HttpResponse response = httpRequest.execute();
-      String content = IOUtils.toString(response.getContent(), UTF_8);
-
-      if (Objects.nonNull(content)) {
-        JSONParser parser = new JSONParser(content);
-        LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>> dagList =
-            (LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>) parser.parse();
-        List<LinkedHashMap<String, String>> items = dagList.get("items");
-        String finalDagName = dagName;
-        if (items.stream().noneMatch(c -> c.get("dag_id").equals(finalDagName))) {
-          throw new BadRequestException(
-              String.format("DAG with name %s doesn't exist.", dagName));
-        }
-      }
-    } catch (HttpResponseException e) {
-      throw new IntegrationException("Airflow request fail", e);
-    } catch (IOException | ParseException e) {
-      throw new RuntimeException(e.getMessage(), e);
-    }
   }
 }

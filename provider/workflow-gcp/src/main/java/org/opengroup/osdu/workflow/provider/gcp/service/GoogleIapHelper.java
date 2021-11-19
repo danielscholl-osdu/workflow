@@ -17,6 +17,8 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -35,6 +37,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import javax.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.jsoup.Jsoup;
@@ -44,13 +49,16 @@ import org.opengroup.osdu.workflow.provider.gcp.exception.GoogleIamException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GoogleIapHelper {
 
   static final String IAM_SCOPE = "https://www.googleapis.com/auth/iam";
   final HttpTransport httpTransport = new NetHttpTransport();
+  private final ObjectMapper objectMapper;
 
   /**
    * Fetch Google IAP client ID
+   *
    * @param url service URL
    * @return IAP client ID
    */
@@ -74,51 +82,30 @@ public class GoogleIapHelper {
   /**
    * Make request and add an IAP Bearer Authorization header with signed JWT token.
    */
-  public HttpRequest buildIapPostRequest(String webServerUrl, String iapClientId,
-      Map<String, Object> data) {
+  public HttpRequest buildIapRequest(String webServerUrl, String iapClientId,
+      String httpMethod, @Nullable String data) {
     try {
-      JsonHttpContent jsonHttpContent = new JsonHttpContent(new JacksonFactory(), data);
+      JsonHttpContent jsonHttpContent = null;
+      if (Objects.nonNull(data)) {
+        Map<String, Object> dataMap =
+            objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
+            });
+        jsonHttpContent = new JsonHttpContent(new JacksonFactory(), dataMap);
+      }
       IdTokenProvider idTokenProvider = getIdTokenProvider();
       IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
       HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
 
       return httpTransport
           .createRequestFactory(httpRequestInitializer)
-          .buildPostRequest(new GenericUrl(webServerUrl), jsonHttpContent);
+          .buildRequest(httpMethod, new GenericUrl(webServerUrl), jsonHttpContent);
     } catch (IOException e) {
       throw new GoogleIamException("Exception when build authorized request", e);
     }
   }
 
-  public HttpRequest buildIapDeleteRequest(String webServerUrl, String iapClientId) {
-    try {
-      IdTokenProvider idTokenProvider = getIdTokenProvider();
-      IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
-      HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
-
-      return httpTransport
-          .createRequestFactory(httpRequestInitializer)
-          .buildDeleteRequest(new GenericUrl(webServerUrl));
-    } catch (IOException e) {
-      throw new GoogleIamException("Exception when build authorized request", e);
-    }
-  }
-
-  public HttpRequest buildIapGetRequest(String webServerUrl, String iapClientId) {
-    try {
-      IdTokenProvider idTokenProvider = getIdTokenProvider();
-      IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
-      HttpRequestInitializer httpRequestInitializer = new HttpCredentialsAdapter(credentials);
-
-      return httpTransport
-          .createRequestFactory(httpRequestInitializer)
-          .buildGetRequest(new GenericUrl(webServerUrl));
-    } catch (IOException e) {
-      throw new GoogleIamException("Exception when build authorized request", e);
-    }
-  }
-
-  private IdTokenCredentials getIdTokenCredentials(IdTokenProvider idTokenProvider, String iapClientId) {
+  private IdTokenCredentials getIdTokenCredentials(IdTokenProvider idTokenProvider,
+      String iapClientId) {
     return IdTokenCredentials.newBuilder()
         .setIdTokenProvider(idTokenProvider)
         .setTargetAudience(iapClientId)

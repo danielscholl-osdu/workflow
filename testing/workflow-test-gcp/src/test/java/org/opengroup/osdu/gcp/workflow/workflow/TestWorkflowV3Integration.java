@@ -34,6 +34,8 @@ import java.util.List;
 import javax.ws.rs.HttpMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.gcp.workflow.util.HTTPClientGCP;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowV3IntegrationTests;
 
@@ -72,6 +74,11 @@ public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
       }
     });
   }
+
+  @Override
+  @Test
+  @Disabled
+  public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception { }
 
   @Override
   protected void deleteTestWorkflows(String workflowName) throws Exception {

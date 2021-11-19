@@ -43,6 +43,10 @@ In order to run the service locally, you will need to have the following environ
 | `SPRING_DATASTOURCE_URL` | `jdbc:postgresql://127.0.0.1:5432/postgres` | Postgres connection URL | no | - |
 | `SPRING_DATASTOURCE_USERNAME` | `postgres` | Postgres username | yes | - |
 | `SPRING_DATASTOURCE_PASSWORD` | `postgres` | Postgres password | yes | - |
+| `OSDU_AIRFLOW_VERSION2` | `true` OR `false` | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, by default used `false` and `experimental` API | no | - |
+| `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate it requests to Airflow, by default `true` and IAAP used | no | - |
+| `OSDU_AIRFLOW_USERNAME` | `******` | Airflow username, need to be defined if `AIRFLOW_IAAP_MODE`=`false`| yes | - |
+| `OSDU_AIRFLOW_PASSWORD` | `******` | Airflow password, need to be defined if `AIRFLOW_IAAP_MODE`=`false` | yes | - |
 
 **Required to run integration tests**
 
