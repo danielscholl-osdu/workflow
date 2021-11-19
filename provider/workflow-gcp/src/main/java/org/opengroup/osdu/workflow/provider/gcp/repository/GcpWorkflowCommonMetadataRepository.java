@@ -36,12 +36,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
 import org.opengroup.osdu.core.gcp.multitenancy.IDatastoreFactory;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
@@ -88,7 +88,7 @@ public class GcpWorkflowCommonMetadataRepository {
     if (tasks.hasNext()) {
       return convertEntityToWorkflowMetadata(tasks.next());
     }
-    throw new NotFoundException(
+    throw new WorkflowNotFoundException(
         String.format("Workflow entity for workflow name: %s not found.", workflowName));
   }
 

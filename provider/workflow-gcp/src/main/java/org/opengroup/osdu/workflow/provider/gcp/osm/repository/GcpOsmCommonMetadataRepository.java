@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
 import org.opengroup.osdu.core.gcp.osm.service.Context;
 import org.opengroup.osdu.core.gcp.osm.translate.TranslatorException;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
 import org.opengroup.osdu.workflow.provider.gcp.osm.config.IDestinationProvider;
@@ -99,7 +99,7 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
     String tenant = getTenantName(isSystemWorkflow);
     List<WorkflowMetadata> results = getWorkflowMetadataByWorkflowName(workflowName, tenant);
     return results.stream().findFirst()
-        .orElseThrow(() -> new NotFoundException(
+        .orElseThrow(() -> new WorkflowNotFoundException(
             String.format("Workflow entity for workflow name: %s not found.", workflowName)));
   }
 
