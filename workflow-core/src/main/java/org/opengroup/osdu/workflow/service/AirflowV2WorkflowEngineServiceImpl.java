@@ -70,7 +70,7 @@ public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineServic
 	@Override
 	public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context) {
 		log.info("IBM : Submitting ingestion with Airflow 2 with dagName: {}", rq.getDagName());
-		String url = "";    
+		String url = "";
 		final JSONObject requestBody = new JSONObject();
 		requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, context);
 			url = format(TRIGGER_AIRFLOW_ENDPOINT_STABLE, rq.getDagName());
@@ -92,7 +92,7 @@ public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineServic
 				String dag_run_id = "";
 				if(jsonNode.has(EXECUTION_DATE_PARAMETER_NAME))
 					execution_date = jsonNode.get(EXECUTION_DATE_PARAMETER_NAME).asText();
-				if(jsonNode.has(RUN_ID_PARAMETER_NAME_STABLE))	
+				if(jsonNode.has(RUN_ID_PARAMETER_NAME_STABLE))
 					dag_run_id = jsonNode.get(RUN_ID_PARAMETER_NAME_STABLE).asText();
 
 				return new TriggerWorkflowResponse(execution_date, "", dag_run_id );
