@@ -1,7 +1,7 @@
 package org.opengroup.osdu.workflow.provider.azure.cache;
 
 import org.opengroup.osdu.core.common.cache.RedisCache;
-import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
