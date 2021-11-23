@@ -18,6 +18,7 @@ import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
+import org.opengroup.osdu.workflow.provider.azure.utils.airflow.IAirflowWorkflowEngineUtil;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +29,6 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,21 +36,14 @@ import java.util.Map;
 @Primary
 public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowEngineServiceImpl.class);
-  private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE =
-      "Failed to trigger workflow with id %s and name %s";
-  private static final String AIRFLOW_DELETE_DAG_ERROR_MESSAGE =
-      "Failed to delete workflow with name %s";
-  private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
-      "No WorkflowRun executed for Workflow: %s on %s ";
+  private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE = "Failed to trigger workflow with id %s and name %s";
+  private static final String AIRFLOW_DELETE_DAG_ERROR_MESSAGE = "Failed to delete workflow with name %s";
+  private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND = "No WorkflowRun executed for Workflow: %s on %s ";
   private final static String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
-  private final static String RUN_ID_PARAMETER_NAME = "run_id";
-  private final static String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
-  private final static String EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-  private static final String FILE_NAME_PREFIX = ".py";
+
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_TRIGGER_CONFIGURATION = "_trigger_config";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
-  private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
   private static final String KEY_DAG_CONTENT = "dagContent";
 
   @Autowired
@@ -75,6 +65,13 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Autowired
   private AzureWorkflowEngineConfig workflowEngineConfig;
 
+  @Autowired
+  private IAirflowWorkflowEngineUtil engineUtil;
+
+  @Autowired
+  @Qualifier("WorkflowObjectMapper")
+  private ObjectMapper om;
+
   @Override
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
@@ -85,12 +82,12 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     }
     if (dagContent != null && !dagContent.isEmpty()) {
       if (!rq.isSystemWorkflow()) {
-        fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
-            fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
+        fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), engineUtil.getFileShareName(fileShareConfig),
+            fileShareConfig.getDagsFolder(), engineUtil.getFileNameFromWorkflow(rq.getWorkflowName()),
             dagContent);
       } else {
-        fileShareStore.writeToFileShare(fileShareConfig.getShareName(),
-            fileShareConfig.getDagsFolder(), getFileNameFromWorkflow(rq.getWorkflowName()),
+        fileShareStore.writeToFileShare(engineUtil.getFileShareName(fileShareConfig),
+            fileShareConfig.getDagsFolder(), engineUtil.getFileNameFromWorkflow(rq.getWorkflowName()),
             dagContent);
       }
     }
@@ -106,24 +103,26 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       // Figure out how to only remove the metadata but not the DAG.
       // Because in repeated delete create fashion the dag will not appear for a while
       try {
-        String deleteDAGEndpoint = String.format("api/experimental/dags/%s", workflowName);
+        String deleteDAGEndpoint = String.format(engineUtil.getAirflowDagsUrl(), workflowName);
 
-        callAirflowApi(getAirflowConfig(rq.isSystemWorkflow()), deleteDAGEndpoint, HttpMethod.DELETE, null,
-            String.format(AIRFLOW_DELETE_DAG_ERROR_MESSAGE, workflowName));
+        callAirflowApi(getAirflowConfig(rq.isSystemWorkflow()), deleteDAGEndpoint, HttpMethod.DELETE,
+            null, String.format(AIRFLOW_DELETE_DAG_ERROR_MESSAGE, workflowName));
       } catch (AppException e) {
         if (e.getError().getCode() != 404) {
           throw e;
         }
       }
 
-      String fileName = getFileNameFromWorkflow(workflowName);
+      String fileName = engineUtil.getFileNameFromWorkflow(workflowName);
       LOGGER.info("Deleting DAG file {} from file share", fileName);
       try {
         if (!rq.isSystemWorkflow()) {
           fileShareStore.deleteFromFileShare(dpsHeaders.getPartitionId(),
-              fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
+              engineUtil.getFileShareName(fileShareConfig), fileShareConfig.getDagsFolder(),
+              fileName);
         } else {
-          fileShareStore.deleteFromFileShare(fileShareConfig.getShareName(), fileShareConfig.getDagsFolder(), fileName);
+          fileShareStore.deleteFromFileShare(engineUtil.getFileShareName(fileShareConfig),
+              fileShareConfig.getDagsFolder(), fileName);
         }
       } catch (final ShareStorageException e) {
         if (e.getStatusCode() != 404) {
@@ -135,34 +134,35 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Override
   public void saveCustomOperator(final String customOperatorDefinition, final String fileName) {
-    fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(), fileShareConfig.getShareName(),
+    fileShareStore.writeToFileShare(dpsHeaders.getPartitionId(),
+        engineUtil.getFileShareName(fileShareConfig),
         fileShareConfig.getCustomOperatorsFolder(), fileName, customOperatorDefinition);
   }
 
   private ClientResponse triggerWorkflowBase(AirflowConfig airflowConfig, final String runId,
                                              final String workflowId, String workflowName,
                                              final Map<String, Object> inputData) {
-    String triggerDAGEndpoint = String.format("api/experimental/dags/%s/dag_runs", workflowName);
+    String triggerDAGEndpoint = String.format(engineUtil.getAirflowDagRunsUrl(), workflowName);
 
     JSONObject requestBody = new JSONObject();
-    requestBody.put(RUN_ID_PARAMETER_NAME, runId);
+    requestBody.put(engineUtil.getDagRunIdParameterName(), runId);
     requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, inputData);
-    requestBody.put(AIRFLOW_MICROSECONDS_FLAG, "false");
+    requestBody = engineUtil.addMicroSecParam(requestBody);
 
-    return callAirflowApi(airflowConfig, triggerDAGEndpoint, HttpMethod.POST, requestBody.toString(),
+    return callAirflowApi(airflowConfig, triggerDAGEndpoint, HttpMethod.POST,
+        requestBody.toString(),
         String.format(AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE, workflowId, workflowName));
   }
 
-  private ClientResponse triggerWorkflowUsingController(AirflowConfig airflowConfig,
-                                                        final String runId, final String workflowId,
-                                                        String workflowName,
-                                                        Map<String, Object> inputData, boolean isSystemWorkflow) {
-    String triggerDAGEndpoint = String
-        .format("api/experimental/dags/%s/dag_runs", getAirflowConfig(isSystemWorkflow).getControllerDagId());
+  private ClientResponse triggerWorkflowUsingController(
+      AirflowConfig airflowConfig, final String runId, final String workflowId,
+      String workflowName, Map<String, Object> inputData, boolean isSystemWorkflow) {
+    String controllerId = getAirflowConfig(isSystemWorkflow).getControllerDagId();
+    String triggerDAGEndpoint = String.format(engineUtil.getAirflowDagRunsUrl(), controllerId);
 
     JSONObject requestBody = new JSONObject();
     String parentRunId = "PARENT_" + runId;
-    requestBody.put(RUN_ID_PARAMETER_NAME, parentRunId);
+    requestBody.put(engineUtil.getDagRunIdParameterName(), parentRunId);
 
     Map<String, String> triggerParams = new HashMap<>();
     triggerParams.put(AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID, workflowName);
@@ -170,9 +170,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
     inputData.put(AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_TRIGGER_CONFIGURATION, triggerParams);
     requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, inputData);
-    requestBody.put(AIRFLOW_MICROSECONDS_FLAG, "false");
+    requestBody = engineUtil.addMicroSecParam(requestBody);
 
-    return callAirflowApi(airflowConfig, triggerDAGEndpoint, HttpMethod.POST, requestBody.toString(),
+    return callAirflowApi(airflowConfig, triggerDAGEndpoint, HttpMethod.POST,
+        requestBody.toString(),
         String.format(AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE, workflowId, workflowName));
   }
 
@@ -183,7 +184,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     String runId = rq.getRunId();
     String workflowId = rq.getWorkflowId();
     LOGGER.info("Submitting ingestion with Airflow with dagName: {}", workflowName);
-    ClientResponse response = null;
+    ClientResponse response;
     AirflowConfig airflowConfig = getAirflowConfig(rq.isSystemWorkflow());
     if (airflowConfig.isDagRunAbstractionEnabled()) {
       response = triggerWorkflowUsingController(airflowConfig, runId, workflowId,
@@ -193,9 +194,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     }
 
     try {
-      final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-      final TriggerWorkflowResponse triggerWorkflowResponse = OBJECT_MAPPER
-          .readValue(response.getEntity(String.class), TriggerWorkflowResponse.class);
+      final TriggerWorkflowResponse triggerWorkflowResponse = engineUtil.
+          extractTriggerWorkflowResponse(response.getEntity(String.class));
       LOGGER.info("Airflow response: {}.", triggerWorkflowResponse);
       return triggerWorkflowResponse;
     } catch (JsonProcessingException e) {
@@ -228,40 +228,29 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public WorkflowStatusType getWorkflowRunStatus(WorkflowEngineRequest rq) {
     String workflowName = rq.getWorkflowName();
-    String executionDate = rq.getWorkflowEngineExecutionDate();
-    LOGGER.info("getting status of WorkflowRun of Workflow {} executed on {}", workflowName,
-        executionDate);
-    String getDAGRunStatusEndpoint = String.format("api/experimental/dags/%s/dag_runs/%s",
-        workflowName, executionDate);
+    String dagRunIdentificationParam = engineUtil.getDagRunIdentificationParam(rq);
+    LOGGER.info("getting status of WorkflowRun of Workflow {} with identification on {}",
+        workflowName, dagRunIdentificationParam);
+    String getDAGRunStatusEndpoint = String.format(engineUtil.getAirflowDagRunsStatusUrl(),
+        workflowName, dagRunIdentificationParam);
     ClientResponse response = callAirflowApi(getAirflowConfig(rq.isSystemWorkflow()),
         getDAGRunStatusEndpoint, HttpMethod.GET, null,
-        String.format(AIRFLOW_WORKFLOW_RUN_NOT_FOUND, workflowName, executionDate));
+        String.format(AIRFLOW_WORKFLOW_RUN_NOT_FOUND, workflowName, dagRunIdentificationParam));
     try {
-      final ObjectMapper objectMapper = new ObjectMapper();
-      final AirflowGetDAGRunStatus airflowResponse =
-          objectMapper.readValue(response.getEntity(String.class),
-              AirflowGetDAGRunStatus.class);
+      final AirflowGetDAGRunStatus airflowResponse = om.readValue(response.getEntity(String.class),
+          AirflowGetDAGRunStatus.class);
       return airflowResponse.getStatusType();
     } catch (JsonProcessingException e) {
-      String errorMessage = String.format("Unable to Process Json Received. " + e.getMessage());
+      String errorMessage = "Unable to Process Json Received. " + e.getMessage();
       LOGGER.error(errorMessage + e.getStackTrace());
       throw new AppException(500, "Failed to Get Status from Airflow", errorMessage);
     }
   }
 
-  private String getExecutionDateInFormat(final Long executionTimeStamp, final String format) {
-    Instant instant = Instant.ofEpochMilli(executionTimeStamp);
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
-    return zonedDateTime.format(DateTimeFormatter.ofPattern(format));
-  }
-
-  private String getFileNameFromWorkflow(String workflowName) {
-    return workflowName + FILE_NAME_PREFIX;
-  }
 
   private AirflowConfig getAirflowConfig(Boolean isSystemWorkflow) {
     if (isSystemWorkflow) {
-      if(workflowEngineConfig.getIsDPAirflowUsedForSystemDAG()) {
+      if (workflowEngineConfig.getIsDPAirflowUsedForSystemDAG()) {
         return airflowConfigResolver.getAirflowConfig(dpsHeaders.getPartitionId());
       } else {
         return airflowConfigResolver.getSystemAirflowConfig();

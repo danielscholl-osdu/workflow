@@ -1,19 +1,18 @@
 ## Ingestion Workflow Service
+
 The Workflow service provides a wrapper functionality around the Apache Airflow functions and is
 designed to carry out preliminary work with files before running the Airflow Directed Acyclic Graphs
-(DAGs) that will perform actual ingestion of OSDU data.
-In OSDU R2, depending on the types of data, workflow, and user, the Workflow service starts the
-necessary workflow such as well log ingestion or opaque ingestion.
-The Workflow Service is a [Spring Boot](https://spring.io/projects/spring-boot) service.
-
-
+(DAGs) that will perform actual ingestion of OSDU data. In OSDU R2, depending on the types of data,
+workflow, and user, the Workflow service starts the necessary workflow such as well log ingestion or
+opaque ingestion. The Workflow Service is a [Spring Boot](https://spring.io/projects/spring-boot)
+service.
 
 ## Build
-All references on repositories settings are external to `pom.xml` and should be configured through Maven `settings.xml` file.
-To build against Community GitLab repositories, use `.mvn/community-maven.settings.xml` settings:
+
+All references on repositories settings are external to `pom.xml` and should be configured through
+Maven `settings.xml` file. To build against Community GitLab repositories,
+use `.mvn/community-maven.settings.xml` settings:
 `mvn clean compile test --settings .mvn/community-maven.settings.xml`
-
-
 
 ## Running Locally
 
@@ -23,26 +22,34 @@ In order to run this service locally, you will need the following:
 
 - [Maven 3.6.0+](https://maven.apache.org/download.cgi)
 - [AdoptOpenJDK8](https://adoptopenjdk.net/)
-- Infrastructure dependencies, deployable through the relevant [infrastructure template](https://dev.azure.com/slb-des-ext-collaboration/open-data-ecosystem/_git/infrastructure-templates?path=%2Finfra&version=GBmaster&_a=contents)
-- While not a strict dependency, example commands in this document use [bash](https://www.gnu.org/software/bash/)
+- Infrastructure dependencies, deployable through the
+  relevant [infrastructure template](https://dev.azure.com/slb-des-ext-collaboration/open-data-ecosystem/_git/infrastructure-templates?path=%2Finfra&version=GBmaster&_a=contents)
+- While not a strict dependency, example commands in this document
+  use [bash](https://www.gnu.org/software/bash/)
 
 ### General Tips
 
 **Environment Variable Management**
 The following tools make environment variable configuration simpler
+
 - [direnv](https://direnv.net/) - for a shell/terminal environment
-- [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) - for [Intellij IDEA](https://www.jetbrains.com/idea/)
+- [EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) -
+  for [Intellij IDEA](https://www.jetbrains.com/idea/)
 
 **Lombok**
-This project uses [Lombok](https://projectlombok.org/) for code generation. You may need to configure your IDE to take advantage of this tool.
+This project uses [Lombok](https://projectlombok.org/) for code generation. You may need to
+configure your IDE to take advantage of this tool.
+
 - [Intellij configuration](https://projectlombok.org/setup/intellij)
 - [VSCode configuration](https://projectlombok.org/setup/vscode)
 
 ### Understanding Environment Variables
 
-In order to run the service locally, you will need to have the following environment variables defined.
+In order to run the service locally, you will need to have the following environment variables
+defined.
 
 **Note** The following command can be useful to pull secrets from keyvault:
+
 ```bash
 az keyvault secret show --vault-name $KEY_VAULT_NAME --name $KEY_VAULT_SECRET_NAME --query value -otsv
 ```
@@ -60,13 +67,15 @@ az keyvault secret show --vault-name $KEY_VAULT_NAME --name $KEY_VAULT_SECRET_NA
 | `OSDU_AIRFLOW_URL` | ex `http://foo.org/test/airflow` | Airflow API endpoint | no |
 | `OSDU_AIRFLOW_USERNAME` | ******** | User Name | yes |
 | `OSDU_AIRFLOW_PASSWORD` | ******** | Airflow API password | yes |
+| `OSDU_AIRFLOW_VERSION2_ENABLED` | ex "false" | Enable Airflow Version 2 stable API| no |
 | `adf_url` | ***** | ADF API endpoint | yes |
 | `argo_url` | ex `http://foo.org/test/workflows/argo` | Argo API endpoint | no |
 | `argo_token` | ***** | Argo token | yes |
 | `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
 | `server_port` | `8082` | Port of application. | no | -- |
 
-In Order to run service with AAD authentication add below environment variables, which will enable Authentication in workflow service using AAD filter.
+In Order to run service with AAD authentication add below environment variables, which will enable
+Authentication in workflow service using AAD filter.
 
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
@@ -75,12 +84,12 @@ In Order to run service with AAD authentication add below environment variables,
 | `azure.activedirectory.client-id` | `********` | AAD client application ID | yes | output of infrastructure deployment | output of infrastructure deployment |
 | `azure.activedirectory.AppIdUri` | `api://${azure.activedirectory.client-id}` | URI for AAD Application | no | -- |
 
-In Order to run service without authentication add below environment variables, which will disable authentication in workflow service.
+In Order to run service without authentication add below environment variables, which will disable
+authentication in workflow service.
 
 name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `azure_istioauth_enabled` | `true` | Flag to Disable AAD auth | no | -- |
-
 
 **Required to run integration tests**
 
@@ -98,12 +107,10 @@ name | value | description | sensitive? | source |
 | `TESTER_SERVICEPRINCIPAL_SECRET` | `********` | Secret for `$INTEGRATION_TESTER` | yes | -- |
 | `FINISHED_WORKFLOW_ID` | ex c80a2419-8527-4804-b96a-6b6444f0d361 | Finished WorkflowID | no | -- |
 
-
-
-
 ### Configure Maven
 
 Check that maven is installed:
+
 ```bash
 $ mvn --version
 Apache Maven 3.6.0
@@ -112,7 +119,9 @@ Java version: 1.8.0_212, vendor: AdoptOpenJDK, runtime: /usr/lib/jvm/jdk8u212-b0
 ...
 ```
 
-You may need to configure access to the remote maven repository that holds the OSDU dependencies. A default file should live within `~/.m2/settings.xml`:
+You may need to configure access to the remote maven repository that holds the OSDU dependencies. A
+default file should live within `~/.m2/settings.xml`:
+
 ```bash
 $ cat ~/.m2/settings.xml
 <settings>
@@ -160,7 +169,8 @@ $ cat ~/.m2/settings.xml
 
 ### Build, Run and Test the application Locally
 
-After configuring your environment as specified above, you can follow these steps to build and run the application
+After configuring your environment as specified above, you can follow these steps to build and run
+the application
 
 ```bash
 # execute build + unit tests
@@ -175,10 +185,11 @@ $ java -jar $(find ./target/ -name '*.jar')
 $ mvn clean test --settings .mvn/community-maven.settings.xml -f integration-tests/pom.xml
 ```
 
-
 ### Test the application
 
-After the service has started it should be accessible via a web browser by visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the request does not fail, you can then run the integration tests.
+After the service has started it should be accessible via a web browser by
+visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the
+request does not fail, you can then run the integration tests.
 
 ```bash
 # build + install integration test core
@@ -190,30 +201,39 @@ $ (cd testing/storage-test-core/ && mvn clean install)
 #       above are already exported in your environment.
 $ (cd testing/storage-test-azure/ && mvn clean test)
 ```
+
 ### Azure Specific Endpoints
-We have added new endpoint to handle System workflows.We plan to move these APIs to workflow-core in future once the [ADR](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/issues/118) is approved.
+
+We have added new endpoint to handle System workflows.We plan to move these APIs to workflow-core in
+future once
+the [ADR](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/issues/118)
+is approved.
+
 - The new API shall be termed as workflow/system
 - To create/delete Public workflows - **/workflow/system** endpoint shall be used
 - To Get/Trigger Public workflows, existing workflow service endpoint must be used.
-- The authorization of new end point shall be different from existing groups. We are  using service principal based authorization.
-- The new API shall not accept data-partition-id as a header. Service is aware where the public workflows are located.
+- The authorization of new end point shall be different from existing groups. We are using service
+  principal based authorization.
+- The new API shall not accept data-partition-id as a header. Service is aware where the public
+  workflows are located.
 - This API should interact only with Public workflows. It should not have access to other workflows.
-- Since we don't have uniqueness check for workflow names, if there are 2 workflows(one system and other private) with same name then the private workflow will get priority while returning response of Get API call.
-- While deleting the system workflows via this new endpoint, currently we don't delete workflow run data since it will have to be deleted from all the partitions. 
+- Since we don't have uniqueness check for workflow names, if there are 2 workflows(one system and
+  other private) with same name then the private workflow will get priority while returning response
+  of Get API call.
+- While deleting the system workflows via this new endpoint, currently we don't delete workflow run
+  data since it will have to be deleted from all the partitions.
 - GetAll api will return the combined list of system as well as private workflows.
 
-
 ## License
+
 Copyright © Microsoft Corporation
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License at
 
 [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing permissions and limitations under the
+License.

@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 public class FileShareConfig {
+  @Deprecated
   private String shareName;
+  private String airflow2ShareName;
   private String dagsFolder;
   private String customOperatorsFolder;
 }
