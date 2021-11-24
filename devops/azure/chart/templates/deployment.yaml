@@ -136,7 +136,7 @@ spec:
             - name: airflowdb_port
               value: "5432"
             - name: airflowdb_username
-              value: "osdu_admin@{{ .Values.global.base_name_sr }}"
+              value: "osdu_admin@{{ .Values.global.base_name_sr }}"-pg
             - name: airflowdb_database
               value: "airflow"
             - name: airflowdb_password
