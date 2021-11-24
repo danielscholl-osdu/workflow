@@ -12,7 +12,8 @@ public class WorkflowMetadataRedisCache extends RedisCache<String, WorkflowMetad
   public WorkflowMetadataRedisCache(
       final @Qualifier("REDIS_HOST") String host,
       final @Qualifier("REDIS_PORT") int port,
-      final @Qualifier("REDIS_PASSWORD") String password) {
-    super(host, port, password, 600, String.class, WorkflowMetadata.class);
+      final @Qualifier("REDIS_PASSWORD") String password,
+      final @Qualifier("WORKFLOW_METADATA_REDIS_TTL") int workflowMetadataRedisTtl) {
+    super(host, port, password, workflowMetadataRedisTtl, String.class, WorkflowMetadata.class);
   }
 }

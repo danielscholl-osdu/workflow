@@ -13,10 +13,19 @@ public class RedisConfig {
   @Value("${redis.port:6380}")
   public int redisPort;
 
+  @Value("${redis.workflowMetadata.ttl:600}")
+  public int workflowMetadataTtl;
+
   @Bean
   @Qualifier("REDIS_PORT")
   public int getRedisPort() {
     return redisPort;
+  }
+
+  @Bean
+  @Qualifier("WORKFLOW_METADATA_REDIS_TTL")
+  public int getWorkflowMetadataTtl() {
+    return workflowMetadataTtl;
   }
 
   @Bean
