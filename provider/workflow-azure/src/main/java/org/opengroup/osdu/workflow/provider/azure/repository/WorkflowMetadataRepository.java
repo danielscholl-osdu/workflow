@@ -103,7 +103,6 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
   public void deleteWorkflow(String workflowName) {
     String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
     workflowMetadataCache.delete(cacheKey);
-    System.out.println("Removed " + cacheKey + " from cache");
       cosmosStore.deleteItem(
           dpsHeaders.getPartitionId(),
           cosmosConfig.getDatabase(),
