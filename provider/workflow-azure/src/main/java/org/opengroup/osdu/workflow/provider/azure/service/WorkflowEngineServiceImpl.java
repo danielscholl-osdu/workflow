@@ -59,7 +59,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_MICROSECONDS_FLAG = "replace_microseconds";
   private static final String KEY_DAG_CONTENT = "dagContent";
   private static final String ACTIVE_DAG_RUNS_CACHE_KEY = "active-dag-runs-count";
-  private static final Integer THRESHOLD = 10000;
+  private static final Integer ACTIVE_DAG_RUNS_THRESHOLD = 50000;
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -196,7 +196,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       numberOfActiveDagRuns = getActiveDagRunsCount();
       activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
     }
-    if (numberOfActiveDagRuns >= THRESHOLD) {
+    if (numberOfActiveDagRuns >= ACTIVE_DAG_RUNS_THRESHOLD) {
       throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
     }
     String workflowName = rq.getWorkflowName();
