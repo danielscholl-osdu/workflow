@@ -17,36 +17,35 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.repository;
 
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityQuery;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.Transaction;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.tomcat.util.json.JSONParser;
-import org.apache.tomcat.util.json.ParseException;
-import org.opengroup.osdu.core.common.exception.BadRequestException;
-import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
 import org.opengroup.osdu.core.gcp.multitenancy.IDatastoreFactory;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.exception.IntegrationException;
-import org.opengroup.osdu.workflow.exception.RuntimeException;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
-import org.opengroup.osdu.workflow.provider.gcp.service.GoogleIapHelper;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Deprecated
 @Slf4j
@@ -62,47 +61,23 @@ public class GcpWorkflowCommonMetadataRepository {
   private static final String VERSION = "Version";
 
   private Map<String, Datastore> tenantRepositories = new HashMap<>();
-  private final AirflowConfig airflowConfig;
+  private final IWorkflowEngineService workflowEngineService;
   private final WorkflowPropertiesConfiguration workflowConfig;
-  private final GoogleIapHelper googleIapHelper;
   private final TenantInfo tenantInfo;
   private final IDatastoreFactory datastoreFactory;
   private final ITenantFactory tenantFactory;
 
-  public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata, boolean isSystemWorkflow) {
+  public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata,
+      boolean isSystemWorkflow) {
     log.info("Saving workflow : {}", workflowMetadata);
 
     String dagName = getDagName(workflowMetadata);
-    // validate DAG name
-    try {
-      String airflowUrl = this.airflowConfig.getUrl();
-      String iapClientId = this.googleIapHelper.getIapClientId(airflowUrl);
-      String webServerUrl = String.format("%s/api/experimental/latest_runs", airflowUrl);
 
-      HttpRequest httpRequest = this.googleIapHelper.buildIapGetRequest(webServerUrl, iapClientId);
-      HttpResponse response = httpRequest.execute();
-      String content = IOUtils.toString(response.getContent(), UTF_8);
-
-      if (Objects.nonNull(content)) {
-        JSONParser parser = new JSONParser(content);
-        LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>> dagList =
-            (LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>) parser.parse();
-        List<LinkedHashMap<String, String>> items = dagList.get("items");
-        String finalDagName = dagName;
-        if (items.stream().noneMatch(c -> c.get("dag_id").equals(finalDagName))) {
-          throw new BadRequestException(
-              String.format("DAG with name %s doesn't exist.", dagName));
-        }
-      }
-    } catch (HttpResponseException e) {
-      throw new IntegrationException("Airflow request fail", e);
-    } catch (IOException | ParseException e) {
-      throw new RuntimeException(e.getMessage(), e);
-    }
     saveWorkflowMetadata(workflowMetadata, dagName, isSystemWorkflow);
     resetWorkflowMetadata(workflowMetadata);
     log.info("Fetch saved workflow : {}. DAG name {}", workflowMetadata, dagName);
     return workflowMetadata;
+
   }
 
   public WorkflowMetadata getWorkflow(String workflowName, boolean isSystemWorkflow) {
@@ -113,7 +88,7 @@ public class GcpWorkflowCommonMetadataRepository {
     if (tasks.hasNext()) {
       return convertEntityToWorkflowMetadata(tasks.next());
     }
-    throw new NotFoundException(
+    throw new WorkflowNotFoundException(
         String.format("Workflow entity for workflow name: %s not found.", workflowName));
   }
 
@@ -139,7 +114,8 @@ public class GcpWorkflowCommonMetadataRepository {
     }
   }
 
-  public List<WorkflowMetadata> getAllWorkflowForTenant(final String prefix, boolean isSystemWorkflow) {
+  public List<WorkflowMetadata> getAllWorkflowForTenant(final String prefix,
+      boolean isSystemWorkflow) {
     log.info("Get all workflows. Prefix {}", prefix);
     Datastore ds = getDatastore(isSystemWorkflow);
     List<WorkflowMetadata> responseList = new ArrayList<>();
@@ -161,7 +137,8 @@ public class GcpWorkflowCommonMetadataRepository {
     }).collect(Collectors.toList());
   }
 
-  private void saveWorkflowMetadata(WorkflowMetadata workflowMetadata, String dagName, boolean isSystemWorkflow) {
+  private void saveWorkflowMetadata(WorkflowMetadata workflowMetadata, String dagName,
+      boolean isSystemWorkflow) {
     Datastore ds = getDatastore(isSystemWorkflow);
     Transaction txn = ds.newTransaction();
     String workflowName = workflowMetadata.getWorkflowName();
@@ -169,12 +146,14 @@ public class GcpWorkflowCommonMetadataRepository {
       EntityQuery.Builder queryBuilder = getBaseQueryBuilder(workflowName, isSystemWorkflow);
       QueryResults<Entity> tasks = ds.run(queryBuilder.build());
       if (!tasks.hasNext()) {
-        Entity entity = convertWorkflowMetadataToEntity(workflowMetadata, dagName, isSystemWorkflow);
+        Entity entity =
+            convertWorkflowMetadataToEntity(workflowMetadata, dagName, isSystemWorkflow);
         txn.put(entity);
         txn.commit();
         workflowMetadata.setWorkflowId(entity.getKey().getName());
       } else {
-        throw new AppException(HttpStatus.CONFLICT.value(), "Conflict", String.format("Workflow with name %s already exists.", workflowName));
+        throw new AppException(HttpStatus.CONFLICT.value(), "Conflict",
+            String.format("Workflow with name %s already exists.", workflowName));
       }
     } catch (DatastoreException ex) {
       throw new PersistenceException(ex.getCode(), ex.getMessage(), ex.getReason());
@@ -189,7 +168,8 @@ public class GcpWorkflowCommonMetadataRepository {
     workflowMetadata.setRegistrationInstructions(null);
   }
 
-  private Entity convertWorkflowMetadataToEntity(WorkflowMetadata workflowMetadata, String dagName, boolean isSystemWorkflow) {
+  private Entity convertWorkflowMetadataToEntity(WorkflowMetadata workflowMetadata, String dagName,
+      boolean isSystemWorkflow) {
     Datastore ds = getDatastore(isSystemWorkflow);
     String kind = getKind(isSystemWorkflow);
     Key taskKey = ds.newKeyFactory()
@@ -229,7 +209,8 @@ public class GcpWorkflowCommonMetadataRepository {
         .creationTimestamp(entity.getLong(CREATION_TIME_STAMP))
         .description(entity.getString(DESCRIPTION))
         .version(entity.getLong(VERSION))
-        .registrationInstructions(Collections.singletonMap(KEY_DAG_NAME, entity.getString(DAG_NAME)))
+        .registrationInstructions(
+            Collections.singletonMap(KEY_DAG_NAME, entity.getString(DAG_NAME)))
         .build();
   }
 
@@ -241,9 +222,9 @@ public class GcpWorkflowCommonMetadataRepository {
         .setFilter(StructuredQuery.PropertyFilter.eq(WORKFLOW_NAME, workflowName));
   }
 
-  private Datastore getDatastore(boolean isSystemWorkflow){
+  private Datastore getDatastore(boolean isSystemWorkflow) {
     String tenantName = isSystemWorkflow ?
-        this.workflowConfig.getSharedTenantName():
+        this.workflowConfig.getSharedTenantName() :
         this.tenantInfo.getName();
 
     log.debug("tenantName: " + tenantName);
