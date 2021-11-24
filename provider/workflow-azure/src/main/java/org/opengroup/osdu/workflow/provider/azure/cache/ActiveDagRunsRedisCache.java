@@ -12,7 +12,8 @@ public class ActiveDagRunsRedisCache extends RedisCache<String, Integer> {
   public ActiveDagRunsRedisCache(
       final @Qualifier("REDIS_HOST") String host,
       final @Qualifier("REDIS_PORT") int port,
-      final @Qualifier("REDIS_PASSWORD") String password) {
-    super(host, port, password, 20, String.class, Integer.class);
+      final @Qualifier("REDIS_PASSWORD") String password,
+      final @Qualifier("ACTIVE_DAG_RUNS_REDIS_TTL") int activeDagRunsTtl) {
+    super(host, port, password, activeDagRunsTtl, String.class, Integer.class);
   }
 }

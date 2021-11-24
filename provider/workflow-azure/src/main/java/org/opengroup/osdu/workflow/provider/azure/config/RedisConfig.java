@@ -13,10 +13,19 @@ public class RedisConfig {
   @Value("${redis.port:6380}")
   public int redisPort;
 
+  @Value("${redis.activeDagRuns.ttl:20}")
+  public int activeDagRunsTtl;
+
   @Bean
   @Qualifier("REDIS_PORT")
   public int getRedisPort() {
     return redisPort;
+  }
+
+  @Bean
+  @Qualifier("ACTIVE_DAG_RUNS_REDIS_TTL")
+  public int getActiveDagRunsTtl() {
+    return activeDagRunsTtl;
   }
 
   @Bean
