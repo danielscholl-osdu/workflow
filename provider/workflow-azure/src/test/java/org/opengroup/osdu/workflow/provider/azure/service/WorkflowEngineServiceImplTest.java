@@ -209,11 +209,10 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
-
-    final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
     when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
@@ -286,11 +285,10 @@ public class WorkflowEngineServiceImplTest {
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
-    when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
-
+    when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
     when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
@@ -326,11 +324,10 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
-
-    final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
     when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
