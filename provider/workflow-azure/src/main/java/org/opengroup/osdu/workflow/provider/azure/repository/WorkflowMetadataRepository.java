@@ -78,10 +78,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
     String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
     WorkflowMetadata workflowMetadata = workflowMetadataCache.get(cacheKey);
     if (workflowMetadata != null) {
-      System.out.println("####### Found in cache #######");
       return workflowMetadata;
-    } else {
-      System.out.println("####### Not found in cache #######");
     }
     Optional<WorkflowMetadataDoc> workflowMetadataDoc =
       cosmosStore.findItem(
