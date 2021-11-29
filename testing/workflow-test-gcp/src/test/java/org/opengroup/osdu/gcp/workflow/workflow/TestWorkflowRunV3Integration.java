@@ -34,6 +34,8 @@ import java.util.List;
 import javax.ws.rs.HttpMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.opengroup.osdu.gcp.workflow.util.HTTPClientGCP;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
 
@@ -87,7 +89,29 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     sendDeleteRequest(url);
   }
 
-  protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId) throws Exception {
+  /*
+   * this test case will not work for airflow 2.0
+   */
+  @Override
+  @Test
+  @EnabledIfEnvironmentVariable(named = "OSDU_AIRFLOW_VERSION2", matches = "false")
+  public void triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId() throws Exception {
+    super.triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId();
+  }
+
+  /*
+   * this test case will not work for airflow 1.0
+   */
+  @Override
+  @Test
+  @EnabledIfEnvironmentVariable(named = "OSDU_AIRFLOW_VERSION2", matches = "true")
+  public void triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()
+      throws Exception {
+    super.triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API();
+  }
+
+  protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId)
+      throws Exception {
     return client.send(
         HttpMethod.PUT,
         String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowName,

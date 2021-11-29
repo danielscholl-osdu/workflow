@@ -15,4 +15,5 @@ data:
   OSDU_AIRFLOW_URL: "{{ .Values.data.gcp_airflow_url }}"
   WORKFLOW_ADMIN_ACCOUNT: "{{ .Values.data.workflow_admin_account }}"
   SHARED_TENANT_NAME: "{{ .Values.data.shared_tenant_name }}"
+  OSDU_AIRFLOW_VERSION2: "{{ .Values.data.airflow_version_2 }}"
 
