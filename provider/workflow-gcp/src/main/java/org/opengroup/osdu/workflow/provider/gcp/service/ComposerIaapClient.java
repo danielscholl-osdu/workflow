@@ -17,7 +17,6 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
@@ -25,28 +24,14 @@ import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreException;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Transaction;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.core.common.model.legal.PersistenceException;
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
-import org.opengroup.osdu.core.gcp.multitenancy.IDatastoreFactory;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -55,18 +40,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ComposerIaapClient {
 
-  private static final String KEY_AIRFLOW_RUN_ID = "AirflowRunID";
-  private static final String KEY_WORKFLOW_ID = "WorkflowID";
-  private static final String KEY_RUN_ID = "RunID";
-  private static final String KEY_STATUS = "Status";
-
   private final GoogleIapHelper googleIapHelper;
   private final AirflowConfig airflowConfig;
-  private final WorkflowPropertiesConfiguration workflowConfig;
-  private final TenantInfo tenantInfo;
-  private final Map<String, Datastore> tenantRepositories = new HashMap<>();
-  private final IDatastoreFactory datastoreFactory;
-  private final ITenantFactory tenantFactory;
 
   public ClientResponse sendAirflowRequest(
       String httpMethod, String url, String stringData, WorkflowEngineRequest rq) {
@@ -81,9 +56,7 @@ public class ComposerIaapClient {
           this.googleIapHelper.buildIapRequest(url, iapClientId, httpMethod, stringData);
       HttpResponse response = httpRequest.execute();
       String content = IOUtils.toString(response.getContent(), UTF_8);
-      if (HttpMethod.POST.name().equals(httpMethod) && response.getStatusCode() == 200) {
-        saveWorkflowStatus(content, rq);
-      }
+
       return ClientResponse.builder()
           .contentEncoding(response.getContentEncoding())
           .contentType(response.getContentType())
@@ -103,56 +76,4 @@ public class ComposerIaapClient {
     }
   }
 
-  private void saveWorkflowStatus(String content, WorkflowEngineRequest rq) {
-    log.info("Saving workflow status. Workflow status id : {}", rq.getWorkflowId());
-    String airflowRunId = getRunIdFromResponse(content);
-    if (isNullOrEmpty(airflowRunId)) {
-      airflowRunId = rq.getRunId();
-    }
-    Datastore ds = getDatastore();
-    Transaction txn = ds.newTransaction();
-    try {
-      Entity entity = buildStatusEntity(airflowRunId, rq.getWorkflowName(), rq.getRunId());
-      txn.put(entity);
-      txn.commit();
-    } catch (DatastoreException ex) {
-      throw new PersistenceException(ex.getCode(), ex.getMessage(), ex.getReason());
-    } finally {
-      if (txn.isActive()) {
-        txn.rollback();
-      }
-    }
-  }
-
-  private Entity buildStatusEntity(String airflowRunId,
-      String workflowName, String runId) {
-    Datastore ds = getDatastore();
-    Key newKey = ds.newKeyFactory()
-        .setKind(workflowConfig.getWorkflowStatusKind())
-        .newKey(runId);
-    return Entity.newBuilder(newKey)
-        .set(KEY_WORKFLOW_ID, workflowName)
-        .set(KEY_AIRFLOW_RUN_ID, airflowRunId)
-        .set(KEY_RUN_ID, runId)
-        .set(KEY_STATUS, WorkflowStatusType.SUBMITTED.name()).build();
-  }
-
-  private String getRunIdFromResponse(String response) {
-    String[] responsePath = response.split(" ");
-    if (responsePath.length < 10) {
-      log.warn(String.format("Incorrect response from airflow. Response: %s", response));
-      return "";
-    }
-    return responsePath[6].replace(",", "");
-  }
-
-  private Datastore getDatastore() {
-    String tenantName = this.tenantInfo.getName();
-    if (!this.tenantRepositories.containsKey(tenantName)) {
-      TenantInfo info = this.tenantFactory.getTenantInfo(tenantName);
-      Datastore datastore = this.datastoreFactory.getDatastore(info);
-      this.tenantRepositories.put(tenantName, datastore);
-    }
-    return this.tenantRepositories.get(tenantName);
-  }
 }
