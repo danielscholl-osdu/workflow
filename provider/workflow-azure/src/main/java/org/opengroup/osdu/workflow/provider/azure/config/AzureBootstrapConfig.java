@@ -18,7 +18,6 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.security.keyvault.secrets.SecretClient;
 import org.opengroup.osdu.azure.KeyVaultFacade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +26,6 @@ import javax.inject.Named;
 
 @Configuration
 public class AzureBootstrapConfig {
-
-  @Autowired
-  private RedisConfig redisConfig;
 
   @Value("${azure.keyvault.url}")
   private String keyVaultURL;
