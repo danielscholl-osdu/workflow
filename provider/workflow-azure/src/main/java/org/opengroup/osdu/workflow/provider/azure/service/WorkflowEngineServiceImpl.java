@@ -8,6 +8,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
+import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
+import org.opengroup.osdu.azure.partition.PartitionServiceClient;
 import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -83,6 +85,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private PartitionServiceClient partitionService;
 
   @Override
   public void createWorkflow(
@@ -192,13 +197,19 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
                                                  Map<String, Object> inputData) {
-    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_CACHE_KEY);
-    if (numberOfActiveDagRuns == null) {
-      numberOfActiveDagRuns = getActiveDagRunsCount();
-      activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
-    }
-    if (numberOfActiveDagRuns >= ACTIVE_DAG_RUNS_THRESHOLD) {
-      throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
+    PartitionInfoAzure pi = this.partitionService.getPartition(dpsHeaders.getPartitionId());
+    // NOTE: [aaljain] limiting trigger requests not supported for multi partition
+    if (!pi.getAirflowEnabled()) {
+      Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_CACHE_KEY);
+      if (numberOfActiveDagRuns == null) {
+        LOGGER.info("Obtaining number of active dag runs from airflow db");
+        numberOfActiveDagRuns = getActiveDagRunsCount();
+        activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
+      }
+      if (numberOfActiveDagRuns >= ACTIVE_DAG_RUNS_THRESHOLD) {
+        throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
+      }
+      LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
     }
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
