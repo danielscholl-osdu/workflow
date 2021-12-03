@@ -19,7 +19,6 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.security.keyvault.secrets.SecretClient;
 import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,41 +41,6 @@ public class AzureBootstrapConfig {
   @Named("KEY_VAULT_URL")
   public String keyVaultURL() {
     return keyVaultURL;
-  }
-
-
-  /**
-   * NOTE:
-   * Redis instance used here is used for caching purposes and is not impacted by single / multi partition
-   * The redis instance used here is the one that resides in service resource
-   * the hostname and password for which is obtained from the central key vault
-   */
-
-  @Bean
-  @Qualifier("REDIS_HOST")
-  public String redisHost(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "redis-hostname");
-  }
-
-  @Bean
-  @Qualifier("REDIS_PASSWORD")
-  public String redisPassword(SecretClient kv) {
-    return KeyVaultFacade.getSecretWithValidation(kv, "redis-password");
-  }
-
-  /**
-   * Use redis config in order to obtain port / ttl used for various use cases
-   */
-  @Bean
-  @Qualifier("REDIS_PORT")
-  public int redisPort(SecretClient kv) {
-    return redisConfig.getRedisPort();
-  }
-
-  @Bean
-  @Qualifier("WORKFLOW_METADATA_REDIS_TTL")
-  public int workflowMetadataTtl(SecretClient kv) {
-    return redisConfig.getWorkflowMetadataTtl();
   }
 
   /*This is done to support Single partition support for slb. Once implementation is complete for multi-partition we can remove this method */
