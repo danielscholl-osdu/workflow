@@ -5,6 +5,7 @@ import com.azure.cosmos.models.SqlQuerySpec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
@@ -14,12 +15,16 @@ import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConf
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataUtils.*;
+import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataUtils.buildSqlQuerySpecForGetAllWorkflow;
+import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataUtils.buildWorkflowMetadata;
+import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataUtils.buildWorkflowMetadataDoc;
+import static org.opengroup.osdu.workflow.provider.azure.utils.WorkflowMetadataUtils.convertWorkflowMetadataDocsToWorkflowMetadataList;
 
 @Slf4j
 @Repository
@@ -35,8 +40,15 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 
   private final AzureWorkflowEngineConfig workflowEngineConfig;
 
+  @Qualifier("WorkflowMetadataCache")
+  private final ICache<String, WorkflowMetadata> workflowMetadataCache;
+
   @Override
   public WorkflowMetadata getSystemWorkflow(final String workflowName) {
+    WorkflowMetadata workflowMetadata = workflowMetadataCache.get(workflowName);
+    if (workflowMetadata != null) {
+      return workflowMetadata;
+    }
     Optional<WorkflowMetadataDoc> workflowSystemMetadataDoc =
         cosmosStore.findItem(
           cosmosConfig.getSystemdatabase(),
@@ -50,7 +62,9 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
       logger.error(LOGGER_NAME, errorMessage);
       throw new WorkflowNotFoundException(errorMessage);
     }
-    return buildWorkflowMetadata(workflowSystemMetadataDoc.get());
+    workflowMetadata = buildWorkflowMetadata(workflowSystemMetadataDoc.get());
+    workflowMetadataCache.put(workflowName, workflowMetadata);
+    return workflowMetadata;
   }
 
   @Override
@@ -78,12 +92,16 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 
   @Override
   public void deleteSystemWorkflow(String workflowName) {
+      workflowMetadataCache.delete(workflowName);
       cosmosStore.deleteItem(
         cosmosConfig.getSystemdatabase(),
         cosmosConfig.getWorkflowMetadataCollection(),
         workflowName,
         workflowName
       );
+    // making sure to delete it from the cache in case there are scenarios where the key gets added
+    // back to the workflow metadata cache when a GET request is called while deleting the item from cosmos
+    workflowMetadataCache.delete(workflowName);
   }
 
   @Override

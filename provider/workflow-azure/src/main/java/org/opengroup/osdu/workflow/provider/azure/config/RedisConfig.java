@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.opengroup.osdu.azure.KeyVaultFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -35,35 +33,8 @@ public class RedisConfig {
   @PostConstruct
   private void setupRedisConfig() {
     if (this.isDefaultRedisConfig()) {
-      this.redisPort = 6380;
-      this.workflowMetadataTtl = 600;
       this.redisHost = KeyVaultFacade.getSecretWithValidation(kv, "redis-hostname");;
       this.redisPassword = KeyVaultFacade.getSecretWithValidation(kv, "redis-password");;
     }
-  }
-
-  /** Beans declared for injecting into the super method of WorkflowMetadataRedisCache **/
-  @Bean
-  @Qualifier("REDIS_HOST")
-  public String redisHost() {
-    return redisHost;
-  }
-
-  @Bean
-  @Qualifier("REDIS_PORT")
-  public int redisPort() {
-    return redisPort;
-  }
-
-  @Bean
-  @Qualifier("REDIS_PASSWORD")
-  public String redisPassword() {
-    return redisPassword;
-  }
-
-  @Bean
-  @Qualifier("WORKFLOW_METADATA_REDIS_TTL")
-  public int workflowMetadataTtl() {
-    return workflowMetadataTtl;
   }
 }

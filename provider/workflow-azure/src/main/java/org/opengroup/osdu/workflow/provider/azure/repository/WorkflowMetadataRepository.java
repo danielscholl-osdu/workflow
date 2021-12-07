@@ -101,8 +101,8 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
   @Override
   public void deleteWorkflow(String workflowName) {
-    String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
-    workflowMetadataCache.delete(cacheKey);
+      String cacheKey = String.format("%s-%s", dpsHeaders.getPartitionId(), workflowName);
+      workflowMetadataCache.delete(cacheKey);
       cosmosStore.deleteItem(
           dpsHeaders.getPartitionId(),
           cosmosConfig.getDatabase(),
@@ -110,6 +110,9 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
           workflowName,
           workflowName
       );
+      // making sure to delete it from the cache in case there are scenarios where the key gets added
+      // back to the workflow metadata cache when a GET request is called while deleting the item from cosmos
+      workflowMetadataCache.delete(cacheKey);
   }
 
   @Override

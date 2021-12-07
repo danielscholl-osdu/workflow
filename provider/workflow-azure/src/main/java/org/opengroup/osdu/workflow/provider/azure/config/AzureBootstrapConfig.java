@@ -39,6 +39,7 @@ public class AzureBootstrapConfig {
     return keyVaultURL;
   }
 
+
   /*This is done to support Single partition support for slb. Once implementation is complete for multi-partition we can remove this method */
   @Bean
   public CosmosClient buildCosmosClient(SecretClient kv) {

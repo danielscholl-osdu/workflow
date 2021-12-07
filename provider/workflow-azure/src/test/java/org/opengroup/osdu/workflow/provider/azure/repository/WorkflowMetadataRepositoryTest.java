@@ -173,6 +173,8 @@ public class WorkflowMetadataRepositoryTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private static final String WORKFLOW_METADATA_CACHE_KEY = String.format("%s-%s", PARTITION_ID, WORKFLOW_NAME);
+
   @Mock
   private CosmosConfig cosmosConfig;
 
@@ -299,11 +301,26 @@ public class WorkflowMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class)))
         .thenReturn(Optional.of(workflowMetadataDoc));
     final WorkflowMetadata response = workflowMetadataRepository.getWorkflow(WORKFLOW_NAME);
+    verify(workflowMetadataCache).get(eq(WORKFLOW_METADATA_CACHE_KEY));
     verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getDatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
     verify(dpsHeaders,times(2)).getPartitionId();
+    assertThat(response, equalTo(workflowMetadata));
+  }
+
+  @Test
+  public void testGetWorkflowWithExistingWorkflowId_workflowMetadataPresentInCache() throws Exception {
+    final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_GET_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    when(workflowMetadataCache.get(eq(WORKFLOW_METADATA_CACHE_KEY))).thenReturn(workflowMetadata);
+    final WorkflowMetadata response = workflowMetadataRepository.getWorkflow(WORKFLOW_NAME);
+    verify(workflowMetadataCache).get(eq(WORKFLOW_METADATA_CACHE_KEY));
+    verify(cosmosStore, times(0)).findItem(any(), any(), any(), any(), any(), any());
+    verify(cosmosConfig, times(0)).getDatabase();
+    verify(cosmosConfig, times(0)).getWorkflowMetadataCollection();
+    verify(dpsHeaders,times(1)).getPartitionId();
     assertThat(response, equalTo(workflowMetadata));
   }
 
@@ -318,6 +335,7 @@ public class WorkflowMetadataRepositoryTest {
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowMetadataRepository.getWorkflow(WORKFLOW_NAME);
     });
+    verify(workflowMetadataCache).get(eq(WORKFLOW_METADATA_CACHE_KEY));
     verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getDatabase();
@@ -393,5 +411,6 @@ public class WorkflowMetadataRepositoryTest {
     verify(cosmosConfig).getDatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
     verify(dpsHeaders,times(2)).getPartitionId();
+    verify(workflowMetadataCache, times(2)).delete(eq(WORKFLOW_METADATA_CACHE_KEY));
   }
 }

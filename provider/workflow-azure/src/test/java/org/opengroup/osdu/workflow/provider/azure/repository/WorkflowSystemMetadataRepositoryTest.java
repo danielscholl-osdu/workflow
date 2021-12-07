@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
@@ -179,6 +180,9 @@ public class WorkflowSystemMetadataRepositoryTest {
   @Mock
   private JaxRsDpsLog jaxRsDpsLog;
 
+  @Mock
+  private ICache<String, WorkflowMetadata> workflowMetadataCache;
+
   @InjectMocks
   private WorkflowSystemMetadataRepository workflowSystemMetadataRepository;
 
@@ -221,10 +225,23 @@ public class WorkflowSystemMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class)))
         .thenReturn(Optional.of(workflowMetadataDoc));
     final WorkflowMetadata response = workflowSystemMetadataRepository.getSystemWorkflow(WORKFLOW_NAME);
+    verify(workflowMetadataCache).get(eq(WORKFLOW_NAME));
     verify(cosmosStore).findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
+    assertThat(response, equalTo(workflowMetadata));
+  }
+
+  @Test
+  public void testGetSystemWorkflowWithExistingWorkflowId_workflowMetadataPresentInCache() throws Exception {
+    final WorkflowMetadata workflowMetadata = OBJECT_MAPPER.readValue(OUTPUT_GET_WORKFLOW_METADATA_WITH_DAG_CONTENT, WorkflowMetadata.class);
+    when(workflowMetadataCache.get(eq(WORKFLOW_NAME))).thenReturn(workflowMetadata);
+    final WorkflowMetadata response = workflowSystemMetadataRepository.getSystemWorkflow(WORKFLOW_NAME);
+    verify(workflowMetadataCache).get(eq(WORKFLOW_NAME));
+    verify(cosmosStore, times(0)).findItem(any(), any(), any(), any(), any(), any());
+    verify(cosmosConfig, times(0)).getDatabase();
+    verify(cosmosConfig, times(0)).getWorkflowMetadataCollection();
     assertThat(response, equalTo(workflowMetadata));
   }
 
@@ -238,6 +255,7 @@ public class WorkflowSystemMetadataRepositoryTest {
     Assertions.assertThrows(WorkflowNotFoundException.class, () -> {
       workflowSystemMetadataRepository.getSystemWorkflow(WORKFLOW_NAME);
     });
+    verify(workflowMetadataCache).get(eq(WORKFLOW_NAME));
     verify(cosmosStore, times(1)).findItem(eq(DATABASE_NAME), eq(WORKFLOW_METADATA_COLLECTION),
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME), eq(WorkflowMetadataDoc.class));
     verify(cosmosConfig).getSystemdatabase();
@@ -305,6 +323,7 @@ public class WorkflowSystemMetadataRepositoryTest {
         eq(WORKFLOW_NAME), eq(WORKFLOW_NAME));
     verify(cosmosConfig).getSystemdatabase();
     verify(cosmosConfig).getWorkflowMetadataCollection();
+    verify(workflowMetadataCache, times(2)).delete(eq(WORKFLOW_NAME));
   }
 
   private void testCreateWorkflowWithoutPartitionId(WorkflowMetadata inputWorkflowMetadata,
