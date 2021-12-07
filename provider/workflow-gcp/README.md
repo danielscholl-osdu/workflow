@@ -62,6 +62,7 @@ In order to run the service locally, you will need to have the following environ
 | `GOOGLE_AUDIENCE` | ex `********.apps.googleusercontent.com`| client application ID | yes | https://console.cloud.google.com/apis/credentials |
 | `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
 | `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
+| `OSDU_AIRFLOW_VERSION2` | `true` or `false` | Disable\Enable tests that work only with specific Airflow version | no | - |
 
 **Entitlements configuration for integration accounts**
 
