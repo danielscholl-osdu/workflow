@@ -19,7 +19,6 @@ global:
   replicaCount: 1
   nodepool: services
   isAutoscalingEnabled: false
-  base_name_sr: #{base-name-sr}#
 
 ################################################################################
 # Specify the Gitlab branch being used for image creation
