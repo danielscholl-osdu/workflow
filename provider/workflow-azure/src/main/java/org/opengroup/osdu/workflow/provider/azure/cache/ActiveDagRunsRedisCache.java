@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(value = "runtime.env.local", havingValue = "false", matchIfMissing = true)
 public class ActiveDagRunsRedisCache extends RedisCache<String, Integer> {
 
-  public ActiveDagRunsRedisCache(RedisConfig redisConfig) {
+  public ActiveDagRunsRedisCache(final RedisConfig redisConfig) {
     super(redisConfig.getRedisHost(), redisConfig.getRedisPort(), redisConfig.getRedisPassword(), redisConfig.getActiveDagRunsTtl(), String.class, Integer.class);
   }
 }
