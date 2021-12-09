@@ -18,6 +18,7 @@ import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.azure.config.ActiveDagRunsConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
@@ -51,7 +52,6 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private static final String KEY_DAG_CONTENT = "dagContent";
   private static final String ACTIVE_DAG_RUNS_CACHE_KEY = "active-dag-runs-count";
-  private static final Integer ACTIVE_DAG_RUNS_THRESHOLD = 50000;
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -82,6 +82,9 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Autowired
   @Qualifier("ActiveDagRunsCache")
   private ICache<String, Integer> activeDagRunsCache;
+
+  @Autowired
+  private ActiveDagRunsConfig activeDagRunsConfig;
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -206,7 +209,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
         numberOfActiveDagRuns = getActiveDagRunsCount();
         activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
       }
-      if (numberOfActiveDagRuns >= ACTIVE_DAG_RUNS_THRESHOLD) {
+      if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
         throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
       }
       LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
