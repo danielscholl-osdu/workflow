@@ -1,50 +1,56 @@
 package org.opengroup.osdu.workflow.service;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.model.*;
+import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static java.lang.String.format;
-
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "osdu.airflow.version2", havingValue = "true", matchIfMissing=false)
 public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineService {
-	private static final String RUN_ID_PARAMETER_NAME_STABLE = "dag_run_id";
+
+  private static final String RUN_ID_PARAMETER_NAME_STABLE = "dag_run_id";
 	private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 	private static final String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
 	private static final String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
 	private static final String TRIGGER_AIRFLOW_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns";
 	private static final String AIRFLOW_RUN_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns/%s";
+  private static final String AIRFLOW_VERSION_ENDPOINT = "api/v1/version";
+  private static final String NOT_AVAILABLE = "N/A";
+  public static final String VERSION = "version";
 
 	private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE =
 			"Failed to trigger workflow with id %s and name %s";
 	private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
 			"No WorkflowRun executed for Workflow: %s on %s ";
 
-	private final Client restClient;
+
+  private final Client restClient;
 	private final AirflowConfig airflowConfig;
 
 	public AirflowV2WorkflowEngineServiceImpl(Client restClient, AirflowConfig airflowConfig){
@@ -130,6 +136,32 @@ public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineServic
 			throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to Get Status from Airflow", errorMessage);
 		}
 	}
+
+  public String getAirflowVersion() {
+    ClientResponse clientResponse =
+        callAirflow(
+            HttpMethod.GET,
+            AIRFLOW_VERSION_ENDPOINT,
+            null,
+            null,
+            null);
+    try {
+      ObjectMapper om = new ObjectMapper();
+      String body = clientResponse.getResponseBody().toString();
+      JsonNode jsonNode = om.readValue(body, JsonNode.class);
+      if (jsonNode.has(VERSION)) {
+        return jsonNode.get(VERSION).asText();
+      } else {
+        log.error("Unable to locate version in Airflow response. Airflow response: {}.",
+            clientResponse);
+        return NOT_AVAILABLE;
+      }
+    } catch (JsonProcessingException e) {
+      log.error("Unable to Process(Parse, Generate) JSON value. Airflow response: {}.",
+          clientResponse);
+      return NOT_AVAILABLE;
+    }
+  }
 
 	protected ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
 			WorkflowEngineRequest rq, String errorMessage) {
