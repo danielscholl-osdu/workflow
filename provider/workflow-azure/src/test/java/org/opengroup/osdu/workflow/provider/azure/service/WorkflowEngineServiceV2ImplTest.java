@@ -220,7 +220,7 @@ public class WorkflowEngineServiceV2ImplTest {
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
-    when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
+    when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null).thenReturn(0);
     when(activeDagRunsConfig.getThreshold()).thenReturn(ACTIVE_DAG_RUNS_THRESHOLD);
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
@@ -248,10 +248,11 @@ public class WorkflowEngineServiceV2ImplTest {
     verify(airflowConfig).getUrl();
     verify(airflowConfig).getAppKey();
     verify(airflowConfig).isDagRunAbstractionEnabled();
-    verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
-    verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
+    verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
+    verify(activeDagRunsCache, times(2)).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsConfig).getThreshold();
-    assertEquals(0, numberOfActiveDagRunsCaptor.getValue());
+    assertEquals(0, numberOfActiveDagRunsCaptor.getAllValues().get(0));
+    assertEquals(1, numberOfActiveDagRunsCaptor.getAllValues().get(1));
     JSONAssert.assertEquals(AIRFLOW_INPUT, airflowInputCaptor.getValue(), true);
   }
 
@@ -424,7 +425,7 @@ public class WorkflowEngineServiceV2ImplTest {
     verify(airflowConfig).getUrl();
     verify(airflowConfig).getAppKey();
     verify(airflowConfig).isDagRunAbstractionEnabled();
-    verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
+    verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsConfig).getThreshold();
     assertEquals(0, numberOfActiveDagRunsCaptor.getValue());

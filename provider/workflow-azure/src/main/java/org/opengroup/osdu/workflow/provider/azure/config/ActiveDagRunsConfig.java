@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("osdu.azure.activeDagRuns")
+@ConfigurationProperties("osdu.azure.active-dag-runs")
 @Getter
 @Setter
 public class ActiveDagRunsConfig {

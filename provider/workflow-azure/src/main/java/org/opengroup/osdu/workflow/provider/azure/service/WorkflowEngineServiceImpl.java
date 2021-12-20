@@ -38,6 +38,8 @@ import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.opengroup.osdu.workflow.provider.azure.consts.CacheConstants.ACTIVE_DAG_RUNS_COUNT_CACHE_KEY;
+
 @Service
 @Primary
 public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
@@ -51,7 +53,6 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private static final String KEY_DAG_CONTENT = "dagContent";
-  private static final String ACTIVE_DAG_RUNS_CACHE_KEY = "active-dag-runs-count";
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -201,18 +202,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
                                                  Map<String, Object> inputData) {
     PartitionInfoAzure pi = this.partitionService.getPartition(dpsHeaders.getPartitionId());
+    Boolean isAirflowEnabled = pi.getAirflowEnabled();
     // NOTE: [aaljain] limiting trigger requests not supported for multi partition
-    if (!pi.getAirflowEnabled()) {
-      Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_CACHE_KEY);
-      if (numberOfActiveDagRuns == null) {
-        LOGGER.info("Obtaining number of active dag runs from airflow db");
-        numberOfActiveDagRuns = getActiveDagRunsCount();
-        activeDagRunsCache.put(ACTIVE_DAG_RUNS_CACHE_KEY, numberOfActiveDagRuns);
-      }
-      if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
-        throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
-      }
-      LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
+    if (!isAirflowEnabled) {
+      checkAndUpdateActiveDagRunsCache();
     }
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
@@ -231,10 +224,35 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       final TriggerWorkflowResponse triggerWorkflowResponse = engineUtil.
           extractTriggerWorkflowResponse(response.getEntity(String.class));
       LOGGER.info("Airflow response: {}.", triggerWorkflowResponse);
+      if (!isAirflowEnabled) {
+        incrementActiveDagRunsCountInCache();
+      }
       return triggerWorkflowResponse;
     } catch (JsonProcessingException e) {
       final String error = "Unable to Process(Parse, Generate) JSON value";
       throw new AppException(500, error, e.getMessage());
+    }
+  }
+
+  private void checkAndUpdateActiveDagRunsCache() {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
+    if (numberOfActiveDagRuns == null) {
+      LOGGER.info("Obtaining number of active dag runs from airflow postgresql db");
+      numberOfActiveDagRuns = getActiveDagRunsCount();
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+    }
+    if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
+      throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
+    }
+    LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
+  }
+
+  private void incrementActiveDagRunsCountInCache() {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
+    if (numberOfActiveDagRuns != null) {
+      numberOfActiveDagRuns += 1;
+      LOGGER.info("Incrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns);
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
     }
   }
 
@@ -295,6 +313,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   }
 
   private Integer getActiveDagRunsCount() {
+    LOGGER.info("Obtaining active dag runs from postgresql");
     String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
     return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
   }

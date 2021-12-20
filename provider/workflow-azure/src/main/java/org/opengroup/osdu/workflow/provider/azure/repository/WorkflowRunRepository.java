@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
@@ -19,6 +20,7 @@ import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
+import static org.opengroup.osdu.workflow.provider.azure.consts.CacheConstants.ACTIVE_DAG_RUNS_COUNT_CACHE_KEY;
 
 @Slf4j
 @Repository
@@ -43,6 +46,9 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   private final CursorUtils cursorUtils;
 
   private final WorkflowTasksSharingRepository workflowTasksSharingRepository;
+
+  @Qualifier("ActiveDagRunsCache")
+  private final ICache<String, Integer> activeDagRunsCache;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
@@ -168,10 +174,21 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
     //  The feature for deleting container needs to be moved to service folder later
     final WorkflowStatusType currentStatusType = workflowRun.getStatus();
     if (getCompletedStatusTypes().contains(currentStatusType)) {
+        decrementActiveDagRunsCountInCache();
         workflowTasksSharingRepository.deleteTasksSharingInfoContainer(dpsHeaders.getPartitionId(), workflowRun.getWorkflowName(), workflowRun.getRunId());
     }
 
     return getWorkflowRun(workflowRun.getWorkflowId(), workflowRun.getRunId());
+  }
+
+  private void decrementActiveDagRunsCountInCache() {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
+    // Update the cache count: decrementing the count by 1
+    if (numberOfActiveDagRuns != null) {
+      numberOfActiveDagRuns = Math.max(0, numberOfActiveDagRuns - 1);
+      log.info("Decrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns);
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+    }
   }
 
   private WorkflowRunDoc buildWorkflowRunDoc(final WorkflowRun workflowRun) {
