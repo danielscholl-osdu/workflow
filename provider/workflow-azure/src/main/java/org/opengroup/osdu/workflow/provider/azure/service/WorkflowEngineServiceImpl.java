@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -315,6 +316,18 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private Integer getActiveDagRunsCount() {
     LOGGER.info("Obtaining active dag runs from postgresql");
     String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
-    return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+    try {
+      return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+    } catch (DataAccessException e) {
+      e.printStackTrace();
+      throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR,
+          "DataAccessException",
+          "Error occurred while obtaining number of active dag runs from airflow db");
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR,
+          "Unknown error occurred. Unable to query airflow db",
+          e.getMessage());
+    }
   }
 }
