@@ -63,5 +63,5 @@ include:
     file: "cloud-providers/aws.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "cloud-providers/azure.yml"
