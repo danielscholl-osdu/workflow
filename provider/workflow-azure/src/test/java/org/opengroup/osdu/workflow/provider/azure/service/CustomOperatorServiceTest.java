@@ -13,6 +13,7 @@ import org.opengroup.osdu.core.common.exception.BadRequestException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
+import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.exception.CustomOperatorNotFoundException;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorMetadataRepository;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperator;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 public class CustomOperatorServiceTest {
-  private static final String NEW_CUSTOM_OPERATOR = "{\n" +
+  private static final String CUSTOM_OPERATOR_WITH_CONTENT = "{\n" +
       "    \"name\": \"hello_world_operator\",\n" +
       "    \"className\": \"HelloWorld\",\n" +
       "    \"description\": \"Used to print hello world\",\n" +
@@ -62,14 +63,17 @@ public class CustomOperatorServiceTest {
   @Mock
   private IWorkflowEngineService workflowEngineService;
 
+  @Mock
+  private AzureWorkflowEngineConfig workflowEngineConfig;
+
   @InjectMocks
   private CustomOperatorServiceImpl customOperatorService;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
-  public void testRegisterNewOperatorWithNewOperator() throws Exception {
-    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(NEW_CUSTOM_OPERATOR,
+  public void testRegisterNewOperatorWithNewOperator_whenIgnoreDagContentIsDisabled() throws Exception {
+    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(CUSTOM_OPERATOR_WITH_CONTENT,
         RegisterCustomOperatorRequest.class);
     final ArgumentCaptor<String> fileNameArgumentCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<String> contentArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -81,6 +85,7 @@ public class CustomOperatorServiceTest {
     when(customOperatorMetadataRepository.saveMetadata(customOperatorArgumentCaptor.capture()))
         .thenReturn(responseCustomOperator);
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
+    when(workflowEngineConfig.getIgnoreCustomOperatorContent()).thenReturn(false);
 
     CustomOperator customOperator = customOperatorService.registerNewOperator(newOperatorRequest);
 
@@ -88,6 +93,7 @@ public class CustomOperatorServiceTest {
         .saveMetadata(ArgumentMatchers.any(CustomOperator.class));
     verify(workflowEngineService).saveCustomOperator(ArgumentMatchers.any(String.class),
             ArgumentMatchers.any(String.class));
+    verify(workflowEngineConfig, times(1)).getIgnoreCustomOperatorContent();
     assertThat(customOperator, equalTo(responseCustomOperator));
     assertThat(contentArgumentCaptor.getValue(), equalTo(newOperatorRequest.getContent()));
     assertThat(fileNameArgumentCaptor.getValue(),
@@ -97,8 +103,21 @@ public class CustomOperatorServiceTest {
   }
 
   @Test
+  public void testRegisterNewOperatorWithNewOperator_throwsException_whenIgnoreDagContentIsEnabled() throws Exception {
+    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(CUSTOM_OPERATOR_WITH_CONTENT,
+        RegisterCustomOperatorRequest.class);
+    when(workflowEngineConfig.getIgnoreCustomOperatorContent()).thenReturn(true);
+
+    Assertions.assertThrows(AppException.class, () -> {
+      customOperatorService.registerNewOperator(newOperatorRequest);
+    });
+
+    verify(workflowEngineConfig, times(1)).getIgnoreCustomOperatorContent();
+  }
+
+  @Test
   public void testRegisterNewOperatorWithExistingOperator() throws Exception {
-    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(NEW_CUSTOM_OPERATOR,
+    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(CUSTOM_OPERATOR_WITH_CONTENT,
         RegisterCustomOperatorRequest.class);
     final ArgumentCaptor<CustomOperator> customOperatorArgumentCaptor =
         ArgumentCaptor.forClass(CustomOperator.class);
@@ -121,7 +140,7 @@ public class CustomOperatorServiceTest {
 
   @Test
   public void testRegisterNewOperatorThrowsExceptionIfUnknownError() throws Exception {
-    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(NEW_CUSTOM_OPERATOR,
+    RegisterCustomOperatorRequest newOperatorRequest = objectMapper.readValue(CUSTOM_OPERATOR_WITH_CONTENT,
         RegisterCustomOperatorRequest.class);
     final ArgumentCaptor<CustomOperator> customOperatorArgumentCaptor =
         ArgumentCaptor.forClass(CustomOperator.class);

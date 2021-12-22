@@ -4,39 +4,34 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.opengroup.osdu.azure.workflow.framework.models.WorkflowRun;
 import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
-import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
+import org.opengroup.osdu.azure.workflow.framework.util.AzureTestBase;
 
 import javax.ws.rs.HttpMethod;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.GET_SIGNED_URL_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
-public abstract class GetSignedUrlIntegrationTests extends TestBase {
+public abstract class GetSignedUrlIntegrationTests extends AzureTestBase {
 
   private static final String INVALID_WORKFLOW_ID = "Invalid-Workflow-ID";
   private static final String INVALID_WORKFLOW_RUN_ID = "Invalid-WorkflowRun-ID";
   private static final String INVALID_PARTITION = "invalid-partition";
   private static final String SIGNED_URL_FIELD = "url";
-  private static WorkflowRun triggeredWorkflow = null;
 
-  public void initializeTriggeredWorkflow() throws Exception {
-    triggeredWorkflow = triggerDummyWorkflow(client, headers);
-  }
+  protected Map<String, String> workflowInfo = null;
+  protected Map<String, String> workflowRunInfo = null;
 
   @Test
   public void should_returnSuccess_when_givenValidRequest() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
+        String.format(GET_SIGNED_URL_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getAccessToken()
@@ -54,7 +49,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   public void should_returnNotFound_when_givenInvalidWorkflowId() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, INVALID_WORKFLOW_ID, triggeredWorkflow.getRunId()),
+        String.format(GET_SIGNED_URL_URL, INVALID_WORKFLOW_ID, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getAccessToken()
@@ -66,7 +61,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   public void should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), INVALID_WORKFLOW_RUN_ID),
+        String.format(GET_SIGNED_URL_URL, CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
         null,
         headers,
         client.getAccessToken()
@@ -78,7 +73,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
+        String.format(GET_SIGNED_URL_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         client.getNoDataAccessToken()
@@ -90,7 +85,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
   public void should_returnForbidden_when_notGivenAccessToken() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
+        String.format(GET_SIGNED_URL_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         headers,
         null
@@ -104,7 +99,7 @@ public abstract class GetSignedUrlIntegrationTests extends TestBase {
 
     ClientResponse response = client.send(
         HttpMethod.GET,
-        String.format(GET_SIGNED_URL_URL, triggeredWorkflow.getWorkflowId(), triggeredWorkflow.getRunId()),
+        String.format(GET_SIGNED_URL_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
         null,
         HTTPClient.overrideHeader(headersWithInvalidPartition, INVALID_PARTITION),
         client.getAccessToken()

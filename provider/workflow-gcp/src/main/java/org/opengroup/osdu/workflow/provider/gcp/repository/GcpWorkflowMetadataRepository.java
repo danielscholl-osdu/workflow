@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class GcpWorkflowMetadataRepository implements IWorkflowMetadataRepository {
-  private final GcpWorkflowCommonMetadataRepository commonMetadataRepository;
+  private final ICommonMetadataRepository commonMetadataRepository;
 
   @Override
   public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {

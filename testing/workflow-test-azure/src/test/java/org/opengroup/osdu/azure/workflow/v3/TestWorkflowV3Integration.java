@@ -1,23 +1,25 @@
-package org.opengroup.osdu.azure.workflow.workflow;
+package org.opengroup.osdu.azure.workflow.v3;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.utils.HTTPClientAzure;
-import org.opengroup.osdu.workflow.workflow.v3.DeleteSystemWorkflowV3IntegrationTests;
+import org.opengroup.osdu.workflow.workflow.v3.WorkflowV3IntegrationTests;
 
 import java.util.ArrayList;
 
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 
-public class TestDeleteSystemWorkflowV3Integration extends DeleteSystemWorkflowV3IntegrationTests {
+public class TestWorkflowV3Integration extends WorkflowV3IntegrationTests {
 
   @BeforeEach
   @Override
   public void setup() {
     this.client = new HTTPClientAzure();
-    this.headers = client.getCommonHeaderWithoutPartition();
+    this.headers = client.getCommonHeader();
     try {
-      deleteTestSystemWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+      deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -32,10 +34,15 @@ public class TestDeleteSystemWorkflowV3Integration extends DeleteSystemWorkflowV
     this.createdWorkflows = new ArrayList<>();
   }
 
+  @Override
+  @Test
+  @Disabled
+  public void shouldReturnBadRequestWhenInvalidDagNameWorkflowCreate() throws Exception { }
+
   private void deleteAllTestWorkflowRecords() {
     createdWorkflows.stream().forEach(c -> {
       try {
-        deleteTestSystemWorkflows(c.get(WORKFLOW_NAME_FIELD));
+        deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
       } catch (Exception e) {
         e.printStackTrace();
       }

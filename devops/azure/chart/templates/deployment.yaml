@@ -128,4 +128,6 @@ spec:
             - name: dp_airflow_for_system_dag
               value: "false"
             - name: ignore_dagContent
-              value: "false"
+              value: "true"
+            - name: ignore_customOperatorContent
+              value: "true"

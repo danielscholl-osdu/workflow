@@ -39,12 +39,12 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.Strings;
-import org.opengroup.osdu.core.common.exception.NotFoundException;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
 import org.opengroup.osdu.core.gcp.multitenancy.IDatastoreFactory;
+import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
@@ -52,9 +52,8 @@ import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfigu
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 
-@Service
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
@@ -121,7 +120,7 @@ public class GcpWorkflowRunRepository implements IWorkflowRunRepository {
     if (tasks.hasNext()) {
       return buildWorkflowRunFromDataStoreEntity(tasks.next());
     }
-    throw new NotFoundException(
+    throw new WorkflowNotFoundException(
         String.format("Workflow entity for workflow name: %s and run id: %s not found.",
             workflowName,
             runId));

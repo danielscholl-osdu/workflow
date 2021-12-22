@@ -22,8 +22,16 @@ import org.opengroup.osdu.workflow.util.PayloadBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_ACTIVE;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_TASK_RUN;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_CONCURRENT_WORKFLOW_RUN;
+import static org.opengroup.osdu.azure.workflow.framework.util.CreateWorkflowTestsBuilder.WORKFLOW_DESCRIPTION;
+import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+
 
 public class AzurePayLoadBuilder {
+
+  private static final String DAG_CONTENT = "test-dag-content";
 
   public static String buildInvalidWorkflowIdPayload(String workflowId){
     Map<String, Object> payload = new HashMap<>();
@@ -50,6 +58,42 @@ public class AzurePayLoadBuilder {
   public static String getInValidWorkflowPayload(){
     return AzurePayLoadBuilder.buildStartWorkflow(buildContext(), TestConstants.WORKFLOW_TYPE_INGEST);
   }
+
+  public static String buildCreateWorkflowValidPayloadWithDagContent() {
+    Map<String, String> registrationInstructions = new HashMap<String, String>();
+    registrationInstructions.put("dagContent", DAG_CONTENT);
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
+    payload.put("registrationInstructions", registrationInstructions);
+    payload.put("description", "Test workflow record for integration tests.");
+    return new Gson().toJson(payload);
+  }
+
+  public static String buildCreateWorkflowValidPayloadWithGivenWorkflowName(String workflowName) {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", workflowName);
+    payload.put("registrationInstructions", new HashMap<String, String>());
+    payload.put("description", "Test workflow record for integration tests.");
+
+    return new Gson().toJson(payload);
+  }
+
+  public static Map<String, Object> buildCreateWorkflowRequestWithRegistrationInstructions(String workflowName) {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", workflowName);
+
+    Map<String, Object> registrationInstructions = new HashMap<>();
+    registrationInstructions.put("dagName", workflowName);
+    registrationInstructions.put("concurrentWorkflowRun", WORKFLOW_CONCURRENT_WORKFLOW_RUN);
+    registrationInstructions.put("concurrentTaskRun", WORKFLOW_CONCURRENT_TASK_RUN);
+    registrationInstructions.put("active", WORKFLOW_ACTIVE);
+
+    payload.put("registrationInstructions", registrationInstructions);
+    payload.put("description",WORKFLOW_DESCRIPTION);
+
+    return payload;
+  }
+
   public static Map<String, Object> buildContext() {
     Map<String, Object> context = new HashMap<>();
 

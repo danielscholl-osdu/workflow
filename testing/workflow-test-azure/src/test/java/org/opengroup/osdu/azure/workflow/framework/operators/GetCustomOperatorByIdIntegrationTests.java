@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.azure.workflow.framework.util.HTTPClient;
 import org.opengroup.osdu.azure.workflow.framework.util.TestBase;
@@ -24,6 +25,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
   private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
   @Test
+  @Disabled
   public void should_return_operator_when_request_with_valid_id() throws Exception {
     JsonObject testOperatorData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
     ClientResponse response = client.send(
@@ -41,6 +43,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_return_notFound_when_request_with_invalid_id() throws Exception {
     ClientResponse response = client.send(
         HttpMethod.GET,
@@ -54,6 +57,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_notGivenAccessToken() {
     JsonObject testOperatorData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
     ClientResponse response = client.send(
@@ -69,6 +73,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
     JsonObject testOperatorData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
     ClientResponse response = client.send(
@@ -84,6 +89,7 @@ public abstract class GetCustomOperatorByIdIntegrationTests extends TestBase {
   }
 
   @Test
+  @Disabled
   public void should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
     JsonObject testOperatorData = TestDataUtil.getOperator(SIMPLE_CUSTOM_OPERATOR);
     ClientResponse response = client.send(
