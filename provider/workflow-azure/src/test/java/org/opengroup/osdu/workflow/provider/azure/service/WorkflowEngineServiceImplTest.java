@@ -311,12 +311,55 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
+  public void testTriggerWorkflow_whenUnableToObtainActiveDagRunsFromDb() throws JsonProcessingException {
+    PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
+    Map<String, Object> INPUT_DATA = new HashMap<>();
+    INPUT_DATA.put("Hello", "World");
+    final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+    when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
+    when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
+    when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
+    when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
+    doCallRealMethod().when(engineUtil).addMicroSecParam(any());
+    when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
+    when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
+    when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
+    when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
+    when(airflowConfig.isDagRunAbstractionEnabled()).thenReturn(false);
+    when(restClient.resource(eq(AIRFLOW_DAG_TRIGGER_URL))).thenReturn(webResource);
+    when(webResource.type(eq(MediaType.APPLICATION_JSON))).thenReturn(webResourceBuilder);
+    when(webResourceBuilder.header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE)))
+        .thenReturn(webResourceBuilder);
+    when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(clientResponse);
+    when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
+    when(engineUtil.extractTriggerWorkflowResponse(WORKFLOW_TRIGGER_RESPONSE)).
+        thenReturn(new TriggerWorkflowResponse(EXECUTION_DATE, "", RUN_ID));
+    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenThrow(new AppException(500, "", ""));
+    workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false), INPUT_DATA);
+    verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
+    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder).method(eq("POST"), eq(ClientResponse.class), any(String.class));
+    verify(clientResponse).getStatus();
+    verify(clientResponse).getEntity(String.class);
+    verify(airflowConfig).getUrl();
+    verify(airflowConfig).getAppKey();
+    verify(airflowConfig).isDagRunAbstractionEnabled();
+    verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
+    verify(activeDagRunsCache, times(0)).put(any(), any());
+    verify(activeDagRunsConfig, times(0)).getThreshold();
+    JSONAssert.assertEquals(AIRFLOW_INPUT, airflowInputCaptor.getValue(), true);
+  }
+
+  @Test
   public void testTriggerWorkflowThrowsError_whenActiveDagRunsThresholdExceededAndNumberOfActiveDagRunsNotPresentInCache() {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
     String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
-    final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
@@ -330,9 +373,8 @@ public class WorkflowEngineServiceImplTest {
 
     verify(jdbcTemplate).queryForObject(eq(sqlQuery), eq(Integer.class));
     verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
-    verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
+    verify(activeDagRunsCache, times(0)).put(any(), any());
     verify(activeDagRunsConfig).getThreshold();
-    assertEquals(ACTIVE_DAG_RUNS_THRESHOLD, numberOfActiveDagRunsCaptor.getValue());
   }
 
   @Test

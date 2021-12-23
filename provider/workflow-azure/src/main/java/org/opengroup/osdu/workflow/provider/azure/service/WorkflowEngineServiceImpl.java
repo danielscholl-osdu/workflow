@@ -246,10 +246,10 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     }
 
     if (numberOfActiveDagRuns != null) {
-      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
       if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
         throw new AppException(HttpStatus.TOO_MANY_REQUESTS.value(), "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
       }
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
       LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
     }
   }
