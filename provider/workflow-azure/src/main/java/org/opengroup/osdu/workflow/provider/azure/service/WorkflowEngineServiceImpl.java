@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
 import org.opengroup.osdu.azure.partition.PartitionServiceClient;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -239,13 +238,20 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
     if (numberOfActiveDagRuns == null) {
       LOGGER.info("Obtaining number of active dag runs from airflow postgresql db");
-      numberOfActiveDagRuns = getActiveDagRunsCount();
+      try {
+        numberOfActiveDagRuns = getActiveDagRunsCount();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+    if (numberOfActiveDagRuns != null) {
       activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+      if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
+        throw new AppException(HttpStatus.TOO_MANY_REQUESTS.value(), "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
+      }
+      LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
     }
-    if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
-      throw new AppException(HttpStatus.SC_FORBIDDEN, "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
-    }
-    LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
   }
 
   private void incrementActiveDagRunsCountInCache() {
@@ -316,18 +322,6 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private Integer getActiveDagRunsCount() {
     LOGGER.info("Obtaining active dag runs from postgresql");
     String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
-    try {
-      return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
-    } catch (DataAccessException e) {
-      e.printStackTrace();
-      throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR,
-          "DataAccessException",
-          "Error occurred while obtaining number of active dag runs from airflow db");
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR,
-          "Unknown error occurred. Unable to query airflow db",
-          e.getMessage());
-    }
+    return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
   }
 }
