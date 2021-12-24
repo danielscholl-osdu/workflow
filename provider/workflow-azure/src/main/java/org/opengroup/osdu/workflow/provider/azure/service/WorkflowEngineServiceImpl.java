@@ -241,8 +241,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       try {
         numberOfActiveDagRuns = getActiveDagRunsCount();
       } catch (Exception e) {
-        String errorMessage = "Unable to obtain active dag runs count from airflow database. " + e.getMessage();
-        LOGGER.error(errorMessage);
+        LOGGER.error("Unable to obtain active dag runs count from airflow database", e);
       }
     }
 
