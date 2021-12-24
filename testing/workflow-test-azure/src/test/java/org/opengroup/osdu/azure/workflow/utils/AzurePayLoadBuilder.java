@@ -69,6 +69,14 @@ public class AzurePayLoadBuilder {
     return new Gson().toJson(payload);
   }
 
+  public static String buildCreateWorkflowValidPayloadWithGivenDescription(String description) {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
+    payload.put("registrationInstructions", new HashMap<String, String>());
+    payload.put("description", description);
+    return new Gson().toJson(payload);
+  }
+
   public static String buildCreateWorkflowValidPayloadWithGivenWorkflowName(String workflowName) {
     Map<String, Object> payload = new HashMap<>();
     payload.put("workflowName", workflowName);
