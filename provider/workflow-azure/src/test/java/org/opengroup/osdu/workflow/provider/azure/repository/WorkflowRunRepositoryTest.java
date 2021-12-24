@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppError;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -31,14 +31,27 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.opengroup.osdu.workflow.provider.azure.consts.CacheConstants.ACTIVE_DAG_RUNS_COUNT_CACHE_KEY;
 import static org.springframework.util.Assert.doesNotContain;
 
 /**
@@ -113,6 +126,9 @@ public class WorkflowRunRepositoryTest {
   @Mock
   private WorkflowTasksSharingRepository workflowTasksSharingRepository;
 
+  @Mock
+  private ICache<String, Integer> activeDagRunsCache;
+
   @InjectMocks
   private WorkflowRunRepository workflowRunRepository;
 
@@ -186,6 +202,7 @@ public class WorkflowRunRepositoryTest {
         eq(WORKFLOW_RUN_COLLECTION), eq(RUN_ID), eq(WORKFLOW_NAME), workflowRunDocArgumentCaptor.capture());
     when(cosmosStore.findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_RUN_COLLECTION),
         eq(RUN_ID), eq(WORKFLOW_NAME), eq(WorkflowRunDoc.class))).thenReturn(Optional.of(updatedWorkflowRunDoc));
+    when(activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY)).thenReturn(null);
     final WorkflowRun response = workflowRunRepository.updateWorkflowRun(updatedWorkflowRun);
     verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_RUN_COLLECTION),
         eq(RUN_ID), eq(WORKFLOW_NAME), eq(WorkflowRunDoc.class));
@@ -195,6 +212,38 @@ public class WorkflowRunRepositoryTest {
     verify(cosmosConfig,times(2)).getDatabase();
     verify(cosmosConfig, times(2)).getWorkflowRunCollection();
     verify(dpsHeaders, times(3)).getPartitionId();
+    verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY));
+    assertThat(workflowRunDocArgumentCaptor.getValue().getStatus(), equalTo(response.getStatus().toString()));
+    assertThat(workflowRunDocArgumentCaptor.getValue().getId(), equalTo(response.getRunId()));
+    assertThat(workflowRunDocArgumentCaptor.getValue().getWorkflowName(), equalTo(response.getWorkflowId()));
+    assertThat(workflowRunDocArgumentCaptor.getValue().getSubmittedBy(), equalTo(response.getSubmittedBy()));
+    assertThat(workflowRunDocArgumentCaptor.getValue().getEndTimeStamp(), equalTo(WORKFLOW_RUN_END_TIMESTAMP));
+  }
+
+  @Test
+  public void testUpdateWorkflowRunStatusWithExistingWorkflowRunAndActiveDagRunsCacheContainsActiveDagRunsCount() throws Exception {
+    final WorkflowRun updatedWorkflowRun = OBJECT_MAPPER.readValue(UPDATED_WORKFLOW_RUN, WorkflowRun.class);
+    final WorkflowRunDoc updatedWorkflowRunDoc = OBJECT_MAPPER.readValue(UPDATED_WORKFLOW_RUN_DOC, WorkflowRunDoc.class);
+    final ArgumentCaptor<WorkflowRunDoc> workflowRunDocArgumentCaptor = ArgumentCaptor.forClass(WorkflowRunDoc.class);
+    when(cosmosConfig.getDatabase()).thenReturn(DATABASE_NAME);
+    when(cosmosConfig.getWorkflowRunCollection()).thenReturn(WORKFLOW_RUN_COLLECTION);
+    when(dpsHeaders.getPartitionId()).thenReturn(PARTITION_ID);
+    doNothing().when(cosmosStore).replaceItem(eq(PARTITION_ID), eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION), eq(RUN_ID), eq(WORKFLOW_NAME), workflowRunDocArgumentCaptor.capture());
+    when(cosmosStore.findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_RUN_COLLECTION),
+        eq(RUN_ID), eq(WORKFLOW_NAME), eq(WorkflowRunDoc.class))).thenReturn(Optional.of(updatedWorkflowRunDoc));
+    when(activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY)).thenReturn(1);
+    final WorkflowRun response = workflowRunRepository.updateWorkflowRun(updatedWorkflowRun);
+    verify(cosmosStore).findItem(eq(PARTITION_ID), eq(DATABASE_NAME), eq(WORKFLOW_RUN_COLLECTION),
+        eq(RUN_ID), eq(WORKFLOW_NAME), eq(WorkflowRunDoc.class));
+    verify(cosmosStore).replaceItem(eq(PARTITION_ID), eq(DATABASE_NAME),
+        eq(WORKFLOW_RUN_COLLECTION), eq(RUN_ID), eq(WORKFLOW_NAME), any(WorkflowRunDoc.class));
+    verify(workflowTasksSharingRepository, times(1)).deleteTasksSharingInfoContainer(eq(PARTITION_ID), eq(WORKFLOW_NAME), eq(RUN_ID));
+    verify(cosmosConfig,times(2)).getDatabase();
+    verify(cosmosConfig, times(2)).getWorkflowRunCollection();
+    verify(dpsHeaders, times(3)).getPartitionId();
+    verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY));
+    verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY), eq(0));
     assertThat(workflowRunDocArgumentCaptor.getValue().getStatus(), equalTo(response.getStatus().toString()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getId(), equalTo(response.getRunId()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getWorkflowName(), equalTo(response.getWorkflowId()));

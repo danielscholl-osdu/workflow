@@ -7,6 +7,9 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.json.JSONObject;
+import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
+import org.opengroup.osdu.azure.partition.PartitionServiceClient;
+import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
@@ -14,6 +17,7 @@ import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.azure.config.ActiveDagRunsConfig;
 import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
@@ -25,12 +29,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.opengroup.osdu.workflow.provider.azure.consts.CacheConstants.ACTIVE_DAG_RUNS_COUNT_CACHE_KEY;
 
 @Service
 @Primary
@@ -71,6 +79,19 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Autowired
   @Qualifier("WorkflowObjectMapper")
   private ObjectMapper om;
+
+  @Autowired
+  @Qualifier("ActiveDagRunsCache")
+  private ICache<String, Integer> activeDagRunsCache;
+
+  @Autowired
+  private ActiveDagRunsConfig activeDagRunsConfig;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private PartitionServiceClient partitionService;
 
   @Override
   public void createWorkflow(
@@ -180,6 +201,12 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
                                                  Map<String, Object> inputData) {
+    PartitionInfoAzure pi = this.partitionService.getPartition(dpsHeaders.getPartitionId());
+    Boolean isAirflowEnabled = pi.getAirflowEnabled();
+    // NOTE: [aaljain] limiting trigger requests not supported for multi partition
+    if (!isAirflowEnabled) {
+      checkAndUpdateActiveDagRunsCache();
+    }
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
     String workflowId = rq.getWorkflowId();
@@ -197,10 +224,42 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       final TriggerWorkflowResponse triggerWorkflowResponse = engineUtil.
           extractTriggerWorkflowResponse(response.getEntity(String.class));
       LOGGER.info("Airflow response: {}.", triggerWorkflowResponse);
+      if (!isAirflowEnabled) {
+        incrementActiveDagRunsCountInCache();
+      }
       return triggerWorkflowResponse;
     } catch (JsonProcessingException e) {
       final String error = "Unable to Process(Parse, Generate) JSON value";
       throw new AppException(500, error, e.getMessage());
+    }
+  }
+
+  private void checkAndUpdateActiveDagRunsCache() {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
+    if (numberOfActiveDagRuns == null) {
+      LOGGER.info("Obtaining number of active dag runs from airflow postgresql db");
+      try {
+        numberOfActiveDagRuns = getActiveDagRunsCount();
+      } catch (Exception e) {
+        LOGGER.error("Unable to obtain active dag runs count from airflow database", e);
+      }
+    }
+
+    if (numberOfActiveDagRuns != null) {
+      if (numberOfActiveDagRuns >= activeDagRunsConfig.getThreshold()) {
+        throw new AppException(HttpStatus.TOO_MANY_REQUESTS.value(), "Triggering a new dag run is not allowed", "Maximum threshold for number of active dag runs reached");
+      }
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+      LOGGER.info("Number of active dag runs present: {}", numberOfActiveDagRuns);
+    }
+  }
+
+  private void incrementActiveDagRunsCountInCache() {
+    Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
+    if (numberOfActiveDagRuns != null) {
+      numberOfActiveDagRuns += 1;
+      LOGGER.info("Incrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns);
+      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
     }
   }
 
@@ -258,5 +317,11 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     } else {
       return airflowConfigResolver.getAirflowConfig(dpsHeaders.getPartitionId());
     }
+  }
+
+  private Integer getActiveDagRunsCount() {
+    LOGGER.info("Obtaining active dag runs from postgresql");
+    String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
+    return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
   }
 }

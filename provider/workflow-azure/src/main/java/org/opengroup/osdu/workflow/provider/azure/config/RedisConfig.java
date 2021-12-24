@@ -26,6 +26,7 @@ public class RedisConfig {
   private String redisPassword;
   private int redisPort;
   private int workflowMetadataTtl;
+  private int activeDagRunsTtl;
 
   @Autowired
   private SecretClient kv;

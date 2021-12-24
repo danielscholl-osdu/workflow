@@ -224,6 +224,11 @@ is approved.
   data since it will have to be deleted from all the partitions.
 - GetAll api will return the combined list of system as well as private workflows.
 
+## Limit on triggering workflow requests
+
+- Currently, we limit the number of trigger requests based on a threshold that can be provided as part of the configuration.
+- Default threshold is set to be `50000` and can be overridden through property `osdu.azure.active-dag-runs.threshold` in `application.properties`.
+
 ## License
 
 Copyright © Microsoft Corporation
