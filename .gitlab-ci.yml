@@ -32,31 +32,31 @@ variables:
 
 include:
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "standard-setup.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "build/maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "scanners/gitlab-ultimate.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "scanners/fossa-maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "publishing/pages.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "cloud-providers/osdu-gcp-gke.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
+    ref: "ingestion-code-coverage"
     file: "cloud-providers/ibm.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"

@@ -349,7 +349,7 @@ curl --location --request PUT 'https://{path}/v1/workflow/{workflow_name}/workfl
 as per airflow community, airflow experimnetal API will be discontinued. with help of MR 160 we added airflow 2.0 stable api support. for more details please check mentioned MR. 160
 
 #### Procedure to switch airflow 2.0 :
-- add following properties
+- add following properties 
 
 | Key | Value | Decription |
 | ------ | ------ | ------ |
@@ -387,6 +387,3 @@ on the Google developer's portal][application-default-credentials].
 * Documentation for the GCP Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)
 
 
-## Azure code coverage
-
-[![coverage report](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/badges/master/coverage.svg)](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/commits/master)
