@@ -1,5 +1,7 @@
 ## Ingestion Workflow Service
 
+[![coverage report](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/badges/master/coverage.svg)](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/commits/master)
+
 The Workflow service provides a wrapper functionality around the Apache Airflow functions and is
 designed to carry out preliminary work with files before running the Airflow Directed Acyclic Graphs
 (DAGs) that will perform actual ingestion of OSDU data. In OSDU R2, depending on the types of data,
