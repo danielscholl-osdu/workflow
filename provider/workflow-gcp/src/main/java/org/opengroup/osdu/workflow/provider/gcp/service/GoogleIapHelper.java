@@ -17,26 +17,24 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.http.json.JsonHttpContent;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.IdTokenCredentials;
 import com.google.auth.oauth2.IdTokenProvider;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -85,12 +83,10 @@ public class GoogleIapHelper {
   public HttpRequest buildIapRequest(String webServerUrl, String iapClientId,
       String httpMethod, @Nullable String data) {
     try {
-      JsonHttpContent jsonHttpContent = null;
+      InputStreamContent inputStreamContent = null;
       if (Objects.nonNull(data)) {
-        Map<String, Object> dataMap =
-            objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
-            });
-        jsonHttpContent = new JsonHttpContent(new JacksonFactory(), dataMap);
+        inputStreamContent =
+            new InputStreamContent("application/json", new ByteArrayInputStream(data.getBytes()));
       }
       IdTokenProvider idTokenProvider = getIdTokenProvider();
       IdTokenCredentials credentials = getIdTokenCredentials(idTokenProvider, iapClientId);
@@ -98,7 +94,7 @@ public class GoogleIapHelper {
 
       return httpTransport
           .createRequestFactory(httpRequestInitializer)
-          .buildRequest(httpMethod, new GenericUrl(webServerUrl), jsonHttpContent);
+          .buildRequest(httpMethod, new GenericUrl(webServerUrl), inputStreamContent);
     } catch (IOException e) {
       throw new GoogleIamException("Exception when build authorized request", e);
     }
