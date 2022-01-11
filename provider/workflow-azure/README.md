@@ -226,8 +226,32 @@ is approved.
 
 ## Limit on triggering workflow requests
 
-- Currently, we limit the number of trigger requests based on a threshold that can be provided as part of the configuration.
-- Default threshold is set to be `50000` and can be overridden through property `osdu.azure.active-dag-runs.threshold` in `application.properties`.
+- Currently, we limit the number of trigger requests based on a threshold that can be provided as
+  part of the configuration.
+- Default threshold is set to be `50000` and can be overridden through
+  property `osdu.azure.active-dag-runs.threshold` in `application.properties`.
+
+### Airflow 2 Migration
+
+To use Airflow2 as with the workflow service modify following values in [values.yaml](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/blob/master/devops/azure/chart/values.yaml#L25)
+
+| name | value |
+| ---  | ---   |
+| `osduAirflowURL` | `http://airflow2-web.airflow2.svc.cluster.local:8080/airflow2` |
+| `airflowVersion2Enabled` | `true` |
+
+The steps for creation of the airflow2 setup is
+document [here](https://community.opengroup.org/osdu/platform/deployment-and-operations/infra-azure-provisioning/-/blob/master/docs/airflow2-migration-guide.md)
+.
+
+### Revert to airflow 1.10.12
+
+To use Airflow2 as with the workflow service modify following values in [values.yaml](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/blob/master/devops/azure/chart/values.yaml#L25)
+
+|  name | value |
+| ---  | ---   |
+| `osduAirflowURL` | `http://airflow-web:8080/airflow` |
+| `airflowVersion2Enabled` | `false` |
 
 ## License
 

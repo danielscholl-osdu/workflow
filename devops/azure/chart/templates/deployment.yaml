@@ -99,7 +99,7 @@ spec:
             - name: authorizeAPIKey
               value: "OBSOLETE"
             - name: OSDU_AIRFLOW_URL
-              value: "http://airflow-web:8080/airflow"
+              value: {{ .Values.airflow.config.osduAirflowURL | quote }}
             - name: OSDU_AIRFLOW_USERNAME
               value: "admin"
             - name: OSDU_AIRFLOW_PASSWORD
@@ -150,3 +150,5 @@ spec:
               value: "5432"
             - name: postgres_db
               value: "airflow"
+            - name: OSDU_AIRFLOW_VERSION2_ENABLED
+              value: {{ .Values.airflow.config.airflowVersion2Enabled | quote }}
