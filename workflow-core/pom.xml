@@ -32,6 +32,8 @@
   <name>workflow-core</name>
   <description>Core project for the Workflow service</description>
 
+  <properties />
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
