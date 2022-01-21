@@ -12,6 +12,7 @@ data:
   workflow_admin_account: ""
   shared_tenant_name: ""
   airflow_version_2: "true"
+  iapp_mode: "true"
 
 conf:
   configmap: "workflow-config"

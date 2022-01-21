@@ -20,9 +20,10 @@ spec:
       containers:
       - name: "{{ .Values.conf.app_name }}"
         image: "{{ .Values.data.image }}"
+        imagePullPolicy: "{{ .Values.data.imagePullPolicy }}"
         envFrom:
         - configMapRef:
-            name: "{{ .Values.conf.configmap }}"                       
+            name: "{{ .Values.conf.configmap }}"
         securityContext:
           allowPrivilegeEscalation: false
           runAsUser: 0
