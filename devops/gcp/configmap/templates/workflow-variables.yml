@@ -16,4 +16,5 @@ data:
   WORKFLOW_ADMIN_ACCOUNT: "{{ .Values.data.workflow_admin_account }}"
   SHARED_TENANT_NAME: "{{ .Values.data.shared_tenant_name }}"
   OSDU_AIRFLOW_VERSION2: "{{ .Values.data.airflow_version_2 }}"
+  AIRFLOW_IAAP_MODE: "{{.Values.data.iapp_mode}}"
 
