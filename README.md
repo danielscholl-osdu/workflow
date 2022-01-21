@@ -387,6 +387,3 @@ on the Google developer's portal][application-default-credentials].
 * Documentation for the GCP Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)
 
 
-## AWS implementation
-
-See README in provider/workflow-aws/README.md
