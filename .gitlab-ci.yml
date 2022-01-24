@@ -21,6 +21,7 @@ variables:
   AWS_ENVIRONMENT: dev
   AWS_DEPLOY_TARGET: EKS
   AWS_EKS_DEPLOYMENT_NAME: os-ingestion-workflow
+  AWS_SERVICE_NAMESPACE: osdu-ingest
 
   # Start azure specific variables
   AZURE_SERVICE: ingestion-workfow

@@ -48,12 +48,12 @@ public class WorkflowSqsClient {
     sqs = sqsConfig.AmazonSQS();
   }
 
-  public void sendMessageToWorkflowQueue(String serializedMsg){
-    log.info("Sending serialized message");
-    log.debug(String.format("Serialized message contents: %s", serializedMsg));
+  public void sendMessageToWorkflowQueue(String ref){
+    log.info("Sending message");
+    log.debug(String.format("S3 reference: %s", ref));
     SendMessageRequest send_msg_request = new SendMessageRequest()
         .withQueueUrl(awsConfig.workflowQueueUrl)
-        .withMessageBody(serializedMsg);
+        .withMessageBody(ref);
     sqs.sendMessage(send_msg_request);
     log.info("Message successfully sent");
   }

@@ -37,6 +37,7 @@ import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.repository.AwsWorkflowRunRepository;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
+import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
@@ -48,15 +49,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.RequestScope;
 
 @Service
 @Primary
+@RequestScope
 public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AwsWorkflowEngineServiceImpl.class);
 
   @Inject
   private AwsServiceConfig config;
+
+  @Inject
+  private DpsHeaders dpsHeaders;
 
   @Inject
   AwsServiceConfig awsConfig;
@@ -72,6 +78,9 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Inject
   WorkflowSqsClient sqsClient;
+
+  @Inject
+  S3Client s3Client;
 
   @Inject
   private WorkflowRequestBodyFactory workflowRequestBodyFactory;
@@ -118,7 +127,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
         TriggerWorkflowResponse resp = null;
 
-        switch (awsConfig.airflowApiMode) {
+        switch (awsConfig.getAirflowApiMode()) {
           case AwsAirflowApiMode.HTTP:
             ClientResponse clientResp = triggerWorkflowUsingApi(runId, workflowId, workflowName, inputData);
             try {
@@ -166,8 +175,8 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
     String serializedData = workflowRequestBodyFactory.getSerializedWorkflowRequest(inputData,
         workflowName, runId, headers, true);
 
-    sqsClient.sendMessageToWorkflowQueue(serializedData);
-
+    String ref = s3Client.save(runId, serializedData, dpsHeaders.getPartitionId());
+    sqsClient.sendMessageToWorkflowQueue(ref);
   }
 
   private ClientResponse triggerWorkflowUsingApi(final String runId, final String workflowId,
