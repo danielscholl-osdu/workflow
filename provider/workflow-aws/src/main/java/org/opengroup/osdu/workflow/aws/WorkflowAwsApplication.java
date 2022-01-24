@@ -14,10 +14,16 @@
 
 package org.opengroup.osdu.workflow.aws;
 
+import org.opengroup.osdu.core.aws.mongodb.config.MongoDBAutoconfigExclude;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
-@SpringBootApplication(scanBasePackages = "org.opengroup.osdu")
+@ComponentScan(
+    basePackages = {"org.opengroup.osdu"},
+    excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = MongoDBAutoconfigExclude.class)})
+@SpringBootApplication
 public class WorkflowAwsApplication {
 
   public static void main(String[] args) {
