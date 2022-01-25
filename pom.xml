@@ -51,7 +51,7 @@
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <os-core-common.version>0.13.0</os-core-common.version>
     <springfox.version>3.0.0</springfox.version>
-    <log4j2.version>2.17.0</log4j2.version>
+    <log4j2.version>2.17.1</log4j2.version>
   </properties>
 
   <licenses>
