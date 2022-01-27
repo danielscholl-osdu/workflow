@@ -19,6 +19,7 @@ package org.opengroup.osdu.workflow.provider.gcp.osm.config;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
@@ -48,5 +49,10 @@ public class PgTenantDestinationResolver implements PgDestinationResolver {
   public PgDestinationResolution resolve(Destination destination) {
     TenantInfo ti = tenantInfoFactory.getTenantInfo(destination.getPartitionId());
     return PgDestinationResolution.builder().projectId(ti.getProjectId()).build();
+  }
+
+  @Override
+  public void close() throws IOException {
+
   }
 }
