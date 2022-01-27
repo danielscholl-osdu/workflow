@@ -19,34 +19,115 @@ package org.opengroup.osdu.workflow.provider.gcp.osm.config;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
+import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import javax.annotation.PreDestroy;
+import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.opengroup.osdu.core.common.partition.IPartitionProvider;
+import org.opengroup.osdu.core.common.partition.PartitionException;
+import org.opengroup.osdu.core.common.partition.PartitionInfo;
+import org.opengroup.osdu.core.common.partition.Property;
 import org.opengroup.osdu.core.gcp.osm.model.Destination;
+import org.opengroup.osdu.core.gcp.osm.translate.TranslatorRuntimeException;
 import org.opengroup.osdu.core.gcp.osm.translate.postgresql.PgDestinationResolution;
 import org.opengroup.osdu.core.gcp.osm.translate.postgresql.PgDestinationResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @Scope(SCOPE_SINGLETON)
 @ConditionalOnProperty(name = "osmDriver", havingValue = "postgres")
 @RequiredArgsConstructor
 public class PgTenantDestinationResolver implements PgDestinationResolver {
 
-  private final ITenantFactory tenantInfoFactory;
+  private final IPartitionProvider partitionProvider;
 
-  /**
-   * Takes provided Destination with partitionId set to needed tenantId, gets its TenantInfo and
-   * uses it to find a relevant DB server URL.
-   *
-   * @param destination to resolve
-   * @return resolution results
-   */
+  private final PgOsmConfigurationProperties properties;
+
+  private static final String DATASOURCE = ".datasource.";
+  private static final String URL = DATASOURCE.concat("url");
+  private static final String USERNAME = DATASOURCE.concat("username");
+  private static final String PASSWORD = DATASOURCE.concat("password");
+
+  private static final String DRIVER_CLASS_NAME = "org.postgresql.Driver";
+
+  private final Map<String, DataSource> dataSourceCache = new HashMap<>();
+
   @Override
   public PgDestinationResolution resolve(Destination destination) {
-    TenantInfo ti = tenantInfoFactory.getTenantInfo(destination.getPartitionId());
-    return PgDestinationResolution.builder().projectId(ti.getProjectId()).build();
+
+    String partitionId = destination.getPartitionId();
+    DataSource dataSource = dataSourceCache.get(partitionId);
+    if (dataSource == null || (dataSource instanceof HikariDataSource
+        && ((HikariDataSource) dataSource).isClosed())) {
+      synchronized (dataSourceCache) {
+        dataSource = dataSourceCache.get(partitionId);
+        if (dataSource == null || (dataSource instanceof HikariDataSource
+            && ((HikariDataSource) dataSource).isClosed())) {
+
+          PartitionInfo partitionInfo;
+          try {
+            partitionInfo = partitionProvider.get(destination.getPartitionId());
+          } catch (PartitionException e) {
+            throw new TranslatorRuntimeException(e,
+                "Partition '%s' destination resolution issue", destination.getPartitionId());
+          }
+          Map<String, Property> partitionProperties = partitionInfo.getProperties();
+
+          String url = getPartitionProperty(partitionId, partitionProperties, URL);
+          String username = getPartitionProperty(partitionId, partitionProperties, USERNAME);
+          String password = getPartitionProperty(partitionId, partitionProperties, PASSWORD);
+
+          dataSource = DataSourceBuilder.create()
+              .driverClassName(DRIVER_CLASS_NAME)
+              .url(url)
+              .username(username)
+              .password(password)
+              .build();
+
+          HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+          hikariDataSource.setMaximumPoolSize(properties.getMaximumPoolSize());
+          hikariDataSource.setMinimumIdle(properties.getMinimumIdle());
+          hikariDataSource.setIdleTimeout(properties.getIdleTimeout());
+          hikariDataSource.setMaxLifetime(properties.getMaxLifetime());
+          hikariDataSource.setConnectionTimeout(properties.getConnectionTimeout());
+
+          dataSourceCache.put(partitionId, dataSource);
+        }
+      }
+    }
+
+    return PgDestinationResolution.builder()
+        .datasource(dataSource)
+        .build();
+  }
+
+  @PreDestroy
+  @Override
+  public void close() {
+    log.info("On pre-destroy. {} DataSources to shutdown", dataSourceCache.size());
+    for (DataSource dataSource : dataSourceCache.values()) {
+      if (dataSource instanceof HikariDataSource && !((HikariDataSource) dataSource).isClosed()) {
+        ((HikariDataSource) dataSource).close();
+      }
+    }
+  }
+
+  private String getPartitionProperty(String partitionId, Map<String, Property> partitionProperties,
+      String propertyName) {
+    String fullName = properties.getPartitionPropertiesPrefix().concat(propertyName);
+    return Optional.ofNullable(partitionProperties.get(fullName)).map(Property::getValue)
+        .map(Object::toString)
+        .orElseThrow(() ->
+            new TranslatorRuntimeException(null,
+                "Partition '%s' Postgres OSM destination resolution configuration issue. Property '%s' is not provided in PartitionInfo.",
+                partitionId, fullName));
   }
 }
