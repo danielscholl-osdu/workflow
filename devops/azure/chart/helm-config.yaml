@@ -28,3 +28,9 @@ image:
   repository: #{container-registry}#.azurecr.io
   branch: #{ENVIRONMENT_NAME}#
   tag: #{Build.SourceVersion}#
+
+airflow:
+  config:
+    osduAirflowURL: "http://airflow2-web.airflow2.svc.cluster.local:8080/airflow2"
+    airflowVersion2Enabled: "true"
+
