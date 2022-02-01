@@ -381,7 +381,7 @@ The following software have components provided under the terms of this license:
 - Microsoft Azure SDK for SQL API of Azure Cosmos DB Service (from https://github.com/Azure/azure-sdk-for-java)
 - Mockito (from http://mockito.org, http://www.mockito.org, https://github.com/mockito/mockito)
 - MongoDB Driver (from http://www.mongodb.org)
-- MongoDB Java Driver Core (from http://www.mongodb.org)
+- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org)
 - Netty/All-in-One (from https://netty.io/netty-all/, https://repo1.maven.org/maven2/io/netty/netty-all)
 - Netty/Buffer (from https://repo1.maven.org/maven2/io/netty/netty-buffer)
 - Netty/Codec (from https://repo1.maven.org/maven2/io/netty/netty-codec)
@@ -416,7 +416,7 @@ The following software have components provided under the terms of this license:
 - Non-Blocking Reactive Foundation for the JVM (from https://github.com/reactor/reactor, https://github.com/reactor/reactor-core)
 - OAuth 2.0 SDK with OpenID Connect extensions (from https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions)
 - Objenesis (from http://objenesis.org)
-- OkHttp (from https://github.com/square/okhttp, https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
+- OkHttp (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
 - OkHttp Logging Interceptor (from https://github.com/square/okhttp, https://repo1.maven.org/maven2/com/squareup/okhttp3/logging-interceptor, https://square.github.io/okhttp/)
 - OkHttp URLConnection (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp-urlconnection, https://square.github.io/okhttp/)
 - Okio (from https://github.com/square/okio/, https://repo1.maven.org/maven2/com/squareup/okio/okio)
@@ -439,16 +439,16 @@ The following software have components provided under the terms of this license:
 - Spring Boot Actuator Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
 - Spring Boot AutoConfigure (from https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-autoconfigure, https://spring.io/projects/spring-boot)
 - Spring Boot Configuration Processor (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-tools/spring-boot-configuration-processor, https://spring.io/projects/spring-boot)
-- Spring Boot Dependencies (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
+- Spring Boot Dependencies (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#, https://spring.io/projects/spring-boot)
 - Spring Boot JDBC Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
 - Spring Boot Json Starter (from https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-json, https://spring.io/projects/spring-boot)
 - Spring Boot Log4j 2 Starter (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-log4j2, https://spring.io/projects/spring-boot)
 - Spring Boot Logging Starter (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-logging, https://spring.io/projects/spring-boot)
 - Spring Boot Security Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
 - Spring Boot Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
-- Spring Boot Test (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
-- Spring Boot Test Auto-Configure (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
-- Spring Boot Test Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
+- Spring Boot Test (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-test, https://spring.io/projects/spring-boot)
+- Spring Boot Test Auto-Configure (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-test-autoconfigure, https://spring.io/projects/spring-boot)
+- Spring Boot Test Starter (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-test, https://spring.io/projects/spring-boot)
 - Spring Boot Tomcat Starter (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-tomcat, https://spring.io/projects/spring-boot)
 - Spring Boot Validation Starter (from http://projects.spring.io/spring-boot/, https://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
 - Spring Boot Web Starter (from http://projects.spring.io/spring-boot/, https://spring.io/projects/spring-boot)
@@ -546,20 +546,20 @@ The following software have components provided under the terms of this license:
 - tomcat-annotations-api (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-api (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-catalina (from http://tomcat.apache.org/, https://tomcat.apache.org/)
-- tomcat-coyote (from https://tomcat.apache.org/)
+- tomcat-coyote (from http://tomcat.apache.org/)
 - tomcat-el-api (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-embed-core (from http://tomcat.apache.org/)
 - tomcat-embed-el (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-embed-websocket (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-jaspic-api (from https://tomcat.apache.org/)
-- tomcat-jni (from https://tomcat.apache.org/)
-- tomcat-jsp-api (from https://tomcat.apache.org/)
+- tomcat-jni (from http://tomcat.apache.org/)
+- tomcat-jsp-api (from http://tomcat.apache.org/)
 - tomcat-juli (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-servlet-api (from http://tomcat.apache.org/, https://tomcat.apache.org/)
 - tomcat-util (from http://tomcat.apache.org/, https://tomcat.apache.org/)
-- tomcat-util-scan (from https://tomcat.apache.org/)
+- tomcat-util-scan (from http://tomcat.apache.org/)
 - tomcat-websocket (from http://tomcat.apache.org/, https://tomcat.apache.org/)
-- tomcat-websocket-api (from https://tomcat.apache.org/)
+- tomcat-websocket-api (from http://tomcat.apache.org/)
 
 ========================================================================
 BSD-2-Clause
@@ -616,7 +616,7 @@ CC-BY-2.5
 The following software have components provided under the terms of this license:
 
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
-- MongoDB Java Driver Core (from http://www.mongodb.org)
+- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org)
 
 ========================================================================
 CC-BY-4.0
@@ -829,7 +829,7 @@ The following software have components provided under the terms of this license:
 - Microsoft Azure common module for Storage (from https://github.com/Azure/azure-sdk-for-java)
 - Microsoft Azure internal Avro module for Storage (from https://github.com/Azure/azure-sdk-for-java)
 - Mockito (from http://mockito.org, http://www.mockito.org, https://github.com/mockito/mockito)
-- MongoDB Java Driver Core (from http://www.mongodb.org)
+- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org)
 - Netty/All-in-One (from https://netty.io/netty-all/, https://repo1.maven.org/maven2/io/netty/netty-all)
 - Netty/Codec/HTTP (from https://repo1.maven.org/maven2/io/netty/netty-codec-http)
 - Netty/Common (from https://repo1.maven.org/maven2/io/netty/netty-common)
@@ -862,7 +862,7 @@ MPL-2.0
 The following software have components provided under the terms of this license:
 
 - Javassist (from http://www.javassist.org/)
-- OkHttp (from https://github.com/square/okhttp, https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
+- OkHttp (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
 
 ========================================================================
 PHP-3.01
