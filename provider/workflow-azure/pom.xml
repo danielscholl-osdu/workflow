@@ -227,7 +227,6 @@
     <dependency>
       <groupId>net.minidev</groupId>
       <artifactId>json-smart</artifactId>
-      <version>2.4.5</version>
     </dependency>
 
     <dependency>
