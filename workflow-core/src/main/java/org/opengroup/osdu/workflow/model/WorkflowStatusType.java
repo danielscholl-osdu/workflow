@@ -36,10 +36,13 @@ public enum WorkflowStatusType {
   FAILED,
 
   @JsonProperty("success")
-  SUCCESS;
+  SUCCESS,
+
+  @JsonProperty("queued")
+  QUEUED;
 
   public static List<WorkflowStatusType> getActiveStatusTypes() {
-    return Arrays.asList(SUBMITTED, RUNNING);
+    return Arrays.asList(SUBMITTED, RUNNING, QUEUED);
   }
 
   public static List<WorkflowStatusType> getCompletedStatusTypes() {
