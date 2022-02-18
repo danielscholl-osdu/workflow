@@ -18,35 +18,13 @@ In order to run this service locally, you will need the following:
 - [AdoptOpenJDK8](https://adoptopenjdk.net/)
 - Infrastructure dependencies, deployable through the relevant [infrastructure template](https://community.opengroup.org/osdu/platform/deployment-and-operations/infra-gcp-provisioning)
 
-### Environment Variables
 
-In order to run the service locally, you will need to have the following environment variables defined.
+## Service Configuration
+### Anthos:
+[Anthos service configuration ](docs/anthos/README.md)
+### GCP:
+[Gcp service configuration ](docs/gcp/README.md)
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
-| `osdu.entitlements.url` | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint | no | output of infrastructure deployment |
-| `osdu.entitlements.app-key` | ex `test` | Entitlements app key | no | - |
-| `WORKFLOW_ADMIN_ACCOUNT` | ex `admin@domain.iam.gserviceaccount.com` | Admin account for using root endpoints | yes | - |
-| `gcp.airflow.url` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
-| `GOOGLE_AUDIENCES` | ex `*****.apps.googleusercontent.com` | Client ID for getting access to cloud resources | yes | https://console.cloud.google.com/apis/credentials |
-| `GOOGLE_APPLICATION_CREDENTIALS` | ex `/path/to/directory/service-key.json` | Service account credentials, you only need this if running locally | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `OSDU_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
-| `OSDU_AIRFLOW_USERNAME` | ex `******` | Username for access Apache Airflow | yes | - |
-| `OSDU_AIRFLOW_PASSWORD` | ex `******` | Password for access Apache Airflow | yes | - |
-| `PARTITION_API` | ex `http://localhost:8081/api/partition/v1` | Partition service endpoint | no | - |
-| `SHARED_TENANT_NAME` | ex `common` or `opendes` | the name of the shared tenant | yes | - |
-| `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows to configure message publishing about schemas changes to Pub/Sub | no | - |
-| `STATUS_CHANGED_TOPIC_NAME` | ex `status-changed` | Allows to subscribe a specific Pub/Sub topic | no | - |
-| `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
-| `DATASTORE_LEGACY_DATA_STRUCTURE` | `false` OR `true` | Serves to use already existing data structure, by default true | no | - |
-| `SPRING_DATASTOURCE_URL` | `jdbc:postgresql://127.0.0.1:5432/postgres` | Postgres connection URL | no | - |
-| `SPRING_DATASTOURCE_USERNAME` | `postgres` | Postgres username | yes | - |
-| `SPRING_DATASTOURCE_PASSWORD` | `postgres` | Postgres password | yes | - |
-| `OSDU_AIRFLOW_VERSION2` | `true` OR `false` | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, by default used `false` and `experimental` API | no | - |
-| `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate it requests to Airflow, by default `true` and IAAP used | no | - |
-| `OSDU_AIRFLOW_USERNAME` | `******` | Airflow username, need to be defined if `AIRFLOW_IAAP_MODE`=`false`| yes | - |
-| `OSDU_AIRFLOW_PASSWORD` | `******` | Airflow password, need to be defined if `AIRFLOW_IAAP_MODE`=`false` | yes | - |
 
 **Required to run integration tests**
 
@@ -68,51 +46,9 @@ In order to run the service locally, you will need to have the following environ
 
 | INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
 | ---  | ---   |
-| users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
 
 
-### Persistence layer
-### Database structure for OSMDRIVER=postgres
-```
-DROP TABLE IF EXISTS opendes.workflow;
-CREATE TABLE IF NOT EXISTS opendes.workflow
-(
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_id UNIQUE (id)
-)
-TABLESPACE pg_default;
-ALTER TABLE opendes.workflow
-    OWNER to postgres;
-
-
-DROP TABLE IF EXISTS opendes.workflow_run;
-CREATE TABLE IF NOT EXISTS opendes.workflow_run
-(
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_run_id UNIQUE (id)
-)
-TABLESPACE pg_default;
-ALTER TABLE opendes.workflow_run
-    OWNER to postgres;
-
-
-DROP TABLE IF EXISTS opendes.workflow_status;
-CREATE TABLE IF NOT EXISTS opendes.workflow_status
-(
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_status_id UNIQUE (id)
-)
-TABLESPACE pg_default;
-ALTER TABLE opendes.workflow_status
-    OWNER to postgres;
-
-```
 ### Run Locally
 Check that maven is installed:
 

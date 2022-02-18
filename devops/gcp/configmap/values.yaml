@@ -7,12 +7,9 @@ data:
   partition_api: "http://partition/api/partition/v1/"
   google_audiences: ""
   osdu_entitlements_url: "http://entitlements/api/entitlements/v2/"
-  osdu_entitlements_appkey: ""
   gcp_airflow_url: ""
-  workflow_admin_account: ""
   shared_tenant_name: ""
-  airflow_version_2: "true"
-  iapp_mode: "true"
+  spring_profiles_active: "gcp"
 
 conf:
   configmap: "workflow-config"

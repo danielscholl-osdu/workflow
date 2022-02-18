@@ -65,6 +65,7 @@ public class ComposerIaapClient {
           .statusCode(response.getStatusCode())
           .statusMessage(response.getStatusMessage())
           .build();
+
     } catch (HttpResponseException e) {
       String errorMessage = format("Unable to send request to Airflow. %s", e.getMessage());
       log.error(errorMessage, e);

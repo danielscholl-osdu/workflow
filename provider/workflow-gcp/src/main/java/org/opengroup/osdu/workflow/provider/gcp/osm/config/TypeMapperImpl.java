@@ -24,13 +24,11 @@ import com.google.cloud.datastore.Key;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
-import java.util.HashMap;
 import org.opengroup.osdu.core.gcp.osm.persistence.IdentityTranslator;
 import org.opengroup.osdu.core.gcp.osm.translate.Instrumentation;
 import org.opengroup.osdu.core.gcp.osm.translate.TypeMapper;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
-import org.opengroup.osdu.workflow.model.WorkflowStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,13 +41,7 @@ public class TypeMapperImpl extends TypeMapper {
   public TypeMapperImpl() {
     super(ImmutableList.of(
         new Instrumentation<>(WorkflowMetadata.class,
-            new HashMap<String, String>() {{
-              put("workflowName", "WorkflowName");
-              put("createdBy", "CreatedBy");
-              put("creationTimestamp", "CreationTimestamp");
-              put("description", "Description");
-              put("version", "Version");
-            }},
+            Collections.emptyMap(),
             ImmutableMap.of(
                 "creationTimestamp", Timestamp.class
             ),
@@ -60,14 +52,7 @@ public class TypeMapperImpl extends TypeMapper {
             Collections.singletonList("workflowId")
         ),
         new Instrumentation<>(WorkflowRun.class,
-            new HashMap<String, String>() {{
-              put("workflowId", "WorkflowID");
-              put("workflowName", "WorkflowName");
-              put("startTimeStamp", "StartTimeStamp");
-              put("endTimeStamp", "EndTimeStamp");
-              put("status", "Status");
-              put("submittedBy", "SubmittedBy");
-            }},
+            Collections.emptyMap(),
             ImmutableMap.of(
                 "startTimeStamp", Timestamp.class,
                 "endTimeStamp", Timestamp.class
@@ -76,21 +61,8 @@ public class TypeMapperImpl extends TypeMapper {
                 WorkflowRun::getRunId,
                 ((w, o) -> w.setRunId(((Key) o).getName()))
             ),
-            Collections.singletonList("runId")),
-        new Instrumentation<>(WorkflowStatus.class,
-            new HashMap<String, String>() {{
-              put("workflowId", "WorkflowID");
-              put("airflowRunId", "AirflowRunID");
-              put("workflowStatusType", "Status");
-            }},
-            ImmutableMap.of(
-                "submittedAt", Timestamp.class
-            ),
-            new IdentityTranslator<>(
-                WorkflowStatus::getAirflowRunId,
-                ((w, o) -> w.setAirflowRunId(((Key) o).getName()))
-            ),
-            Collections.singletonList("airflowRunId")))
+            Collections.singletonList("runId"))
+        )
     );
   }
 }
