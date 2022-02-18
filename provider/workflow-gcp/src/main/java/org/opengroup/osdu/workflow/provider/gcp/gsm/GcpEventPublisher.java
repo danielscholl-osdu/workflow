@@ -17,17 +17,10 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.gsm;
 
-import com.google.api.gax.retrying.RetrySettings;
-import com.google.cloud.pubsub.v1.Publisher;
-import com.google.protobuf.ByteString;
-import com.google.pubsub.v1.ProjectTopicName;
-import com.google.pubsub.v1.PubsubMessage;
-import com.google.pubsub.v1.PubsubMessage.Builder;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import com.google.gson.Gson;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.exception.CoreException;
@@ -35,9 +28,12 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.status.IEventPublisher;
+import org.opengroup.osdu.core.gcp.oqm.driver.OqmDriver;
+import org.opengroup.osdu.core.gcp.oqm.model.OqmDestination;
+import org.opengroup.osdu.core.gcp.oqm.model.OqmMessage;
+import org.opengroup.osdu.core.gcp.oqm.model.OqmTopic;
 import org.opengroup.osdu.workflow.provider.gcp.config.EventMessagingPropertiesConfig;
 import org.springframework.stereotype.Service;
-import org.threeten.bp.Duration;
 
 @Slf4j
 @Service
@@ -45,79 +41,44 @@ import org.threeten.bp.Duration;
 public class GcpEventPublisher implements IEventPublisher {
 
   private final EventMessagingPropertiesConfig eventMessagingPropertiesConfig;
-  private Publisher publisher;
   private final TenantInfo tenantInfo;
+  private final OqmDriver driver;
+  private OqmTopic oqmTopic;
 
-  private static final RetrySettings RETRY_SETTINGS = RetrySettings.newBuilder()
-      .setTotalTimeout(Duration.ofSeconds(10))
-      .setInitialRetryDelay(Duration.ofMillis(5))
-      .setRetryDelayMultiplier(2)
-      .setMaxRetryDelay(Duration.ofSeconds(3))
-      .setInitialRpcTimeout(Duration.ofSeconds(10))
-      .setRpcTimeoutMultiplier(2)
-      .setMaxRpcTimeout(Duration.ofSeconds(10))
-      .build();
-
+  @PostConstruct
+  void postConstruct() {
+    oqmTopic = OqmTopic.builder().name(eventMessagingPropertiesConfig.getTopicName()).build();
+  }
 
   @Override
-  public void publish(Message[] messages,
-      Map<String, String> attributesMap) throws CoreException {
+  public void publish(Message[] messages, Map<String, String> attributesMap) throws CoreException {
     if (eventMessagingPropertiesConfig.isMessagingEnabled()) {
       validateInput(messages, attributesMap);
 
-      if (Objects.isNull(this.publisher)) {
-        try {
-          this.publisher = Publisher.newBuilder(
-                  ProjectTopicName.newBuilder()
-                      .setProject(this.tenantInfo.getProjectId())
-                      .setTopic(this.eventMessagingPropertiesConfig.getTopicName()).build())
-              .setRetrySettings(RETRY_SETTINGS).build();
-        } catch (IOException e) {
-          log.error(e.getMessage(), e);
-        }
-      }
-      Map<String, Object> messageMap = createMessageMap(messages, attributesMap);
-      PubsubMessage pubSubMessage = createPubSubMessageList(messageMap);
+      OqmDestination oqmDestination = OqmDestination.builder()
+          .partitionId(tenantInfo.getDataPartitionId())
+          .build();
 
-      publisher.publish(pubSubMessage);
+      OqmMessage oqmMessage = createMessage(messages, attributesMap);
+      driver.publish(oqmMessage, oqmTopic, oqmDestination);
+    } else {
+      log.info("Event publishing disabled");
     }
   }
 
-  private Map<String, Object> createMessageMap(Message[] messages,
-      Map<String, String> attributesMap) {
-    String dataPartitionId = attributesMap.get(DpsHeaders.DATA_PARTITION_ID);
-    String correlationId = attributesMap.get(DpsHeaders.CORRELATION_ID);
-    Map<String, Object> message = new HashMap<>();
-    message.put("data", messages);
-    message.put(DpsHeaders.DATA_PARTITION_ID, dataPartitionId);
-    message.put(DpsHeaders.CORRELATION_ID, correlationId);
-    message.put(DpsHeaders.ACCOUNT_ID, this.tenantInfo.getName());
-    return message;
+  private OqmMessage createMessage(Message[] messages, Map<String, String> attributesMap) {
+    String data = new Gson().toJson(messages);
+    attributesMap.put(DpsHeaders.ACCOUNT_ID, this.tenantInfo.getName());
+    return OqmMessage.builder()
+        .data(data)
+        .attributes(attributesMap)
+        .build();
   }
-
-  private PubsubMessage createPubSubMessageList(Map<String, Object> message) {
-    Builder messageBuilder = PubsubMessage.newBuilder();
-    messageBuilder.putAttributes(DpsHeaders.ACCOUNT_ID,
-        String.valueOf(message.get(DpsHeaders.ACCOUNT_ID)));
-    messageBuilder.putAttributes(DpsHeaders.DATA_PARTITION_ID,
-        String.valueOf(message.get(DpsHeaders.DATA_PARTITION_ID)));
-    messageBuilder.putAttributes(DpsHeaders.CORRELATION_ID,
-        String.valueOf(message.get(DpsHeaders.CORRELATION_ID)));
-
-    Message[] messagesArray = (Message[]) message.get("data");
-
-    ByteString data = ByteString.copyFromUtf8(Arrays.toString(messagesArray));
-    messageBuilder.setData(data);
-
-    return messageBuilder.build();
-  }
-
 
   private void validateInput(Message[] messages, Map<String, String> attributesMap) {
     validateMsg(messages);
     validateAttributesMap(attributesMap);
   }
-
 
   private void validateMsg(Message[] messages) {
     if (Objects.isNull(messages) || messages.length == 0) {
