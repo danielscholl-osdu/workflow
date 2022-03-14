@@ -12,6 +12,9 @@ Must have:
 | `OSDU_AIRFLOW_USERNAME` | `******` | Airflow username, need to be defined if `AIRFLOW_IAAP_MODE`=`false`| yes | - |
 | `OSDU_AIRFLOW_PASSWORD` | `******` | Airflow password, need to be defined if `AIRFLOW_IAAP_MODE`=`false` | yes | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
+| `<POSTGRES_PASSWORD_ENV_VARIABLE_NAME>` | ex `POSTGRES_PASS_OSDU` | Postgres password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `<AMQP_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_PASS_OSDU` | Amqp password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `<AMQP_ADMIN_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_ADMIN_PASS_OSDU` | Amqp admin password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
 
 Defined in default application property file but possible to override:
 
@@ -33,6 +36,23 @@ and usage in mixed mode was not tested. Usage of spring profiles is preferred.
 | `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
 | `OSDU_AIRFLOW_VERSION2` | `true` OR `false` | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, by default used `true`  | no | - |
 | `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate it requests to Airflow, by default `true` and IAAP used | no | - |
+
+### Properties set in Partition service:
+
+Note that properties can be set in Partition as `sensitive` in that case in property `value` should be present **not value itself**, but **ENV variable name**.
+This variable should be present in environment of service that need that variable.
+
+Example:
+```
+    "elasticsearch.port": {
+      "sensitive": false, <- value not sensitive
+      "value": "9243"  <- will be used as is.
+    },
+      "elasticsearch.password": {
+      "sensitive": true, <- value is sensitive
+      "value": "ELASTIC_SEARCH_PASSWORD_OSDU" <- service consumer should have env variable ELASTIC_SEARCH_PASSWORD_OSDU with elastic search password
+    }
+```
 
 ## Postgres configuration:
 
@@ -69,7 +89,7 @@ curl -L -X PATCH 'http://partition.com/api/partition/v1/partitions/opendes' -H '
     },
     "osm.postgres.datasource.password": {
       "sensitive": true,
-      "value": "postgres"
+      "value": "<POSTGRES_PASSWORD_ENV_VARIABLE_NAME>" <- (Not actual value, just name of env variable)
     }
   }
 }'
@@ -94,8 +114,8 @@ ALTER TABLE opendes.workflow
     OWNER to postgres;
 
 
-DROP TABLE IF EXISTS opendes.workflow_run_osm;
-CREATE TABLE IF NOT EXISTS opendes.workflow_run
+DROP TABLE IF EXISTS <partitionId>.workflow_run_osm;
+CREATE TABLE IF NOT EXISTS <partitionId>.workflow_run
 (
 	id text COLLATE pg_catalog."default" NOT NULL,
 	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -103,7 +123,7 @@ CREATE TABLE IF NOT EXISTS opendes.workflow_run
 	CONSTRAINT workflow_run_id UNIQUE (id)
 )
 TABLESPACE pg_default;
-ALTER TABLE opendes.workflow_run
+ALTER TABLE <partitionId>.workflow_run
     OWNER to postgres;
 ```
 
@@ -158,7 +178,7 @@ curl -L -X PATCH 'https://dev.osdu.club/api/partition/v1/partitions/opendes' -H 
     },
     "oqm.rabbitmq.amqp.password": {
       "sensitive": true,
-      "value": "guest"
+      "value": "<AMQP_PASSWORD_ENV_VARIABLE_NAME>" <- (Not actual value, just name of env variable)
     },
 
      "oqm.rabbitmq.admin.schema": {
@@ -183,7 +203,7 @@ curl -L -X PATCH 'https://dev.osdu.club/api/partition/v1/partitions/opendes' -H 
     },
     "oqm.rabbitmq.admin.password": {
       "sensitive": true,
-      "value": "guest"
+      "value": "<AMQP_ADMIN_PASSWORD_ENV_VARIABLE_NAME>" <- (Not actual value, just name of env variable)
     }
   }
 }'
