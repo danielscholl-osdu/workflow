@@ -23,9 +23,48 @@
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
 		<tomcat.embed.core.version>9.0.54</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
+		<jackson-databind.version>2.13.0</jackson-databind.version>
 	</properties>
 
+    <dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-databind.version}</version>
+			</dependency>
+			<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson-databind.version}</version>
+		</dependency>
+			
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
+
+	    <dependency>
+	      <groupId>org.apache.tomcat.embed</groupId>
+	      <artifactId>tomcat-embed-websocket</artifactId>
+	      <version>9.0.54</version>
+	      <exclusions>
+	        <exclusion>
+	          <groupId>org.apache.tomcat.embed</groupId>
+	          <artifactId>tomcat-embed-core</artifactId>
+	        </exclusion>
+	      </exclusions>
+	    </dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>${jackson-databind.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-cbor</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>workflow-core</artifactId>
@@ -46,6 +85,10 @@
 				<exclusion>
 					<groupId>org.yaml</groupId>
 					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-websocket</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
