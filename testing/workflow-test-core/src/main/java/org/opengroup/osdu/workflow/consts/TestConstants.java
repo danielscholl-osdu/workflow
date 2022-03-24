@@ -29,7 +29,7 @@ public class TestConstants {
   public static final String CREATE_SYSTEM_WORKFLOW_API_ENDPOINT ="v1/workflow/system";
   public static final String GET_SYSTEM_WORKFLOW_BY_ID_API_ENDPOINT = "v1/workflow/system/%s";
 
-  public static final String GET_SERVICE_INFO_API_ENDPOINT = "info";
+  public static final String GET_SERVICE_INFO_API_ENDPOINT = "v1/info";
   public static final String GET_ALL_WORKFLOW_PREFIX = "?prefix=";
   public static final String WORKFLOW_TYPE_INGEST = "ingest";
 
