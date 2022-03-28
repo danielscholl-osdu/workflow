@@ -27,6 +27,7 @@ variables:
   AZURE_SERVICE: ingestion-workfow
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure
+  AZURE_COVERAGE_THRESHOLD: 60
   # End azure specific variables
 
 include:

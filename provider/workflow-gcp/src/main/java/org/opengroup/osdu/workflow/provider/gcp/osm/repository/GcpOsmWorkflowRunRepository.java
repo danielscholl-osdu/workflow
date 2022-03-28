@@ -50,7 +50,7 @@ import org.springframework.stereotype.Repository;
 public class GcpOsmWorkflowRunRepository implements IWorkflowRunRepository {
 
   private static final String INCORRECT_RUN_ID_PREFIX = "backfill";
-  public static final String WORKFLOW_NAME = "WorkflowName";
+  public static final String WORKFLOW_NAME = "workflowName";
   public static final String RUN_ID = "runId";
   public static final String LIMIT_PARAM = "limit";
   public static final String CURSOR_PARAM = "cursor";

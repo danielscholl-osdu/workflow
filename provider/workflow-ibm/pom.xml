@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.opengroup.osdu</groupId>
 		<artifactId>os-workflow</artifactId>
-		<version>0.13.0-SNAPSHOT</version>
+		<version>0.14.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>workflow-ibm</artifactId>
-	<version>0.13.0-SNAPSHOT</version>
+	<version>0.14.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>workflow-ibm</name>
@@ -19,7 +19,7 @@
 
 	<properties>
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
-		<osdu.ibmcore.version>0.13.0-rc6</osdu.ibmcore.version>
+		<osdu.ibmcore.version>0.13.0</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
 		<tomcat.embed.core.version>9.0.54</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>workflow-core</artifactId>
-			<version>0.13.0-SNAPSHOT</version>
+			<version>0.14.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.tomcat.embed</groupId>

@@ -40,7 +40,6 @@ import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
 import org.opengroup.osdu.workflow.provider.gcp.osm.config.IDestinationProvider;
 import org.opengroup.osdu.workflow.provider.gcp.repository.ICommonMetadataRepository;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -53,8 +52,8 @@ import org.springframework.stereotype.Repository;
 public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository {
 
   private static final String KEY_DAG_NAME = "dagName";
+  public static final String WORKFLOW_NAME = "workflowName";
   private final WorkflowPropertiesConfiguration workflowConfig;
-  private final IWorkflowEngineService workflowEngineService;
   private final IDestinationProvider destinationProvider;
   private final Context context;
   private final TenantInfo tenantInfo;
@@ -63,15 +62,10 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
   @Override
   public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata,
       boolean isSystemWorkflow) {
-    String dagName = null;
+
     Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
     String workflowName = workflowMetadata.getWorkflowName();
-
-    if (Objects.nonNull(instructions.get(KEY_DAG_NAME))) {
-      dagName = (String) instructions.get(KEY_DAG_NAME);
-    } else {
-      dagName = workflowName;
-    }
+    instructions.putIfAbsent(KEY_DAG_NAME,workflowName);
 
     if (Objects.isNull(workflowMetadata.getWorkflowId()) || workflowMetadata.getWorkflowId()
         .isEmpty()) {
@@ -112,7 +106,7 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
       context.delete(
           clazz,
           destinationProvider.getDestination(tenant, workflowConfig.getWorkflowKind()),
-          eq("WorkflowName", workflowName)
+          eq(WORKFLOW_NAME, workflowName)
       );
     } catch (TranslatorException ex) {
       throw new PersistenceException(HttpStatusCodes.STATUS_CODE_SERVER_ERROR,
@@ -140,7 +134,7 @@ public class GcpOsmCommonMetadataRepository implements ICommonMetadataRepository
         new GetQuery<>(
             clazz,
             destinationProvider.getDestination(tenant, workflowConfig.getWorkflowKind()),
-            eq("WorkflowName", workflowName)
+            eq(WORKFLOW_NAME, workflowName)
         );
     return context.getResultsAsList(workflowMetadata);
   }
