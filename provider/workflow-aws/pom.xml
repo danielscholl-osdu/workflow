@@ -93,13 +93,6 @@
       <version>2.11.2</version>
     </dependency>
 
-    <!--transitive dep security vulnerability-->
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-core</artifactId>
-      <version>9.0.43</version>
-    </dependency>
-
     <!-- AWS managed packages -->
     <dependency>
       <groupId>com.amazonaws</groupId>
