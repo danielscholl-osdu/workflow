@@ -1,11 +1,10 @@
 package org.opengroup.osdu.workflow.provider.azure.gsm;
 
-import com.microsoft.azure.eventgrid.models.EventGridEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.opengroup.osdu.azure.eventgrid.EventGridTopicStore;
+import org.opengroup.osdu.azure.publisherFacade.MessagePublisher;
+import org.opengroup.osdu.azure.publisherFacade.PublisherInfo;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
@@ -13,73 +12,52 @@ import org.opengroup.osdu.core.common.status.IEventPublisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AzureEventGridPublisher implements IEventPublisher {
-
+public class AzureMessagePublisher implements IEventPublisher {
 
   private static final String STATUS_CHANGED = "status-changed";
   private static final String EVENT_DATA_VERSION = "1.0";
 
   @Setter
   @Value("${azure.eventGrid.topicName}")
-  private String topicName;
+  private String eventGridTopic;
 
   @Setter
-  @Value("${azure.eventGrid.enabled}")
-  private Boolean isEventGridEnabled;
+  @Value("${azure.serviceBus.topicName}")
+  private String serviceBusTopic;
 
-  private final EventGridTopicStore eventGridTopicStore;
+  private final MessagePublisher messagePublisher;
 
   @Override
   public void publish(Message[] messages, Map<String, String> attributesMap) throws CoreException {
-    validateEventGrid();
     validateInput(messages, attributesMap);
 
-    Map<String, Object> message = createMessageMap(messages, attributesMap);
-    List<EventGridEvent> eventsList = createEventGridEventList(message);
     String dataPartitionId = attributesMap.get(DpsHeaders.DATA_PARTITION_ID);
-
-    eventGridTopicStore.publishToEventGridTopic(dataPartitionId, topicName, eventsList);
-
     String correlationId = attributesMap.get(DpsHeaders.CORRELATION_ID);
+
+    DpsHeaders dpsHeaders = new DpsHeaders();
+    dpsHeaders.put(DpsHeaders.DATA_PARTITION_ID, dataPartitionId);
+    dpsHeaders.put(DpsHeaders.CORRELATION_ID, correlationId);
+
+    PublisherInfo publisherInfo = PublisherInfo.builder()
+        .batch(messages)
+        .eventGridTopicName(eventGridTopic)
+        .eventGridEventSubject(STATUS_CHANGED)
+        .eventGridEventType(STATUS_CHANGED)
+        .eventGridEventDataVersion(EVENT_DATA_VERSION)
+        .serviceBusTopicName(serviceBusTopic).build();
+
+    messagePublisher.publishMessage(dpsHeaders, publisherInfo);
+
     String logMsg = String.format(
-        "Event published successfully to topic='%s' with dataPartitionId='%s' and correlationId='%s'.",
-        topicName, dataPartitionId, correlationId
+        "Event published successfully to eventGridTopic='%s', ServiceBusTopic='%s' with dataPartitionId='%s' and correlationId='%s'.",
+        eventGridTopic, serviceBusTopic, dataPartitionId, correlationId
     );
     log.info(logMsg);
-  }
-
-  private List<EventGridEvent> createEventGridEventList(Map<String, Object> message) {
-    String messageId = UUID.randomUUID().toString();
-    EventGridEvent eventGridEvent = new EventGridEvent(messageId, STATUS_CHANGED, message, STATUS_CHANGED,
-        DateTime.now(), EVENT_DATA_VERSION);
-
-    return Collections.singletonList(eventGridEvent);
-  }
-
-  private Map<String, Object> createMessageMap(Message[] messages, Map<String, String> attributesMap) {
-    String dataPartitionId = attributesMap.get(DpsHeaders.DATA_PARTITION_ID);
-    String correlationId = attributesMap.get(DpsHeaders.CORRELATION_ID);
-    Map<String, Object> message = new HashMap<>();
-    message.put("data", messages);
-    message.put(DpsHeaders.DATA_PARTITION_ID, dataPartitionId);
-    message.put(DpsHeaders.CORRELATION_ID, correlationId);
-
-    return message;
-  }
-
-  private void validateEventGrid() throws CoreException {
-    if (!isEventGridEnabled) {
-      throw new CoreException("Event grid is not enabled");
-    }
   }
 
   private void validateInput(Message[] messages, Map<String, String> attributesMap) throws CoreException {

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opengroup.osdu.azure.eventgrid.EventGridTopicStore;
+import org.opengroup.osdu.azure.publisherFacade.MessagePublisher;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
@@ -16,36 +16,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link AzureEventGridPublisher}
+ * Tests for {@link AzureMessagePublisher}
  */
 @ExtendWith(MockitoExtension.class)
-class AzureEventGridPublisherTest {
+class AzureMessagePublisherTest {
 
   private final static String TOPIC_NAME = "status_topic";
   private final static String CORRELATION_ID = "CORRELATION_ID";
   private final static String DATA_PARTITION_ID = "DATA_PARTITION_ID";
 
   @Mock
-  private EventGridTopicStore eventGridTopicStore;
+  private MessagePublisher messagePublisher;
 
-  private AzureEventGridPublisher publisher;
+  private AzureMessagePublisher publisher;
 
   @BeforeEach
   void setUp() {
-    publisher = new AzureEventGridPublisher(eventGridTopicStore);
-    publisher.setTopicName(TOPIC_NAME);
-    publisher.setIsEventGridEnabled(true);
+    publisher = new AzureMessagePublisher(messagePublisher);
+    publisher.setEventGridTopic(TOPIC_NAME);
+    publisher.setServiceBusTopic(TOPIC_NAME);
   }
 
   @Test
   void shouldPublishGSMMessage() {
     //given
-    doNothing().when(eventGridTopicStore).publishToEventGridTopic(any(), any(), any());
+    doNothing().when(messagePublisher).publishMessage(any(), any());
     Message[] messages = new Message[]{new StatusDetails()};
     Map<String, String> attributesMap = new HashMap<String, String>() {{
       put(DpsHeaders.CORRELATION_ID, CORRELATION_ID);
@@ -56,28 +54,8 @@ class AzureEventGridPublisherTest {
     publisher.publish(messages, attributesMap);
 
     //then
-    verify(eventGridTopicStore, times(1))
-        .publishToEventGridTopic(any(), any(), any());
-  }
-
-  @Test
-  void shouldTrowCoreExceptionOnDisabledPublishing() {
-    //given
-    publisher.setIsEventGridEnabled(false);
-    Message[] messages = new Message[]{new StatusDetails()};
-    Map<String, String> attributesMap = new HashMap<String, String>() {{
-      put(DpsHeaders.CORRELATION_ID, CORRELATION_ID);
-      put(DpsHeaders.DATA_PARTITION_ID, DATA_PARTITION_ID);
-    }};
-
-    //when & then
-    Assertions.assertThrows(CoreException.class,
-        () -> publisher.publish(messages, attributesMap)
-    );
-
-    //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(1))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -94,8 +72,8 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -113,8 +91,8 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -128,8 +106,8 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -144,8 +122,8 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -162,8 +140,8 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 
   @Test
@@ -180,7 +158,7 @@ class AzureEventGridPublisherTest {
     );
 
     //then
-    verify(eventGridTopicStore, times(0))
-        .publishToEventGridTopic(any(), any(), any());
+    verify(messagePublisher, times(0))
+        .publishMessage(any(), any());
   }
 }
