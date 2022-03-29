@@ -12,6 +12,7 @@ Must have:
 | `SPRING_PROFILES_ACTIVE` | ex `gcp` | Spring profile that activate default configuration for GCP environment | false | - |
 | `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
+| `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 
 Defined in default application property file but possible to override:
 
