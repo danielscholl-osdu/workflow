@@ -15,6 +15,7 @@ Must have:
 | `<POSTGRES_PASSWORD_ENV_VARIABLE_NAME>` | ex `POSTGRES_PASS_OSDU` | Postgres password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
 | `<AMQP_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_PASS_OSDU` | Amqp password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
 | `<AMQP_ADMIN_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_ADMIN_PASS_OSDU` | Amqp admin password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 
 Defined in default application property file but possible to override:
 
@@ -101,8 +102,8 @@ curl -L -X PATCH 'http://partition.com/api/partition/v1/partitions/opendes' -H '
 ### Persistence layer
 ### Database structure for OSMDRIVER=postgres
 ```
-DROP TABLE IF EXISTS <partitionId>.workflow_osm;
-CREATE TABLE IF NOT EXISTS opendes.workflow
+DROP TABLE IF EXISTS anthos.workflow_osm;
+CREATE TABLE IF NOT EXISTS anthos.workflow_osm
 (
 	id text COLLATE pg_catalog."default" NOT NULL,
 	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -110,12 +111,12 @@ CREATE TABLE IF NOT EXISTS opendes.workflow
 	CONSTRAINT workflow_id UNIQUE (id)
 )
 TABLESPACE pg_default;
-ALTER TABLE opendes.workflow
+ALTER TABLE anthos.workflow_osm
     OWNER to postgres;
 
 
-DROP TABLE IF EXISTS <partitionId>.workflow_run_osm;
-CREATE TABLE IF NOT EXISTS <partitionId>.workflow_run
+DROP TABLE IF EXISTS anthos.workflow_run_osm;
+CREATE TABLE IF NOT EXISTS anthos.workflow_run_osm
 (
 	id text COLLATE pg_catalog."default" NOT NULL,
 	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -123,7 +124,7 @@ CREATE TABLE IF NOT EXISTS <partitionId>.workflow_run
 	CONSTRAINT workflow_run_id UNIQUE (id)
 )
 TABLESPACE pg_default;
-ALTER TABLE <partitionId>.workflow_run
+ALTER TABLE anthos.workflow_run_osm
     OWNER to postgres;
 ```
 
