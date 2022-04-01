@@ -3,15 +3,11 @@
 # Declare variables to be passed into your templates.
 
 data:
-  # commom
   log_level: "INFO"
   partition_api: "http://partition/api/partition/v1/"
   osdu_entitlements_url: "http://entitlements/api/entitlements/v2/"
   gcp_airflow_url: ""
   spring_profiles_active: "gcp"
-  # onprem
-  osdu_airflow_username: ""
-  osdu_airflow_password: ""
   # gcp
   google_audiences: ""
   shared_tenant_name: ""
@@ -19,5 +15,4 @@ data:
 conf:
   configmap: "workflow-config"
   app_name: "workflow"
-  secret_name: "workflow-secret"
   on_prem_enabled: false

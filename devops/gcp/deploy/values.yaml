@@ -14,5 +14,5 @@ data:
 conf:
   configmap: "workflow-config"
   app_name: "workflow"
-  secret_name: "workflow-secret"
+  secret_name: "airflow-workflow-secret"
   on_prem_enabled: false
