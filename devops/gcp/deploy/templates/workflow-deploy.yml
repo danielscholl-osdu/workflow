@@ -27,6 +27,13 @@ spec:
         {{- if .Values.conf.on_prem_enabled }}
         - secretRef:
             name: "{{ .Values.conf.secret_name }}"
+        # FIXME
+        env:
+        - name: OSDU_AIRFLOW_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "airflow" 
+              key: airflow-password   
         {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
