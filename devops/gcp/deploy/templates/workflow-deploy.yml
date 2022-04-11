@@ -27,6 +27,10 @@ spec:
         {{- if .Values.conf.on_prem_enabled }}
         - secretRef:
             name: "{{ .Values.conf.secret_name }}"
+        - secretRef:
+            name: "{{ .Values.conf.rabbitmq_secret_name }}"
+        - secretRef:
+            name: "{{ .Values.conf.workflow_postgres_secret_name }}"
         # FIXME
         env:
         - name: OSDU_AIRFLOW_PASSWORD
