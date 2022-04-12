@@ -7,7 +7,7 @@ data:
   requests_memory: "2816M"
   limits_cpu: "1"
   limits_memory: "3G"
-  serviceAccountName: ""
+  serviceAccountName: "workflow"
   image: ""
   imagePullPolicy: "IfNotPresent"
 
@@ -15,4 +15,6 @@ conf:
   configmap: "workflow-config"
   app_name: "workflow"
   secret_name: "airflow-workflow-secret"
+  workflow_postgres_secret_name: "workflow-postgres-secret"
+  rabbitmq_secret_name: "rabbitmq-secret"
   on_prem_enabled: false
