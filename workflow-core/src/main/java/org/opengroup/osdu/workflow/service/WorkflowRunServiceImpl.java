@@ -174,7 +174,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
         break;
       case FINISHED:
         statusPublisher
-            .publishStatusWithUnexpectedErrors(runId, dpsHeaders, WORKFLOW_FINISHED + USER_MADE_CHANGE, FAILED);
+            .publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_FINISHED + USER_MADE_CHANGE, SUCCESS);
         break;
       case FAILED:
         statusPublisher
