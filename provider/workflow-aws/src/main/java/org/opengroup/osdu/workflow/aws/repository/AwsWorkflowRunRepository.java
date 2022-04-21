@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
@@ -47,6 +48,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @Repository
 @RequestScope
+@Slf4j
 public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
     @Inject
@@ -125,7 +127,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         try {
             docs = queryHelper.queryByGSI(WorkflowRunDoc.class, queryDoc, "dataPartitionId", dataPartitionId, limit, cursor);
         } catch (IllegalArgumentException | UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("Failed to query workflow runs.", e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                                    "Failed to query workflow runs by name");
