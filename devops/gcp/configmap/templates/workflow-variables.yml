@@ -11,7 +11,7 @@ data:
   OSDU_ENTITLEMENTS_URL: "{{ .Values.data.osdu_entitlements_url }}"
   SPRING_PROFILES_ACTIVE: "{{ .Values.data.spring_profiles_active }}"
   OSDU_AIRFLOW_URL: "{{ .Values.data.gcp_airflow_url }}"
+  SHARED_TENANT_NAME: "{{ .Values.data.shared_tenant_name }}"
   {{- if not .Values.conf.on_prem_enabled }}
   GOOGLE_AUDIENCES: "{{ .Values.data.google_audiences }}"
-  SHARED_TENANT_NAME: "{{ .Values.data.shared_tenant_name }}"
   {{- end }}
