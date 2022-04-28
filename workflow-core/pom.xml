@@ -181,6 +181,36 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.3</version>
+        <configuration>
+          <excludes>
+            <exclude>org/opengroup/osdu/workflow/config/*</exclude>
+            <exclude>org/opengroup/osdu/workflow/model/*</exclude>
+            <exclude>**/SwaggerDocumentationConfig**</exclude>
+            <!-- The classes below are only used by GCP, can be included when tests are added -->
+            <exclude>**/AirflowV2WorkflowEngineServiceImpl**</exclude>
+            <exclude>**/AirflowWorkflowEngineServiceImpl**</exclude>
+            <exclude>**/CommonUpdateStatusRequestValidator**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
