@@ -8,9 +8,9 @@ data:
   osdu_entitlements_url: "http://entitlements/api/entitlements/v2/"
   gcp_airflow_url: ""
   spring_profiles_active: "gcp"
+  shared_tenant_name: ""
   # gcp
   google_audiences: ""
-  shared_tenant_name: ""
 
 conf:
   configmap: "workflow-config"
