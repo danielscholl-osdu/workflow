@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
-import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppError;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -25,6 +24,7 @@ import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IActiveDagRunsCache;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
 import org.springframework.data.domain.Page;
@@ -127,7 +127,7 @@ public class WorkflowRunRepositoryTest {
   private WorkflowTasksSharingRepository workflowTasksSharingRepository;
 
   @Mock
-  private ICache<String, Integer> activeDagRunsCache;
+  private IActiveDagRunsCache<String, Integer> activeDagRunsCache;
 
   @InjectMocks
   private WorkflowRunRepository workflowRunRepository;
@@ -243,7 +243,7 @@ public class WorkflowRunRepositoryTest {
     verify(cosmosConfig, times(2)).getWorkflowRunCollection();
     verify(dpsHeaders, times(3)).getPartitionId();
     verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY));
-    verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY), eq(0));
+    verify(activeDagRunsCache).decrementKey(eq(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY));
     assertThat(workflowRunDocArgumentCaptor.getValue().getStatus(), equalTo(response.getStatus().toString()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getId(), equalTo(response.getRunId()));
     assertThat(workflowRunDocArgumentCaptor.getValue().getWorkflowName(), equalTo(response.getWorkflowId()));

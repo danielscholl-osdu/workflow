@@ -9,7 +9,6 @@ import com.sun.jersey.api.client.WebResource;
 import org.json.JSONObject;
 import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
 import org.opengroup.osdu.azure.partition.PartitionServiceClient;
-import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
@@ -22,6 +21,7 @@ import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IActiveDagRunsCache;
 import org.opengroup.osdu.workflow.provider.azure.utils.airflow.IAirflowWorkflowEngineUtil;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.slf4j.Logger;
@@ -82,7 +82,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Autowired
   @Qualifier("ActiveDagRunsCache")
-  private ICache<String, Integer> activeDagRunsCache;
+  private IActiveDagRunsCache<String, Integer> activeDagRunsCache;
 
   @Autowired
   private ActiveDagRunsConfig activeDagRunsConfig;
@@ -257,9 +257,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private void incrementActiveDagRunsCountInCache() {
     Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
     if (numberOfActiveDagRuns != null) {
-      numberOfActiveDagRuns += 1;
-      LOGGER.info("Incrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns);
-      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+      LOGGER.info("Incrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns + 1);
+      activeDagRunsCache.incrementKey(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
     }
   }
 

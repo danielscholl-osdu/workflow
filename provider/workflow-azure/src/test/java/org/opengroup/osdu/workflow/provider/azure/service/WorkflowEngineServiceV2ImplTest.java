@@ -28,6 +28,7 @@ import org.opengroup.osdu.workflow.provider.azure.config.AirflowConfigResolver;
 import org.opengroup.osdu.workflow.provider.azure.config.AzureWorkflowEngineConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareConfig;
 import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IActiveDagRunsCache;
 import org.opengroup.osdu.workflow.provider.azure.utils.airflow.AirflowV2WorkflowEngineUtil;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -135,7 +136,7 @@ public class WorkflowEngineServiceV2ImplTest {
   private ClientResponse clientResponse;
 
   @Mock
-  private ICache<String, Integer> activeDagRunsCache;
+  private IActiveDagRunsCache<String, Integer> activeDagRunsCache;
 
   @Mock
   private ActiveDagRunsConfig activeDagRunsConfig;
@@ -249,10 +250,9 @@ public class WorkflowEngineServiceV2ImplTest {
     verify(airflowConfig).getAppKey();
     verify(airflowConfig).isDagRunAbstractionEnabled();
     verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
-    verify(activeDagRunsCache, times(2)).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
+    verify(activeDagRunsCache, times(1)).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsConfig).getThreshold();
     assertEquals(0, numberOfActiveDagRunsCaptor.getAllValues().get(0));
-    assertEquals(1, numberOfActiveDagRunsCaptor.getAllValues().get(1));
     JSONAssert.assertEquals(AIRFLOW_INPUT, airflowInputCaptor.getValue(), true);
   }
 
