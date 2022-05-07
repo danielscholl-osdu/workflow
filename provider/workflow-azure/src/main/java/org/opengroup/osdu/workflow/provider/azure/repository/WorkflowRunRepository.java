@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.azure.query.CosmosStorePageRequest;
-import org.opengroup.osdu.core.common.cache.ICache;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
@@ -17,6 +16,7 @@ import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.consts.WorkflowRunConstants;
+import org.opengroup.osdu.workflow.provider.azure.interfaces.IActiveDagRunsCache;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.provider.azure.utils.CursorUtils;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
@@ -48,7 +48,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   private final WorkflowTasksSharingRepository workflowTasksSharingRepository;
 
   @Qualifier("ActiveDagRunsCache")
-  private final ICache<String, Integer> activeDagRunsCache;
+  private final IActiveDagRunsCache<String, Integer> activeDagRunsCache;
 
   @Override
   public WorkflowRun saveWorkflowRun(final WorkflowRun workflowRun) {
@@ -184,10 +184,9 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
   private void decrementActiveDagRunsCountInCache() {
     Integer numberOfActiveDagRuns = activeDagRunsCache.get(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
     // Update the cache count: decrementing the count by 1
-    if (numberOfActiveDagRuns != null) {
-      numberOfActiveDagRuns = Math.max(0, numberOfActiveDagRuns - 1);
-      log.info("Decrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns);
-      activeDagRunsCache.put(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY, numberOfActiveDagRuns);
+    if (numberOfActiveDagRuns != null && numberOfActiveDagRuns != 0) {
+      log.info("Decrementing the number of active dag runs in cache to {}", numberOfActiveDagRuns - 1);
+      activeDagRunsCache.decrementKey(ACTIVE_DAG_RUNS_COUNT_CACHE_KEY);
     }
   }
 
