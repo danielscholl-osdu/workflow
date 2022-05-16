@@ -7,9 +7,23 @@ variables:
   OSDU_GCP_HELM_PACKAGE_CHARTS: "devops/gcp/deploy devops/gcp/configmap"
   OSDU_GCP_HELM_CONFIG_SERVICE: workflow-config
   OSDU_GCP_HELM_DEPLOYMENT_SERVICE: workflow-deploy
-  OSDU_GCP_HELM_CONFIG_SERVICE_VARS: "--set data.google_audiences=$GOOGLE_AUDIENCE --set data.osdu_entitlements_appkey=workflow-service --set data.gcp_airflow_url=$OSDU_GCP_AIRFLOW_URL --set data.osdu_airflow_url=$OSDU_GCP_AIRFLOW_URL --set data.workflow_admin_account=$OSDU_GCP_WORKFLOW_ADMIN_ACCOUNT --set data.shared_tenant_name=$TENANT_NAME"
-  OSDU_GCP_HELM_CONFIG_SERVICE_VARS_DEV2: "--set data.google_audiences=$GOOGLE_AUDIENCE --set data.osdu_entitlements_appkey=workflow-service --set data.gcp_airflow_url=$OSDU_GCP_AIRFLOW_URL --set data.osdu_airflow_url=$OSDU_GCP_AIRFLOW_URL --set data.workflow_admin_account=$OSDU_GCP_WORKFLOW_ADMIN_ACCOUNT --set data.shared_tenant_name=$TENANT_NAME"
-  OSDU_GCP_HELM_DEPLOYMENT_SERVICE_VARS: "--set data.image=$CI_REGISTRY_IMAGE/osdu-gcp:$CI_COMMIT_SHORT_SHA --set data.serviceAccountName=$OSDU_GCP_SERVICE-k8s"
+  OSDU_GCP_HELM_CONFIG_SERVICE_VARS: >
+    --set data.google_audiences=$GOOGLE_AUDIENCE 
+    --set data.osdu_entitlements_appkey=workflow-service 
+    --set data.gcp_airflow_url=$OSDU_GCP_AIRFLOW_URL 
+    --set data.osdu_airflow_url=$OSDU_GCP_AIRFLOW_URL 
+    --set data.workflow_admin_account=$OSDU_GCP_WORKFLOW_ADMIN_ACCOUNT 
+    --set data.shared_tenant_name=$TENANT_NAME
+  OSDU_GCP_HELM_CONFIG_SERVICE_VARS_DEV2: >
+    --set data.google_audiences=$GOOGLE_AUDIENCE 
+    --set data.osdu_entitlements_appkey=workflow-service 
+    --set data.gcp_airflow_url=$OSDU_GCP_AIRFLOW_URL 
+    --set data.osdu_airflow_url=$OSDU_GCP_AIRFLOW_URL 
+    --set data.workflow_admin_account=$OSDU_GCP_WORKFLOW_ADMIN_ACCOUNT 
+    --set data.shared_tenant_name=$TENANT_NAME
+  OSDU_GCP_HELM_DEPLOYMENT_SERVICE_VARS: >
+    --set data.image=$CI_REGISTRY_IMAGE/osdu-gcp-$OSDU_GCP_SERVICE:$CI_COMMIT_SHORT_SHA 
+    --set data.serviceAccountName=$OSDU_GCP_SERVICE-k8s
   # --- end of osdu gcp specific variables ---
 
   IBM_BUILD_SUBDIR: provider/workflow-ibm
@@ -27,36 +41,29 @@ variables:
   AZURE_SERVICE: ingestion-workfow
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure
-  AZURE_COVERAGE_THRESHOLD: 60
+  AZURE_COVERAGE_THRESHOLD: $AZURE_CODE_COVERAGE_THRESHOLD
   # End azure specific variables
 
 include:
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "standard-setup.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "build/maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "scanners/gitlab-ultimate.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "scanners/fossa-maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "publishing/pages.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "cloud-providers/osdu-gcp-gke.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "cloud-providers/ibm.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
@@ -66,5 +73,4 @@ include:
     file: "cloud-providers/aws-maven.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    ref: "master"
     file: "cloud-providers/azure.yml"

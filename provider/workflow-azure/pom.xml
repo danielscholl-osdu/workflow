@@ -295,6 +295,21 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AuthenticationConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureBootstrapConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/CosmosConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/RedisConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/CustomObjectMapperConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/ActiveDagRunsConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
+            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/security/**</exclude>
+          </excludes>
+        </configuration>
         <version>0.8.3</version>
         <executions>
           <execution>
