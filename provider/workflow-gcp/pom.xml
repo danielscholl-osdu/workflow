@@ -36,6 +36,7 @@
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
   </properties>
 
+
   <dependencies>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
@@ -72,7 +73,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-gcp</artifactId>
-      <version>0.15.0-rc3</version>
+      <version>0.15.0-rc4</version>
     </dependency>
 
     <dependency>
