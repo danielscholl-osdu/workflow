@@ -16,9 +16,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
+import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_QUEUED;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_RUNNING;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUCCESS;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayloadWithGivenRunId;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
 
 @Slf4j
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
@@ -86,5 +92,35 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     assertEquals(org.apache.http.HttpStatus.SC_CONFLICT, duplicateRunIdResponse.getStatus());
   }
 
+  @Override
+  @Test
+  public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusRunning() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
 
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(workflowRunInfo);
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_RUNNING;
+
+    ClientResponse response = client.send(
+        HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus),
+        headers,
+        client.getAccessToken()
+    );
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class), HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_RUNNING);
+
+    String obtainedWorkflowRunStatus = getWorkflowRunStatus(CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertTrue(WORKFLOW_STATUS_TYPE_RUNNING.equals(obtainedWorkflowRunStatus) ||
+        WORKFLOW_STATUS_TYPE_SUCCESS.equals(obtainedWorkflowRunStatus) || WORKFLOW_STATUS_TYPE_QUEUED.equals(obtainedWorkflowRunStatus));
+  }
 }

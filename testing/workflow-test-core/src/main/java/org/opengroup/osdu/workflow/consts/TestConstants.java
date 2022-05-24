@@ -38,6 +38,7 @@ public class TestConstants {
 
   public static final String WORKFLOW_STATUS_TYPE_FINISHED = "finished";
   public static final String WORKFLOW_STATUS_TYPE_SUBMITTED = "submitted";
+  public static final String WORKFLOW_STATUS_TYPE_QUEUED = "queued";
   public static final String WORKFLOW_STATUS_TYPE_SUCCESS = "success";
   public static final String WORKFLOW_STATUS_TYPE_RUNNING = "running";
   public static final String WORKFLOW_STATUS_TYPE_FAILED = "failed";
