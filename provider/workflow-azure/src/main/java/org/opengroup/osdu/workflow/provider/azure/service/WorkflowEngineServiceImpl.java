@@ -53,6 +53,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private static final String KEY_DAG_CONTENT = "dagContent";
+  private static final String KEY_USER_ID = "user_email_id";
+
 
   @Autowired
   private AirflowConfigResolver airflowConfigResolver;
@@ -210,6 +212,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     String workflowName = rq.getWorkflowName();
     String runId = rq.getRunId();
     String workflowId = rq.getWorkflowId();
+    inputData.put(KEY_USER_ID, dpsHeaders.getUserId());
     LOGGER.info("Submitting ingestion with Airflow with dagName: {}", workflowName);
     ClientResponse response;
     AirflowConfig airflowConfig = getAirflowConfig(rq.isSystemWorkflow());
