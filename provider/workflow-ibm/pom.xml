@@ -19,28 +19,12 @@
 
 	<properties>
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
-		<osdu.ibmcore.version>0.13.0</osdu.ibmcore.version>
+		<osdu.ibmcore.version>0.15.0-rc2</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
 		<tomcat.embed.core.version>9.0.54</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
-		<jackson-databind.version>2.13.0</jackson-databind.version>
 	</properties>
 
-    <dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson-databind.version}</version>
-			</dependency>
-			<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson-databind.version}</version>
-		</dependency>
-			
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 
 	    <dependency>
@@ -54,17 +38,27 @@
 	        </exclusion>
 	      </exclusions>
 	    </dependency>
-		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-annotations</artifactId>
-		    <version>${jackson-databind.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.13.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.13.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.13.2</version>
+    </dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-cbor</artifactId>
 			<version>2.13.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>workflow-core</artifactId>
@@ -181,7 +175,7 @@
 			<artifactId>jersey-client</artifactId>
 			<version>1.19.4</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
@@ -237,10 +231,10 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
-	<!-- <repositories> <repository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url> 
-		</repository> </repositories> <distributionManagement> <repository> <id>${gitlab-server}</id> 
-		<url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url> 
-		</repository> <snapshotRepository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url> 
+	<!-- <repositories> <repository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
+		</repository> </repositories> <distributionManagement> <repository> <id>${gitlab-server}</id>
+		<url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
+		</repository> <snapshotRepository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
 		</snapshotRepository> </distributionManagement> -->
 
 

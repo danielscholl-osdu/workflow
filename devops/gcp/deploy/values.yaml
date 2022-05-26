@@ -18,3 +18,4 @@ conf:
   workflow_postgres_secret_name: "workflow-postgres-secret"
   rabbitmq_secret_name: "rabbitmq-secret"
   on_prem_enabled: false
+  domain: ""
