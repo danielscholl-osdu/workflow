@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.HttpMethod;
@@ -46,6 +45,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowEngineServiceImpl.class);
   private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE = "Failed to trigger workflow with id %s and name %s";
   private static final String AIRFLOW_DELETE_DAG_ERROR_MESSAGE = "Failed to delete workflow with name %s";
+  private static final String AIRFLOW_GET_ACTIVE_DAG_RUNS_ERROR_MESSAGE = "Failed to get all active dag runs";
   private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND = "No WorkflowRun executed for Workflow: %s on %s ";
   private final static String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
 
@@ -88,9 +88,6 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Autowired
   private ActiveDagRunsConfig activeDagRunsConfig;
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
 
   @Autowired
   private PartitionServiceClient partitionService;
@@ -321,9 +318,17 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     }
   }
 
-  private Integer getActiveDagRunsCount() {
-    LOGGER.info("Obtaining active dag runs from postgresql");
-    String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
-    return jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+  private Integer getActiveDagRunsCount() throws Exception {
+    LOGGER.info("Obtaining active dag runs from Airflow");
+    String endpoint = engineUtil.getAirflowActiveDagRunsCountUrl();
+    ClientResponse clientResponse = callAirflowApi(getAirflowConfig(false), endpoint, HttpMethod.GET,
+        null, AIRFLOW_GET_ACTIVE_DAG_RUNS_ERROR_MESSAGE);
+
+    Integer activeDagRuns = engineUtil.extractActiveDagRunsResponse(clientResponse.getEntity(String.class));
+
+    if (activeDagRuns != -1) {
+      return activeDagRuns;
+    }
+    throw new Exception("Failed to retrieve active dag runs, got null response");
   }
 }
