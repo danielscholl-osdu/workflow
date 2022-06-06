@@ -292,7 +292,7 @@ The following software have components provided under the terms of this license:
 - Apache Log4j JUL Adapter (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-jul)
 - Apache Log4j SLF4J Binding (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j-impl)
 - Apache Log4j to SLF4J Adapter (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-to-slf4j)
-- AssertJ fluent assertions (from https://repo1.maven.org/maven2/org/assertj/assertj-core)
+- AssertJ fluent assertions (from ${project.parent.url}#${project.artifactId}, https://repo1.maven.org/maven2/org/assertj/assertj-core)
 - Asynchronous Http Client (from https://repo1.maven.org/maven2/org/asynchttpclient/async-http-client)
 - Asynchronous Http Client Netty Utils (from https://repo1.maven.org/maven2/org/asynchttpclient/async-http-client-netty-utils)
 - AutoValue Annotations (from https://github.com/google/auto/tree/master/value, https://repo1.maven.org/maven2/com/google/auto/value/auto-value-annotations)
@@ -618,8 +618,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 CC-BY-2.5
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
 - MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org)
 
@@ -640,8 +638,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 CDDL-1.0
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - JSR 311 API (from https://jsr311.dev.java.net, https://jsr311.dev.java.net/)
 - jersey-client (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-client)
 - jersey-core (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-core)
@@ -721,8 +717,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 GPL-2.0-or-later
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - SnakeYAML (from http://code.google.com/p/snakeyaml/, http://www.snakeyaml.org)
 
 ========================================================================
@@ -743,8 +737,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 GPL-3.0-only
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Project Lombok (from http://projectlombok.org, https://projectlombok.org)
 - jersey-client (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-client)
@@ -753,8 +745,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 JSON
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - JSON in Java (from https://github.com/douglascrockford/JSON-java)
 
 ========================================================================
@@ -777,8 +767,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 LGPL-2.1-or-later
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Javassist (from http://www.javassist.org/)
 - SnakeYAML (from http://code.google.com/p/snakeyaml/, http://www.snakeyaml.org)
 
@@ -854,23 +842,17 @@ The following software have components provided under the terms of this license:
 ========================================================================
 MPL-1.1
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Javassist (from http://www.javassist.org/)
 
 ========================================================================
 MPL-2.0
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Javassist (from http://www.javassist.org/)
 - OkHttp (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
 
 ========================================================================
 PHP-3.01
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Jakarta Activation API (from https://github.com/eclipse-ee4j/jaf, https://repo1.maven.org/maven2/jakarta/activation/jakarta.activation-api)
 - Jakarta XML Binding API (from https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api, https://repo1.maven.org/maven2/org/jboss/spec/javax/xml/bind/jboss-jaxb-api_2.3_spec)
 
@@ -889,8 +871,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 WTFPL
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Reflections (from http://code.google.com/p/reflections/, http://github.com/ronmamo/reflections)
 
 ========================================================================
