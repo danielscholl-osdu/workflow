@@ -26,27 +26,14 @@ In order to run this service locally, you will need the following:
 [Gcp service configuration ](docs/gcp/README.md)
 
 
-**Required to run integration tests**
+### Test the application
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
-| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
-| `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
-| `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
-| `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
-| `GOOGLE_AUDIENCE` | ex `********.apps.googleusercontent.com`| client application ID | yes | https://console.cloud.google.com/apis/credentials |
-| `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
-| `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
-| `OSDU_AIRFLOW_VERSION2` | `true` or `false` | Disable\Enable tests that work only with specific Airflow version | no | - |
+After the service has started it should be accessible via a web browser by visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the request does not fail, you can then run the integration tests.
 
-**Entitlements configuration for integration accounts**
-
-| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
-| ---  | ---   |
-| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+### Anthos test configuration:
+[Anthos service configuration ](docs/anthos/README.md)
+### GCP test configuration:
+[Gcp service configuration ](docs/gcp/README.md)
 
 
 ### Run Locally
@@ -122,21 +109,6 @@ After configuring your environment as specified above, you can follow these step
 
 ```bash
 cd provider/workflow-gcp-datastore/ && mvn spring-boot:run
-```
-
-### Test the application
-
-After the service has started it should be accessible via a web browser by visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the request does not fail, you can then run the integration tests.
-
-```bash
-# build + install integration test core
-$ (cd testing/workflow-test-core/ && mvn clean install)
-
-# build + run GCP integration tests.
-#
-# Note: this assumes that the environment variables for integration tests as outlined
-#       above are already exported in your environment.
-$ (cd testing/workflow-test-gcp/ && mvn clean test)
 ```
 
 ## Deployment
