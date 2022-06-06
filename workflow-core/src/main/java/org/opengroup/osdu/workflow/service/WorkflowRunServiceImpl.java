@@ -99,7 +99,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
     auditLogger.workflowRunEvent(Collections.singletonList(getTruncatedData(request.toString())));
     final WorkflowRunResponse workflowRunResponse = buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
-    statusPublisher.publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED, SUBMITTED);
+    statusPublisher.publishIngestorStatus(runId, dpsHeaders, WORKFLOW_SUBMITTED, SUBMITTED);
 
     return workflowRunResponse;
   }
