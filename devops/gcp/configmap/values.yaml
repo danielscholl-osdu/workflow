@@ -6,7 +6,7 @@ data:
   log_level: "INFO"
   partition_api: "http://partition/api/partition/v1/"
   osdu_entitlements_url: "http://entitlements/api/entitlements/v2/"
-  gcp_airflow_url: ""
+  gcp_airflow_url: "http://airflow:8080"
   spring_profiles_active: "gcp"
   shared_tenant_name: ""
   # gcp

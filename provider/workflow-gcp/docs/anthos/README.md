@@ -225,3 +225,39 @@ It can be overridden by:
 - environment variable `STATUS_CHANGED_TOPIC_NAME`
 
 ![Screenshot](./pics/rabbit.PNG)
+
+### Running E2E Tests
+
+You will need to have the following environment variables defined.
+
+| name | value | description | sensitive? | source |
+| ---  | ---   | ---         | ---        | ---    |
+| `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
+| `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
+| `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
+| `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
+| `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
+| `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
+| `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
+| `TEST_OPENID_PROVIDER_CLIENT_ID` | `********` | Client Id for `$INTEGRATION_TESTER` | yes | -- |
+| `TEST_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$INTEGRATION_TESTER` | -- |
+| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID` | `********` | Client Id for `$NO_ACCESS_INTEGRATION_TESTER` | yes | -- |
+| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$NO_ACCESS_INTEGRATION_TESTER` | -- |
+| `TEST_OPENID_PROVIDER_URL` | `https://keycloak.com/auth/realms/osdu` | OpenID provider url | yes | -- |
+
+**Entitlements configuration for integration accounts**
+
+| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
+| ---  | ---   |
+| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+
+```bash
+# build + install integration test core
+$ (cd testing/workflow-test-core/ && mvn clean install)
+
+# build + run anthos integration tests.
+#
+# Note: this assumes that the environment variables for integration tests as outlined
+#       above are already exported in your environment.
+$ (cd testing/workflow-test-anthos/ && mvn clean test)
+```

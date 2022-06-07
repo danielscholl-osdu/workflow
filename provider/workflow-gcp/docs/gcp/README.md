@@ -63,3 +63,38 @@ TBD
 | Required roles |
 | ---    |
 | - |
+
+### Running E2E Tests
+
+You will need to have the following environment variables defined.
+
+| name | value | description | sensitive? | source |
+| ---  | ---   | ---         | ---        | ---    |
+| `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
+| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
+| `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
+| `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
+| `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
+| `GOOGLE_AUDIENCE` | ex `********.apps.googleusercontent.com`| client application ID | yes | https://console.cloud.google.com/apis/credentials |
+| `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
+| `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
+| `OSDU_AIRFLOW_VERSION2` | `true` or `false` | Disable\Enable tests that work only with specific Airflow version | no | - |
+
+**Entitlements configuration for integration accounts**
+
+| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
+| ---  | ---   |
+| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+
+```bash
+# build + install integration test core
+$ (cd testing/workflow-test-core/ && mvn clean install)
+
+# build + run GCP integration tests.
+#
+# Note: this assumes that the environment variables for integration tests as outlined
+#       above are already exported in your environment.
+$ (cd testing/workflow-test-gcp/ && mvn clean test)
+```
