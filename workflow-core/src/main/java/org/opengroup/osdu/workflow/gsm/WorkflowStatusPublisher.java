@@ -26,7 +26,6 @@ public class WorkflowStatusPublisher {
 
   private static final String FAILED_TO_PUBLISH_STATUS = "Failed to publish status. ";
   private static final String KIND = "status";
-  private static final String STAGE_INGESTOR = "INGESTOR";
   private static final String STAGE_WORKFLOW = "WORKFLOW";
   private static final String DEFAULT_VERSION = "1";
 
@@ -37,22 +36,15 @@ public class WorkflowStatusPublisher {
 
   private final IEventPublisher statusEventPublisher;
 
-  public void publishIngestorStatus(String runId, DpsHeaders dpsHeaders, String msg, Status status) {
-    StatusDetails statusDetails = createStatusDetails(msg, runId, status, NO_ERRORS, dpsHeaders, STAGE_INGESTOR);
-    log.debug(String.format(LOG_TEMPLATE, runId, status));
-
-    publish(statusDetails, dpsHeaders);
-  }
-
   public void publishStatusWithNoErrors(String runId, DpsHeaders dpsHeaders, String msg, Status status) {
-    StatusDetails statusDetails = createStatusDetails(msg, runId, status, NO_ERRORS, dpsHeaders, STAGE_WORKFLOW);
+    StatusDetails statusDetails = createStatusDetails(msg, runId, status, NO_ERRORS, dpsHeaders);
     log.debug(String.format(LOG_TEMPLATE, runId, status));
 
     publish(statusDetails, dpsHeaders);
   }
 
   public void publishStatusWithUnexpectedErrors(String runId, DpsHeaders dpsHeaders, String msg, Status status) {
-    StatusDetails statusDetails = createStatusDetails(msg, runId, status, UNEXPECTED_FAILURE, dpsHeaders,STAGE_WORKFLOW);
+    StatusDetails statusDetails = createStatusDetails(msg, runId, status, UNEXPECTED_FAILURE, dpsHeaders);
     log.debug(String.format(LOG_TEMPLATE, runId, status));
 
     publish(statusDetails, dpsHeaders);
@@ -60,8 +52,8 @@ public class WorkflowStatusPublisher {
 
   private StatusDetails createStatusDetails(String msg, String recordId,
                                             Status status,
-                                            int errorCode, DpsHeaders dpsHeaders, String stage) {
-    StatusDetails.Properties properties = createProperties(msg, recordId, status, errorCode, dpsHeaders, stage);
+                                            int errorCode, DpsHeaders dpsHeaders) {
+    StatusDetails.Properties properties = createProperties(msg, recordId, status, errorCode, dpsHeaders);
     StatusDetails statusDetails = new StatusDetails();
     statusDetails.setKind(KIND);
     statusDetails.setProperties(properties);
@@ -70,7 +62,7 @@ public class WorkflowStatusPublisher {
   }
 
   private StatusDetails.Properties createProperties(String msg, String recordId,
-                                                    Status status, int errorCode, DpsHeaders dpsHeaders,String stage) {
+                                                    Status status, int errorCode, DpsHeaders dpsHeaders) {
     StatusDetails statusDetails = new StatusDetails();
     StatusDetails.Properties properties = statusDetails.new Properties();
     properties.setCorrelationId(dpsHeaders.getCorrelationId());
@@ -78,7 +70,7 @@ public class WorkflowStatusPublisher {
     properties.setMessage(msg);
     properties.setRecordId(recordId);
     properties.setRecordIdVersion(WorkflowStatusPublisher.DEFAULT_VERSION);
-    properties.setStage(stage);
+    properties.setStage(STAGE_WORKFLOW);
     properties.setStatus(status);
     properties.setTimestamp(System.currentTimeMillis());
     properties.setUserEmail(dpsHeaders.getUserEmail());

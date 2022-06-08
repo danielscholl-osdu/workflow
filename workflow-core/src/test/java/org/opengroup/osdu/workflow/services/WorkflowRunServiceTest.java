@@ -208,7 +208,7 @@ public class WorkflowRunServiceTest {
 	  verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
-    verify(statusPublisher).publishIngestorStatus(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
+    verify(statusPublisher).publishStatusWithNoErrors(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
     assertThat(returnedWorkflowRun, equalTo(buildWorkflowRunResponse(responseWorkflowRun)));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowName(), equalTo(WORKFLOW_NAME));
@@ -262,7 +262,7 @@ public class WorkflowRunServiceTest {
     verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
-    verify(statusPublisher).publishIngestorStatus(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
+    verify(statusPublisher).publishStatusWithNoErrors(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
     assertThat(returnedWorkflowRun, equalTo(buildWorkflowRunResponse(responseWorkflowRun)));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
     assertThat(workflowRunArgumentCaptor.getValue().getWorkflowName(), equalTo(WORKFLOW_NAME));
