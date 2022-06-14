@@ -34,7 +34,7 @@ include:
     file: "publishing/pages.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/osdu-gcp-gke.yml"
+    file: "cloud-providers/osdu-gcp-global.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
     file: "cloud-providers/ibm.yml"
