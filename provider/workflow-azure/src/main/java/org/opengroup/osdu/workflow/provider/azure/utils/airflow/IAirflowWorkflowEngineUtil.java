@@ -20,9 +20,14 @@ public interface IAirflowWorkflowEngineUtil {
 
   String getAirflowDagRunsStatusUrl();
 
+  String getAirflowActiveDagRunsCountUrl();
+
   String getFileShareName(FileShareConfig fileShareConfig);
 
   TriggerWorkflowResponse extractTriggerWorkflowResponse(String response)
+      throws JsonProcessingException;
+
+  Integer extractActiveDagRunsResponse(String response)
       throws JsonProcessingException;
 
   String getDagRunIdentificationParam(WorkflowEngineRequest rq);
