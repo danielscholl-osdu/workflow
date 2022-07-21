@@ -31,7 +31,6 @@ import org.opengroup.osdu.workflow.provider.azure.fileshare.FileShareStore;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.IActiveDagRunsCache;
 import org.opengroup.osdu.workflow.provider.azure.utils.airflow.AirflowV1WorkflowEngineUtil;
 import org.skyscreamer.jsonassert.JSONAssert;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
@@ -65,7 +64,10 @@ public class WorkflowEngineServiceImplTest {
   private static final String P_AIRFLOW_DAGS_URL = "api/experimental/dags/%s";
   private static final String P_AIRFLOW_DAG_RUNS_URL = "api/experimental/dags/%s/dag_runs";
   private static final String P_AIRFLOW_DAG_RUNS_STATUS_URL = "api/experimental/dags/%s/dag_runs/%s";
+  private static final String P_AIRFLOW_ACTIVE_DAG_RUNS_URL = "activeDagRuns";
   private final static String RUN_ID_PARAMETER_NAME = "run_id";
+  private static final String AIRFLOW_DAG_RUN_URL = "https://airflow.com/airlfow/activeDagRuns";
+  private static final String AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE = "{\"active_dag_runs\":10}";
   private static final String AIRFLOW_DAG_TRIGGER_URL =
       "https://airflow.com/airlfow/api/experimental/dags/HelloWorld/dag_runs";
   private static final String AIRFLOW_DAG_GET_STATUS_URL =
@@ -139,6 +141,8 @@ public class WorkflowEngineServiceImplTest {
   @Mock
   private Client restClient;
 
+  @Mock ClientResponse airflowActiveDagRunsResponse;
+
   @Mock
   private WebResource webResource;
 
@@ -153,9 +157,6 @@ public class WorkflowEngineServiceImplTest {
 
   @Mock
   private ActiveDagRunsConfig activeDagRunsConfig;
-
-  @Mock
-  private JdbcTemplate jdbcTemplate;
 
   @Mock
   private PartitionServiceClient partitionService;
@@ -239,12 +240,16 @@ public class WorkflowEngineServiceImplTest {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
+    Integer dagRunsCount = 10;
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    // Mock
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
+    when(engineUtil.getAirflowActiveDagRunsCountUrl()).thenReturn(P_AIRFLOW_ACTIVE_DAG_RUNS_URL);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
     when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null).thenReturn(0);
     when(activeDagRunsConfig.getThreshold()).thenReturn(ACTIVE_DAG_RUNS_THRESHOLD);
@@ -261,24 +266,37 @@ public class WorkflowEngineServiceImplTest {
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
+    when(restClient.resource(eq(AIRFLOW_DAG_RUN_URL))).thenReturn(webResource);
     when(engineUtil.extractTriggerWorkflowResponse(WORKFLOW_TRIGGER_RESPONSE)).
         thenReturn(new TriggerWorkflowResponse(EXECUTION_DATE, "", RUN_ID));
-    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
+    when(webResourceBuilder.method(eq("GET"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(airflowActiveDagRunsResponse);
+
+    when(engineUtil.extractActiveDagRunsResponse(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE)).
+        thenReturn(dagRunsCount);
+    when(airflowActiveDagRunsResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(airflowActiveDagRunsResponse.getEntity(String.class)).thenReturn(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE);
+
+    // ACT
     workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
+
+    // Verify
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
-    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
-    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
-    verify(webResourceBuilder).method(eq("POST"), eq(ClientResponse.class), any(String.class));
+    verify(webResource, times(2)).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder, times(2)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder, times(1)).method(eq("POST"), eq(ClientResponse.class), any(String.class));
     verify(clientResponse).getStatus();
     verify(clientResponse).getEntity(String.class);
-    verify(airflowConfig).getUrl();
-    verify(airflowConfig).getAppKey();
+    verify(airflowActiveDagRunsResponse).getStatus();
+    verify(airflowActiveDagRunsResponse).getEntity(String.class);
+    verify(airflowConfig, times(2)).getUrl();
+    verify(airflowConfig, times(2)).getAppKey();
     verify(airflowConfig).isDagRunAbstractionEnabled();
     verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsCache, times(1)).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsCache, times(1)).incrementKey(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsConfig).getThreshold();
-    assertEquals(0, numberOfActiveDagRunsCaptor.getAllValues().get(0));
+    assertEquals(10, numberOfActiveDagRunsCaptor.getAllValues().get(0));
     JSONAssert.assertEquals(AIRFLOW_INPUT, airflowInputCaptor.getValue(), true);
   }
 
@@ -329,6 +347,8 @@ public class WorkflowEngineServiceImplTest {
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+
+    // Mock
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
@@ -344,22 +364,35 @@ public class WorkflowEngineServiceImplTest {
     when(webResource.type(eq(MediaType.APPLICATION_JSON))).thenReturn(webResourceBuilder);
     when(webResourceBuilder.header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE)))
         .thenReturn(webResourceBuilder);
+
+    when(engineUtil.getAirflowActiveDagRunsCountUrl()).thenReturn(P_AIRFLOW_ACTIVE_DAG_RUNS_URL);
+    when(restClient.resource(eq(AIRFLOW_DAG_RUN_URL))).thenReturn(webResource);
+    when(webResourceBuilder.method(eq("GET"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(airflowActiveDagRunsResponse);
+    when(engineUtil.extractActiveDagRunsResponse(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE)).
+        thenReturn(-1);
+
+    when(airflowActiveDagRunsResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(airflowActiveDagRunsResponse.getEntity(String.class)).thenReturn(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE);
     when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class),
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
     when(engineUtil.extractTriggerWorkflowResponse(WORKFLOW_TRIGGER_RESPONSE)).
         thenReturn(new TriggerWorkflowResponse(EXECUTION_DATE, "", RUN_ID));
-    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenThrow(new AppException(500, "", ""));
+
+    // ACT
     workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
+
+    // Verify
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
-    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
-    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
-    verify(webResourceBuilder).method(eq("POST"), eq(ClientResponse.class), any(String.class));
+    verify(webResource, times(2)).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder, times(2)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder, times(1)).method(eq("POST"), eq(ClientResponse.class), any(String.class));
     verify(clientResponse).getStatus();
     verify(clientResponse).getEntity(String.class);
-    verify(airflowConfig).getUrl();
-    verify(airflowConfig).getAppKey();
+    verify(airflowConfig, times(2)).getUrl();
+    verify(airflowConfig, times(2)).getAppKey();
     verify(airflowConfig).isDagRunAbstractionEnabled();
     verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsCache, times(0)).put(any(), any());
@@ -368,26 +401,46 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflowThrowsError_whenActiveDagRunsThresholdExceededAndNumberOfActiveDagRunsNotPresentInCache() {
+  public void testTriggerWorkflowThrowsError_whenActiveDagRunsThresholdExceededAndNumberOfActiveDagRunsNotPresentInCache() throws JsonProcessingException{
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
-    String sqlQuery = "SELECT COUNT(*) FROM dag_run where state='running'";
+    final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
+
+    // Mock
     when(dpsHeaders.getPartitionId()).thenReturn(TEST_PARTITION);
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
     when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
     when(activeDagRunsConfig.getThreshold()).thenReturn(ACTIVE_DAG_RUNS_THRESHOLD);
-    when(jdbcTemplate.queryForObject(eq(sqlQuery), eq(Integer.class))).thenReturn(ACTIVE_DAG_RUNS_THRESHOLD);
+    when(engineUtil.getAirflowActiveDagRunsCountUrl()).thenReturn(P_AIRFLOW_ACTIVE_DAG_RUNS_URL);
+    when(airflowConfigResolver.getAirflowConfig(TEST_PARTITION)).thenReturn(airflowConfig);
+    when(airflowConfig.getUrl()).thenReturn(AIRFLOW_URL);
+    when(airflowConfig.getAppKey()).thenReturn(AIRFLOW_APP_KEY);
 
+    when(restClient.resource(eq(AIRFLOW_DAG_RUN_URL))).thenReturn(webResource);
+    when(webResource.type(eq(MediaType.APPLICATION_JSON))).thenReturn(webResourceBuilder);
+    when(webResourceBuilder.header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE)))
+        .thenReturn(webResourceBuilder);
+    when(webResourceBuilder.method(eq("GET"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(airflowActiveDagRunsResponse);
+
+    when(airflowActiveDagRunsResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(airflowActiveDagRunsResponse.getEntity(String.class)).thenReturn(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE);
+    when(engineUtil.extractActiveDagRunsResponse(any())).thenReturn(ACTIVE_DAG_RUNS_THRESHOLD);
+
+    // ACT
     Assertions.assertThrows(AppException.class, () -> {
       workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
     });
 
-    verify(jdbcTemplate).queryForObject(eq(sqlQuery), eq(Integer.class));
+    // Verify
     verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsCache, times(0)).put(any(), any());
     verify(activeDagRunsConfig).getThreshold();
+
+    verify(airflowConfig, times(1)).getUrl();
+    verify(airflowConfig, times(1)).getAppKey();
   }
 
   @Test
@@ -405,13 +458,12 @@ public class WorkflowEngineServiceImplTest {
       workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
     });
 
-    verify(jdbcTemplate, times(0)).queryForObject(any(String.class), eq(Integer.class));
     verify(activeDagRunsCache, times(0)).put(any(), any());
     verify(activeDagRunsConfig).getThreshold();
   }
 
   @Test
-  public void testTriggerWorkflowWithExceptionFromAirflow() {
+  public void testTriggerWorkflowWithExceptionFromAirflow() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     INPUT_DATA.put("Hello", "World");
@@ -420,6 +472,7 @@ public class WorkflowEngineServiceImplTest {
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
     doCallRealMethod().when(engineUtil).addMicroSecParam(any());
+    when(engineUtil.getAirflowActiveDagRunsCountUrl()).thenReturn(P_AIRFLOW_ACTIVE_DAG_RUNS_URL);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
     when(engineUtil.getDagRunIdParameterName()).thenReturn(RUN_ID_PARAMETER_NAME);
     when(activeDagRunsCache.get(eq(ACTIVE_DAG_RUNS_CACHE_KEY))).thenReturn(null);
@@ -436,22 +489,27 @@ public class WorkflowEngineServiceImplTest {
     when(webResourceBuilder.method(eq("POST"), eq(ClientResponse.class),
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(INTERNAL_SERVER_ERROR_STATUS_CODE);
-    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
+    when(restClient.resource(eq(AIRFLOW_DAG_RUN_URL))).thenReturn(webResource);
+    when(webResourceBuilder.method(eq("GET"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(airflowActiveDagRunsResponse);
+
+    when(airflowActiveDagRunsResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(airflowActiveDagRunsResponse.getEntity(String.class)).thenReturn(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE);
+    when(engineUtil.extractActiveDagRunsResponse(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE)).
+        thenReturn(10);
     Assertions.assertThrows(AppException.class, () -> {
       workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
     });
     verify(restClient).resource(eq(AIRFLOW_DAG_TRIGGER_URL));
-    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
-    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
-    verify(webResourceBuilder).method(eq("POST"), eq(ClientResponse.class), any(String.class));
+    verify(webResource, times(2)).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder, times(2)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder, times(1)).method(eq("POST"), eq(ClientResponse.class), any(String.class));
     verify(clientResponse).getStatus();
-    verify(airflowConfig).getUrl();
-    verify(airflowConfig).getAppKey();
-    verify(airflowConfig).isDagRunAbstractionEnabled();
+    verify(airflowConfig, times(2)).getUrl();
+    verify(airflowConfig, times(2)).getAppKey();
+    verify(airflowConfig, times(1)).isDagRunAbstractionEnabled();
     verify(activeDagRunsCache).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
-    verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsConfig).getThreshold();
-    assertEquals(0, numberOfActiveDagRunsCaptor.getValue());
     JSONAssert.assertEquals(AIRFLOW_INPUT, airflowInputCaptor.getValue(), true);
   }
 
@@ -462,6 +520,8 @@ public class WorkflowEngineServiceImplTest {
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    // Mock
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
     when(partitionInfoAzure.getAirflowEnabled()).thenReturn(false);
     when(engineUtil.getAirflowDagRunsUrl()).thenReturn(P_AIRFLOW_DAG_RUNS_URL);
@@ -485,21 +545,34 @@ public class WorkflowEngineServiceImplTest {
         airflowInputCaptor.capture())).thenReturn(clientResponse);
     when(clientResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
     when(clientResponse.getEntity(String.class)).thenReturn(WORKFLOW_TRIGGER_RESPONSE);
-    when(jdbcTemplate.queryForObject(any(String.class), eq(Integer.class))).thenReturn(0);
+
+    when(engineUtil.getAirflowActiveDagRunsCountUrl()).thenReturn(P_AIRFLOW_ACTIVE_DAG_RUNS_URL);
+    when(restClient.resource(eq(AIRFLOW_DAG_RUN_URL))).thenReturn(webResource);
+    when(webResourceBuilder.method(eq("GET"), eq(ClientResponse.class),
+        airflowInputCaptor.capture())).thenReturn(airflowActiveDagRunsResponse);
+
+    when(airflowActiveDagRunsResponse.getStatus()).thenReturn(SUCCESS_STATUS_CODE);
+    when(airflowActiveDagRunsResponse.getEntity(String.class)).thenReturn(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE);
+    when(engineUtil.extractActiveDagRunsResponse(AIRFLOW_ACTIVE_DAG_RUNS_RESPONSE)).
+        thenReturn(10);
+
+    // ACT
     workflowEngineService.triggerWorkflow(workflowEngineRequest(null, false, false), INPUT_DATA);
+
+    // Verify
     verify(restClient).resource(eq(AIRFLOW_CONTROLLER_DAG_TRIGGER_URL));
-    verify(webResource).type(eq(MediaType.APPLICATION_JSON));
-    verify(webResourceBuilder).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
-    verify(webResourceBuilder).method(eq("POST"), eq(ClientResponse.class), any(String.class));
+    verify(webResource, times(2)).type(eq(MediaType.APPLICATION_JSON));
+    verify(webResourceBuilder, times(2)).header(eq(HEADER_AUTHORIZATION_NAME), eq(HEADER_AUTHORIZATION_VALUE));
+    verify(webResourceBuilder, times(1)).method(eq("POST"), eq(ClientResponse.class), any(String.class));
     verify(clientResponse).getStatus();
     verify(clientResponse).getEntity(String.class);
-    verify(airflowConfig).getUrl();
-    verify(airflowConfig).getAppKey();
-    verify(airflowConfig).isDagRunAbstractionEnabled();
+    verify(airflowConfig, times(2)).getUrl();
+    verify(airflowConfig, times(2)).getAppKey();
+    verify(airflowConfig, times(1)).isDagRunAbstractionEnabled();
     verify(activeDagRunsCache, times(2)).get(eq(ACTIVE_DAG_RUNS_CACHE_KEY));
     verify(activeDagRunsCache).put(eq(ACTIVE_DAG_RUNS_CACHE_KEY), numberOfActiveDagRunsCaptor.capture());
     verify(activeDagRunsConfig).getThreshold();
-    assertEquals(0, numberOfActiveDagRunsCaptor.getValue());
+    assertEquals(10, numberOfActiveDagRunsCaptor.getValue());
     JSONAssert.assertEquals(AIRFLOW_CONTROLLER_DAG_INPUT, airflowInputCaptor.getValue(), true);
   }
 

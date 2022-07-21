@@ -22,10 +22,11 @@ public class AirflowV2WorkflowEngineUtil implements IAirflowWorkflowEngineUtil {
   private static final String FILE_NAME_PREFIX = ".py";
   private static final String AIRFLOW_DAGS_URL = "api/v1/dags/%s";
   private static final String AIRFLOW_DAG_RUNS_URL = "api/v1/dags/%s/dagRuns";
+  private static final String AIRFLOW_ACTIVE_DAG_RUNS_COUNT_URL = "activeDagRuns/";
   private static final String AIRFLOW_DAG_RUNS_STATUS_URL = "api/v1/dags/%s/dagRuns/%s";
   private final static String RUN_ID_PARAMETER_NAME = "dag_run_id";
   private final static String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
-
+  private final static String ACTIVE_DAG_RUNS = "active_dag_runs";
   @Autowired
   @Qualifier("WorkflowObjectMapper")
   private ObjectMapper OBJECT_MAPPER;
@@ -40,6 +41,10 @@ public class AirflowV2WorkflowEngineUtil implements IAirflowWorkflowEngineUtil {
 
   public String getAirflowDagsUrl() {
     return AIRFLOW_DAGS_URL;
+  }
+
+  public String getAirflowActiveDagRunsCountUrl() {
+    return AIRFLOW_ACTIVE_DAG_RUNS_COUNT_URL;
   }
 
   public String getAirflowDagRunsUrl() {
@@ -65,6 +70,15 @@ public class AirflowV2WorkflowEngineUtil implements IAirflowWorkflowEngineUtil {
                         ? jsonNode.get(RUN_ID_PARAMETER_NAME).asText()
                         : "";
     return new TriggerWorkflowResponse(execution_date, "", dag_run_id);
+  }
+
+  public Integer extractActiveDagRunsResponse(String response)
+      throws JsonProcessingException {
+    JsonNode jsonNode = OBJECT_MAPPER.readValue(response, JsonNode.class);
+    Integer activeDagRuns = jsonNode.has(ACTIVE_DAG_RUNS)
+        ? jsonNode.get(ACTIVE_DAG_RUNS).asInt()
+        : -1;
+    return activeDagRuns;
   }
 
   @Override

@@ -3,16 +3,16 @@
 # Declare variables to be passed into your templates.
 
 data:
-  log_level: "INFO"
+  logLevel: "INFO"
   partitionHost: "http://partition"
   entitlementsHost: "http://entitlements"
-  osdu_airflow_url: "http://airflow:8080"
-  spring_profiles_active: "gcp"
-  shared_tenant_name: ""
+  osduAirflowUrl: "http://airflow:8080"
+  springProfilesActive: "gcp"
+  sharedTenantName: ""
   # gcp
-  google_audiences: ""
+  googleAudiences: ""
 
 conf:
   configmap: "workflow-config"
-  app_name: "workflow"
-  on_prem_enabled: false
+  appName: "workflow"
+  onPremEnabled: false
