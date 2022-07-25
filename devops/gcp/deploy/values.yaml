@@ -3,19 +3,19 @@
 # Declare variables to be passed into your templates.
 
 data:
-  requests_cpu: "0.1"
-  requests_memory: "2816M"
-  limits_cpu: "1"
-  limits_memory: "3G"
+  requestsCpu: "0.1"
+  requestsMemory: "2816M"
+  limitsCpu: "1"
+  limitsMemory: "3G"
   serviceAccountName: "workflow"
   image: ""
   imagePullPolicy: "IfNotPresent"
 
 conf:
   configmap: "workflow-config"
-  app_name: "workflow"
-  secret_name: "airflow-workflow-secret"
-  workflow_postgres_secret_name: "workflow-postgres-secret"
-  rabbitmq_secret_name: "rabbitmq-secret"
-  on_prem_enabled: false
+  appName: "workflow"
+  workflowAirflowSecretName: "workflow-airflow-secret"
+  workflowPostgresSecretName: "workflow-postgres-secret"
+  rabbitmqSecretName: "rabbitmq-secret"
+  onPremEnabled: false
   domain: ""

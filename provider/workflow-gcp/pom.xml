@@ -36,6 +36,15 @@
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>1.34.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -73,7 +82,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-gcp</artifactId>
-      <version>0.15.0</version>
+      <version>0.16.0-rc1</version>
     </dependency>
 
     <dependency>
