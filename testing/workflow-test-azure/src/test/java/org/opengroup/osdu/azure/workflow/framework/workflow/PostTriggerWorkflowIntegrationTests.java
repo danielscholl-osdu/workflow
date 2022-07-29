@@ -21,6 +21,7 @@ import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TE
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_SIMPLE_PYTHON_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestDAGNames.TEST_VALIDATE_RUN_CONFIG_DAG;
 import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildInvalidTriggerWorkflowRunPayload;
+import static org.opengroup.osdu.azure.workflow.framework.util.TriggerWorkflowTestsBuilder.buildTriggerWorkflowPayloadWithMaxRequestSize;
 import static org.opengroup.osdu.azure.workflow.utils.AzurePayLoadBuilder.buildCreateWorkflowValidPayloadWithGivenWorkflowName;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
@@ -32,6 +33,8 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflo
 public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase {
 
   /** Test functionality for dags other then TEST_DUMMY_DAG **/
+
+  private static final String INVALID_REQUEST_SIZE_MESSAGE = "Request content exceeded limit of 2000 kB";
 
   @Test
   @Disabled
@@ -131,5 +134,24 @@ public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase 
     );
     assertEquals(HttpStatus.SC_OK, response.getStatus());
     return response.getEntity(String.class);
+  }
+
+  @Test
+  public void should_returnException_when_givenRequestSizeExceedMaxRequestSize() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    ClientResponse response = client.send(
+        HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+        new Gson().toJson(buildTriggerWorkflowPayloadWithMaxRequestSize()),
+        headers,
+        client.getAccessToken()
+    );
+    String messageBody = response.getEntity(String.class);
+    Map<String, String> messageInfo = new ObjectMapper().readValue(messageBody, HashMap.class);
+    assertEquals(INVALID_REQUEST_SIZE_MESSAGE,messageInfo.get("message"));
+    assertEquals(HttpStatus.SC_REQUEST_TOO_LONG,response.getStatus());
   }
 }

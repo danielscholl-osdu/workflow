@@ -43,6 +43,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}/{{ .Chart.Name }}-{{ .Values.image.branch }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep","90"]
           resources:
             requests:
               cpu: "1000m"
@@ -133,3 +137,4 @@ spec:
               value: "true"
             - name: OSDU_AIRFLOW_VERSION2_ENABLED
               value: {{ .Values.airflow.config.airflowVersion2Enabled | quote }}
+      terminationGracePeriodSeconds: 101
