@@ -33,6 +33,7 @@
   <properties>
     <aws.version>1.11.1018</aws.version>
     <log4j2.version>2.17.1</log4j2.version>
+    <spring-webmvc.version>5.3.22</spring-webmvc.version>
   </properties>
 
   <dependencyManagement>
@@ -124,6 +125,11 @@
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-mongodb</artifactId>
         <version>3.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring-webmvc.version}</version>
     </dependency>
     <dependency>
         <groupId>org.mongodb</groupId>
