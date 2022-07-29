@@ -23,7 +23,7 @@
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
 		<tomcat.embed.core.version>9.0.54</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
-		<spring-webmvc.version>5.3.22</spring-webmvc.version>
+		<spring-webmvc.version>5.2.22.RELEASE</spring-webmvc.version>
 	</properties>
 
 	<dependencies>

@@ -34,7 +34,7 @@
 
   <properties>
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-    <spring-webmvc.version>5.3.22</spring-webmvc.version>
+    <spring-webmvc.version>5.2.22.RELEASE</spring-webmvc.version>
   </properties>
 
   <dependencyManagement>
