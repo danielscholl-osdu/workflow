@@ -686,8 +686,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 CC-BY-2.5
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
 - MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org, https://www.mongodb.com/)
 
@@ -837,8 +835,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 GPL-3.0-only
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Project Lombok (from http://projectlombok.org, https://projectlombok.org)
 - jersey-client (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-client)
@@ -870,8 +866,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 JSON
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - JSON in Java (from https://github.com/douglascrockford/JSON-java)
 
 ========================================================================
@@ -983,15 +977,11 @@ The following software have components provided under the terms of this license:
 ========================================================================
 MPL-1.1
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Javassist (from http://www.javassist.org/)
 
 ========================================================================
 MPL-2.0
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Javassist (from http://www.javassist.org/)
 - OkHttp (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
 - RabbitMQ Java Client (from http://www.rabbitmq.com, https://www.rabbitmq.com)
@@ -1024,8 +1014,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 WTFPL
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Reflections (from http://code.google.com/p/reflections/, http://github.com/ronmamo/reflections)
 
 ========================================================================

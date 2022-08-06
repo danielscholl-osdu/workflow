@@ -26,7 +26,7 @@ public class WorkflowStatusPublisher {
 
   private static final String FAILED_TO_PUBLISH_STATUS = "Failed to publish status. ";
   private static final String KIND = "status";
-  private static final String STAGE_NAME = "INGESTOR";
+  private static final String STAGE_WORKFLOW = "WORKFLOW";
   private static final String DEFAULT_VERSION = "1";
 
   private static final int NO_ERRORS = 0;
@@ -70,7 +70,7 @@ public class WorkflowStatusPublisher {
     properties.setMessage(msg);
     properties.setRecordId(recordId);
     properties.setRecordIdVersion(WorkflowStatusPublisher.DEFAULT_VERSION);
-    properties.setStage(STAGE_NAME);
+    properties.setStage(STAGE_WORKFLOW);
     properties.setStatus(status);
     properties.setTimestamp(System.currentTimeMillis());
     properties.setUserEmail(dpsHeaders.getUserEmail());
