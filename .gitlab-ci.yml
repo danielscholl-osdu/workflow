@@ -15,6 +15,7 @@ variables:
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure
   AZURE_COVERAGE_THRESHOLD: $AZURE_CODE_COVERAGE_THRESHOLD
+  AZURE_HELM_SUBDIR: osdu-azure/workflow
   # End azure specific variables
 
 include:
