@@ -1,6 +1,6 @@
 /*
-  Copyright 2021 Google LLC
-  Copyright 2021 EPAM Systems, Inc
+  Copyright 2020-2022 Google LLC
+  Copyright 2020-2022 EPAM Systems, Inc
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.opengroup.osdu.workflow.provider.gcp.config;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,4 +32,5 @@ public class WorkflowPropertiesConfiguration {
   private String systemWorkflowKind;
   private String workflowStatusKind;
   private String sharedTenantName;
+  private String systemWorkflowNamespace;
 }

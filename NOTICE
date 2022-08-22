@@ -317,6 +317,7 @@ The following software have components provided under the terms of this license:
 - Apache Commons Logging (from http://commons.apache.org/logging/, http://commons.apache.org/proper/commons-logging/)
 - Apache Geronimo JMS Spec 2.0 (from http://geronimo.apache.org/maven/${siteId}/${version})
 - Apache Groovy (from http://groovy-lang.org, http://groovy.codehaus.org/, https://groovy-lang.org)
+- Apache HTTP transport v2 for the Google HTTP Client Library for Java. (from https://repo1.maven.org/maven2/com/google/http-client/google-http-client-apache-v2)
 - Apache HttpClient (from http://hc.apache.org/httpcomponents-client)
 - Apache HttpClient Cache (from http://hc.apache.org/httpcomponents-client)
 - Apache HttpCore (from http://hc.apache.org/httpcomponents-core-ga, http://hc.apache.org/httpcomponents-core-ga/, http://hc.apache.org/httpcomponents-core/)
@@ -339,13 +340,16 @@ The following software have components provided under the terms of this license:
 - ClassMate (from http://github.com/cowtowncoder/java-classmate)
 - Cloud Key Management Service (KMS) API (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms)
 - Cloud Key Management Service (KMS) API v1-rev20220407-1.32.1 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms)
+- Cloud Key Management Service (KMS) API v1-rev20220701-1.32.1 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms)
 - Cloud Storage JSON API (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-storage)
 - Cloud Storage JSON API v1-rev20220604-1.32.1 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-storage)
 - Cloud Storage JSON API v1-rev20220608-1.32.1 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-storage)
+- Cloud Storage JSON API v1-rev20220705-2.0.0 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-storage)
 - CloudWatch Metrics for AWS Java SDK (from https://aws.amazon.com/sdkforjava)
 - Converter: Jackson (from https://github.com/square/retrofit, https://repo1.maven.org/maven2/com/squareup/retrofit2/converter-jackson)
 - Core functionality for the Reactor Netty library (from https://github.com/reactor/reactor-netty)
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
+- GSON extensions to the Google HTTP Client Library for Java. (from https://repo1.maven.org/maven2/com/google/http-client/google-http-client-gson)
 - Google APIs Client Library for Java (from https://repo1.maven.org/maven2/com/google/api-client/google-api-client)
 - Google App Engine extensions to the Google HTTP Client Library for Java. (from https://repo1.maven.org/maven2/com/google/http-client/google-http-client-appengine)
 - Google Cloud Core (from https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core, https://github.com/googleapis/java-core)
@@ -594,6 +598,7 @@ The following software have components provided under the terms of this license:
 - springfox-swagger-ui (from https://github.com/springfox/springfox)
 - springfox-swagger2 (from https://github.com/springfox/springfox)
 - swagger-annotations (from https://repo1.maven.org/maven2/io/swagger/core/v3/swagger-annotations, https://repo1.maven.org/maven2/io/swagger/swagger-annotations)
+- swagger-core (from https://repo1.maven.org/maven2/io/swagger/swagger-core)
 - swagger-jaxrs (from https://repo1.maven.org/maven2/io/swagger/swagger-jaxrs)
 - swagger-models (from https://repo1.maven.org/maven2/io/swagger/core/v3/swagger-models, https://repo1.maven.org/maven2/io/swagger/swagger-models)
 - tomcat (from https://tomcat.apache.org/)
@@ -686,6 +691,8 @@ The following software have components provided under the terms of this license:
 ========================================================================
 CC-BY-2.5
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - FindBugs-jsr305 (from http://findbugs.sourceforge.net/)
 - MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org, https://www.mongodb.com/)
 
@@ -799,7 +806,7 @@ The following software have components provided under the terms of this license:
 
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Jakarta Servlet (from http://servlet-spec.java.net, https://javaee.github.io/servlet-spec/, https://projects.eclipse.org/projects/ee4j.servlet)
-- JavaBeans Activation Framework
+- JavaBeans Activation Framework (from https://repo1.maven.org/maven2/com/sun/activation/javax.activation)
 - RabbitMQ Java Client (from http://www.rabbitmq.com, https://www.rabbitmq.com)
 - javax.annotation-api (from http://jcp.org/en/jsr/detail?id=250)
 - jersey-client (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-client)
@@ -835,6 +842,8 @@ The following software have components provided under the terms of this license:
 ========================================================================
 GPL-3.0-only
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Project Lombok (from http://projectlombok.org, https://projectlombok.org)
 - jersey-client (from https://repo1.maven.org/maven2/com/sun/jersey/jersey-client)
@@ -866,6 +875,8 @@ The following software have components provided under the terms of this license:
 ========================================================================
 JSON
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - JSON in Java (from https://github.com/douglascrockford/JSON-java)
 
 ========================================================================
@@ -898,8 +909,12 @@ The following software have components provided under the terms of this license:
 ========================================================================
 LGPL-3.0-only
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Apache Log4j API (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api)
 - Apache Log4j Core (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core)
+- Logback Classic Module (from http://logback.qos.ch, https://repo1.maven.org/maven2/ch/qos/logback/logback-classic)
+- Logback Core Module (from http://logback.qos.ch, https://repo1.maven.org/maven2/ch/qos/logback/logback-core)
 
 ========================================================================
 MIT
@@ -977,11 +992,15 @@ The following software have components provided under the terms of this license:
 ========================================================================
 MPL-1.1
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Javassist (from http://www.javassist.org/)
 
 ========================================================================
 MPL-2.0
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Javassist (from http://www.javassist.org/)
 - OkHttp (from https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp, https://square.github.io/okhttp/)
 - RabbitMQ Java Client (from http://www.rabbitmq.com, https://www.rabbitmq.com)
@@ -1014,6 +1033,8 @@ The following software have components provided under the terms of this license:
 ========================================================================
 WTFPL
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Reflections (from http://code.google.com/p/reflections/, http://github.com/ronmamo/reflections)
 
 ========================================================================
@@ -1060,8 +1081,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 unknown
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Byte Buddy (without dependencies) (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy)
