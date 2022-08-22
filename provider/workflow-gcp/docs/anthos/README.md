@@ -12,9 +12,9 @@ Must have:
 | `OSDU_AIRFLOW_USERNAME` | `******` | Airflow username, need to be defined if `AIRFLOW_IAAP_MODE`=`false`| yes | - |
 | `OSDU_AIRFLOW_PASSWORD` | `******` | Airflow password, need to be defined if `AIRFLOW_IAAP_MODE`=`false` | yes | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
-| `<POSTGRES_PASSWORD_ENV_VARIABLE_NAME>` | ex `POSTGRES_PASS_OSDU` | Postgres password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
-| `<AMQP_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_PASS_OSDU` | Amqp password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
-| `<AMQP_ADMIN_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_ADMIN_PASS_OSDU` | Amqp admin password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have it's own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `<POSTGRES_PASSWORD_ENV_VARIABLE_NAME>` | ex `POSTGRES_PASS_OSDU` | Postgres password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have its own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `<AMQP_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_PASS_OSDU` | Amqp password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have its own ENV name value, and it must be present in ENV of Workflow service | yes | - |
+| `<AMQP_ADMIN_PASSWORD_ENV_VARIABLE_NAME>` | ex `AMQP_ADMIN_PASS_OSDU` | Amqp admin password env name, name of that variable not defined at the service level, the name will be received through partition service. Each tenant can have its own ENV name value, and it must be present in ENV of Workflow service | yes | - |
 | `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 
 Defined in default application property file but possible to override:
@@ -24,24 +24,25 @@ Defined in default application property file but possible to override:
 | `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
 | `AUTHORIZE_API` | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint | no | output of infrastructure deployment |
 | `PARTITION_API` | ex `http://localhost:8081/api/partition/v1` | Partition service endpoint | no | - |
-| `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows to configure message publishing about schemas changes to Pub/Sub | no | - |
+| `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows configuring message publishing about schemas changes to Pub/Sub | no | - |
 | `STATUS_CHANGED_TOPIC_NAME` | ex `status-changed` | Allows to subscribe a specific Pub/Sub topic | no | - |
 
 These variables define service behavior, and are used to switch between `anthos` or `gcp` environments, their overriding
-and usage in mixed mode was not tested. Usage of spring profiles is preferred.
+and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
 
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `PARTITION_AUTH_ENABLED` | ex `true` or `false` | Disable or enable auth token provisioning for requests to Partition service | no | - |
-| `OQMDRIVER` | `rabbitmq` or `pubsub` | Oqm driver mode that defines which message broker will be used | no | - |
-| `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
+| `OQMDRIVER` | `rabbitmq` or `pubsub` | OQM driver mode that defines which message broker will be used | no | - |
+| `OSMDRIVER` | `postgres` OR `datastore` | OSM driver mode that defines which storage will be used | no | - |
 | `OSDU_AIRFLOW_VERSION2` | `true` OR `false` | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, by default used `true`  | no | - |
-| `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate it requests to Airflow, by default `true` and IAAP used | no | - |
+| `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `true` and IAAP used | no | - |
+| `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
 
 ### Properties set in Partition service:
 
-Note that properties can be set in Partition as `sensitive` in that case in property `value` should be present **not value itself**, but **ENV variable name**.
-This variable should be present in environment of service that need that variable.
+Note that properties can be set in Partition as `sensitive` in that case, property `value` should be present **not value itself**, but **ENV variable name**.
+This variable should be present in the environment of service that needs that variable.
 
 Example:
 ```
@@ -66,7 +67,7 @@ It can be overridden by:
 - through the Spring Boot property `osm.postgres.partition-properties-prefix`
 - environment variable `OSM_POSTGRES_PARTITION_PROPERTIES_PREFIX`
 
-**Propertyset:**
+**Property set:**
 
 | Property | Description |
 | --- | --- |
@@ -125,6 +126,18 @@ CREATE TABLE IF NOT EXISTS anthos.workflow_run_osm
 )
 TABLESPACE pg_default;
 ALTER TABLE anthos.workflow_run_osm
+    OWNER to postgres;
+    
+DROP TABLE IF EXISTS system_workflow_namespace.system_workflow_osm;
+CREATE TABLE IF NOT EXISTS system_workflow_namespace.system_workflow_osm
+(
+	id text COLLATE pg_catalog."default" NOT NULL,
+	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	data jsonb NOT NULL,
+	CONSTRAINT workflow_run_id UNIQUE (id)
+)
+TABLESPACE pg_default;
+ALTER TABLE system_workflow_namespace.system_workflow_osm
     OWNER to postgres;
 ```
 
@@ -215,7 +228,7 @@ curl -L -X PATCH 'https://dev.osdu.club/api/partition/v1/partitions/opendes' -H 
 
 ### Exchanges & queues configuration:
 
-At RabbitMq should be created exchange with name:
+At RabbitMq should be created exchange with the name:
 
 **name:** `status-changed`
 
@@ -243,7 +256,7 @@ You will need to have the following environment variables defined.
 | `TEST_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$INTEGRATION_TESTER` | -- |
 | `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID` | `********` | Client Id for `$NO_ACCESS_INTEGRATION_TESTER` | yes | -- |
 | `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$NO_ACCESS_INTEGRATION_TESTER` | -- |
-| `TEST_OPENID_PROVIDER_URL` | `https://keycloak.com/auth/realms/osdu` | OpenID provider url | yes | -- |
+| `TEST_OPENID_PROVIDER_URL` | `https://keycloak.com/auth/realms/osdu` | OpenID provider URL | yes | -- |
 
 **Entitlements configuration for integration accounts**
 
