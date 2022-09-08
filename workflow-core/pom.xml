@@ -82,7 +82,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20140107</version>
+      <version>20220320</version>
     </dependency>
 
     <!-- WhiteSource updates -->
@@ -107,7 +107,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
-      <version>5.4.4</version>
+      <version>5.7.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.springframework</groupId>
@@ -119,7 +119,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>9.0.43</version>
+      <version>9.0.64</version>
     </dependency>
 
     <dependency>
@@ -149,7 +149,7 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.26</version>
+      <version>1.31</version>
     </dependency>
 
     <dependency>
