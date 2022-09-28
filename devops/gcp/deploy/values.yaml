@@ -8,6 +8,8 @@ data:
   limitsCpu: "1"
   limitsMemory: "3G"
   serviceAccountName: "workflow"
+  bootstrapImage: ""
+  bootstrapServiceAccountName: ""
   image: ""
   imagePullPolicy: "IfNotPresent"
 
@@ -17,5 +19,6 @@ conf:
   workflowAirflowSecretName: "workflow-airflow-secret"
   workflowPostgresSecretName: "workflow-postgres-secret"
   rabbitmqSecretName: "rabbitmq-secret"
+  bootstrapSecretName: "datafier-secret"
   onPremEnabled: false
   domain: ""
