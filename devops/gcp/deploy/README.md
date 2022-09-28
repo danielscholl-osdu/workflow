@@ -29,27 +29,35 @@ First you need to set variables in **values.yaml** file using any code editor. S
 
 ### Common variables
 
-| Name | Description | Type | Default |Required |
-|------|-------------|------|---------|---------|
-**image** | your image name | string | - | yes
-**requestsCpu** | amount of requests CPU | string | 0.1 | yes
-**requestsMemory** | amount of requests memory| string | 2816M | yes
-**limitsCpu** | CPU limit | string | 1 | yes
-**limitsMemory** | memory limit | string | 3G | yes
-**serviceAccountName** | name of your service account | string | workflow | yes
-**imagePullPolicy** | when to pull image | string | IfNotPresent | yes
+| Name                   | Description                  | Type   | Default      | Required |
+| ---------------------- | ---------------------------- | ------ | ------------ | -------- |
+| **image**              | your image name              | string | -            | yes      |
+| **requestsCpu**        | amount of requests CPU       | string | 0.1          | yes      |
+| **requestsMemory**     | amount of requests memory    | string | 2816M        | yes      |
+| **limitsCpu**          | CPU limit                    | string | 1            | yes      |
+| **limitsMemory**       | memory limit                 | string | 3G           | yes      |
+| **serviceAccountName** | name of your service account | string | workflow     | yes      |
+| **imagePullPolicy**    | when to pull image           | string | IfNotPresent | yes      |
+
+### Bootstrap variables
+
+| Name                            | Description                 | Type   | Default | Required |
+| ------------------------------- | --------------------------- | ------ | ------- | -------- |
+| **bootstrapImage**              | name of the bootstrap image | string | -       | yes      |
+| **bootstrapServiceAccountName** | name of the bootstrap SA    | string | -       | yes      |
 
 ### Config variables
 
-| Name | Description | Type | Default |Required |
-|------|-------------|------|---------|---------|
-**appName** | name of the app | string | workflow | yes
-**configmap** | configmap to be used | string | workflow-config | yes
-**workflowPostgresSecretName** | secret for postgres | string | workflow-postgres-secret | yes
-**workflowAirflowSecretName** | secret for airflow | string | workflow-airflow-secret | yes
-**rabbitmqSecretName** | secret for rabbitmq | string | rabbitmq-secret | yes
-**onPremEnabled** | whether on-prem is enabled | boolean | false | yes
-**domain** | your domain | string | - | yes
+| Name                           | Description                | Type    | Default                  | Required |
+| ------------------------------ | -------------------------- | ------- | ------------------------ | -------- |
+| **appName**                    | name of the app            | string  | workflow                 | yes      |
+| **configmap**                  | configmap to be used       | string  | workflow-config          | yes      |
+| **workflowPostgresSecretName** | secret for postgres        | string  | workflow-postgres-secret | yes      |
+| **workflowAirflowSecretName**  | secret for airflow         | string  | workflow-airflow-secret  | yes      |
+| **rabbitmqSecretName**         | secret for rabbitmq        | string  | rabbitmq-secret          | yes      |
+| **bootstrapSecretName**        | Secret name for bootstrap  | string  | datafier-secret          | yes      |
+| **onPremEnabled**              | whether on-prem is enabled | boolean | false                    | yes      |
+| **domain**                     | your domain                | string  | -                        | yes      |
 
 ### Install the helm chart
 

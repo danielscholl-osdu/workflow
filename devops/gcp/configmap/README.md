@@ -9,6 +9,7 @@ This chart bootstraps a configmap deployment on a [Kubernetes](https://kubernete
 ## Prerequisites
 
 The code was tested on **Kubernetes cluster** (v1.21.11) with **Istio** (1.12.6)
+
 > It is possible to use other versions, but it hasn't been tested
 
 ### Operation system
@@ -28,28 +29,35 @@ First you need to set variables in **values.yaml** file using any code editor. S
 
 ### Common variables
 
-| Name | Description | Type | Default |Required |
-|------|-------------|------|---------|---------|
-**logLevel** | logging level | string | INFO | yes
-**springProfilesActive** | active spring profile | string | gcp | yes
-**partitionHost** | partition host | string | "http://partition" | yes
-**entitlementsHost** | entitlements host | string | "http://entitlements" | yes
-**osduAirflowUrl** | airflow url | string | "http://airflow:8080" | yes
-**sharedTenantName** | tenant name | string | - | yes
+| Name                     | Description           | Type   | Default               | Required |
+| ------------------------ | --------------------- | ------ | --------------------- | -------- |
+| **logLevel**             | logging level         | string | INFO                  | yes      |
+| **springProfilesActive** | active spring profile | string | gcp                   | yes      |
+| **partitionHost**        | partition host        | string | "http://partition"    | yes      |
+| **entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
+| **osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
+| **sharedTenantName**     | tenant name           | string | -                     | yes      |
+
+### Bootstrap variables
+
+| Name                | Description          | Type   | Default          | Required |
+| ------------------- | -------------------- | ------ | ---------------- | -------- |
+| **dataPartitionId** | ID of data partition | string | -                | yes      |
+| **worflowHost**     | Workflow host URL    | string | http://workflow | yes      |
 
 ### GCP variables
 
-| Name | Description | Type | Default |Required |
-|------|-------------|------|---------|---------|
-**googleAudiences** | your GCP client ID | string | - | yes
+| Name                | Description        | Type   | Default | Required |
+| ------------------- | ------------------ | ------ | ------- | -------- |
+| **googleAudiences** | your GCP client ID | string | -       | yes      |
 
 ### Config variables
 
-| Name | Description | Type | Default |Required |
-|------|-------------|------|---------|---------|
-**configmap** | configmap to be used | string | workflow-config | yes
-**appName** | name of the app | string | workflow | yes
-**onPremEnabled** | whether on-prem is enabled | boolean | false | yes
+| Name              | Description                | Type    | Default         | Required |
+| ----------------- | -------------------------- | ------- | --------------- | -------- |
+| **configmap**     | configmap to be used       | string  | workflow-config | yes      |
+| **appName**       | name of the app            | string  | workflow        | yes      |
+| **onPremEnabled** | whether on-prem is enabled | boolean | false           | yes      |
 
 ### Install the helm chart
 
