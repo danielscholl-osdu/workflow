@@ -6,11 +6,14 @@ variables:
   AWS_TEST_SUBDIR: testing/workflow-test-aws
   AWS_SERVICE: ingestion-workflow
   AWS_ENVIRONMENT: dev
-  AWS_DEPLOY_TARGET: EKS
+  AWS_DEPLOY_TARGET: TF
   AWS_EKS_DEPLOYMENT_NAME: os-ingestion-workflow
   AWS_SERVICE_NAMESPACE: osdu-ingest
 
-  # Start azure specific variables
+ 
+  IBM_HELM_CONFIG_PATH: devops/ibm/ibm-workflow-config
+  IBM_HELM_DEPLOY_PATH: devops/ibm/ibm-workflow-deploy
+ # Start azure specific variables
   AZURE_SERVICE: ingestion-workfow
   AZURE_BUILD_SUBDIR: provider/workflow-azure
   AZURE_TEST_SUBDIR: testing/workflow-test-azure

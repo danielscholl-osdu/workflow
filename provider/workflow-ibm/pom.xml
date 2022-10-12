@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.opengroup.osdu</groupId>
 		<artifactId>os-workflow</artifactId>
-		<version>0.17.0-SNAPSHOT</version>
+		<version>0.18.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>workflow-ibm</artifactId>
-	<version>0.17.0-SNAPSHOT</version>
+	<version>0.18.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>workflow-ibm</name>
@@ -21,7 +21,7 @@
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
 		<osdu.ibmcore.version>0.16.0-rc1</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
-		<tomcat.embed.core.version>9.0.54</tomcat.embed.core.version>
+		<tomcat.embed.core.version>9.0.67</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
 	</properties>
 
@@ -62,7 +62,7 @@
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>workflow-core</artifactId>
-			<version>0.17.0-SNAPSHOT</version>
+			<version>0.18.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.tomcat.embed</groupId>
@@ -226,7 +226,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-core</artifactId>
-    		<version>5.3.8.RELEASE</version>
+    		<version>5.7.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>

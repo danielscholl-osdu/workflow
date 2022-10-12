@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 data:
-  logLevel: "INFO"
+  logLevel: "ERROR"
   partitionHost: "http://partition"
   entitlementsHost: "http://entitlements"
   osduAirflowUrl: "http://airflow:8080"
@@ -11,6 +11,16 @@ data:
   sharedTenantName: ""
   # gcp
   googleAudiences: ""
+  # bootstrap
+  dataPartitionId: ""
+  workflowHost: "http://workflow"
+  dagNames:
+    - csv_ingestion
+    - Energistics_xml_ingest
+    - manifest_ingestion
+    - Osdu_ingest
+    - Segy_to_vds_conversion_sdms
+    - Segy_to_zgy_conversion
 
 conf:
   configmap: "workflow-config"
