@@ -1,4 +1,4 @@
-## Service Configuration for GCP
+## Service Configuration for Google Cloud
 
 ## Environment variables:
 
@@ -9,7 +9,7 @@ Must have:
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `GOOGLE_AUDIENCES` | ex `*****.apps.googleusercontent.com` | Client ID for getting access to cloud resources | yes | https://console.cloud.google.com/apis/credentials |
-| `SPRING_PROFILES_ACTIVE` | ex `gcp` | Spring profile that activate default configuration for GCP environment | false | - |
+| `SPRING_PROFILES_ACTIVE` | ex `gcp` | Spring profile that activate default configuration for Google Cloud environment | false | - |
 | `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
 | `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
@@ -66,7 +66,7 @@ You will need to have the following environment variables defined.
 # build + install integration test core
 $ (cd testing/workflow-test-core/ && mvn clean install)
 
-# build + run GCP integration tests.
+# build + run Google Cloud integration tests.
 #
 # Note: this assumes that the environment variables for integration tests as outlined
 #       above are already exported in your environment.

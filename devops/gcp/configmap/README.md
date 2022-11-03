@@ -45,11 +45,11 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **dataPartitionId** | ID of data partition | string | -                | yes      |
 | **worflowHost**     | Workflow host URL    | string | http://workflow | yes      |
 
-### GCP variables
+### Google Cloud variables
 
 | Name                | Description        | Type   | Default | Required |
 | ------------------- | ------------------ | ------ | ------- | -------- |
-| **googleAudiences** | your GCP client ID | string | -       | yes      |
+| **googleAudiences** | your Google Cloud client ID | string | -       | yes      |
 
 ### Config variables
 

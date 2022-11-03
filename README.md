@@ -15,7 +15,7 @@
     * [PUT /v1/workflow/{workflow_name}/workflowRun/{runId}](#put-v1workflowworkflow_nameworkflowrunrunid)
 * [Airflow 2.0 support](#airflow-2-support)
 * [Service Provider Interfaces](#workflow-service-provider-interfaces)
-* [GCP implementation](#gcp-implementation)
+* [Google Cloud implementation](#gcp-implementation)
 * [Firestore](#firestore-collections)
 
 ## Introduction
@@ -374,9 +374,9 @@ The Workflow service has several Service Provider Interfaces that the classes ne
 | IWorkflowRunRepository      | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunRepository`       |
 | IWorkflowRunService         | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunService`       |
 
-## GCP implementation
+## Google Cloud implementation
 
-The GCP Identity and Access Management service account for the Workflow service must have the
+The Google Cloud Identity and Access Management service account for the Workflow service must have the
 **Composer User** and **Cloud Datastore User** roles.
 
 Note that obtaining user credentials for Application Default Credentials isn't suitable for the
@@ -384,6 +384,6 @@ development purposes because signing a blob is only available with the service a
 Remember to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. Follow the [instructions
 on the Google developer's portal][application-default-credentials].
 
-* Documentation for the GCP Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)
+* Documentation for the Google Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)
 
 
