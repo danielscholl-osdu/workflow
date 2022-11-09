@@ -22,8 +22,8 @@ In order to run this service locally, you will need the following:
 ## Service Configuration
 ### Anthos:
 [Anthos service configuration ](docs/anthos/README.md)
-### GCP:
-[Gcp service configuration ](docs/gcp/README.md)
+### Google Cloud:
+[Google cloud service configuration ](docs/gcp/README.md)
 
 
 ### Test the application
@@ -32,8 +32,8 @@ After the service has started it should be accessible via a web browser by visit
 
 ### Anthos test configuration:
 [Anthos service configuration ](docs/anthos/README.md)
-### GCP test configuration:
-[Gcp service configuration ](docs/gcp/README.md)
+### Google Cloud test configuration:
+[Google Cloud service configuration ](docs/gcp/README.md)
 
 
 ### Run Locally
