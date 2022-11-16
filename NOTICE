@@ -20,6 +20,7 @@ The following software have components provided under the terms of this license:
 - Apache Log4j JUL Adapter (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-jul)
 - Apache Log4j SLF4J Binding (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j-impl)
 - AspectJ Weaver (from http://www.aspectj.org, https://www.eclipse.org/aspectj/)
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -423,6 +424,7 @@ The following software have components provided under the terms of this license:
 - Lucene Core (from https://repo1.maven.org/maven2/org/apache/lucene/lucene-core)
 - MapStruct Core (from http://mapstruct.org/mapstruct/, https://repo1.maven.org/maven2/org/mapstruct/mapstruct)
 - Metrics Core (from https://repo1.maven.org/maven2/io/dropwizard/metrics/metrics-core)
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -655,6 +657,7 @@ The following software have components provided under the terms of this license:
 - Jakarta Annotations API (from https://projects.eclipse.org/projects/ee4j.ca)
 - Jakarta XML Binding API (from https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api, https://repo1.maven.org/maven2/org/jboss/spec/javax/xml/bind/jboss-jaxb-api_2.3_spec)
 - Lucene Core (from https://repo1.maven.org/maven2/org/apache/lucene/lucene-core)
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -676,6 +679,7 @@ Beerware
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -701,6 +705,7 @@ CC-BY-4.0
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -875,8 +880,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 JSON
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - JSON in Java (from https://github.com/douglascrockford/JSON-java)
 
 ========================================================================
@@ -945,6 +948,7 @@ The following software have components provided under the terms of this license:
 - Java Client Runtime for AutoRest (from https://github.com/Azure/autorest-clientruntime-for-java)
 - Java JWT (from http://www.jwt.io, https://github.com/auth0/java-jwt)
 - Lucene Core (from https://repo1.maven.org/maven2/org/apache/lucene/lucene-core)
+- Microsoft Application Insights Java Agent (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Spring Boot starter (from https://github.com/Microsoft/ApplicationInsights-Java)
 - Microsoft Application Insights Java SDK Web Module (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -1064,6 +1068,7 @@ The following software have components provided under the terms of this license:
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Guava: Google Core Libraries for Java (from http://code.google.com/p/guava-libraries, https://github.com/google/guava, https://repo1.maven.org/maven2/com/google/guava/guava)
 - HdrHistogram (from http://hdrhistogram.github.io/HdrHistogram/)
+- JSON in Java (from https://github.com/douglascrockford/JSON-java)
 - Joda-Time (from http://joda-time.sourceforge.net, http://www.joda.org/joda-time/, https://www.joda.org/joda-time/)
 - LatencyUtils (from http://latencyutils.github.io/LatencyUtils/)
 - Microsoft Application Insights Java SDK Core (from https://github.com/Microsoft/ApplicationInsights-Java)
@@ -1081,6 +1086,8 @@ The following software have components provided under the terms of this license:
 ========================================================================
 unknown
 ========================================================================
+The following software have components provided under the terms of this license:
+
 - Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Byte Buddy (without dependencies) (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy)
