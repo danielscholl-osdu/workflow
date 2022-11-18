@@ -23,7 +23,7 @@ env:
     DOCKER_PASSWORD: /osdu/devops/docker_credentials:password
     SONAR_USERNAME: /osdu/devops/sonar_credentials:username
     SONAR_PASSWORD: /osdu/devops/sonar_credentials:password
-  
+
   parameter-store:
     SONAR_URL: /osdu/devops/sonar_url
 
@@ -45,6 +45,10 @@ phases:
       - export AWS_ACCOUNT_ID=`aws sts get-caller-identity | grep Account | cut -d':' -f 2 | cut -d'"' -f 2`
       - export AWS_OSDU_DEV_MAVEN_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain $AWS_OSDU_DEV_MAVEN_DOMAIN --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text`
       # Install git secrets
+      #TODO temporarily adding hotfix, due to https://github.com/awslabs/git-secrets/issues/220
+      - export SAY_LOCATION=`ln -s "$(which echo)" say`
+      - export PATH="$PATH:$SAY_LOCATION"
+
       - git clone https://github.com/awslabs/git-secrets.git
       - cd git-secrets && make install && cd ..
       - git secrets --install && git secrets --register-aws
@@ -71,7 +75,7 @@ phases:
       - if [ "$GIT_SECRETS_SCAN_RESULT" = "FAILED" ]; then echo "Secrets detected!" && exit 1; fi
 
       - echo "Building primary service assemblies..."
-      - mvn -B test install sonar:sonar -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} 
+      - mvn -B test install sonar:sonar -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME}
 
       # Suspended until further notice
       # - echo "Copying assemblies to dist..."
