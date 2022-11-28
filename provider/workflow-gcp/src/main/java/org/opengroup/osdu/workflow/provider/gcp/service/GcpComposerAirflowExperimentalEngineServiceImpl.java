@@ -24,24 +24,24 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+import org.opengroup.osdu.workflow.provider.gcp.config.condition.ComposerAirflowExperimentalCondition;
 import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @Primary
-@ConditionalOnExpression(
-    "'${osdu.airflow.version2}'=='false' and ${airflow.iaap.mode}"
-)
-public class GcpComposerEngineServiceImpl extends AirflowWorkflowEngineServiceImpl {
+@Conditional(ComposerAirflowExperimentalCondition.class)
+public class GcpComposerAirflowExperimentalEngineServiceImpl
+    extends AirflowWorkflowEngineServiceImpl {
 
   private final AirflowConfig airflowConfig;
-  private final ComposerIaapClient iapClient;
+  private final ComposerClient iapClient;
 
-  public GcpComposerEngineServiceImpl(AirflowConfig airflowConfig,
-      ComposerIaapClient iapClient) {
+  public GcpComposerAirflowExperimentalEngineServiceImpl(AirflowConfig airflowConfig,
+      ComposerClient iapClient) {
     super(null, airflowConfig);
     this.airflowConfig = airflowConfig;
     this.iapClient = iapClient;

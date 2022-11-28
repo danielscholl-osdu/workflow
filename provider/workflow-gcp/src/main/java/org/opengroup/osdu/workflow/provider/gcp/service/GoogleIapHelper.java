@@ -44,9 +44,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.opengroup.osdu.workflow.exception.RuntimeException;
 import org.opengroup.osdu.workflow.provider.gcp.exception.GoogleIamException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnBean(ComposerIaapClient.class)
 @RequiredArgsConstructor
 public class GoogleIapHelper {
 
