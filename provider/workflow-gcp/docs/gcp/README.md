@@ -16,14 +16,16 @@ Must have:
 
 Defined in default application property file but possible to override:
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `LOG_PREFIX` | `workflow` | Logging prefix | no | - |
-| `AUTHORIZE_API` | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint | no | output of infrastructure deployment |
-| `PARTITION_API` | ex `http://localhost:8081/api/partition/v1` | Partition service endpoint | no | output of infrastructure deployment |
-| `GOOGLE_APPLICATION_CREDENTIALS` | ex `/path/to/directory/service-key.json` | Service account credentials, you only need this if running locally | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false` | Allows configuring message publishing about schemas changes to Pub/Sub | no | - |
-| `STATUS_CHANGED_TOPIC_NAME` | ex `status-changed` | Allows to subscribe a specific Pub/Sub topic | no | - |
+| name                               | value                                         | description                                                                                                                                            | sensitive? | source |
+|------------------------------------|-----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| ---        | ---    |
+| `LOG_PREFIX`                       | `workflow`                                    | Logging prefix                                                                                                                                         | no | - |
+| `AUTHORIZE_API`                    | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint                                                                                                                              | no | output of infrastructure deployment |
+| `PARTITION_API`                    | ex `http://localhost:8081/api/partition/v1`   | Partition service endpoint                                                                                                                             | no | output of infrastructure deployment |
+| `GOOGLE_APPLICATION_CREDENTIALS`   | ex `/path/to/directory/service-key.json`      | Service account credentials, you only need this if running locally                                                                                     | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false`                             | Allows configuring message publishing about schemas changes to Pub/Sub                                                                                 | no | - |
+| `STATUS_CHANGED_TOPIC_NAME`        | ex `status-changed`                           | Allows to subscribe a specific Pub/Sub topic                                                                                                           | no | - |
+| `OSDU_AIRFLOW_VERSION2`            | `true` OR `false`                             | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, `false` to use `experimental` API, by default used `true` | no | - |
+| `COMPOSER_CLIENT`   | `IAAP` OR `V2` OR `NONE`                      | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `IAAP` is used                          | no | - |
 
 These variables define service behavior, and are used to switch between `anthos` or `gcp` environments, their overriding
 and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
@@ -33,8 +35,6 @@ and usage in the mixed mode were not tested. Usage of spring profiles is preferr
 | `PARTITION_AUTH_ENABLED` | ex `true` or `false` | Disable or enable auth token provisioning for requests to Partition service | no | - |
 | `OQMDRIVER` | `rabbitmq` or `pubsub` | OQM driver mode that defines which message broker will be used | no | - |
 | `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
-| `OSDU_AIRFLOW_VERSION2` | `true` OR `false` | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, by default used `true`  | no | - |
-| `AIRFLOW_IAAP_MODE` | `true` OR `false` | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `true` and IAAP used | no | - |
 | `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
 
 
