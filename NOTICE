@@ -520,14 +520,14 @@ The following software have components provided under the terms of this license:
 - Spring Commons Logging Bridge (from https://github.com/spring-projects/spring-framework)
 - Spring Context (from http://www.springframework.org, https://github.com/spring-projects/spring-framework, https://repo1.maven.org/maven2/org/springframework/spring-context)
 - Spring Core (from http://www.springframework.org, https://github.com/spring-projects/spring-framework, https://repo1.maven.org/maven2/org/springframework/spring-core)
-- Spring Data Core (from https://repo1.maven.org/maven2/org/springframework/data/spring-data-commons)
+- Spring Data Core (from https://repo1.maven.org/maven2/org/springframework/data/spring-data-commons, https://spring.io/projects/spring-data)
 - Spring Data MongoDB - Core (from https://repo1.maven.org/maven2/org/springframework/data/spring-data-mongodb)
 - Spring Expression Language (SpEL) (from https://github.com/SpringSource/spring-framework, https://github.com/spring-projects/spring-framework, https://repo1.maven.org/maven2/org/springframework/spring-expression)
 - Spring JDBC (from https://github.com/SpringSource/spring-framework, https://github.com/spring-projects/spring-framework, https://repo1.maven.org/maven2/org/springframework/spring-jdbc)
 - Spring JMS (from http://www.springframework.org, https://github.com/SpringSource/spring-framework, https://github.com/spring-projects/spring-framework, https://repo1.maven.org/maven2/org/springframework/spring-jms)
 - Spring Messaging (from https://github.com/spring-projects/spring-framework)
 - Spring Plugin - Metadata Extension (from https://repo1.maven.org/maven2/org/springframework/plugin/spring-plugin-metadata)
-- Spring Plugin Core (from https://repo1.maven.org/maven2/org/springframework/plugin/spring-plugin-core)
+- Spring Plugin Core (from https://github.com/spring-projects/spring-plugin/spring-plugin-core, https://repo1.maven.org/maven2/org/springframework/plugin/spring-plugin-core)
 - Spring Security - Core (from http://spring.io/spring-security, https://repo1.maven.org/maven2/org/springframework/security/spring-security-core, https://spring.io/projects/spring-security, https://spring.io/spring-security)
 - Spring Security - Namespace Configuration Module (from http://spring.io/spring-security, https://repo1.maven.org/maven2/org/springframework/security/spring-security-config, https://spring.io/projects/spring-security, https://spring.io/spring-security)
 - Spring Security - Web Application Security Module (from http://spring.io/spring-security, https://repo1.maven.org/maven2/org/springframework/security/spring-security-web, https://spring.io/projects/spring-security, https://spring.io/spring-security)
@@ -690,6 +690,7 @@ BouncyCastle
 ========================================================================
 The following software have components provided under the terms of this license:
 
+- Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 - Bouncy Castle Provider (from http://www.bouncycastle.org/java.html, https://www.bouncycastle.org/java.html)
 
 ========================================================================
@@ -912,8 +913,6 @@ The following software have components provided under the terms of this license:
 ========================================================================
 LGPL-3.0-only
 ========================================================================
-The following software have components provided under the terms of this license:
-
 - Apache Log4j API (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api)
 - Apache Log4j Core (from https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core)
 - Logback Classic Module (from http://logback.qos.ch, https://repo1.maven.org/maven2/ch/qos/logback/logback-classic)
