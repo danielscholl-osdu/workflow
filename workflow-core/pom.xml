@@ -155,7 +155,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
-      <version>4.1.46.Final</version>
+      <version>4.1.68.Final</version>
     </dependency>
 
     <dependency>
@@ -187,7 +187,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>5.2.21.RELEASE</version>
+      <version>5.2.22.RELEASE</version>
     </dependency>
 
     <dependency>
