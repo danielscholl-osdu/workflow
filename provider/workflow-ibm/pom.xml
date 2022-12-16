@@ -111,7 +111,7 @@
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.26</version>
+			<version>1.33</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
@@ -215,7 +215,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-web</artifactId>
-    		<version>5.3.8.RELEASE</version>
+    		<version>5.7.2</version>
     		<exclusions>
 				<exclusion>
             		<groupId>org.springframework.security</groupId>
