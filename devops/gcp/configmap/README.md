@@ -50,6 +50,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | Name                | Description        | Type   | Default | Required |
 | ------------------- | ------------------ | ------ | ------- | -------- |
 | **googleAudiences** | your Google Cloud client ID | string | -       | yes      |
+| **composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
 
 ### Config variables
 

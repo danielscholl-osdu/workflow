@@ -11,6 +11,7 @@ data:
   sharedTenantName: ""
   # gcp
   googleAudiences: ""
+  composerClient: "IAAP"
   # bootstrap
   dataPartitionId: ""
   workflowHost: "http://workflow"
