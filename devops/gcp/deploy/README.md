@@ -27,7 +27,22 @@ Packages are only needed for installation from a local computer.
 
 First you need to set variables in **values.yaml** file using any code editor. Some of the values are prefilled, but you need to specify some values as well. You can find more information about them below.
 
-### Common variables
+### Configmap variables
+
+| Name                     | Description           | Type   | Default               | Required |
+| ------------------------ | --------------------- | ------ | --------------------- | -------- |
+| **logLevel**             | logging level         | string | ERROR                  | yes      |
+| **springProfilesActive** | active spring profile | string | gcp                   | yes      |
+| **partitionHost**        | partition host        | string | "http://partition"    | yes      |
+| **entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
+| **osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
+| **sharedTenantName**     | tenant name           | string | -                     | yes      |
+| **dataPartitionId** | ID of data partition | string | -                | yes      |
+| **worflowHost**     | Workflow host URL    | string | "http://workflow" | yes      |
+| **googleAudiences** | your Google Cloud client ID | string | -       | yes      |
+| **composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
+
+### Deployment variables
 
 | Name                   | Description                  | Type   | Default      | Required |
 | ---------------------- | ---------------------------- | ------ | ------------ | -------- |
@@ -38,11 +53,6 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **limitsMemory**       | memory limit                 | string | 3G           | yes      |
 | **serviceAccountName** | name of your service account | string | workflow     | yes      |
 | **imagePullPolicy**    | when to pull image           | string | IfNotPresent | yes      |
-
-### Bootstrap variables
-
-| Name                            | Description                 | Type   | Default | Required |
-| ------------------------------- | --------------------------- | ------ | ------- | -------- |
 | **bootstrapImage**              | name of the bootstrap image | string | -       | yes      |
 | **bootstrapServiceAccountName** | name of the bootstrap SA    | string | -       | yes      |
 

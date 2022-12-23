@@ -3,6 +3,25 @@
 # Declare variables to be passed into your templates.
 
 data:
+  #Configmap variables
+  logLevel: "ERROR"
+  partitionHost: "http://partition"
+  entitlementsHost: "http://entitlements"
+  osduAirflowUrl: "http://airflow:8080"
+  springProfilesActive: "gcp"
+  sharedTenantName: ""
+  googleAudiences: ""
+  composerClient: "IAAP"
+  dataPartitionId: ""
+  workflowHost: "http://workflow"
+  dagNames:
+    - csv_ingestion
+    - Energistics_xml_ingest
+    - manifest_ingestion
+    - Osdu_ingest
+    - Segy_to_vds_conversion_sdms
+    - Segy_to_zgy_conversion
+  # Deployment variables
   requestsCpu: "0.1"
   requestsMemory: "2816M"
   limitsCpu: "1"
