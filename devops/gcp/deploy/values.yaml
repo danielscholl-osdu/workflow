@@ -10,7 +10,6 @@ data:
   osduAirflowUrl: "http://airflow:8080"
   springProfilesActive: "gcp"
   sharedTenantName: ""
-  googleAudiences: ""
   composerClient: "IAAP"
   dataPartitionId: ""
   workflowHost: "http://workflow"

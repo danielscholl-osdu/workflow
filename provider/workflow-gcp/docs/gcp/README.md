@@ -8,7 +8,6 @@ Must have:
 
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
-| `GOOGLE_AUDIENCES` | ex `*****.apps.googleusercontent.com` | Client ID for getting access to cloud resources | yes | https://console.cloud.google.com/apis/credentials |
 | `SPRING_PROFILES_ACTIVE` | ex `gcp` | Spring profile that activate default configuration for Google Cloud environment | false | - |
 | `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
@@ -51,7 +50,6 @@ You will need to have the following environment variables defined.
 | `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
 | `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
 | `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
-| `GOOGLE_AUDIENCE` | ex `********.apps.googleusercontent.com`| client application ID | yes | https://console.cloud.google.com/apis/credentials |
 | `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
 | `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
 | `OSDU_AIRFLOW_VERSION2` | `true` or `false` | Disable\Enable tests that work only with specific Airflow version | no | - |
