@@ -12,7 +12,6 @@ public enum DefaultVariable {
 	LEGAL_TAG(""),
 	OTHER_RELEVANT_DATA_COUNTRIES(""),
 
-	GOOGLE_AUDIENCE(""),
 	FINISHED_WORKFLOW_ID(""),
 
 	TEST_DAG_NAME(""),

@@ -27,6 +27,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties
 public class GcpPropertiesConfiguration {
-  private String googleAudiences;
   private String workflowAdminAccount;
 }
