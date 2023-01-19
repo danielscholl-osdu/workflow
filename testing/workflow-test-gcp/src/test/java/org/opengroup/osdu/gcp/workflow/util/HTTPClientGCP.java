@@ -34,7 +34,7 @@ public class HTTPClientGCP extends HTTPClient {
       log.info("Get INTEGRATION_TESTER credentials");
       accessToken =
           new GoogleServiceAccount(getEnvironmentVariableOrDefaultKey(INTEGRATION_TESTER))
-              .getAuthToken(getEnvironmentVariableOrDefaultKey(GOOGLE_AUDIENCE));
+              .getAuthToken();
     }
     return "Bearer " + accessToken;
   }
@@ -45,7 +45,7 @@ public class HTTPClientGCP extends HTTPClient {
       log.info("Get NO_DATA_ACCESS_TESTER credentials");
       noDataAccessToken =
           new GoogleServiceAccount(getEnvironmentVariableOrDefaultKey(NO_DATA_ACCESS_TESTER))
-              .getAuthToken(getEnvironmentVariableOrDefaultKey(GOOGLE_AUDIENCE));
+              .getAuthToken();
     }
     return "Bearer " + noDataAccessToken;
   }
