@@ -34,7 +34,6 @@
 
   <properties>
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-    <spring-webmvc.version>5.2.22.RELEASE</spring-webmvc.version>
   </properties>
 
   <dependencyManagement>
@@ -115,7 +114,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
-      <version>${spring-webmvc.version}</version>
     </dependency>
 
   </dependencies>
@@ -160,6 +158,7 @@
         </dependencies>
         <executions>
           <execution>
+            <id>gcp-shade</id>
             <goals>
               <goal>shade</goal>
             </goals>
