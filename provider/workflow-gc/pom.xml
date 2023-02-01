@@ -25,11 +25,11 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>workflow-gcp</artifactId>
+  <artifactId>workflow-gc</artifactId>
   <version>0.19.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>workflow-gcp</name>
+  <name>workflow-gc</name>
   <description>Google Cloud implementation of Workflow service APIs for Datastore</description>
 
   <properties>

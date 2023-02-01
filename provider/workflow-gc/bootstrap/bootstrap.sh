@@ -45,7 +45,7 @@ bootstrap_workflow_onprem() {
     done
 }
 
-bootstrap_workflow_gcp() {
+bootstrap_workflow_gc() {
 
     # Getting ACCESS_TOKEN from context
     ACCESS_TOKEN="$(gcloud auth print-access-token)"
@@ -86,7 +86,7 @@ if [ "${ONPREM_ENABLED}" == "true" ]; then
     source ./validate-env.sh "OPENID_PROVIDER_CLIENT_SECRET"
     bootstrap_workflow_onprem
 else
-    bootstrap_workflow_gcp
+    bootstrap_workflow_gc
 fi
 
 touch /tmp/bootstrap_ready

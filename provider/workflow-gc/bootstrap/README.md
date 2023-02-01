@@ -1,8 +1,8 @@
 # Workflow Bootstrap
 
 The following script is responsible for creating workflows, required for DAGs to run.
-It creates workflow for all DAGs on either GCP or Anthos (On-Prem) environments.
-Below you can find required variables to bootstrap Workflow Service on GCP and on-prem.
+It creates workflow for all DAGs on either Google Cloud or Reference (On-Prem) environments.
+Below you can find required variables to bootstrap Workflow Service on Google Cloud and on-prem.
 They should be passed as environment variables.
 
 ## Common variables
@@ -12,7 +12,7 @@ They should be passed as environment variables.
 | **DATA_PARTITION_ID** | ID of data partition                                                                   | `osdu`                       | yes      |
 | **WORKFLOW_HOST**     | Workflow host URL                                                                      | `http://workflow`            | yes      |
 | **DAG_NAMES**         | Name of dags delimited by `,`                                                          | `Osdu-ingestion,segy_to_vds` | yes      |
-| **ONPREM_EANABLED**   | Used to switch between Anthos (On-Prem) bootstrap (`true`) and GCP bootstrap (`false`) | `true`                       | yes      |
+| **ONPREM_EANABLED**   | Used to switch between Anthos (On-Prem) bootstrap (`true`) and Google Cloud bootstrap (`false`) | `true`                       | yes      |
 
 ## On-prem variables
 

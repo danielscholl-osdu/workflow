@@ -1,6 +1,6 @@
 ## Service Configuration for Google Cloud
 
-## Environment variables:
+## Environment variables
 
 Define the following environment variables.
 
@@ -20,13 +20,13 @@ Defined in default application property file but possible to override:
 | `LOG_PREFIX`                       | `workflow`                                    | Logging prefix                                                                                                                                         | no | - |
 | `AUTHORIZE_API`                    | ex `https://entitlements.com/entitlements/v1` | Entitlements API endpoint                                                                                                                              | no | output of infrastructure deployment |
 | `PARTITION_API`                    | ex `http://localhost:8081/api/partition/v1`   | Partition service endpoint                                                                                                                             | no | output of infrastructure deployment |
-| `GOOGLE_APPLICATION_CREDENTIALS`   | ex `/path/to/directory/service-key.json`      | Service account credentials, you only need this if running locally                                                                                     | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `GOOGLE_APPLICATION_CREDENTIALS`   | ex `/path/to/directory/service-key.json`      | Service account credentials, you only need this if running locally                                                                                     | yes | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
 | `STATUS_CHANGED_MESSAGING_ENABLED` | `true` OR `false`                             | Allows configuring message publishing about schemas changes to Pub/Sub                                                                                 | no | - |
 | `STATUS_CHANGED_TOPIC_NAME`        | ex `status-changed`                           | Allows to subscribe a specific Pub/Sub topic                                                                                                           | no | - |
 | `OSDU_AIRFLOW_VERSION2`            | `true` OR `false`                             | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, `false` to use `experimental` API, by default used `true` | no | - |
 | `COMPOSER_CLIENT`   | `IAAP` OR `V2` OR `NONE`                      | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `IAAP` is used                          | no | - |
 
-These variables define service behavior, and are used to switch between `anthos` or `gcp` environments, their overriding
+These variables define service behavior, and are used to switch between `Reference` or `Google Cloud` environments, their overriding
 and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
 
 | name | value | description | sensitive? | source |
@@ -36,7 +36,6 @@ and usage in the mixed mode were not tested. Usage of spring profiles is preferr
 | `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
 | `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
 
-
 ### Running E2E Tests
 
 You will need to have the following environment variables defined.
@@ -44,8 +43,8 @@ You will need to have the following environment variables defined.
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
 | `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
-| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
-| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | https://console.cloud.google.com/iam-admin/serviceaccounts |
+| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
+| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
 | `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
 | `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
 | `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
@@ -68,11 +67,10 @@ $ (cd testing/workflow-test-core/ && mvn clean install)
 #
 # Note: this assumes that the environment variables for integration tests as outlined
 #       above are already exported in your environment.
-$ (cd testing/workflow-test-gcp/ && mvn clean test)
+$ (cd testing/workflow-test-gc/ && mvn clean test)
 ```
 
-
-## Datastore configuration:
+## Datastore configuration
 
 There must be a namespace for each tenant, which is the same as the tenant name.
 
@@ -82,7 +80,7 @@ Example:
 
 Kinds `workflow_osm` and `workflow_run_osm` will be created by the service if it does not exist.
 
-## Pubsub configuration:
+## Pubsub configuration
 
 At Pubsub should be created a topic with the name:
 
@@ -93,7 +91,8 @@ It can be overridden by:
 - through the Spring Boot property `gcp.status-changed.topicName`
 - environment variable `STATUS_CHANGED_TOPIC_NAME`
 
-## Google cloud service account configuration :
+## Google cloud service account configuration
+
 TBD
 
 | Required roles |

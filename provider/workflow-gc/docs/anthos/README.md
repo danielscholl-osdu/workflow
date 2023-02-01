@@ -1,6 +1,6 @@
 ## Service Configuration for Anthos
 
-## Environment variables:
+## Environment variables
 
 Define the following environment variables.
 
@@ -29,7 +29,7 @@ Defined in default application property file but possible to override:
 | `OSDU_AIRFLOW_VERSION2`            | `true` OR `false`                             | Allows to configure Airflow API used by Workflow service, choose `true` to use `stable` API, `false` to use `experimental` API, by default used `true` | no | - |
 | `COMPOSER_CLIENT`   | `IAAP` OR `V2` OR `NONE`                      | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `NONE` is used                          | no | - |
 
-These variables define service behavior, and are used to switch between `anthos` or `gcp` environments, their overriding
+These variables define service behavior, and are used to switch between `Reference` or `Google Cloud` environments, their overriding
 and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
 
 | name | value | description | sensitive? | source |
@@ -39,12 +39,13 @@ and usage in the mixed mode were not tested. Usage of spring profiles is preferr
 | `OSMDRIVER` | `postgres` OR `datastore` | OSM driver mode that defines which storage will be used | no | - |
 | `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
 
-### Properties set in Partition service:
+### Properties set in Partition service
 
 Note that properties can be set in Partition as `sensitive` in that case, property `value` should be present **not value itself**, but **ENV variable name**.
 This variable should be present in the environment of service that needs that variable.
 
 Example:
+
 ```
     "elasticsearch.port": {
       "sensitive": false, <- value not sensitive
@@ -56,9 +57,9 @@ Example:
     }
 ```
 
-## Postgres configuration:
+## Postgres configuration
 
-### Properties set in Partition service:
+### Properties set in Partition service
 
 **prefix:** `osm.postgres`
 
@@ -101,15 +102,17 @@ curl -L -X PATCH 'http://partition.com/api/partition/v1/partitions/opendes' -H '
 </details>
 
 ### Persistence layer
+
 ### Database structure for OSMDRIVER=postgres
+
 ```
 DROP TABLE IF EXISTS anthos.workflow_osm;
 CREATE TABLE IF NOT EXISTS anthos.workflow_osm
 (
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_id UNIQUE (id)
+ id text COLLATE pg_catalog."default" NOT NULL,
+ pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ data jsonb NOT NULL,
+ CONSTRAINT workflow_id UNIQUE (id)
 )
 TABLESPACE pg_default;
 ALTER TABLE anthos.workflow_osm
@@ -119,10 +122,10 @@ ALTER TABLE anthos.workflow_osm
 DROP TABLE IF EXISTS anthos.workflow_run_osm;
 CREATE TABLE IF NOT EXISTS anthos.workflow_run_osm
 (
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_run_id UNIQUE (id)
+ id text COLLATE pg_catalog."default" NOT NULL,
+ pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ data jsonb NOT NULL,
+ CONSTRAINT workflow_run_id UNIQUE (id)
 )
 TABLESPACE pg_default;
 ALTER TABLE anthos.workflow_run_osm
@@ -131,19 +134,19 @@ ALTER TABLE anthos.workflow_run_osm
 DROP TABLE IF EXISTS system_workflow_namespace.system_workflow_osm;
 CREATE TABLE IF NOT EXISTS system_workflow_namespace.system_workflow_osm
 (
-	id text COLLATE pg_catalog."default" NOT NULL,
-	pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	data jsonb NOT NULL,
-	CONSTRAINT workflow_run_id UNIQUE (id)
+ id text COLLATE pg_catalog."default" NOT NULL,
+ pk bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ data jsonb NOT NULL,
+ CONSTRAINT workflow_run_id UNIQUE (id)
 )
 TABLESPACE pg_default;
 ALTER TABLE system_workflow_namespace.system_workflow_osm
     OWNER to postgres;
 ```
 
-## RabbitMQ configuration:
+## RabbitMQ configuration
 
-### Properties set in Partition service:
+### Properties set in Partition service
 
 **prefix:** `oqm.rabbitmq`
 
@@ -226,7 +229,7 @@ curl -L -X PATCH 'https://dev.osdu.club/api/partition/v1/partitions/opendes' -H 
 
 </details>
 
-### Exchanges & queues configuration:
+### Exchanges & queues configuration
 
 At RabbitMq should be created exchange with the name:
 

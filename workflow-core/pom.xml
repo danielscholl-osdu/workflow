@@ -218,7 +218,7 @@
             <exclude>org/opengroup/osdu/workflow/config/*</exclude>
             <exclude>org/opengroup/osdu/workflow/model/*</exclude>
             <exclude>**/SwaggerDocumentationConfig**</exclude>
-            <!-- The classes below are only used by GCP, can be included when tests are added -->
+            <!-- The classes below are only used by Google Cloud, can be included when tests are added -->
             <exclude>**/AirflowV2WorkflowEngineServiceImpl**</exclude>
             <exclude>**/AirflowWorkflowEngineServiceImpl**</exclude>
             <exclude>**/CommonUpdateStatusRequestValidator**</exclude>
