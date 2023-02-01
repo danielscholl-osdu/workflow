@@ -1,9 +1,0 @@
-variables:
-  OSDU_GCP_SERVICE: workflow
-  OSDU_GCP_VENDOR: gcp
-  OSDU_GCP_ENABLE_BOOTSTRAP: "true"
-  OSDU_GCP_ENABLE_HELM_CONFIG: "false"
-
-osdu-gcp-anthos-test:
-  variables:
-    OSDU_GCP_VENDOR: anthos

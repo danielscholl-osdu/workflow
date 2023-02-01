@@ -73,7 +73,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 Run this command from within this directory:
 
 ```console
-helm install gcp-workflow-deploy .
+helm install gc-workflow-deploy .
 ```
 
 ## Uninstalling the Chart
@@ -81,7 +81,7 @@ helm install gcp-workflow-deploy .
 To uninstall the helm deployment:
 
 ```console
-helm uninstall gcp-workflow-deploy
+helm uninstall gc-workflow-deploy
 ```
 
 [Move-to-Top](#deploy-helm-chart)

@@ -1,0 +1,9 @@
+variables:
+  GC_SERVICE: workflow
+  GC_VENDOR: gc
+  GC_ENABLE_BOOTSTRAP: "true"
+  GC_ENABLE_HELM_CONFIG: "false"
+
+gc-anthos-test:
+  variables:
+    GC_VENDOR: anthos

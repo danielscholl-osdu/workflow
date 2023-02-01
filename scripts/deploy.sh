@@ -18,7 +18,7 @@ cd "$WORKDIR" || exit 0
 
 if [[ -z $1 ]]; then
   cat << EOF
-Usage: $0 provider mvn-user mvn-password cache-bucket [gcp-region]
+Usage: $0 provider mvn-user mvn-password cache-bucket [gc-region]
 Build and deploy a container to Cloud Run
 
   provider      provider name
@@ -40,7 +40,7 @@ REGION=$5
 [[ -z $REGION ]] && REGION=us-central1
 
 if [[ -z $GOOGLE_CLOUD_PROJECT ]]; then
-  echo "Enter your GCP project ID:"
+  echo "Enter your Google Cloud project ID:"
   read -r GOOGLE_CLOUD_PROJECT
 fi
 

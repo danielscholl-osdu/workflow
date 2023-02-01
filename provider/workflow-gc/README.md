@@ -1,4 +1,4 @@
-# workflow-gcp
+# workflow-gc
 
 The OSDU R3 Workflow service is designed to start business processes in the system. In the OSDU R3
 prototype phase, the service allows you to work with workflow metadata, supporting CRUD operations
@@ -16,27 +16,32 @@ In order to run this service locally, you will need the following:
 
 - [Maven 3.6.0+](https://maven.apache.org/download.cgi)
 - [AdoptOpenJDK8](https://adoptopenjdk.net/)
-- Infrastructure dependencies, deployable through the relevant [infrastructure template](https://community.opengroup.org/osdu/platform/deployment-and-operations/infra-gcp-provisioning)
-
+- Infrastructure dependencies, deployable through the relevant [infrastructure template](https://community.opengroup.org/osdu/platform/deployment-and-operations/infra-gc-provisioning)
 
 ## Service Configuration
-### Anthos:
-[Anthos service configuration ](docs/anthos/README.md)
-### Google Cloud:
-[Google cloud service configuration ](docs/gcp/README.md)
 
+### Anthos
+
+[Anthos service configuration](docs/anthos/README.md)
+
+### Google Cloud
+
+[Google cloud service configuration](docs/gc/README.md)
 
 ### Test the application
 
 After the service has started it should be accessible via a web browser by visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the request does not fail, you can then run the integration tests.
 
-### Anthos test configuration:
-[Anthos service configuration ](docs/anthos/README.md)
-### Google Cloud test configuration:
-[Google Cloud service configuration ](docs/gcp/README.md)
+### Anthos test configuration
 
+[Anthos service configuration](docs/anthos/README.md)
+
+### Google Cloud test configuration
+
+[Google Cloud service configuration](docs/gc/README.md)
 
 ### Run Locally
+
 Check that maven is installed:
 
 ```bash
@@ -73,54 +78,60 @@ $ cat ~/.m2/settings.xml
 </settings>
 ```
 
-* Update the Google cloud SDK to the latest version:
+- Update the Google cloud SDK to the latest version:
 
 ```bash
 gcloud components update
 ```
-* Set Google Project Id:
+
+- Set Google Project Id:
 
 ```bash
 gcloud config set project <YOUR-PROJECT-ID>
 ```
 
-* Perform a basic authentication in the selected project:
+- Perform a basic authentication in the selected project:
 
 ```bash
 gcloud auth application-default login
 ```
 
 ## Testing
-* Navigate to workflow service's root folder and run:
+
+- Navigate to workflow service's root folder and run:
 
 ```bash
 mvn clean install
 ```
 
-* If you wish to see the coverage report then go to testing/target/site/jacoco-aggregate and open index.html
+- If you wish to see the coverage report then go to testing/target/site/jacoco-aggregate and open index.html
 
-* If you wish to build the project without running tests
+- If you wish to build the project without running tests
 
 ```bash
 mvn clean install -DskipTests
 ```
+
 ### Running
+
 After configuring your environment as specified above, you can follow these steps to build and run the application. These steps should be invoked from the *repository root.*
 
 ```bash
-cd provider/workflow-gcp-datastore/ && mvn spring-boot:run
+cd provider/workflow-gc-datastore/ && mvn spring-boot:run
 ```
 
 ## Deployment
+
 Workflow Service is compatible with App Engine Flexible Environment and Cloud Run.
 
-* To deploy into Cloud run, please, use this documentation:
-  https://cloud.google.com/run/docs/quickstarts/build-and-deploy
+- To deploy into Cloud run, please, use this documentation:
+  <https://cloud.google.com/run/docs/quickstarts/build-and-deploy>
 
-* To deploy into App Engine, please, use this documentation:
-  https://cloud.google.com/appengine/docs/flexible/java/quickstart
+- To deploy into App Engine, please, use this documentation:
+  <https://cloud.google.com/appengine/docs/flexible/java/quickstart>
 
 ## License
+
 Copyright 2020 Google LLC
 Copyright 2020 EPAM Systems, Inc
 

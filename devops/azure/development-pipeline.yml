@@ -23,7 +23,7 @@ trigger:
       - .gitignore
       - /docs
       - /provider/workflow-aws
-      - /provider/workflow-gcp
+      - /provider/workflow-gc
       - /provider/workflow-ibm
 
 resources:
@@ -36,8 +36,8 @@ resources:
       name: infra-azure-provisioning
 
 variables:
-  - group: 'Azure - OSDU'
-  - group: 'Azure - OSDU Secrets'
+  - group: "Azure - OSDU"
+  - group: "Azure - OSDU Secrets"
 
   - name: serviceName
     value: "ingestion-workflow"
@@ -45,40 +45,40 @@ variables:
     value: "devops/azure/chart"
   - name: valuesFile
     value: "devops/azure/chart/helm-config.yaml"
-  - name: 'MANIFEST_REPO'
+  - name: "MANIFEST_REPO"
     value: $[ resources.repositories['FluxRepo'].name ]
-  - name: 'MAVEN_CACHE_FOLDER'
+  - name: "MAVEN_CACHE_FOLDER"
     value: $(Pipeline.Workspace)/.m2/repository
   - name: SKIP_TESTS
-    value: 'false'
+    value: "false"
 
 stages:
   - template: /devops/build-stage.yml@TemplateRepo
     parameters:
-      mavenGoal: 'package'
+      mavenGoal: "package"
       mavenPublishJUnitResults: true
-      serviceCoreMavenOptions: '-pl workflow-core --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-      mavenOptions: '-pl provider/workflow-azure --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+      serviceCoreMavenOptions: "-pl workflow-core --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+      mavenOptions: "-pl provider/workflow-azure --settings .mvn/community-maven.settings.xml -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
       copyFileContents: |
         pom.xml
         provider/workflow-azure/maven/settings.xml
         provider/workflow-azure/pom.xml
         provider/workflow-azure/target/*-spring-boot.jar
         .mvn/community-maven.settings.xml
-      copyFileContentsToFlatten: ''
-      mavenSettingsFile: './maven/settings.xml'
+      copyFileContentsToFlatten: ""
+      mavenSettingsFile: "./maven/settings.xml"
       serviceBase: ${{ variables.serviceName }}
-      testingRootFolder: 'testing'
+      testingRootFolder: "testing"
       chartPath: ${{ variables.chartPath }}
   - template: /devops/deploy-stages.yml@TemplateRepo
     parameters:
       serviceName: ${{ variables.serviceName }}
       chartPath: ${{ variables.chartPath }}
       valuesFile: ${{ variables.valuesFile }}
-      testCoreMavenPomFile: 'testing/workflow-test-core/pom.xml'
-      testCoreMavenOptions: '--settings $(System.DefaultWorkingDirectory)/drop/.mvn/community-maven.settings.xml'
+      testCoreMavenPomFile: "testing/workflow-test-core/pom.xml"
+      testCoreMavenOptions: "--settings $(System.DefaultWorkingDirectory)/drop/.mvn/community-maven.settings.xml"
       skipDeploy: ${{ variables.SKIP_DEPLOY }}
       skipTest: ${{ variables.SKIP_TESTS }}
       providers:
-        -  name: Azure
-           environments: ['dev']
+        - name: Azure
+          environments: ["dev"]

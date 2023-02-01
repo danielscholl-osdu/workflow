@@ -5,17 +5,17 @@
 * [Introduction](#introduction)
 * [System interactions](#system-interactions)
 * [Workflow API](#workflow-api)
-    * [POST /v1/workflow](#post-v1workflow)
-    * [GET /v1/workflow](#get-v1workflow)
-    * [DELETE /v1/workflow/{workflow_name](#delete-v1workflowworkflow_name)
-    * [GET /v1/workflow/{workflow_name](#get-v1workflowworkflow_name)
-    * [POST /v1/workflow/{workflow_name}/workflowRun](#post-v1workflowworkflow_nameworkflowrun)
-    * [GET /v1/workflow/{workflow_name}/workflowRun](#get-v1workflowworkflow_nameworkflowrun)
-    * [GET /v1/workflow/{workflow_name}/workflowRun/{runId}](#get-v1workflowworkflow_nameworkflowrunrunid)
-    * [PUT /v1/workflow/{workflow_name}/workflowRun/{runId}](#put-v1workflowworkflow_nameworkflowrunrunid)
+  * [POST /v1/workflow](#post-v1workflow)
+  * [GET /v1/workflow](#get-v1workflow)
+  * [DELETE /v1/workflow/{workflow_name](#delete-v1workflowworkflow_name)
+  * [GET /v1/workflow/{workflow_name](#get-v1workflowworkflow_name)
+  * [POST /v1/workflow/{workflow_name}/workflowRun](#post-v1workflowworkflow_nameworkflowrun)
+  * [GET /v1/workflow/{workflow_name}/workflowRun](#get-v1workflowworkflow_nameworkflowrun)
+  * [GET /v1/workflow/{workflow_name}/workflowRun/{runId}](#get-v1workflowworkflow_nameworkflowrunrunid)
+  * [PUT /v1/workflow/{workflow_name}/workflowRun/{runId}](#put-v1workflowworkflow_nameworkflowrunrunid)
 * [Airflow 2.0 support](#airflow-2-support)
 * [Service Provider Interfaces](#workflow-service-provider-interfaces)
-* [Google Cloud implementation](#gcp-implementation)
+* [Google Cloud implementation](#gc-implementation)
 * [Firestore](#firestore-collections)
 
 ## Introduction
@@ -241,12 +241,6 @@ curl --location --request POST 'https://{path}/v1/workflow/{workflow_name}/workf
 | status | `String` | Workflow status |
 | submittedBy | `String` | User Id who started the workflow |
 
-
-
-
-
-
-
 ### GET /v1/workflow/{workflow_name}/workflowRun
 
 Get all run instances for a workflow.
@@ -293,6 +287,7 @@ curl --location --request GET 'https://{path}/v1/workflow/{workflow_name}/workfl
     --header 'Data-Partition-Id: {assigned partition ID}' \
     --header 'Content-Type: application/json'
 ```
+
 #### Parameters
 
 | Name | Description                   |
@@ -346,10 +341,12 @@ curl --location --request PUT 'https://{path}/v1/workflow/{workflow_name}/workfl
 | submittedBy | `String` | User Id who started the workflow |
 
 ## Airflow 2 support
+
 as per airflow community, airflow experimnetal API will be discontinued. with help of MR 160 we added airflow 2.0 stable api support. for more details please check mentioned MR. 160
 
-#### Procedure to switch airflow 2.0 :
-- add following properties 
+#### Procedure to switch airflow 2.0
+
+* add following properties
 
 | Key | Value | Decription |
 | ------ | ------ | ------ |
@@ -357,9 +354,8 @@ as per airflow community, airflow experimnetal API will be discontinued. with he
 | osdu.airflow.username| `<_airflow_username_>` | airflow username if basic auth is enabled
 | osdu.airflow.password | `<_airflow-password_>` | airflow password if basic auth is enabled
 
-- override and disable integration test case ` org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId()` in provider level.
-- override and enable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()` in provider level
-
+* override and disable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId()` in provider level.
+* override and enable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()` in provider level
 
 ## Workflow Service Provider Interfaces
 
@@ -384,6 +380,4 @@ development purposes because signing a blob is only available with the service a
 Remember to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. Follow the [instructions
 on the Google developer's portal][application-default-credentials].
 
-* Documentation for the Google Cloud Datastore implementation is located in [here](./provider/workflow-gcp/README.md)
-
-
+* Documentation for the Google Cloud Datastore implementation is located in [here](./provider/workflow-gc/README.md)
