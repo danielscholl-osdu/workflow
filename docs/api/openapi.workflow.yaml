@@ -28,6 +28,7 @@ paths:
       tags:
         - Workflow
       summary: Creates workflow definition with standard orchestrator operators.
+      description:         **Required roles**: 'service.workflow.admin'.
       operationId: deployWorkflow
       description: API to create a new workflow using standard operators of orchestrator.
       responses:
@@ -77,6 +78,7 @@ paths:
       tags:
         - Workflow
       summary: List all the workflow applicable for a tenant.
+      description:         **Required roles**: 'service.workflow.viewer'.
       operationId: listAllWorkflow
       description: List all the workflows for the tenant.
       parameters:
@@ -131,6 +133,7 @@ paths:
       tags:
         - Workflow
       summary: Delete a workflow defintion.
+      description:         **Required roles**: 'service.workflow.admin'.
       operationId: deleteWorkflow
       description: Delete a workflow by it's name.
       parameters:
@@ -177,6 +180,7 @@ paths:
       tags:
         - Workflow
       summary: Get complete details for a workflow.
+      description:         **Required roles**: 'service.workflow.viewer'.
       operationId: viewWorkflow
       description: Get complete details for an workflow.
       parameters:
@@ -229,6 +233,7 @@ paths:
       tags:
         - Workflow Run
       summary: Trigger a workflow.
+       description:         **Required roles**: 'service.workflow.creator'.     
       operationId: triggerWorkflow
       description: Trigger a workflow mentioned in payload.
       parameters:
@@ -284,6 +289,7 @@ paths:
       tags:
         - Workflow Run
       summary: Get all run instances of a workflow.
+      description:         **Required roles**: 'service.workflow.viewer'.
       operationId: getAllWorkflowRuns
       description: Get all run instances for a worflow.
       parameters:
@@ -380,6 +386,7 @@ paths:
       tags:
         - Workflow Run
       summary: Get details for a speciffic workflow run instance.
+      description:         **Required roles**: 'service.workflow.viewer'.
       operationId: getWorkflowRun
       description: Get an execution instances for a workflow.
       parameters:
@@ -436,6 +443,7 @@ paths:
       tags:
         - Workflow Run
       summary: Update the workflow run instance.
+      description:         **Required roles**: 'service.workflow.viewer'.
       operationId: updateWorkflowRun
       description: Update workflow run.
       parameters:
