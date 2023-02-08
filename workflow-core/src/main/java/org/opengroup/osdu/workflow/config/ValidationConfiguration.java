@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.hibernate.validator.HibernateValidatorConfiguration;
-import org.hibernate.validator.cfg.ConstraintMapping;
+import org.hibernate.validator.internal.cfg.context.DefaultConstraintMapping;
 import org.hibernate.validator.spi.cfg.ConstraintMappingContributor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +53,7 @@ public class ValidationConfiguration {
       if (cfg instanceof HibernateValidatorConfiguration) {
         HibernateValidatorConfiguration configuration = (HibernateValidatorConfiguration) cfg;
         this.contributors.forEach(contributor -> contributor.createConstraintMappings(() -> {
-          ConstraintMapping mapping = configuration.createConstraintMapping();
+          DefaultConstraintMapping mapping = new DefaultConstraintMapping();
           configuration.addMapping(mapping);
           return mapping;
         }));

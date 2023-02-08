@@ -1,37 +1,73 @@
 package org.opengroup.osdu.workflow.swagger;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.servlet.ServletContext;
-import java.util.Collections;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.oas.annotations.EnableOpenApi;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.ParameterType;
+import springfox.documentation.service.RequestParameter;
+import springfox.documentation.service.SecurityReference;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
+import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
+@EnableOpenApi
 public class SwaggerDocumentationConfig {
-  @Bean
-  public OpenAPI openApi(ServletContext servletContext) {
-    Server server = new Server().url(servletContext.getContextPath());
-    return new OpenAPI()
-        .servers(Collections.singletonList(server))
-        .info(new Info()
-                  .title("Workflow Service")
-                  .version("1.0"))
-        .components(new Components()
-                        .addSecuritySchemes("Authorization",
-                                            new SecurityScheme()
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("bearer")
-                                                .bearerFormat("Authorization")
-                                                .in(SecurityScheme.In.HEADER)
-                                                .name("Authorization")))
-        .addSecurityItem(
-            new SecurityRequirement()
-                .addList("Authorization"));
-  }
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String DEFAULT_INCLUDE_PATTERN = "/.*";
+
+    @Bean
+    public Docket api() {
+        RequestParameterBuilder builder = new RequestParameterBuilder();
+        List<RequestParameter> parameters = new ArrayList<>();
+        builder.name(DpsHeaders.DATA_PARTITION_ID)
+                .description("Which tenant to use")
+                .in(ParameterType.HEADER)
+                .required(true)
+                .build();
+        parameters.add(builder.build());
+        builder.name("Content-Type")
+                .description("The file type/format of the request body")
+                .in(ParameterType.HEADER)
+                .required(false)
+                .build();
+        parameters.add(builder.build());
+        return new Docket(DocumentationType.OAS_30)
+                .globalRequestParameters(parameters)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("org.opengroup.osdu.workflow.api"))
+                .build()
+                .securityContexts(Collections.singletonList(securityContext()))
+                .securitySchemes(Collections.singletonList(apiKey()));
+    }
+
+    private ApiKey apiKey() {
+        return new ApiKey(AUTHORIZATION_HEADER, AUTHORIZATION_HEADER, "header");
+    }
+
+    private SecurityContext securityContext() {
+        return SecurityContext.builder()
+                .securityReferences(defaultAuth())
+                .operationSelector(o -> PathSelectors.regex(DEFAULT_INCLUDE_PATTERN).test(o.requestMappingPattern()))
+                .build();
+    }
+
+    List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope
+                = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes =
+                new AuthorizationScope[]{authorizationScope};
+        return Collections.singletonList(
+                new SecurityReference(AUTHORIZATION_HEADER, authorizationScopes));
+    }
 }

@@ -21,6 +21,7 @@
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
 		<osdu.ibmcore.version>0.16.0-rc1</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
+    <tomcat.embed.core.version>9.0.67</tomcat.embed.core.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
 	</properties>
 
@@ -125,6 +126,7 @@
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
+      <version>${tomcat.embed.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
@@ -213,6 +215,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-web</artifactId>
+        <version>5.7.2</version>
     		<exclusions>
 				<exclusion>
             		<groupId>org.springframework.security</groupId>
@@ -223,6 +226,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-core</artifactId>
+        <version>5.7.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
