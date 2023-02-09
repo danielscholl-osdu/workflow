@@ -211,7 +211,6 @@
         </dependencies>
         <executions>
           <execution>
-            <id>aws-shade</id>
             <goals>
               <goal>shade</goal>
             </goals>
