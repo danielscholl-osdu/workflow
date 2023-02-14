@@ -31,42 +31,53 @@ First you need to set variables in **values.yaml** file using any code editor. S
 
 | Name                     | Description           | Type   | Default               | Required |
 | ------------------------ | --------------------- | ------ | --------------------- | -------- |
-| **logLevel**             | logging level         | string | ERROR                  | yes      |
-| **springProfilesActive** | active spring profile | string | gcp                   | yes      |
-| **partitionHost**        | partition host        | string | "http://partition"    | yes      |
-| **entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
-| **osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
-| **sharedTenantName**     | tenant name           | string | -                     | yes      |
-| **dataPartitionId** | ID of data partition | string | -                | yes      |
-| **worflowHost**     | Workflow host URL    | string | "http://workflow" | yes      |
-| **composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
+| **data.logLevel**             | logging level         | string | ERROR                  | yes      |
+| **data.springProfilesActive** | active spring profile | string | gcp                   | yes      |
+| **data.partitionHost**        | partition host        | string | "http://partition"    | yes      |
+| **data.entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
+| **data.osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
+| **data.sharedTenantName**     | tenant name           | string | -                     | yes      |
+| **data.dataPartitionId** | ID of data partition | string | -                | yes      |
+| **data.worflowHost**     | Workflow host URL    | string | "http://workflow" | yes      |
+| **data.composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
 
 ### Deployment variables
 
 | Name                   | Description                  | Type   | Default      | Required |
 | ---------------------- | ---------------------------- | ------ | ------------ | -------- |
-| **image**              | your image name              | string | -            | yes      |
-| **requestsCpu**        | amount of requests CPU       | string | 0.1          | yes      |
-| **requestsMemory**     | amount of requests memory    | string | 2816M        | yes      |
-| **limitsCpu**          | CPU limit                    | string | 1            | yes      |
-| **limitsMemory**       | memory limit                 | string | 3G           | yes      |
-| **serviceAccountName** | name of your service account | string | workflow     | yes      |
-| **imagePullPolicy**    | when to pull image           | string | IfNotPresent | yes      |
-| **bootstrapImage**              | name of the bootstrap image | string | -       | yes      |
-| **bootstrapServiceAccountName** | name of the bootstrap SA    | string | -       | yes      |
+| **data.image**              | your image name              | string | -            | yes      |
+| **data.requestsCpu**        | amount of requests CPU       | string | 0.1          | yes      |
+| **data.requestsMemory**     | amount of requests memory    | string | 2816M        | yes      |
+| **data.limitsCpu**          | CPU limit                    | string | 1            | yes      |
+| **data.limitsMemory**       | memory limit                 | string | 3G           | yes      |
+| **data.serviceAccountName** | name of your service account | string | workflow     | yes      |
+| **data.imagePullPolicy**    | when to pull image           | string | IfNotPresent | yes      |
+| **data.bootstrapImage**              | name of the bootstrap image | string | -       | yes      |
+| **data.bootstrapServiceAccountName** | name of the bootstrap SA    | string | -       | yes      |
 
 ### Config variables
 
 | Name                           | Description                | Type    | Default                  | Required |
 | ------------------------------ | -------------------------- | ------- | ------------------------ | -------- |
-| **appName**                    | name of the app            | string  | workflow                 | yes      |
-| **configmap**                  | configmap to be used       | string  | workflow-config          | yes      |
-| **workflowPostgresSecretName** | secret for postgres        | string  | workflow-postgres-secret | yes      |
-| **workflowAirflowSecretName**  | secret for airflow         | string  | workflow-airflow-secret  | yes      |
-| **rabbitmqSecretName**         | secret for rabbitmq        | string  | rabbitmq-secret          | yes      |
-| **bootstrapSecretName**        | Secret name for bootstrap  | string  | datafier-secret          | yes      |
-| **onPremEnabled**              | whether on-prem is enabled | boolean | false                    | yes      |
-| **domain**                     | your domain                | string  | -                        | yes      |
+| **conf.appName**                    | name of the app            | string  | workflow                 | yes      |
+| **conf.configmap**                  | configmap to be used       | string  | workflow-config          | yes      |
+| **conf.workflowPostgresSecretName** | secret for postgres        | string  | workflow-postgres-secret | yes      |
+| **conf.workflowAirflowSecretName**  | secret for airflow         | string  | workflow-airflow-secret  | yes      |
+| **conf.rabbitmqSecretName**         | secret for rabbitmq        | string  | rabbitmq-secret          | yes      |
+| **conf.bootstrapSecretName**        | Secret name for bootstrap  | string  | datafier-secret          | yes      |
+| **conf.onPremEnabled**              | whether on-prem is enabled | boolean | false                    | yes      |
+| **conf.domain**                     | your domain                | string  | -                        | yes      |
+
+### Istio variables
+
+| Name | Description | Type | Default |Required |
+|------|-------------|------|---------|---------|
+**istio.proxyCPU** | CPU request for Envoy sidecars | string | `50m` | yes
+**istio.proxyCPULimit** | CPU limit for Envoy sidecars | string | `500m` | yes
+**istio.proxyMemory** | memory request for Envoy sidecars | string | `64Mi` | yes
+**istio.proxyMemoryLimit** | memory limit for Envoy sidecars | string | `512Mi` | yes
+**istio.bootstrapProxyCPU** | CPU request for Envoy sidecars | string | `10m` | yes
+**istio.bootstrapProxyCPULimit** | CPU limit for Envoy sidecars | string | `100m` | yes
 
 ### Install the helm chart
 
