@@ -1,0 +1,102 @@
+# Service Config
+image: __CONTAINER__
+imagePullPolicy: Always
+service:
+  type: ClusterIP
+  port: 8080
+  apiPath: /api/workflow/
+  readinessProbeHttpPath: /api/workflow/v1/liveness_check
+  livenessProbeHttpPath: /api/workflow/v1/liveness_check
+serviceParameters:
+  - objectName: "/osdu/{{ .Values.global.resourcePrefix }}/redis/redisauthtoken"
+    objectType: "secretsmanager"
+    objectAlias: "CACHE_CLUSTER_KEY"
+  - objectName: "/osdu/{{ .Values.global.resourcePrefix }}/redis-core/end-point"
+    objectType: "ssmparameter"
+    objectAlias: "CACHE_CLUSTER_ENDPOINT"
+  - objectName: "/osdu/{{ .Values.global.resourcePrefix }}/redis-core/end-point-port"
+    objectType: "ssmparameter"
+    objectAlias: "CACHE_CLUSTER_PORT"
+  - objectName: "/osdu/{{ .Values.global.resourcePrefix }}/airflow/username"
+    objectType: "secretsmanager"
+    objectAlias: "OSDU_AIRFLOW_USERNAME"
+  - objectName: "/osdu/{{ .Values.global.resourcePrefix }}/airflow/password"
+    objectType: "secretsmanager"
+    objectAlias: "OSDU_AIRFLOW_PASSWORD"
+environmentVariables:
+  - name: APPLICATION_PORT
+    value: "{{ .Values.service.port }}"
+  - name: AWS_REGION
+    value: "{{ .Values.global.region }}"
+  - name: ENVIRONMENT
+    value: "{{ .Values.global.resourcePrefix }}"
+  - name: JAVA_OPTS
+    value: "-Xms538M -Xmx2048M"
+  - name: LOG_LEVEL
+    value: "{{ default `INFO` .Values.global.logLevel }}"
+  - name: SSL_ENABLED
+    value: "false"
+  - name: SSM_ENABLED
+    value: "True"
+  - name: ENTITLEMENTS_BASE_URL
+    value: "http://os-entitlements.osdu-services:8080"
+  - name: PARTITION_BASE_URL
+    value: "http://os-partition.osdu-services:8080"
+  - name: OSDU_ENTITLEMENTS_URL
+    value: "http://os-entitlements.osdu-services:8080/api/entitlements/v2"
+  - name: ELASTIC_DISABLE_CERTIFICATE_TRUST
+    value: "true"
+  - name: WORKFLOW_QUEUE_URL
+    value: https://sqs.{{ .Values.global.region }}.amazonaws.com/{{ .Values.global.accountID }}/{{ .Values.global.resourcePrefix }}-osdu-workflow-queue
+  - name: AIRFLOW_API_MODE
+    value: "sqs"
+  - name: OSDU_AIRFLOW_URL
+    value: http://airflow-webserver.osdu-airflow:8080/api/airflow/
+  - name: PARAMETER_MOUNT_PATH
+    value: "/mnt/params"
+
+podAnnotations: 
+  checkov.io/skip1: CKV_K8S_22=necessary to function properly
+  checkov.io/skip2: CKV_K8S_14=false positive
+  checkov.io/skip3: CKV_K8S_43=false positive
+
+# Resource Config
+replicaCount: 1
+resources:
+  limits:
+    memory: 2048M
+  requests:
+    memory: 2048M
+    cpu: 500m
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+# Security Config
+serviceAccountRole: arn:aws:iam::{{ .Values.global.accountID }}:role/osdu-{{ .Values.global.resourcePrefix }}-{{ .Values.global.region }}-{{ include "common.name" . }}
+cors:
+  maxAge: "60m"
+  allowCredentials: true
+  allowMethods:
+    - POST
+    - GET
+    - DELETE
+  allowHeaders:
+    - Authorization
+    - Data-Partition-Id
+    - Correlation-Id
+    - Content-Type
+securityContext: 
+  runAsUser: 10001
+  runAsNonRoot: true
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+podSecurityContext: 
+  fsGroup: 1337
+  seccompProfile:
+    type: RuntimeDefault

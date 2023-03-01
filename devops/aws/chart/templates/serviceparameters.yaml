@@ -1,0 +1,4 @@
+{{- template "common.serviceparameters" (list . "os-ingestion-workflow.serviceparameters") -}}
+{{- define "os-ingestion-workflow.serviceparameters" -}}
+## Define overrides for the service parameters here
+{{- end -}}

@@ -1,0 +1,4 @@
+{{- template "common.deployment" (list . "os-ingestion-workflow.deployment") -}}
+{{- define "os-ingestion-workflow.deployment" -}}
+## Define overrides for the service deployment resource here
+{{- end -}}
