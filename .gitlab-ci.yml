@@ -4,9 +4,11 @@ variables:
 
   AWS_BUILD_SUBDIR: provider/workflow-aws/build-aws
   AWS_TEST_SUBDIR: testing/workflow-test-aws
+  AWS_CHART_SUBDIR: devops/aws/chart
   AWS_SERVICE: ingestion-workflow
+  AWS_SERVICE_GATEWAY: osdu-services/osdu-gateway
   AWS_ENVIRONMENT: dev
-  AWS_DEPLOY_TARGET: TF
+  AWS_DEPLOY_TARGET: HELM
   AWS_EKS_DEPLOYMENT_NAME: os-ingestion-workflow
   AWS_SERVICE_NAMESPACE: osdu-ingest
 

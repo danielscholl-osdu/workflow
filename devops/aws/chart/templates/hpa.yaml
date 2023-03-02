@@ -1,0 +1,4 @@
+{{- template "common.hpa" (list . "os-ingestion-workflow.hpa") -}}
+{{- define "os-ingestion-workflow.hpa" -}}
+## Define overrides for the service HPA resource here
+{{- end -}}
