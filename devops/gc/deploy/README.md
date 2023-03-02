@@ -47,7 +47,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | ---------------------- | ---------------------------- | ------ | ------------ | -------- |
 | **data.image**              | your image name              | string | -            | yes      |
 | **data.requestsCpu**        | amount of requests CPU       | string | 10m          | yes      |
-| **data.requestsMemory**     | amount of requests memory    | string | 2G        | yes      |
+| **data.requestsMemory**     | amount of requests memory    | string | 750Mi        | yes      |
 | **data.limitsCpu**          | CPU limit                    | string | 1            | yes      |
 | **data.limitsMemory**       | memory limit                 | string | 3G           | yes      |
 | **data.serviceAccountName** | name of your service account | string | workflow     | yes      |
@@ -73,9 +73,9 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | Name | Description | Type | Default |Required |
 |------|-------------|------|---------|---------|
 **istio.proxyCPU** | CPU request for Envoy sidecars | string | `10m` | yes
-**istio.proxyCPULimit** | CPU limit for Envoy sidecars | string | `500m` | yes
-**istio.proxyMemory** | memory request for Envoy sidecars | string | `100Mi` | yes
-**istio.proxyMemoryLimit** | memory limit for Envoy sidecars | string | `512Mi` | yes
+**istio.proxyCPULimit** | CPU limit for Envoy sidecars | string | `200m` | yes
+**istio.proxyMemory** | memory request for Envoy sidecars | string | `64Mi` | yes
+**istio.proxyMemoryLimit** | memory limit for Envoy sidecars | string | `256Mi` | yes
 **istio.bootstrapProxyCPU** | CPU request for Envoy sidecars | string | `10m` | yes
 **istio.bootstrapProxyCPULimit** | CPU limit for Envoy sidecars | string | `100m` | yes
 
