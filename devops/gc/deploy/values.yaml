@@ -22,7 +22,7 @@ data:
     - Segy_to_zgy_conversion
   # Deployment variables
   requestsCpu: "10m"
-  requestsMemory: "2G"
+  requestsMemory: "750Mi"
   limitsCpu: "1"
   limitsMemory: "3G"
   serviceAccountName: "workflow"
@@ -43,8 +43,8 @@ conf:
 
 istio:
   proxyCPU: "10m"
-  proxyCPULimit: "500m"
-  proxyMemory: "100Mi"
-  proxyMemoryLimit: "512Mi"
+  proxyCPULimit: "200m"
+  proxyMemory: "64Mi"
+  proxyMemoryLimit: "256Mi"
   bootstrapProxyCPU: "10m"
   bootstrapProxyCPULimit: "100m"
