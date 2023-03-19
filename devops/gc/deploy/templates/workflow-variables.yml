@@ -12,6 +12,6 @@ data:
   SPRING_PROFILES_ACTIVE: {{ .Values.data.springProfilesActive | quote }}
   OSDU_AIRFLOW_URL: {{ .Values.data.osduAirflowUrl | quote }}
   SHARED_TENANT_NAME: {{ .Values.data.sharedTenantName | quote }}
-  {{- if not .Values.conf.onPremEnabled }}
+  {{- if not .Values.global.onPremEnabled }}
   COMPOSER_CLIENT: {{ .Values.data.composerClient | quote  }}
   {{- end }}

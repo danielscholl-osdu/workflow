@@ -9,4 +9,4 @@ data:
   DATA_PARTITION_ID: {{ .Values.data.dataPartitionId | quote }}
   WORKFLOW_HOST: {{ .Values.data.workflowHost | quote }}
   DAG_NAMES: {{ join "," .Values.data.dagNames | quote }}
-  ONPREM_ENABLED: {{ .Values.conf.onPremEnabled | quote }}
+  ONPREM_ENABLED: {{ .Values.global.onPremEnabled | quote }}
