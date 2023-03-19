@@ -2,6 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  domain: ""
+  onPremEnabled: false
+
 data:
   #Configmap variables
   logLevel: "ERROR"
@@ -38,8 +42,6 @@ conf:
   workflowPostgresSecretName: "workflow-postgres-secret"
   rabbitmqSecretName: "rabbitmq-secret"
   bootstrapSecretName: "datafier-secret"
-  onPremEnabled: false
-  domain: ""
 
 istio:
   proxyCPU: "10m"
