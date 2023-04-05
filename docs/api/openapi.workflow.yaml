@@ -27,10 +27,9 @@ paths:
     post:
       tags:
         - Workflow
-      summary: Creates workflow definition with standard orchestrator operators.
-      description:         **Required roles**: 'service.workflow.admin'.
+      summary: Creates workflow definition with standard orchestrator operators.         
       operationId: deployWorkflow
-      description: API to create a new workflow using standard operators of orchestrator.
+      description: API to create a new workflow using standard operators of orchestrator. **Required roles** - 'service.workflow.admin'.
       responses:
         '200':
           description: Workflow created\updated successfully.
@@ -77,10 +76,9 @@ paths:
     get:
       tags:
         - Workflow
-      summary: List all the workflow applicable for a tenant.
-      description:         **Required roles**: 'service.workflow.viewer'.
+      summary: List all the workflow applicable for a tenant.        
       operationId: listAllWorkflow
-      description: List all the workflows for the tenant.
+      description: List all the workflows for the tenant. **Required roles** - 'service.workflow.viewer'.
       parameters:
         - name: prefix
           in: query
@@ -132,10 +130,9 @@ paths:
     delete:
       tags:
         - Workflow
-      summary: Delete a workflow defintion.
-      description:         **Required roles**: 'service.workflow.admin'.
+      summary: Delete a workflow defintion.       
       operationId: deleteWorkflow
-      description: Delete a workflow by it's name.
+      description: Delete a workflow by it's name. **Required roles** - 'service.workflow.admin'.
       parameters:
         - name: workflow_name
           in: path
@@ -179,10 +176,9 @@ paths:
     get:
       tags:
         - Workflow
-      summary: Get complete details for a workflow.
-      description:         **Required roles**: 'service.workflow.viewer'.
+      summary: Get complete details for a workflow.      
       operationId: viewWorkflow
-      description: Get complete details for an workflow.
+      description: Get complete details for an workflow. **Required roles** - 'service.workflow.viewer'.
       parameters:
         - name: workflow_name
           in: path
@@ -232,10 +228,9 @@ paths:
     post:
       tags:
         - Workflow Run
-      summary: Trigger a workflow.
-       description:         **Required roles**: 'service.workflow.creator'.     
+      summary: Trigger a workflow.             
       operationId: triggerWorkflow
-      description: Trigger a workflow mentioned in payload.
+      description: Trigger a workflow mentioned in payload. **Required roles** - 'service.workflow.creator'.
       parameters:
         - name: workflow_name
           in: path
@@ -288,10 +283,9 @@ paths:
     get:
       tags:
         - Workflow Run
-      summary: Get all run instances of a workflow.
-      description:         **Required roles**: 'service.workflow.viewer'.
+      summary: Get all run instances of a workflow.        
       operationId: getAllWorkflowRuns
-      description: Get all run instances for a worflow.
+      description: Get all run instances for a worflow. **Required roles** - 'service.workflow.viewer'.
       parameters:
         - name: workflow_name
           in: path
@@ -385,10 +379,9 @@ paths:
     get:
       tags:
         - Workflow Run
-      summary: Get details for a speciffic workflow run instance.
-      description:         **Required roles**: 'service.workflow.viewer'.
+      summary: Get details for a speciffic workflow run instance.        
       operationId: getWorkflowRun
-      description: Get an execution instances for a workflow.
+      description: Get an execution instances for a workflow. **Required roles** - 'service.workflow.viewer'.
       parameters:
         - name: workflow_name
           in: path
@@ -442,10 +435,9 @@ paths:
     put:
       tags:
         - Workflow Run
-      summary: Update the workflow run instance.
-      description:         **Required roles**: 'service.workflow.viewer'.
+      summary: Update the workflow run instance.        
       operationId: updateWorkflowRun
-      description: Update workflow run.
+      description: Update workflow run. **Required roles** - 'service.workflow.viewer'.
       parameters:
         - name: workflow_name
           in: path
