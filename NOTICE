@@ -441,6 +441,7 @@ The following software have components provided under the terms of this license:
 - Netty/Common (from https://repo1.maven.org/maven2/io/netty/netty-common)
 - Netty/Handler (from https://repo1.maven.org/maven2/io/netty/netty-handler)
 - Netty/Handler/Proxy (from https://repo1.maven.org/maven2/io/netty/netty-handler-proxy)
+- Netty/Handler/Ssl/Ocsp (from https://repo1.maven.org/maven2/io/netty/netty-handler-ssl-ocsp)
 - Netty/Resolver (from https://repo1.maven.org/maven2/io/netty/netty-resolver)
 - Netty/Resolver/DNS (from https://repo1.maven.org/maven2/io/netty/netty-resolver-dns)
 - Netty/Resolver/DNS/Classes/MacOS (from https://repo1.maven.org/maven2/io/netty/netty-resolver-dns-classes-macos)
