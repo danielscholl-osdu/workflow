@@ -27,5 +27,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties
 public class GcpPropertiesConfiguration {
+
   private String workflowAdminAccount;
+  private int partitionInfoVmCacheExpTime = 60;
+  private int partitionInfoVmCacheSize = 100;
 }
