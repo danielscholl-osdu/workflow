@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.MAX_SIZE_ALLOWED;
 
 public class TriggerWorkflowTestsBuilder {
 
@@ -53,7 +54,7 @@ public class TriggerWorkflowTestsBuilder {
     Map<String, Object> executionContext = new HashMap<>();
     JsonObject workflowTriggerConfig = new Gson().fromJson(NEW_WORKFLOW_RUN_TRIGGER_CONFIG, JsonObject.class);
     JsonObject additionalProperties = new Gson().fromJson(NEW_WORKFLOW_RUN_ADD_PROP, JsonObject.class);
-    byte[]  dummyObject = new byte[2000000];
+    byte[]  dummyObject = new byte[MAX_SIZE_ALLOWED*1000];
     String newId = new String(dummyObject);
     additionalProperties.addProperty("id",newId);
     executionContext.put("workflowTriggerConfig",workflowTriggerConfig);
