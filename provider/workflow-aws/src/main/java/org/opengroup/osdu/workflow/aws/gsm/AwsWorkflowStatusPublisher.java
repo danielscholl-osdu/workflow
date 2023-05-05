@@ -20,6 +20,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.aws.sns.AmazonSNSConfig;
 import org.opengroup.osdu.core.aws.sns.PublishRequestBuilder;
+import org.opengroup.osdu.core.aws.ssm.K8sLocalParameterProvider;
 import org.opengroup.osdu.core.aws.ssm.SSMConfig;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -32,6 +33,7 @@ import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,18 +42,15 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
     @Value("${aws.sns.region}")
     private String amazonSNSRegion;
 
-    @Value("${aws.sns.topic.arn}")
-    private String snsTopicArn;
-
     private AmazonSNS snsClient;
-    private String amazonSNSTopic;
+    private String amazonSnsTopic;
 
     @PostConstruct
     public void init() {
         AmazonSNSConfig snsConfig = new AmazonSNSConfig(amazonSNSRegion);
         snsClient = snsConfig.AmazonSNS();
-        SSMConfig ssmConfig = new SSMConfig();
-        amazonSNSTopic = ssmConfig.amazonSSM().getProperty(snsTopicArn).toString();
+        K8sLocalParameterProvider provider = new K8sLocalParameterProvider();
+        amazonSnsTopic = Objects.requireNonNull(provider.getParameterAsStringOrDefault("INGESTION_WORKFLOW_SNS_ARN", null)).toString();
     }
 
     @Override
@@ -61,7 +60,7 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
             "data",
             Arrays.asList(messages),
             createMessageMap(messages, attributesMap),
-            amazonSNSTopic);
+            amazonSnsTopic);
         snsClient.publish(publishRequest);
     }
 
