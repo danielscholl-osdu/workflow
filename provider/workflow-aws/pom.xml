@@ -191,6 +191,7 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>${maven-shade-plugin.version}</version>
         <configuration>
@@ -216,6 +217,7 @@
         </dependencies>
         <executions>
           <execution>
+            <id>shade-my-jar</id>
             <goals>
               <goal>shade</goal>
             </goals>

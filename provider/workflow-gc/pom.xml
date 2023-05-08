@@ -160,6 +160,7 @@
         </dependencies>
         <executions>
           <execution>
+            <id>shade-my-jar</id>
             <goals>
               <goal>shade</goal>
             </goals>
