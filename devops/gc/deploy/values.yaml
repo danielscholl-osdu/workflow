@@ -25,8 +25,8 @@ data:
     - Segy_to_vds_conversion_sdms
     - Segy_to_zgy_conversion
   # Deployment variables
-  requestsCpu: "10m"
-  requestsMemory: "750Mi"
+  requestsCpu: "5m"
+  requestsMemory: "650Mi"
   limitsCpu: "1"
   limitsMemory: "3G"
   serviceAccountName: "workflow"
@@ -44,9 +44,9 @@ conf:
   bootstrapSecretName: "datafier-secret"
 
 istio:
-  proxyCPU: "10m"
+  proxyCPU: "5m"
   proxyCPULimit: "200m"
-  proxyMemory: "64Mi"
+  proxyMemory: "50Mi"
   proxyMemoryLimit: "256Mi"
-  bootstrapProxyCPU: "10m"
-  bootstrapProxyCPULimit: "100m"
+  bootstrapProxyCPU: "5m"
+  bootstrapProxyCPULimit: "50m"
