@@ -39,11 +39,6 @@ public class AwsServiceConfig {
   @Setter(AccessLevel.PROTECTED)
   public String amazonRegion;
 
-  @Value("${aws.resource.prefix}")
-  @Getter()
-  @Setter(AccessLevel.PROTECTED)
-  public String environment;
-
   @Value("${aws.airflow.api.mode}")
   @Getter()
   @Setter(AccessLevel.PROTECTED)
