@@ -18,6 +18,7 @@ public class TestConstants extends org.opengroup.osdu.workflow.consts.TestConsta
 
   public static final String WORKFLOW_ID_FIELD = "WorkflowID";
   public static final String STATUS_FIELD = "Status";
+  public static final int MAX_SIZE_ALLOWED = 12000;
 
   public static final String CREATE_SYSTEM_WORKFLOW_URL =
       getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST) + CREATE_SYSTEM_WORKFLOW_API_ENDPOINT;
