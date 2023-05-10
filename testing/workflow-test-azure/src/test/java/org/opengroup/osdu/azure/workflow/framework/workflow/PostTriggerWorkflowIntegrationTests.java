@@ -29,12 +29,13 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_W
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUCCESS;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
+import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.MAX_SIZE_ALLOWED;
 
 public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase {
 
-  /** Test functionality for dags other then TEST_DUMMY_DAG **/
+  /** Test functionality for dags other than TEST_DUMMY_DAG **/
 
-  private static final String INVALID_REQUEST_SIZE_MESSAGE = "Request content exceeded limit of 2000 kB";
+  private static final String INVALID_REQUEST_SIZE_MESSAGE = "Request content exceeded limit of %s kB";
 
   @Test
   @Disabled
@@ -151,7 +152,8 @@ public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase 
     );
     String messageBody = response.getEntity(String.class);
     Map<String, String> messageInfo = new ObjectMapper().readValue(messageBody, HashMap.class);
-    assertEquals(INVALID_REQUEST_SIZE_MESSAGE,messageInfo.get("message"));
+    String expectedErrorMessage = String.format(INVALID_REQUEST_SIZE_MESSAGE, MAX_SIZE_ALLOWED);
+    assertEquals(expectedErrorMessage,messageInfo.get("message"));
     assertEquals(HttpStatus.SC_REQUEST_TOO_LONG,response.getStatus());
   }
 }
