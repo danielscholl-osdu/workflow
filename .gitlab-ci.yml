@@ -8,7 +8,7 @@ variables:
   AWS_SERVICE: ingestion-workflow
   AWS_SERVICE_GATEWAY: osdu-services/osdu-gateway
   AWS_ENVIRONMENT: dev
-  AWS_DEPLOY_TARGET: HELM
+  AWS_DEPLOY_TARGET: TF
   AWS_EKS_DEPLOYMENT_NAME: os-ingestion-workflow
   AWS_SERVICE_NAMESPACE: osdu-ingest
 

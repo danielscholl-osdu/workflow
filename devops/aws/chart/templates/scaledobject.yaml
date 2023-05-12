@@ -1,0 +1,4 @@
+{{- template "common.scaledobject" (list . "os-ingestion-workflow.scaledobject") -}}
+{{- define "os-ingestion-workflow.scaledobject" -}}
+## Define overrides for the service's scaled object resource here
+{{- end -}}
