@@ -18,6 +18,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * Note: these exclusions are the result of duplicate dependencies being introduced in the
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.FilterType;
  * mvn project. These duplicate beans are not needed by this application and so they are explicity
  * ignored.
  */
+@EnableWebMvc
 @ComponentScan(
     basePackages = {"org.opengroup.osdu"},
     excludeFilters = {
