@@ -12,7 +12,7 @@ They should be passed as environment variables.
 | **DATA_PARTITION_ID** | ID of data partition                                                                   | `osdu`                       | yes      |
 | **WORKFLOW_HOST**     | Workflow host URL                                                                      | `http://workflow`            | yes      |
 | **DAG_NAMES**         | Name of dags delimited by `,`                                                          | `Osdu-ingestion,segy_to_vds` | yes      |
-| **ONPREM_EANABLED**   | Used to switch between Anthos (On-Prem) bootstrap (`true`) and Google Cloud bootstrap (`false`) | `true`                       | yes      |
+| **ONPREM_EANABLED**   | Used to switch between Baremetal (On-Prem) bootstrap (`true`) and Google Cloud bootstrap (`false`) | `true`                       | yes      |
 
 ## On-prem variables
 
