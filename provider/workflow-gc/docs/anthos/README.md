@@ -8,7 +8,7 @@ Must have:
 
 | name | value | description | sensitive? | source |
 | ---  | ---   | ---         | ---        | ---    |
-| `SPRING_PROFILES_ACTIVE` | ex `anthos` | Spring profile that activate default configuration for Anthos environment | false | - |
+| `SPRING_PROFILES_ACTIVE` | ex `anthos` | Spring profile that activate default configuration for Baremetal environment | false | - |
 | `OSDU_AIRFLOW_USERNAME` | `******` | Airflow username, need to be defined if `AIRFLOW_IAAP_MODE`=`false`| yes | - |
 | `OSDU_AIRFLOW_PASSWORD` | `******` | Airflow password, need to be defined if `AIRFLOW_IAAP_MODE`=`false` | yes | - |
 | `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
@@ -271,9 +271,9 @@ You will need to have the following environment variables defined.
 # build + install integration test core
 $ (cd testing/workflow-test-core/ && mvn clean install)
 
-# build + run anthos integration tests.
+# build + run baremetal integration tests.
 #
 # Note: this assumes that the environment variables for integration tests as outlined
 #       above are already exported in your environment.
-$ (cd testing/workflow-test-anthos/ && mvn clean test)
+$ (cd testing/workflow-test-baremetal/ && mvn clean test)
 ```
