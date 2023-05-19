@@ -24,7 +24,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>workflow-test-anthos</artifactId>
+  <artifactId>workflow-test-baremetal</artifactId>
   <packaging>jar</packaging>
 
   <properties>

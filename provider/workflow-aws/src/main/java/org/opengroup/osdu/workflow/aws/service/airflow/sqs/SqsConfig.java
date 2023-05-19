@@ -16,10 +16,13 @@
 
 package org.opengroup.osdu.workflow.aws.service.airflow.sqs;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import org.opengroup.osdu.core.aws.iam.IAMConfig;
+
+import org.opengroup.osdu.core.aws.configurationsetup.ConfigSetup;
 
 public class SqsConfig {
   private AWSCredentialsProvider amazonAWSCredentials = IAMConfig.amazonAWSCredentials();
@@ -34,6 +37,6 @@ public class SqsConfig {
         this.amazonAWSCredentials
     ).withRegion(
         this.amazonSQSRegion
-    ).build();
+    ).withClientConfiguration(ConfigSetup.setUpConfig()).build();
   }
 }
