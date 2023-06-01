@@ -21,13 +21,13 @@
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
 		<osdu.ibmcore.version>0.16.0-rc1</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
-		<tomcat.embed.core.version>9.0.69</tomcat.embed.core.version>
+		<!--<tomcat.embed.core.version>9.0.69</tomcat.embed.core.version>-->
 		<lucene.core.version>8.10.0</lucene.core.version>
 	</properties>
 
 	<dependencies>
 
-		<dependency>
+		<!--<dependency>
 	      <groupId>org.apache.tomcat.embed</groupId>
 	      <artifactId>tomcat-embed-websocket</artifactId>
 	      <version>9.0.54</version>
@@ -37,7 +37,7 @@
 	          <artifactId>tomcat-embed-core</artifactId>
 	        </exclusion>
 	      </exclusions>
-	    </dependency>
+	    </dependency>-->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -64,10 +64,10 @@
 			<artifactId>workflow-core</artifactId>
 			<version>0.22.0-SNAPSHOT</version>
 			<exclusions>
-				<exclusion>
+			<!--	<exclusion>
 					<groupId>org.apache.tomcat.embed</groupId>
 					<artifactId>tomcat-embed-core</artifactId>
-				</exclusion>
+				</exclusion>-->
 				<exclusion>
 					<groupId>io.netty</groupId>
 					<artifactId>netty-codec</artifactId>
@@ -80,10 +80,10 @@
 					<groupId>org.yaml</groupId>
 					<artifactId>snakeyaml</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-websocket</artifactId>
-				</exclusion>
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.tomcat</groupId>-->
+<!--					<artifactId>tomcat-websocket</artifactId>-->
+<!--				</exclusion>-->
 				<exclusion>
             		<groupId>org.springframework.security</groupId>
             		<artifactId>spring-security-core</artifactId>
@@ -123,11 +123,11 @@
 			<artifactId>netty-codec</artifactId>
 			<version>4.1.86.Final</version>
 		</dependency>
-		<dependency>
+	<!--	<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
 			<version>${tomcat.embed.core.version}</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>os-core-lib-ibm</artifactId>
@@ -234,7 +234,7 @@
 			<version>7.9</version>
 		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>org.opengroup.osdu</groupId>
 			<artifactId>os-core-common</artifactId>
 			<version>${os-core-common.version}</version>
@@ -256,7 +256,7 @@
 					<artifactId>snakeyaml</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
@@ -277,16 +277,16 @@
 			<artifactId>gson</artifactId>
 			<version>2.8.9</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>5.3.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>5.3.7</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-web</artifactId>-->
+<!--			<version>5.3.7</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-core</artifactId>-->
+<!--			<version>5.3.7</version>-->
+<!--		</dependency>-->
 	</dependencies>
 	<!-- <repositories> <repository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
 		</repository> </repositories> <distributionManagement> <repository> <id>${gitlab-server}</id>

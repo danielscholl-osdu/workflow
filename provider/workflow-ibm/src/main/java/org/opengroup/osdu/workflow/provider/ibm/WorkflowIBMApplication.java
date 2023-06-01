@@ -7,7 +7,7 @@ package org.opengroup.osdu.workflow.provider.ibm;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
+@SpringBootApplication(scanBasePackages = "org.opengroup.osdu")
 public class WorkflowIBMApplication {
 
   public static void main(String[] args) {
