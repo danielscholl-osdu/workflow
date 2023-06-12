@@ -3,6 +3,7 @@ package org.opengroup.osdu.azure.workflow.framework.workflow;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.ClientResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_T
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.azure.workflow.framework.consts.TestConstants.MAX_SIZE_ALLOWED;
 
+@Slf4j
 public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase {
 
   /** Test functionality for dags other than TEST_DUMMY_DAG **/
@@ -139,10 +141,12 @@ public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase 
 
   @Test
   public void should_returnException_when_givenRequestSizeExceedMaxRequestSize() throws Exception {
+    log.info("Running the test, should_returnException_when_givenRequestSizeExceedMaxRequestSize");
     String workflowResponseBody = createWorkflow();
     Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
     createdWorkflows.add(workflowInfo);
 
+    log.info("Created the workflow, will now run with payload > 12mb");
     ClientResponse response = client.send(
         HttpMethod.POST,
         String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
@@ -150,10 +154,16 @@ public abstract class PostTriggerWorkflowIntegrationTests extends AzureTestBase 
         headers,
         client.getAccessToken()
     );
+
+    log.info("Ran the workflow, will now fetch the results");
     String messageBody = response.getEntity(String.class);
     Map<String, String> messageInfo = new ObjectMapper().readValue(messageBody, HashMap.class);
     String expectedErrorMessage = String.format(INVALID_REQUEST_SIZE_MESSAGE, MAX_SIZE_ALLOWED);
-    assertEquals(expectedErrorMessage,messageInfo.get("message"));
+    //first check the status code then the message, as when we have a null message, we do not have the error code printed.
     assertEquals(HttpStatus.SC_REQUEST_TOO_LONG,response.getStatus());
+    log.info("Status: " + response.getStatus());
+    log.info("Message: " + messageBody);
+
+    assertEquals(expectedErrorMessage,messageInfo.get("message"));
   }
 }
