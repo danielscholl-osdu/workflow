@@ -2,6 +2,7 @@ package org.opengroup.osdu.workflow.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
@@ -45,6 +46,7 @@ import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
 import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WorkflowRunServiceImpl implements IWorkflowRunService {
@@ -56,7 +58,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private static final String KEY_AUTH_TOKEN = "authToken";
   private static final String KEY_DAG_NAME = "dagName";
   private static final Integer WORKFLOW_RUN_LIMIT = 100;
-
+  private static final String KEY_USER_ID = "userId";
   private final IWorkflowMetadataRepository workflowMetadataRepository;
 
   private final IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
@@ -227,13 +229,27 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
                                                     final String runId,
                                                     final String correlationId,
                                                     final TriggerWorkflowRequest request) {
+    final Map<String, Object> executionContext = addUserId(workflowName, request);
     final Map<String, Object> payload = new HashMap<>();
     payload.put(KEY_RUN_ID, runId);
     payload.put(KEY_WORKFLOW_NAME, workflowName);
     payload.put(KEY_AUTH_TOKEN, dpsHeaders.getAuthorization());
     payload.put(KEY_CORRELATION_ID, correlationId);
-    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
+    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(executionContext, Map.class));
     return payload;
+  }
+
+  private Map<String, Object> addUserId(String workflowName, TriggerWorkflowRequest request) {
+    final Map<String, Object> executionContext = request.getExecutionContext();
+
+    if (executionContext.get(KEY_USER_ID) != null) {
+      String errorMessage = String.format("Request to trigger workflow with name %s failed because execution context contains reserved key 'userId'", workflowName);
+      throw new AppException(400, "Failed to trigger workflow run", errorMessage);
+    }
+    String userId = dpsHeaders.getUserId();
+    log.debug("putting user id: " + userId + " in execution context");
+    executionContext.put(KEY_USER_ID, userId);
+    return executionContext;
   }
 
   private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {

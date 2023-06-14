@@ -62,6 +62,7 @@ public class WorkflowRunServiceTest {
   private static final String KEY_EXECUTION_CONTEXT = "execution_context";
   private static final String KEY_WORKFLOW_NAME = "workflow_name";
   private static final String KEY_CORRELATION_ID = "correlation_id";
+  private static final String KEY_USER_ID = "userId";
   private static final String AUTH_TOKEN = "Bearer Dummy";
   private static final String WORKFLOW_NAME = "some-dag-name";
   private static final String CORRELATION_ID = "some-correlation-id";
@@ -70,7 +71,7 @@ public class WorkflowRunServiceTest {
   private static final String TEST_CURSOR = "test-cursor";
   private static final String EXECUTION_DATE = "2021-01-05T11:36:45+00:00";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+  private static final String USER_ID = "dummy-user-id";
   private static final String WORKFLOW_METADATA = "{\n" +
       "  \"workflowId\": \"some-dag-name\",\n" +
       "  \"workflowName\": \"some-dag-name\",\n" +
@@ -183,6 +184,8 @@ public class WorkflowRunServiceTest {
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
+    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
+    request.getExecutionContext().remove(KEY_USER_ID);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
         .forClass(WorkflowRun.class);
     final WorkflowRun responseWorkflowRun = mock(WorkflowRun.class);
@@ -208,6 +211,7 @@ public class WorkflowRunServiceTest {
 	  verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
+    verify(dpsHeaders).getUserId();
     verify(statusPublisher).publishStatusWithNoErrors(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
     assertThat(returnedWorkflowRun, equalTo(buildWorkflowRunResponse(responseWorkflowRun)));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
@@ -237,12 +241,13 @@ public class WorkflowRunServiceTest {
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
+    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
         .forClass(WorkflowRun.class);
     final WorkflowRun responseWorkflowRun = mock(WorkflowRun.class);
     when(workflowRunRepository.saveWorkflowRun(workflowRunArgumentCaptor.capture()))
         .thenReturn(responseWorkflowRun);
-
+    request.getExecutionContext().remove(KEY_USER_ID);
     //when
     final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .triggerWorkflow(WORKFLOW_NAME, request);
@@ -304,7 +309,8 @@ public class WorkflowRunServiceTest {
         eq(createWorkflowPayload(RUN_ID, request)));
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
-
+    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
+    request.getExecutionContext().remove(KEY_USER_ID);
     //when and then
     Assertions.assertThrows(CoreException.class, () -> {
       workflowRunService.triggerWorkflow(WORKFLOW_NAME, request);
@@ -756,11 +762,12 @@ public class WorkflowRunServiceTest {
 
   private Map<String, Object> createWorkflowPayload(final String runId,
                                                     final TriggerWorkflowRequest request) {
+    final Map<String, Object> executionContext = request.getExecutionContext();
+    executionContext.put(KEY_USER_ID, USER_ID);
     final Map<String, Object> payload = new HashMap<>();
     payload.put(KEY_RUN_ID, runId);
     payload.put(KEY_AUTH_TOKEN, AUTH_TOKEN);
-    payload.put(KEY_EXECUTION_CONTEXT,
-        OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
+    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(executionContext, Map.class));
     payload.put(KEY_WORKFLOW_NAME, WORKFLOW_NAME);
     payload.put(KEY_CORRELATION_ID, CORRELATION_ID);
     return payload;

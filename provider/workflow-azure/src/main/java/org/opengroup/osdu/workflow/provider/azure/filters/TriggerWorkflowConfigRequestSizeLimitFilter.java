@@ -1,6 +1,7 @@
 package org.opengroup.osdu.workflow.provider.azure.filters;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.workflow.provider.azure.config.TriggerWorkflowConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class TriggerWorkflowConfigRequestSizeLimitFilter extends OncePerRequestFilter {
 
@@ -31,7 +33,9 @@ public class TriggerWorkflowConfigRequestSizeLimitFilter extends OncePerRequestF
         && isApplicationJson(request)
         && request.getRequestURI().matches(URI)
         && request.getContentLengthLong() > triggerWorkflowConfig.getMaxRequestSizeInBytes()) {
-      response.sendError(HttpStatus.SC_REQUEST_TOO_LONG, String.format(MESSAGE, triggerWorkflowConfig.getMaxRequestSize()));
+      String errMsg = String.format(MESSAGE, triggerWorkflowConfig.getMaxRequestSize());
+      log.error("Request size filter error: " + errMsg);
+      response.sendError(HttpStatus.SC_REQUEST_TOO_LONG, errMsg);
       return;
     }
 
