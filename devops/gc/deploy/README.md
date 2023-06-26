@@ -33,6 +33,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 |------|-------------|------|---------|---------|
 **global.domain** | your domain for the external endpoint, ex `example.com` | string | - | yes
 **global.onPremEnabled** | whether on-prem is enabled | boolean | false | yes
+**global.limitsEnabled** | whether CPU and memory limits are enabled | boolean | true | yes
 
 ### Configmap variables
 
@@ -55,8 +56,8 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **data.image**              | your image name              | string | -            | yes      |
 | **data.requestsCpu**        | amount of requests CPU       | string | 10m          | yes      |
 | **data.requestsMemory**     | amount of requests memory    | string | 750Mi        | yes      |
-| **data.limitsCpu**          | CPU limit                    | string | 1            | yes      |
-| **data.limitsMemory**       | memory limit                 | string | 3G           | yes      |
+| **data.limitsCpu**          | CPU limit                    | string | 1            | only if `global.limitsEnabled` is true      |
+| **data.limitsMemory**       | memory limit                 | string | 3G           | only if `global.limitsEnabled` is true      |
 | **data.serviceAccountName** | name of your service account | string | workflow     | yes      |
 | **data.imagePullPolicy**    | when to pull image           | string | IfNotPresent | yes      |
 | **data.bootstrapImage**              | name of the bootstrap image | string | -       | yes      |
