@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -51,7 +52,7 @@ public class AzureMessagePublisher implements IEventPublisher {
         .eventGridEventDataVersion(EVENT_DATA_VERSION)
         .serviceBusTopicName(serviceBusTopic).build();
 
-    messagePublisher.publishMessage(dpsHeaders, publisherInfo);
+    messagePublisher.publishMessage(dpsHeaders, publisherInfo, Optional.empty());
 
     String logMsg = String.format(
         "Event published successfully to eventGridTopic='%s', ServiceBusTopic='%s' with dataPartitionId='%s' and correlationId='%s'.",
