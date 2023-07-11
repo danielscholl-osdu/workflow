@@ -43,7 +43,7 @@ class AzureMessagePublisherTest {
   @Test
   void shouldPublishGSMMessage() {
     //given
-    doNothing().when(messagePublisher).publishMessage(any(), any());
+    doNothing().when(messagePublisher).publishMessage(any(), any(), any());
     Message[] messages = new Message[]{new StatusDetails()};
     Map<String, String> attributesMap = new HashMap<String, String>() {{
       put(DpsHeaders.CORRELATION_ID, CORRELATION_ID);
@@ -55,7 +55,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(1))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -73,7 +73,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -92,7 +92,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -107,7 +107,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -123,7 +123,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -141,7 +141,7 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 
   @Test
@@ -159,6 +159,6 @@ class AzureMessagePublisherTest {
 
     //then
     verify(messagePublisher, times(0))
-        .publishMessage(any(), any());
+        .publishMessage(any(), any(), any());
   }
 }
