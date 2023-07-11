@@ -1,7 +1,7 @@
 package org.opengroup.osdu.workflow.provider.azure.service;
 
 
-import com.microsoft.azure.spring.autoconfigure.aad.UserPrincipal;
+import com.azure.spring.autoconfigure.aad.UserPrincipal;
 import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +26,6 @@ public class AdminAuthorizationServiceImpl implements IAdminAuthorizationService
     }
 
     final UserPrincipal userPrincipal = (UserPrincipal) principal;
-
     UserType type = getType(userPrincipal);
     if (type == UserType.SERVICE_PRINCIPAL) {
       return true;
