@@ -204,6 +204,14 @@ $ (cd testing/storage-test-core/ && mvn clean install)
 $ (cd testing/storage-test-azure/ && mvn clean test)
 ```
 
+Open API 3.0 - Swagger
+
+Swagger UI:  http://localhost:8089/api/workflow/swagger (will redirect to  http://localhost:8089/api/workflow/swagger-ui/index.html)
+api-docs (JSON) :  http://localhost:8089/api/workflow/api-docs
+api-docs (YAML) :  http://localhost:8080/api/workflow/api-docs.yaml
+
+All the Swagger and OpenAPI related common properties are managed here [swagger.properties](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/blob/jb/az_swagger_openapi/workflow-core/src/main/resources/swagger.properties)
+
 ### Azure Specific Endpoints
 
 We have added new endpoint to handle System workflows.We plan to move these APIs to workflow-core in

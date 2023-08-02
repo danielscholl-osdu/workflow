@@ -370,6 +370,15 @@ The Workflow service has several Service Provider Interfaces that the classes ne
 | IWorkflowRunRepository      | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunRepository`       |
 | IWorkflowRunService         | Obligatory to implement | `workflow-core/src/main/.../provider/interfaces/IWorkflowRunService`       |
 
+
+## Open API 3.0 - Swagger
+
+- Swagger UI : https://host/context-path/swagger (will redirect to https://host/context-path/swagger-ui/index.html)
+- api-docs (JSON) : https://host/context-path/api-docs
+- api-docs (YAML) : https://host/context-path/api-docs.yaml
+
+All the Swagger and OpenAPI related common properties are managed here [swagger.properties](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/blob/jb/az_swagger_openapi/workflow-core/src/main/resources/swagger.properties)
+
 ## Google Cloud implementation
 
 The Google Cloud Identity and Access Management service account for the Workflow service must have the
