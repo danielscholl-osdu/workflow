@@ -19,9 +19,11 @@ package org.opengroup.osdu.workflow.provider.gcp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
 @ConfigurationPropertiesScan("org.opengroup.osdu.workflow.provider.gcp.config")
+@PropertySource("classpath:swagger.properties")
 public class WorkflowGcpDatastoreApplication {
 
   public static void main(String[] args) {

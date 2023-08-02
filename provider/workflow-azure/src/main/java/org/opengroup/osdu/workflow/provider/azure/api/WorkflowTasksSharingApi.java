@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.api;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.IWorkflowTasksSharingService;
 import org.opengroup.osdu.workflow.provider.azure.model.GetSignedUrlResponse;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
@@ -16,6 +17,7 @@ public class WorkflowTasksSharingApi {
   @Autowired
   private IWorkflowTasksSharingService workflowTasksSharingService;
 
+  @Hidden
   @GetMapping("/{workflow_name}/workflowRun/{runId}/getSignedUrl")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
   public GetSignedUrlResponse create(@PathVariable("workflow_name") final String workflowName,
