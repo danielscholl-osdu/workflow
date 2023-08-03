@@ -19,7 +19,7 @@ public class CreateWorkflowRequest {
   @Schema(description = "Workfow registration instructions which could contains:\n" +
       "\n" +
       "Name of already registered Airflow DAG\n" +
-      "Cotent of python DAG file\n" +
+      "Content of python DAG file\n" +
       "etc By default this is Airflow DAG named workflowName")
   private Map<String, Object> registrationInstructions;
 }

@@ -377,7 +377,7 @@ The Workflow service has several Service Provider Interfaces that the classes ne
 - api-docs (JSON) : https://host/context-path/api-docs
 - api-docs (YAML) : https://host/context-path/api-docs.yaml
 
-All the Swagger and OpenAPI related common properties are managed here [swagger.properties](https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/blob/jb/az_swagger_openapi/workflow-core/src/main/resources/swagger.properties)
+All the Swagger and OpenAPI related common properties are managed here [swagger.properties](workflow-core/src/main/resources/swagger.properties)
 
 ## Google Cloud implementation
 

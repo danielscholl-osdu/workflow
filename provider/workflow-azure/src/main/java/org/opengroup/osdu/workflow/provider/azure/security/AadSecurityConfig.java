@@ -21,7 +21,6 @@ public class AadSecurityConfig extends WebSecurityConfigurerAdapter {
       "/swagger-ui.html",
       "/swagger-ui/**",
   };
-
   @Autowired
   private AADAppRoleStatelessAuthenticationFilter aadAppRoleStatelessAuthenticationFilter;
 
