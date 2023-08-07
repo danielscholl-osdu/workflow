@@ -38,7 +38,7 @@ public class HealthCheckApi {
   @Operation(summary = "${healthCheckApi.livenessCheck.summary}",
       description = "${healthCheckApi.livenessCheck.description}", tags = {"health"})
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Legal service is alive", content = {@Content(schema = @Schema(implementation = String.class))})
+      @ApiResponse(responseCode = "200", description = "Workflow service is alive", content = {@Content(schema = @Schema(implementation = String.class))})
   })
   @PermitAll
   @GetMapping("/liveness_check")
@@ -49,7 +49,7 @@ public class HealthCheckApi {
   @Operation(summary = "${healthCheckApi.readinessCheck.summary}",
       description = "${healthCheckApi.readinessCheck.description}", tags = {"health"})
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Legal service is ready", content = {@Content(schema = @Schema(implementation = String.class))})
+      @ApiResponse(responseCode = "200", description = "Workflow service is ready", content = {@Content(schema = @Schema(implementation = String.class))})
   })
   @PermitAll
   @GetMapping("/readiness_check")
