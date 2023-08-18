@@ -1,5 +1,4 @@
 package org.opengroup.osdu.workflow.provider.azure.security;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
