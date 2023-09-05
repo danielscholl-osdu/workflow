@@ -25,6 +25,7 @@ data:
     - Osdu_ingest
     - Segy_to_vds_conversion_sdms
     - Segy_to_zgy_conversion
+    - Osdu_ingest_by_reference
   # Deployment variables
   requestsCpu: "5m"
   requestsMemory: "650Mi"
