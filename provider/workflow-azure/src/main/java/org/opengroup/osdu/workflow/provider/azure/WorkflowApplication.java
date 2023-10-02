@@ -18,6 +18,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Note: these exclusions are the result of duplicate dependencies being introduced in the
@@ -33,6 +34,7 @@ import org.springframework.context.annotation.FilterType;
 )
 
 @SpringBootApplication
+@PropertySource("classpath:swagger.properties")
 public class WorkflowApplication {
   public static void main(String[] args) {
     SpringApplication.run(WorkflowApplication.class, args);

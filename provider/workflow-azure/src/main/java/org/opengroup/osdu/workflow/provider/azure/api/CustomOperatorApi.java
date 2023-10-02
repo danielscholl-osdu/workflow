@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.api;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.azure.interfaces.ICustomOperatorService;
 import org.opengroup.osdu.workflow.provider.azure.model.customoperator.CustomOperator;
@@ -22,6 +23,7 @@ public class CustomOperatorApi {
    * @param request Request object which has information to create new custom operator.
    * @return Information about created custom operator.
    */
+  @Hidden
   @PostMapping
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
   public CustomOperator registerCustomOperator(
@@ -35,6 +37,7 @@ public class CustomOperatorApi {
    * @param cursor Checkpoint information from which to fetch the next set of custom operators
    * @return Information about all the custom operators
    */
+  @Hidden
   @GetMapping
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "', '"
       + WorkflowRole.CREATOR + "', '" + WorkflowRole.VIEWER + "')")
@@ -49,6 +52,7 @@ public class CustomOperatorApi {
    * @param customOperatorName Name of custom operator
    * @return Custom Operator by ID
    */
+  @Hidden
   @GetMapping("/{custom_operator_name}")
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "', '"
       + WorkflowRole.CREATOR + "', '" + WorkflowRole.VIEWER + "')")
