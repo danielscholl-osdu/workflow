@@ -17,6 +17,7 @@ data:
   sharedTenantName: ""
   composerClient: "IAAP"
   dataPartitionId: ""
+  dataPartitionIdList: ["osdu"]
   workflowHost: "http://workflow"
   dagNames:
     - csv_ingestion
