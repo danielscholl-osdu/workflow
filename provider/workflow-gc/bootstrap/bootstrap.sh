@@ -26,11 +26,10 @@ bootstrap_workflow_onprem() {
     # Create workflow for each dag
     for DAG_NAME in "${DAG_LIST[@]}"; do
 
-        status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow" \
+        status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow/system" \
             --write-out "%{http_code}" --silent --output "output.txt" \
             --header 'Content-Type: application/json' \
             --header "Authorization: Bearer ${ID_TOKEN}" \
-            --header "data-partition-id: ${DATA_PARTITION_ID}" \
             --data-binary '{ "workflowName": "'"${DAG_NAME}"'", "registrationInstructions": { "dagName": "'"${DAG_NAME}"'", "etc": "string" }, "description": "'"${DAG_NAME}"'" }')
 
         # Checking result code
@@ -137,11 +136,10 @@ bootstrap_workflow_gc() {
     # Create workflow for each dag
     for DAG_NAME in "${DAG_LIST[@]}"; do
 
-        status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow" \
+        status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow/system" \
             --write-out "%{http_code}" --silent --output "output.txt" \
             --header 'Content-Type: application/json' \
             --header "Authorization: Bearer ${ACCESS_TOKEN}" \
-            --header "data-partition-id: ${DATA_PARTITION_ID}" \
             --data-binary '{ "workflowName": "'"${DAG_NAME}"'", "registrationInstructions": { "dagName": "'"${DAG_NAME}"'", "etc": "string" }, "description": "'"${DAG_NAME}"'" }')
 
         # Checking result code
