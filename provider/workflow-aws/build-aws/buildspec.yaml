@@ -77,7 +77,7 @@ phases:
       - if [ "$GIT_SECRETS_SCAN_RESULT" = "FAILED" ]; then echo "Secrets detected!" && exit 1; fi
 
       - echo "Building primary service assemblies..."
-      - mvn -B test install sonar:sonar -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME}
+      - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
 
       # Suspended until further notice
       # - echo "Copying assemblies to dist..."
