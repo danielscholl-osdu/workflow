@@ -38,10 +38,20 @@
     <azure.appservice.appname />
     <azure.appservice.subscription />
     <spring-webmvc.version>5.3.22</spring-webmvc.version>
+    <netty.version>4.1.98.Final</netty.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- netty-bom dependency to be declared before spring-boot-dependencies,
+           to pull all netty-transitive dependencies with same version -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- Inherit managed dependencies from core-lib-azure -->
       <dependency>
         <groupId>org.opengroup.osdu</groupId>
@@ -137,8 +147,12 @@
         </exclusion>
         <exclusion>
           <!-- Removing azure core as we'll include the netty version-->
-          <artifactId>azure-core</artifactId>
           <groupId>com.azure</groupId>
+          <artifactId>azure-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.microsoft.azure</groupId>
+          <artifactId>documentdb-bulkexecutor</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -147,11 +161,28 @@
       <artifactId>workflow-core</artifactId>
       <version>0.24.0-SNAPSHOT</version>
     </dependency>
+    <!-- netty related dependencies -->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-tcnative-boringssl-static</artifactId>
-      <version>2.0.46.Final</version>
     </dependency>
+    <!-- netty related dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
