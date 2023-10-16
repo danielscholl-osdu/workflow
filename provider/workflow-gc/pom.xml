@@ -121,12 +121,6 @@
       <version>0.23.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>obm</artifactId>
-      <version>0.23.0</version>
-    </dependency>
-
     <!-- WhiteSource updates -->
 
     <dependency>
