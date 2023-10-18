@@ -41,6 +41,13 @@ spec:
           runAsNonRoot: true
         ports:
         - containerPort: 8080
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: api/workflow/v1/liveness_check
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
         resources:
           requests:
             cpu: {{ .Values.data.requestsCpu | quote }}
