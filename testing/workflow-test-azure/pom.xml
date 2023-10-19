@@ -94,7 +94,7 @@
       <dependency>
         <groupId>org.opengroup.osdu</groupId>
         <artifactId>core-lib-azure</artifactId>
-        <version>0.0.28</version>
+        <version>0.24.0</version>
         <scope>test</scope>
         <exclusions>
           <exclusion>
