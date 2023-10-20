@@ -13,6 +13,8 @@ metadata:
 data:
   DATA_PARTITION_ID: {{ .Values.data.dataPartitionId | quote }}
   WORKFLOW_HOST: {{ .Values.data.workflowHost | quote }}
+  PARTITION_HOST: {{ .Values.data.partitionHost | quote }}
+  LEGAL_HOST: {{ .Values.data.legalHost | quote }}
+  SCHEMA_HOST: {{ .Values.data.schemaHost | quote }}
   ONPREM_ENABLED: {{ .Values.global.onPremEnabled | quote }}
   DAG_NAMES: {{ include "convertNamesToList" .Values.data.dagNames }}
-  DATA_PARTITION_ID_LIST: {{ join "," .Values.data.dataPartitionIdList | quote }}

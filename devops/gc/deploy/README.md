@@ -43,10 +43,11 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **data.springProfilesActive** | active spring profile | string | gcp                   | yes      |
 | **data.partitionHost**        | partition host        | string | "http://partition"    | yes      |
 | **data.entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
+| **data.legalHost** | legal host for creating a tag in bootstrap | string | "http://legal" | yes |
+| **data.schemaHost** | schema host for checking schema status in bootstrap | string | "http://schema" | yes |
 | **data.osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
 | **data.sharedTenantName**     | tenant name           | string | -                     | yes      |
 | **data.dataPartitionId** | ID of data partition | string | -                | yes      |
-| **data.dataPartitionIdList** | list of partition IDs | array | - | yes |
 | **data.worflowHost**     | Workflow host URL    | string | "http://workflow" | yes      |
 | **data.composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
 
