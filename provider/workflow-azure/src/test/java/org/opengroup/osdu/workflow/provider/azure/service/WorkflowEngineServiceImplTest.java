@@ -83,15 +83,16 @@ public class WorkflowEngineServiceImplTest {
   private static final String AIRFLOW_INPUT = "{\n" +
       "  \"run_id\": \"4f65d8d2-e40b-4e76-a290-12e2c6fee033\",\n" +
       "  \"conf\": {\n" +
-      "    \"Hello\": \"World\"\n" +
+      "    \"Hello\": \"World\",\n" +
+      "    \"execution_context\":{}" +
       "  },\n" +
       "  \"replace_microseconds\":\"false\"" +
       "}";
-
   private static final String AIRFLOW_CONTROLLER_DAG_INPUT = "{\n" +
       "  \"run_id\": \"PARENT_4f65d8d2-e40b-4e76-a290-12e2c6fee033\",\n" +
       "  \"conf\": {\n" +
-      "    \"Hello\": \"World\"\n," +
+      "    \"Hello\": \"World\",\n" +
+      "    \"execution_context\":{}," +
       "    \"_trigger_config\": {\n" +
       "       \"trigger_dag_id\": \"HelloWorld\"\n," +
       "       \"trigger_dag_run_id\": \"4f65d8d2-e40b-4e76-a290-12e2c6fee033\"\n" +
@@ -239,6 +240,8 @@ public class WorkflowEngineServiceImplTest {
   public void testTriggerWorkflowWithSuccessExecution() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    INPUT_DATA.put("execution_context", executionContext);
     INPUT_DATA.put("Hello", "World");
     Integer dagRunsCount = 10;
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
@@ -304,6 +307,8 @@ public class WorkflowEngineServiceImplTest {
   public void testTriggerWorkflowWithSuccessExecution_multiPartitionAirflow() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    INPUT_DATA.put("execution_context", executionContext);
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     when(partitionService.getPartition(eq(TEST_PARTITION))).thenReturn(partitionInfoAzure);
@@ -345,6 +350,8 @@ public class WorkflowEngineServiceImplTest {
   public void testTriggerWorkflow_whenUnableToObtainActiveDagRunsFromDb() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    INPUT_DATA.put("execution_context", executionContext);
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -466,6 +473,8 @@ public class WorkflowEngineServiceImplTest {
   public void testTriggerWorkflowWithExceptionFromAirflow() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    INPUT_DATA.put("execution_context", executionContext);
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -517,6 +526,8 @@ public class WorkflowEngineServiceImplTest {
   public void testTriggerWorkflowWithControllerDag() throws JsonProcessingException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
+    Map<String, Object> executionContext = new HashMap<>();
+    INPUT_DATA.put("execution_context", executionContext);
     INPUT_DATA.put("Hello", "World");
     final ArgumentCaptor<String> airflowInputCaptor = ArgumentCaptor.forClass(String.class);
     final ArgumentCaptor<Integer> numberOfActiveDagRunsCaptor = ArgumentCaptor.forClass(Integer.class);

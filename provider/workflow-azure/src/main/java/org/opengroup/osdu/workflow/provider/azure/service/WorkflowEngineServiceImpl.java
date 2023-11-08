@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.azure.partition.PartitionInfoAzure;
 import org.opengroup.osdu.azure.partition.PartitionServiceClient;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 import static org.opengroup.osdu.workflow.provider.azure.consts.CacheConstants.ACTIVE_DAG_RUNS_COUNT_CACHE_KEY;
 
+@Slf4j
 @Service
 @Primary
 public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
@@ -53,6 +55,8 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_ID = "trigger_dag_id";
   private final static String AIRFLOW_CONTROLLER_PAYLOAD_PARAMETER_WORKFLOW_RUN_ID = "trigger_dag_run_id";
   private static final String KEY_DAG_CONTENT = "dagContent";
+  private static final String KEY_USER_ID = "userId";
+  private static final String KEY_EXECUTION_CONTEXT = "execution_context";
 
 
   @Autowired
@@ -199,6 +203,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq,
                                                  Map<String, Object> inputData) {
+
     PartitionInfoAzure pi = this.partitionService.getPartition(dpsHeaders.getPartitionId());
     Boolean isAirflowEnabled = pi.getAirflowEnabled();
     // NOTE: [aaljain] limiting trigger requests not supported for multi partition
@@ -211,6 +216,7 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
     LOGGER.info("Submitting ingestion with Airflow with dagName: {}", workflowName);
     ClientResponse response;
     AirflowConfig airflowConfig = getAirflowConfig(rq.isSystemWorkflow());
+    addUserIdToExecutionContext(inputData, rq);
     if (airflowConfig.isDagRunAbstractionEnabled()) {
       response = triggerWorkflowUsingController(airflowConfig, runId, workflowId,
           workflowName, inputData, rq.isSystemWorkflow());
@@ -328,5 +334,17 @@ public class WorkflowEngineServiceImpl implements IWorkflowEngineService {
       return activeDagRuns;
     }
     throw new Exception("Failed to retrieve active dag runs, got null response");
+  }
+
+  private void addUserIdToExecutionContext(Map<String, Object> inputData, WorkflowEngineRequest rq) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> executionContext = objectMapper.convertValue(inputData.get(KEY_EXECUTION_CONTEXT), Map.class);
+    if (executionContext.containsKey(KEY_USER_ID)) {
+      String errorMessage = String.format("Request to trigger workflow with name %s failed because execution context contains reserved key 'userId'", rq.getWorkflowName());
+      throw new AppException(400, "Failed to trigger workflow run", errorMessage);
+    }
+    log.debug(String.format("putting user id: %s in execution context",dpsHeaders.getUserId()));
+    executionContext.put(KEY_USER_ID, dpsHeaders.getUserId());
+    inputData.put(KEY_EXECUTION_CONTEXT,executionContext);
   }
 }
