@@ -229,27 +229,13 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
                                                     final String runId,
                                                     final String correlationId,
                                                     final TriggerWorkflowRequest request) {
-    final Map<String, Object> executionContext = addUserId(workflowName, request);
     final Map<String, Object> payload = new HashMap<>();
     payload.put(KEY_RUN_ID, runId);
     payload.put(KEY_WORKFLOW_NAME, workflowName);
     payload.put(KEY_AUTH_TOKEN, dpsHeaders.getAuthorization());
     payload.put(KEY_CORRELATION_ID, correlationId);
-    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(executionContext, Map.class));
+    payload.put(KEY_EXECUTION_CONTEXT, OBJECT_MAPPER.convertValue(request.getExecutionContext(), Map.class));
     return payload;
-  }
-
-  private Map<String, Object> addUserId(String workflowName, TriggerWorkflowRequest request) {
-    final Map<String, Object> executionContext = request.getExecutionContext();
-
-    if (executionContext.get(KEY_USER_ID) != null) {
-      String errorMessage = String.format("Request to trigger workflow with name %s failed because execution context contains reserved key 'userId'", workflowName);
-      throw new AppException(400, "Failed to trigger workflow run", errorMessage);
-    }
-    String userId = dpsHeaders.getUserId();
-    log.debug("putting user id: " + userId + " in execution context");
-    executionContext.put(KEY_USER_ID, userId);
-    return executionContext;
   }
 
   private WorkflowRun fetchAndUpdateWorkflowRunStatus(final WorkflowRun workflowRun) {

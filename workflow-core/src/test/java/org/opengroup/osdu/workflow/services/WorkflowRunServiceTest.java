@@ -184,8 +184,6 @@ public class WorkflowRunServiceTest {
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
-    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
-    request.getExecutionContext().remove(KEY_USER_ID);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
         .forClass(WorkflowRun.class);
     final WorkflowRun responseWorkflowRun = mock(WorkflowRun.class);
@@ -211,7 +209,6 @@ public class WorkflowRunServiceTest {
 	  verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getUserEmail();
     verify(dpsHeaders).getCorrelationId();
-    verify(dpsHeaders).getUserId();
     verify(statusPublisher).publishStatusWithNoErrors(any(), any(DpsHeaders.class), any(String.class), any(Status.class));
     assertThat(returnedWorkflowRun, equalTo(buildWorkflowRunResponse(responseWorkflowRun)));
     assertThat(workflowRunArgumentCaptor.getValue().getRunId(), equalTo(RUN_ID));
@@ -241,13 +238,11 @@ public class WorkflowRunServiceTest {
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getUserEmail()).thenReturn(USER_EMAIL);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
-    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
     final ArgumentCaptor<WorkflowRun> workflowRunArgumentCaptor = ArgumentCaptor
         .forClass(WorkflowRun.class);
     final WorkflowRun responseWorkflowRun = mock(WorkflowRun.class);
     when(workflowRunRepository.saveWorkflowRun(workflowRunArgumentCaptor.capture()))
         .thenReturn(responseWorkflowRun);
-    request.getExecutionContext().remove(KEY_USER_ID);
     //when
     final WorkflowRunResponse returnedWorkflowRun = workflowRunService
         .triggerWorkflow(WORKFLOW_NAME, request);
@@ -309,8 +304,6 @@ public class WorkflowRunServiceTest {
         eq(createWorkflowPayload(RUN_ID, request)));
     when(dpsHeaders.getAuthorization()).thenReturn(AUTH_TOKEN);
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
-    when(dpsHeaders.getUserId()).thenReturn(USER_ID);
-    request.getExecutionContext().remove(KEY_USER_ID);
     //when and then
     Assertions.assertThrows(CoreException.class, () -> {
       workflowRunService.triggerWorkflow(WORKFLOW_NAME, request);
