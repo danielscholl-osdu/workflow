@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
@@ -125,15 +126,26 @@ public class GcpOsmWorkflowRunRepository implements IWorkflowRunRepository {
   public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName,
       Map<String, Object> params) {
     log.info("Get all run instances of workflow. Workflow name : {}", workflowName);
-    Integer limit = (Integer) params.get(LIMIT_PARAM);
+    Integer limit = null;
+    if (params.get(LIMIT_PARAM) != null) {
+      try {
+        limit = Integer.parseInt((String) params.get(LIMIT_PARAM));
+      } catch (NumberFormatException e) {
+        throw new AppException(
+            HttpStatusCodes.STATUS_CODE_BAD_REQUEST,
+            "Not valid limit param format.",
+            e.getMessage()
+        );
+      }
+    }
     String cursor = (String) params.get(CURSOR_PARAM);
     GetQuery<WorkflowRun> getQuery =
         new GetQuery<>(
             WorkflowRun.class,
-            this.destinationProvider.getDestination(this.tenantInfo,
-                workflowConfig.getWorkflowRunKind()),
+            this.destinationProvider.getDestination(this.tenantInfo, workflowConfig.getWorkflowRunKind()),
             eq(WORKFLOW_NAME, workflowName)
         );
+
     List<WorkflowRun> responseList =
         context.getResults(getQuery, null, limit, cursor).outcome().getList();
     if (!params.isEmpty()) {
