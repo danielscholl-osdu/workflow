@@ -1,33 +1,32 @@
 package org.opengroup.osdu.workflow.service;
 
-import static java.lang.String.format;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
+import org.opengroup.osdu.workflow.model.*;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
-import org.opengroup.osdu.workflow.model.ClientResponse;
-import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import java.util.Objects;
+
+import static java.lang.String.format;
 
 @Service
 @Slf4j
@@ -35,27 +34,31 @@ import org.springframework.stereotype.Service;
 public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   private static final String RUN_ID_PARAMETER_NAME_STABLE = "dag_run_id";
-	private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-	private static final String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
-	private static final String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
-	private static final String TRIGGER_AIRFLOW_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns";
-	private static final String AIRFLOW_RUN_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns/%s";
+  private static final String AIRFLOW_EXECUTION_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+  private static final String AIRFLOW_PAYLOAD_PARAMETER_NAME = "conf";
+  private static final String EXECUTION_DATE_PARAMETER_NAME = "execution_date";
+  private static final String TRIGGER_AIRFLOW_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns";
+  private static final String AIRFLOW_RUN_ENDPOINT_STABLE = "api/v1/dags/%s/dagRuns/%s";
   private static final String AIRFLOW_VERSION_ENDPOINT = "api/v1/version";
   private static final String NOT_AVAILABLE = "N/A";
   public static final String VERSION = "version";
+  private static final String KEY_USER_ID = "userId";
+  private static final String KEY_EXECUTION_CONTEXT = "execution_context";
 
-	private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE =
-			"Failed to trigger workflow with id %s and name %s";
-	private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
-			"No WorkflowRun executed for Workflow: %s on %s ";
-
+  private static final String AIRFLOW_TRIGGER_DAG_ERROR_MESSAGE =
+      "Failed to trigger workflow with id %s and name %s";
+  private static final String AIRFLOW_WORKFLOW_RUN_NOT_FOUND =
+      "No WorkflowRun executed for Workflow: %s on %s ";
 
   private final Client restClient;
 	private final AirflowConfig airflowConfig;
+	private final DpsHeaders dpsHeaders;
 
-	public AirflowV2WorkflowEngineServiceImpl(Client restClient, AirflowConfig airflowConfig){
+
+	public AirflowV2WorkflowEngineServiceImpl(Client restClient, AirflowConfig airflowConfig, DpsHeaders dpsHeaders){
 		this.restClient = restClient;
 		this.airflowConfig = airflowConfig;
+		this.dpsHeaders = dpsHeaders;
 	}
 
 	@Override
@@ -77,6 +80,7 @@ public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineServic
 	public TriggerWorkflowResponse triggerWorkflow(WorkflowEngineRequest rq, Map<String, Object> context) {
 		log.info("IBM : Submitting ingestion with Airflow 2 with dagName: {}", rq.getDagName());
 		String url = "";
+		addUserIdToExecutionContext(context, rq);
 		final JSONObject requestBody = new JSONObject();
 		requestBody.put(AIRFLOW_PAYLOAD_PARAMETER_NAME, context);
 			url = format(TRIGGER_AIRFLOW_ENDPOINT_STABLE, rq.getDagName());
@@ -196,5 +200,35 @@ public class AirflowV2WorkflowEngineServiceImpl implements IWorkflowEngineServic
 		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
 		return zonedDateTime.format(DateTimeFormatter.ofPattern(AIRFLOW_EXECUTION_DATE_FORMAT));
 	}
+
+  protected void addUserIdToExecutionContext(
+      Map<String, Object> inputData, WorkflowEngineRequest rq) {
+    if (Objects.isNull(inputData)) {
+      throw new AppException(
+          HttpStatus.BAD_REQUEST.value(),
+          "Failed to trigger workflow run",
+          "data is null or empty");
+    }
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> executionContext =
+        objectMapper.convertValue(inputData.get(KEY_EXECUTION_CONTEXT), Map.class);
+    if (Objects.isNull(executionContext)) {
+      throw new AppException(
+          HttpStatus.BAD_REQUEST.value(),
+          "Failed to trigger workflow run",
+          "execution_context is null or empty");
+    }
+    if (executionContext.containsKey(KEY_USER_ID)) {
+      String errorMessage =
+          String.format(
+              "Request to trigger workflow with name %s failed because execution context contains reserved key 'userId'",
+              rq.getWorkflowName());
+      throw new AppException(400, "Failed to trigger workflow run", errorMessage);
+    }
+    log.debug(
+        String.format("putting user email: %s in execution context", dpsHeaders.getUserEmail()));
+    executionContext.put(KEY_USER_ID, dpsHeaders.getUserEmail());
+    inputData.put(KEY_EXECUTION_CONTEXT, executionContext);
+  }
 }
 
