@@ -40,18 +40,19 @@ and usage in the mixed mode were not tested. Usage of spring profiles is preferr
 
 You will need to have the following environment variables defined.
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
-| `INTEGRATION_TESTER` | `********` | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
-| `NO_DATA_ACCESS_TESTER` | `********` | Service account without data access, as a filename or JSON content, plain or Base64 encoded. | yes | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
-| `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
-| `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
-| `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
-| `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
-| `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
-| `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
-| `OSDU_AIRFLOW_VERSION2` | `true` or `false` | Disable\Enable tests that work only with specific Airflow version | no | - |
+| name                                | value                                                         | description                                                                                                                                       | sensitive? | source                                                       |
+|-------------------------------------|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|------------|--------------------------------------------------------------|
+| `DOMAIN`                            | ex `contoso.com`                                              | OSDU R2 to run tests under                                                                                                                        | no         | -                                                            |
+| `INTEGRATION_TESTER`                | `********`                                                    | Service account for API calls, as a filename or JSON content, plain or Base64 encoded.  Note: this user must have entitlements configured already | yes        | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
+| `NO_DATA_ACCESS_TESTER`             | `********`                                                    | Service account without data access, as a filename or JSON content, plain or Base64 encoded.                                                      | yes        | <https://console.cloud.google.com/iam-admin/serviceaccounts> |
+| `LEGAL_TAG`                         | `********`                                                    | Demo legal tag used to pass test                                                                                                                  | yes        | Legal service                                                |
+| `WORKFLOW_HOST`                     | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service                                                                                                                      | no         | -                                                            |
+| `DEFAULT_DATA_PARTITION_ID_TENANT1` | ex `opendes`                                                  | OSDU tenant used for testing                                                                                                                      | no         | -                                                            |
+| `OTHER_RELEVANT_DATA_COUNTRIES`     | `US`                                                          | -                                                                                                                                                 | no         | -                                                            |
+| `FINISHED_WORKFLOW_ID`              | `********`                                                    | Workflow ID with finished status                                                                                                                  | yes        | -                                                            |
+| `TEST_DAG_NAME`                     | `********`                                                    | Name of test DAG                                                                                                                                  | yes        | -                                                            |
+| `OSDU_AIRFLOW_VERSION2`             | `true` or `false`                                             | Disable\Enable tests that work only with specific Airflow version                                                                                 | no         | -                                                            |
+| `ENTITLEMENT_V2_URL`                | ex `http://localhost:8080/api/entitlements/v2/`               | Entitlements V2 Host                                                                                                                              | no         | --                                                           |
 
 **Entitlements configuration for integration accounts**
 

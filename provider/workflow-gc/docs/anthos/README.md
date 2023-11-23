@@ -246,20 +246,21 @@ It can be overridden by:
 
 You will need to have the following environment variables defined.
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `DOMAIN` | ex `contoso.com` | OSDU R2 to run tests under | no | - |
-| `LEGAL_TAG` | `********` | Demo legal tag used to pass test| yes | Legal service |
-| `WORKFLOW_HOST` | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service | no | - |
-| `DEFAULT_DATA_PARTITION_ID_TENANT1`| ex `opendes` | OSDU tenant used for testing | no | - |
-| `OTHER_RELEVANT_DATA_COUNTRIES`| `US`| - | no | - |
-| `FINISHED_WORKFLOW_ID` | `********` | Workflow ID with finished status | yes | - |
-| `TEST_DAG_NAME` | `********` | Name of test DAG | yes | - |
-| `TEST_OPENID_PROVIDER_CLIENT_ID` | `********` | Client Id for `$INTEGRATION_TESTER` | yes | -- |
-| `TEST_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$INTEGRATION_TESTER` | -- |
-| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID` | `********` | Client Id for `$NO_ACCESS_INTEGRATION_TESTER` | yes | -- |
-| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET` | `********` |  | Client secret for `$NO_ACCESS_INTEGRATION_TESTER` | -- |
-| `TEST_OPENID_PROVIDER_URL` | `https://keycloak.com/auth/realms/osdu` | OpenID provider URL | yes | -- |
+| name                                           | value                                                         | description                                   | sensitive?                                        | source        |
+|------------------------------------------------|---------------------------------------------------------------|-----------------------------------------------|---------------------------------------------------|---------------|
+| `DOMAIN`                                       | ex `contoso.com`                                              | OSDU R2 to run tests under                    | no                                                | -             |
+| `LEGAL_TAG`                                    | `********`                                                    | Demo legal tag used to pass test              | yes                                               | Legal service |
+| `WORKFLOW_HOST`                                | ex `https://os-workflow-dot-opendes.appspot.com/api/workflow` | Endpoint of workflow service                  | no                                                | -             |
+| `DEFAULT_DATA_PARTITION_ID_TENANT1`            | ex `opendes`                                                  | OSDU tenant used for testing                  | no                                                | -             |
+| `OTHER_RELEVANT_DATA_COUNTRIES`                | `US`                                                          | -                                             | no                                                | -             |
+| `FINISHED_WORKFLOW_ID`                         | `********`                                                    | Workflow ID with finished status              | yes                                               | -             |
+| `TEST_DAG_NAME`                                | `********`                                                    | Name of test DAG                              | yes                                               | -             |
+| `TEST_OPENID_PROVIDER_CLIENT_ID`               | `********`                                                    | Client Id for `$INTEGRATION_TESTER`           | yes                                               | --            |
+| `TEST_OPENID_PROVIDER_CLIENT_SECRET`           | `********`                                                    |                                               | Client secret for `$INTEGRATION_TESTER`           | --            |
+| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID`     | `********`                                                    | Client Id for `$NO_ACCESS_INTEGRATION_TESTER` | yes                                               | --            |
+| `TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET` | `********`                                                    |                                               | Client secret for `$NO_ACCESS_INTEGRATION_TESTER` | --            |
+| `TEST_OPENID_PROVIDER_URL`                     | `https://keycloak.com/auth/realms/osdu`                       | OpenID provider URL                           | yes                                               | --            |
+| `ENTITLEMENT_V2_URL`                           | ex `http://localhost:8080/api/entitlements/v2/`               | Entitlements V2 Host                          | no                                                | --            |
 
 **Entitlements configuration for integration accounts**
 

@@ -692,4 +692,8 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     assertTrue(org.apache.http.HttpStatus.SC_FORBIDDEN == response.getStatus() || org.apache.http.HttpStatus.SC_UNAUTHORIZED == response.getStatus());
   }
+
+  @Test
+  public void triggerWorkflowRun_should_returnSuccessAndCompleteExecutionWithImpersonationFlow()
+      throws Exception {}
 }

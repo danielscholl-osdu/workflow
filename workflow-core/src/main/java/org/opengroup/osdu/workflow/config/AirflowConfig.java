@@ -1,15 +1,14 @@
 package org.opengroup.osdu.workflow.config;
 
-import java.util.Objects;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import sun.misc.BASE64Encoder;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+
+import java.util.Base64;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -38,6 +37,6 @@ public class AirflowConfig {
     }
 
     String airflowAuthString = username + ":" + password;
-    return new BASE64Encoder().encode(airflowAuthString.getBytes());
+    return Base64.getUrlEncoder().encodeToString(airflowAuthString.getBytes());
   }
 }
