@@ -929,13 +929,6 @@ The following software have components provided under the terms of this license:
 - RabbitMQ Java Client (from http://www.rabbitmq.com, https://www.rabbitmq.com)
 
 ========================================================================
-RSA-MD
-========================================================================
-The following software have components provided under the terms of this license:
-
-- AWS Java SDK for Amazon SQS (from https://aws.amazon.com/sdkforjava)
-
-========================================================================
 SunPro
 ========================================================================
 The following software have components provided under the terms of this license:
