@@ -16,7 +16,6 @@
 
 package org.opengroup.osdu.workflow.aws.service.airflow.sqs;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;

@@ -56,7 +56,9 @@ public class AwsWorkflowSystemMetadataRepository implements IWorkflowSystemMetad
    * @param workflowName Name of the workflow for which metadata should be deleted.
    */
   @Override
-  public void deleteSystemWorkflow(String workflowName) { }
+  public void deleteSystemWorkflow(String workflowName) { 
+    // Do Nothing Here
+  }
 
   /**
    * Get all system workflows metadata based on prefix

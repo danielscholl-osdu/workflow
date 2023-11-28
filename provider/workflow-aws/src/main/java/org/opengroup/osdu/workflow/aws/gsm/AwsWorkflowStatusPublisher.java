@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.aws.sns.AmazonSNSConfig;
 import org.opengroup.osdu.core.aws.sns.PublishRequestBuilder;
 import org.opengroup.osdu.core.aws.ssm.K8sLocalParameterProvider;
-import org.opengroup.osdu.core.aws.ssm.SSMConfig;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
@@ -52,21 +51,21 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
         AmazonSNSConfig snsConfig = new AmazonSNSConfig(amazonSNSRegion);
         snsClient = snsConfig.AmazonSNS();
         K8sLocalParameterProvider provider = new K8sLocalParameterProvider();
-        amazonSnsTopic = Objects.requireNonNull(provider.getParameterAsStringOrDefault("INGESTION_WORKFLOW_SNS_ARN", null)).toString();
+        amazonSnsTopic = Objects.requireNonNull(provider.getParameterAsStringOrDefault("INGESTION_WORKFLOW_SNS_ARN", null));
     }
 
     @Override
     public void publish(Message[] messages, Map<String, String> attributesMap) throws CoreException {
         validateInput(messages, attributesMap);
-        PublishRequest publishRequest = new PublishRequestBuilder().generatePublishRequest(
+        PublishRequest publishRequest = new PublishRequestBuilder<Message>().generatePublishRequest(
             "data",
             Arrays.asList(messages),
-            createMessageMap(messages, attributesMap),
+            createMessageMap(attributesMap),
             amazonSnsTopic);
         snsClient.publish(publishRequest);
     }
 
-    private HashMap<String, MessageAttributeValue> createMessageMap(Message[] messages, Map<String, String> attributesMap) {
+    private HashMap<String, MessageAttributeValue> createMessageMap(Map<String, String> attributesMap) {
         HashMap<String, MessageAttributeValue> messageAttributes = new HashMap<>();
         messageAttributes.put(DpsHeaders.DATA_PARTITION_ID, new MessageAttributeValue()
             .withDataType("String")

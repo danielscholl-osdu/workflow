@@ -72,7 +72,7 @@ public class WorkflowRunDoc {
 
 
     public static WorkflowRunDoc create(WorkflowRun workflowRun, String dataPartitionId) {
-        WorkflowRunDoc doc = WorkflowRunDoc.builder()
+        return WorkflowRunDoc.builder()
             .runId(workflowRun.getRunId())    
             .dataPartitionId(dataPartitionId)
             .workflowId(workflowRun.getWorkflowId())
@@ -84,12 +84,10 @@ public class WorkflowRunDoc {
             .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
             .build();
 
-        return doc;
-
     }
 
     public WorkflowRun convertToWorkflowRun() {
-        WorkflowRun workflowRun = WorkflowRun.builder()
+        return WorkflowRun.builder()
             .runId(runId)    
             .workflowId(workflowId)
             .workflowName(workflowName)            
@@ -99,8 +97,6 @@ public class WorkflowRunDoc {
             .submittedBy(submittedBy)
             .workflowEngineExecutionDate(workflowEngineExecutionDate)
             .build();
-
-        return workflowRun;
     }
 
 
