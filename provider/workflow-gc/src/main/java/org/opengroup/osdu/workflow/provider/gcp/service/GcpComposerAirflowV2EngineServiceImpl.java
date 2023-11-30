@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2023 Google LLC
+ *  Copyright 2020-2023 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static java.lang.String.format;
 
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -38,12 +39,14 @@ public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngi
 
   private final AirflowConfig airflowConfig;
   private final ComposerClient iapClient;
+  private final DpsHeaders dpsHeaders;
 
   public GcpComposerAirflowV2EngineServiceImpl(AirflowConfig airflowConfig,
-      ComposerClient iapClient) {
-    super(null, airflowConfig);
+      ComposerClient iapClient,DpsHeaders dpsHeaders ) {
+    super(null, airflowConfig, dpsHeaders);
     this.airflowConfig = airflowConfig;
     this.iapClient = iapClient;
+    this.dpsHeaders = dpsHeaders;
     log.info("Initialized Airflow with stable API and enabled IAAP authentication.");
   }
 

@@ -1,6 +1,6 @@
 /*
-  Copyright 2020 Google LLC
-  Copyright 2020 EPAM Systems, Inc
+  Copyright 2020-2023 Google LLC
+  Copyright 2020-2023 EPAM Systems, Inc
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,22 +17,13 @@
 
 package org.opengroup.osdu.gcp.workflow.workflow;
 
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.ClientResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.ws.rs.HttpMethod;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +31,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.opengroup.osdu.gcp.workflow.util.HTTPClientGCP;
 import org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests;
+import org.springframework.http.HttpStatus;
 
+import javax.ws.rs.HttpMethod;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opengroup.osdu.workflow.consts.TestConstants.*;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
+
+@Slf4j
 public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests {
 
   private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -121,6 +123,49 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
     super.updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusRunning();
   }
 
+  @Override
+  @Test
+  public void
+      triggerWorkflowRun_should_returnSuccessAndCompleteExecution_when_givenValidTriggerRequest()
+          throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo =
+        new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+    
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo =
+        new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+
+    assertTrue(Objects.nonNull(workflowRunInfo.get("submittedBy")));
+
+    Optional<String> userFromEntitlements = getUserFromEntitlements(headers);
+    assertEquals(userFromEntitlements.get(), workflowRunInfo.get("submittedBy"));
+    createdWorkflowRuns.add(workflowRunInfo);
+  }
+
+  @Override
+  @Test
+  public void triggerWorkflowRun_should_returnSuccessAndCompleteExecutionWithImpersonationFlow() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    Map<String, String> workflowInfo =
+            new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflows.add(workflowInfo);
+
+    headers.put("on-behalf-of", "impersonatetestmember@test.com");
+    String workflowRunResponseBody = createWorkflowRun();
+    Map<String, String> workflowRunInfo =
+            new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+
+    assertTrue(Objects.nonNull(workflowRunInfo.get("submittedBy")));
+
+    Optional<String> userFromEntitlements = getUserFromEntitlements(headers);
+    assertEquals(userFromEntitlements.get(), workflowRunInfo.get("submittedBy"));
+    createdWorkflowRuns.add(workflowRunInfo);
+  }
+
+
+
   protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId)
       throws Exception {
     return client.send(
@@ -160,5 +205,39 @@ public class TestWorkflowRunV3Integration extends WorkflowRunV3IntegrationTests 
 
     return runIds;
 
+  }
+
+  @Override
+  protected String createWorkflowRun() throws Exception {
+
+    ClientResponse response = client.send(
+            HttpMethod.POST,
+            String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
+            buildCreateWorkflowRunValidPayload(),
+            headers,
+            client.getAccessToken()
+    );
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    return response.getEntity(String.class);
+  }
+
+  protected Optional<String> getUserFromEntitlements(Map<String, String> headers) throws Exception {
+    String entitlementV2URL =
+        System.getProperty("ENTITLEMENT_V2_URL", System.getenv("ENTITLEMENT_V2_URL"));
+    ClientResponse response =
+        client.send(
+            HttpMethod.GET, entitlementV2URL + "groups", null, headers, client.getAccessToken());
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+    String entitlementsResponseBody = response.getEntity(String.class);
+    Map<String, String> entitlementsResponseMap =
+        new ObjectMapper().readValue(entitlementsResponseBody, HashMap.class);
+    if (Objects.nonNull(entitlementsResponseMap)
+        && entitlementsResponseMap.containsKey("memberEmail")) {
+      return Optional.ofNullable(entitlementsResponseMap.get("memberEmail"));
+    }
+    return Optional.empty();
   }
 }
