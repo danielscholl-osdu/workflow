@@ -51,10 +51,10 @@ public class WorkflowSqsClient {
   public void sendMessageToWorkflowQueue(String ref){
     log.info("Sending message");
     log.debug(String.format("S3 reference: %s", ref));
-    SendMessageRequest send_msg_request = new SendMessageRequest()
+    SendMessageRequest sendMsgRequest = new SendMessageRequest()
         .withQueueUrl(awsConfig.workflowQueueUrl)
         .withMessageBody(ref);
-    sqs.sendMessage(send_msg_request);
+    sqs.sendMessage(sendMsgRequest);
     log.info("Message successfully sent");
   }
 }

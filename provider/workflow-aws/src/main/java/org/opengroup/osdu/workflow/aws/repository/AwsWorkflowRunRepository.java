@@ -27,19 +27,16 @@ import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
 import org.opengroup.osdu.core.aws.dynamodb.QueryPageResult;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
-import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -65,7 +62,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
     @Value("${aws.dynamodb.workflowRunTable.ssm.relativePath}")
     String workflowRunTableParameterRelativePath;
 
-    private final String workflowRunHashKey = "runId";
+    private static final String workflowRunHashKey = "runId";
 
     @PostConstruct
     public void init() {
@@ -137,7 +134,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         List<WorkflowRun> items;
         String docsCursor = null;
 
-        if (docs != null && docs.results != null && docs.results.size() > 0) {
+        if (docs != null && docs.results != null && (!docs.results.isEmpty())) {
             items = docs.results.stream().map(x -> x.convertToWorkflowRun()).collect(Collectors.toList());
             docsCursor = docs.cursor;
         }

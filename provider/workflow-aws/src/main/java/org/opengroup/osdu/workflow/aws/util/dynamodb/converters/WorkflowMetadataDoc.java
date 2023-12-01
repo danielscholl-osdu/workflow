@@ -67,7 +67,7 @@ public class WorkflowMetadataDoc {
 
 
     public static WorkflowMetadataDoc create(WorkflowMetadata workflowMetadata, String dataPartitionId) {
-        WorkflowMetadataDoc doc = WorkflowMetadataDoc.builder()
+        return WorkflowMetadataDoc.builder()
             .dataPartitionId(dataPartitionId)
             .workflowId(workflowMetadata.getWorkflowId())
             .workflowName(workflowMetadata.getWorkflowName())
@@ -78,12 +78,10 @@ public class WorkflowMetadataDoc {
             .isDeployedThroughWorkflowService(false) //we dont support deployment right now
             .build();
 
-        return doc;
-
     }
 
     public WorkflowMetadata convertToWorkflowMetadata() {
-        WorkflowMetadata metadata = WorkflowMetadata.builder()
+        return  WorkflowMetadata.builder()
             .workflowId(workflowId)
             .workflowName(workflowName)
             .description(description)
@@ -92,8 +90,6 @@ public class WorkflowMetadataDoc {
             .version(version)
             .isDeployedThroughWorkflowService(isDeployedThroughWorkflowService)
             .build();
-
-        return metadata;
     }
 
 

@@ -27,9 +27,9 @@ import java.util.Map;
 
 @Component
 public class WorkflowRequestBodyFactory {
-  private final static String PARSE_ERROR_MSG = "Unable to parse data for dag";
-  private final static String AUTH_HEADER_KEY = "authorization";
-  private final static String APP_KEY_HEADER_KEY = "AppKey";
+  private static final String PARSE_ERROR_MSG = "Unable to parse data for dag";
+  private static final String AUTH_HEADER_KEY = "authorization";
+  private static final String APP_KEY_HEADER_KEY = "AppKey";
 
   /**
    * Serializes input to workflow queue whether from schedule rule or directly to the queue
@@ -85,7 +85,7 @@ public class WorkflowRequestBodyFactory {
       ObjectMapper mapper = new ObjectMapper();
       serializedData = mapper.writeValueAsString(data);
       // airflow calls fail on empty bodies
-      if(serializedData == null || serializedData == ""){
+      if(serializedData == null || serializedData.equals("")){
         serializedData = "{}";
       }
     } catch (JsonProcessingException e){

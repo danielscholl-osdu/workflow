@@ -18,7 +18,6 @@ package org.opengroup.osdu.workflow.aws.service;
 
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
@@ -29,7 +28,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import org.json.JSONObject;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsAirflowApiMode;
@@ -38,7 +36,6 @@ import org.opengroup.osdu.workflow.aws.repository.AwsWorkflowRunRepository;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
 import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
-import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -100,7 +97,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
   @Override
   public void createWorkflow(
       final WorkflowEngineRequest rq, final Map<String, Object> registrationInstruction) {
-
+        // Do Nothing Here
   }
 
   @Override
@@ -112,7 +109,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
   @Override
   public void saveCustomOperator(final String customOperatorDefinition, final String fileName) {
-
+    // Do Nothing Here
   }
 
   @Override
@@ -139,7 +136,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
             }
             break;
           case AwsAirflowApiMode.SQS:
-            triggerWorkflowUsingSqs(runId, workflowId, workflowName, inputData);
+            triggerWorkflowUsingSqs(runId, workflowName, inputData);
             resp = TriggerWorkflowResponse.builder()
                                   .runId(runId)
                                   .executionDate("UNKNOWN")
@@ -169,7 +166,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
     }
   }
 
-  private void triggerWorkflowUsingSqs(final String runId, final String workflowId,
+  private void triggerWorkflowUsingSqs(final String runId,
   String workflowName, final Map<String, Object> inputData) {
 
     String serializedData = workflowRequestBodyFactory.getSerializedWorkflowRequest(inputData,
@@ -185,7 +182,8 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
 
     JSONObject requestBody = new JSONObject();
     requestBody.put(AirflowConstants.RUN_ID_PARAMETER_NAME, runId);
-    requestBody.put(AirflowConstants.AIRFLOW_PAYLOAD_PARAMETER_NAME, inputData);
+    JSONObject inputDataJson = new JSONObject(inputData);
+    requestBody.put(AirflowConstants.AIRFLOW_PAYLOAD_PARAMETER_NAME, inputDataJson);
     requestBody.put(AirflowConstants.AIRFLOW_MICROSECONDS_FLAG, "false");
 
     return callAirflowApi(triggerDAGEndpoint, HttpMethod.POST, requestBody.toString(),

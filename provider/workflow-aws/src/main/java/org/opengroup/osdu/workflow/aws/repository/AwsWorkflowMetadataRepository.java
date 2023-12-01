@@ -28,10 +28,8 @@ import javax.inject.Inject;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
 import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
-import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
@@ -40,7 +38,6 @@ import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -156,9 +153,8 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
         ArrayList<WorkflowMetadataDoc> docs = queryHelper.scanTable(WorkflowMetadataDoc.class, filterExpression, eav);
 
-        if (docs.size() > 0) {
-          List<WorkflowMetadata> metadatas = docs.stream().map(x -> x.convertToWorkflowMetadata()).collect(Collectors.toList());
-          return metadatas;
+        if (!docs.isEmpty()) {
+          return docs.stream().map(x -> x.convertToWorkflowMetadata()).collect(Collectors.toList());
         }
         else {
           return new ArrayList<WorkflowMetadata>();
