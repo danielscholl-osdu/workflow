@@ -78,7 +78,7 @@ phases:
 
       - echo "Building primary service assemblies..."
       - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
-      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME}
+      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow
       # Suspended until further notice
       # - echo "Copying assemblies to dist..."
       # - cp ./provider/workflow-aws/target/*spring-boot.jar ${OUTPUT_DIR}/bin # copy aws jars
