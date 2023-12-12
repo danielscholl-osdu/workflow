@@ -32,7 +32,7 @@
 
   <properties>
     <azure.version>3.4.0</azure.version>
-    <osdu.corelibazure.version>0.24.0</osdu.corelibazure.version>
+    <osdu.corelibazure.version>0.25.0</osdu.corelibazure.version>
     <azure.appservice.resourcegroup />
     <azure.appservice.plan />
     <azure.appservice.appname />
