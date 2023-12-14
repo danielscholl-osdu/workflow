@@ -1,12 +1,12 @@
 /**
 * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *      http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -96,6 +96,7 @@ public class AwsWorkflowEngineServiceImplTest {
           .isSystemWorkflow(false).isDeployedThroughWorkflowService(false).build();
 
         Map<String, Object> inputData = new HashMap<>();
+        inputData.put("execution_context", new HashMap<>());
 
         // to mock
         Mockito.when(awsWorkflowRunRepository.runExists(runId))
@@ -142,7 +143,8 @@ public class AwsWorkflowEngineServiceImplTest {
           .isSystemWorkflow(false).isDeployedThroughWorkflowService(false).build();
 
         Map<String, Object> inputData = new HashMap<>();
-        
+        inputData.put("execution_context", new HashMap<>());
+
         Map<String, String> value = new HashMap<String, String>();
 
         value.put("a", "b");
@@ -171,7 +173,7 @@ public class AwsWorkflowEngineServiceImplTest {
         Mockito.when(builder.header(Mockito.anyString(), Mockito.any())).thenReturn(builder);
 
         Mockito.when(webResource.type(Mockito.anyString())).thenReturn(builder);
-        
+
         Mockito.when(restClient.resource(Mockito.anyString())).thenReturn(webResource);
 
         // Act
@@ -193,7 +195,8 @@ public class AwsWorkflowEngineServiceImplTest {
           .isSystemWorkflow(false).isDeployedThroughWorkflowService(false).build();
 
         Map<String, Object> inputData = new HashMap<>();
-        
+        inputData.put("execution_context", new HashMap<>());
+
         Map<String, String> value = new HashMap<String, String>();
 
         value.put("a", "b");
@@ -220,7 +223,7 @@ public class AwsWorkflowEngineServiceImplTest {
         Mockito.when(builder.header(Mockito.anyString(), Mockito.any())).thenReturn(builder);
 
         Mockito.when(webResource.type(Mockito.anyString())).thenReturn(builder);
-        
+
         Mockito.when(restClient.resource(Mockito.anyString())).thenReturn(webResource);
 
         // Act
@@ -238,7 +241,8 @@ public class AwsWorkflowEngineServiceImplTest {
           .isSystemWorkflow(false).isDeployedThroughWorkflowService(false).build();
 
         Map<String, Object> inputData = new HashMap<>();
-        
+        inputData.put("execution_context", new HashMap<>());
+
         Map<String, String> value = new HashMap<String, String>();
 
         value.put("a", "b");
@@ -265,7 +269,7 @@ public class AwsWorkflowEngineServiceImplTest {
         Mockito.when(builder.header(Mockito.anyString(), Mockito.any())).thenReturn(builder);
 
         Mockito.when(webResource.type(Mockito.anyString())).thenReturn(builder);
-        
+
         Mockito.when(restClient.resource(Mockito.anyString())).thenReturn(webResource);
 
         // Act
