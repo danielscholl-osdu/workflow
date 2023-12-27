@@ -26,6 +26,7 @@ import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.provider.gcp.config.condition.ComposerAirflowV2Condition;
+import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension;
 import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineServiceImpl;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
@@ -35,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Primary
 @Conditional(ComposerAirflowV2Condition.class)
-public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngineServiceImpl {
+public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngineExtension {
 
   private final AirflowConfig airflowConfig;
   private final ComposerClient iapClient;
@@ -47,7 +48,10 @@ public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngi
     this.airflowConfig = airflowConfig;
     this.iapClient = iapClient;
     this.dpsHeaders = dpsHeaders;
-    log.info("Initialized Airflow with stable API and enabled IAAP authentication.");
+    log.info(
+            "Initialized Airflow with stable API and enabled {} authentication.",
+            iapClient.getClass().getSimpleName()
+    );
   }
 
   @Override
