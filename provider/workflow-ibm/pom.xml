@@ -23,6 +23,7 @@
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
 		<!--<tomcat.embed.core.version>9.0.69</tomcat.embed.core.version>-->
 		<lucene.core.version>8.10.0</lucene.core.version>
+    <spring-security-core.version>5.7.11</spring-security-core.version>
 	</properties>
 
 	<dependencies>
@@ -226,7 +227,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-core</artifactId>
-    		<version>5.7.8</version>
+    		<version>${spring-security-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
