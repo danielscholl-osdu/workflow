@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#Variable for disabling EDS ingest dag bootstrap
+USE_EDS_DAG="${USE_EDS_DAG:-false}"
+
 set -ex
 
 source ./validate-env.sh "WORKFLOW_HOST"
@@ -45,7 +48,7 @@ bootstrap_workflow_onprem() {
         fi
         rm /opt/output.txt
     done
-
+if [ "${USE_EDS_DAG}" == "true" ]; then
     # EDS ingest dag bootstrap
 
     # Check Schema bootstrap
@@ -122,6 +125,7 @@ bootstrap_workflow_onprem() {
         rm /opt/output.txt
         sleep 45
     done
+fi
 }
 
 bootstrap_workflow_gc() {
@@ -156,6 +160,7 @@ bootstrap_workflow_gc() {
         rm /opt/output.txt
     done
 
+if [ "${USE_EDS_DAG}" == "true" ]; then
     # EDS ingest dag bootstrap
 
     # Check Schema bootstrap
@@ -232,6 +237,7 @@ bootstrap_workflow_gc() {
         rm /opt/output.txt
         sleep 45
     done
+fi
 }
 
 if [ "${ONPREM_ENABLED}" == "true" ]; then
