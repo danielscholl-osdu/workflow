@@ -11,7 +11,9 @@ data:
   ENTITLEMENTS_HOST: {{ .Values.data.entitlementsHost | quote }}
   SPRING_PROFILES_ACTIVE: {{ .Values.data.springProfilesActive | quote }}
   OSDU_AIRFLOW_URL: {{ .Values.data.osduAirflowUrl | quote }}
-  SHARED_TENANT_NAME: {{ .Values.data.sharedTenantName | quote }}
   {{- if not .Values.global.onPremEnabled }}
+  SHARED_TENANT_NAME: {{ "system" }}
   COMPOSER_CLIENT: {{ .Values.data.composerClient | quote  }}
+  {{- else }}
+  SHARED_TENANT_NAME: {{ .Values.global.dataPartitionId | quote }}
   {{- end }}

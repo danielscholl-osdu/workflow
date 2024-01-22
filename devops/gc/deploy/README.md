@@ -34,6 +34,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 **global.domain** | your domain for the external endpoint, ex `example.com` | string | - | yes
 **global.onPremEnabled** | whether on-prem is enabled | boolean | false | yes
 **global.limitsEnabled** | whether CPU and memory limits are enabled | boolean | true | yes
+**global.dataPartitionId** | ID of data partition | string | -                | yes
 
 ### Configmap variables
 
@@ -47,7 +48,6 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **data.schemaHost** | schema host for checking schema status in bootstrap | string | "http://schema" | yes |
 | **data.osduAirflowUrl**       | airflow url           | string | "http://airflow:8080" | yes      |
 | **data.sharedTenantName**     | tenant name           | string | -                     | yes      |
-| **data.dataPartitionId** | ID of data partition | string | -                | yes      |
 | **data.worflowHost**     | Workflow host URL    | string | "http://workflow" | yes      |
 | **data.composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
 
