@@ -6,6 +6,7 @@ global:
   domain: ""
   onPremEnabled: false
   limitsEnabled: true
+  dataPartitionId: ""
 
 data:
   #Configmap variables
@@ -18,7 +19,6 @@ data:
   springProfilesActive: "gcp"
   sharedTenantName: ""
   composerClient: "IAAP"
-  dataPartitionId: ""
   workflowHost: "http://workflow"
   dagNames:
     - csv_ingestion
