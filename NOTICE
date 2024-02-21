@@ -365,6 +365,7 @@ The following software have components provided under the terms of this license:
 - Asynchronous Http Client Netty Utils (from https://repo1.maven.org/maven2/org/asynchttpclient/async-http-client-netty-utils)
 - AutoValue Annotations (from https://github.com/google/auto/tree/main/value, https://github.com/google/auto/tree/master/value, https://repo1.maven.org/maven2/com/google/auto/value/auto-value-annotations)
 - BSON (from http://bsonspec.org, https://bsonspec.org)
+- BSON Record Codec (from <https://www.mongodb.com/>, https://www.mongodb.com/)
 - Bean Validation API (from http://beanvalidation.org)
 - Brave (from https://repo1.maven.org/maven2/io/zipkin/brave/brave)
 - Brave Instrumentation: Http Adapters (from https://repo1.maven.org/maven2/io/zipkin/brave/brave-instrumentation-http)
@@ -372,7 +373,7 @@ The following software have components provided under the terms of this license:
 - Byte Buddy (without dependencies) (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy)
 - Byte Buddy Java agent (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent)
 - ClassMate (from http://github.com/cowtowncoder/java-classmate)
-- Cloud Key Management Service (KMS) API (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms)
+- Cloud Key Management Service (KMS) API v1-rev20240131-2.0.0 (from https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms)
 - CloudWatch Metrics for AWS Java SDK (from https://aws.amazon.com/sdkforjava)
 - Collections (from https://repo1.maven.org/maven2/commons-collections/commons-collections)
 - Commons Digester (from http://commons.apache.org/digester/)
@@ -738,7 +739,6 @@ The following software have components provided under the terms of this license:
 - HdrHistogram (from http://hdrhistogram.github.io/HdrHistogram/)
 - Hibernate Validator (from https://repo1.maven.org/maven2/org/hibernate/hibernate-validator, https://repo1.maven.org/maven2/org/hibernate/validator/hibernate-validator)
 - LatencyUtils (from http://latencyutils.github.io/LatencyUtils/)
-- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org, https://www.mongodb.com/)
 - Netty/Common (from https://repo1.maven.org/maven2/io/netty/netty-common)
 - RabbitMQ Java Client (from http://www.rabbitmq.com, https://www.rabbitmq.com)
 - reactive-streams (from http://www.reactive-streams.org/)
@@ -939,7 +939,6 @@ The following software have components provided under the terms of this license:
 - Microsoft Azure common module for Storage (from https://github.com/Azure/azure-sdk-for-java)
 - Microsoft Azure internal Avro module for Storage (from https://github.com/Azure/azure-sdk-for-java)
 - Mockito (from http://mockito.org, https://github.com/mockito/mockito)
-- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org, https://www.mongodb.com/)
 - Netty/Codec/HTTP (from https://repo1.maven.org/maven2/io/netty/netty-codec-http)
 - Netty/Common (from https://repo1.maven.org/maven2/io/netty/netty-common)
 - Project Lombok (from http://projectlombok.org, https://projectlombok.org)
@@ -947,7 +946,6 @@ The following software have components provided under the terms of this license:
 - SLF4J API Module (from http://www.slf4j.org)
 - Spongy Castle (from http://rtyley.github.io/spongycastle/)
 - Spring Data for Azure Cosmos DB SQL API (from https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/cosmos/azure-spring-data-cosmos, https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/spring/azure-spring-data-cosmos)
-- ThreeTen backport (from https://github.com/ThreeTen/threetenbp, https://www.threeten.org/threetenbp)
 - adal4j (from https://github.com/AzureAD/azure-activedirectory-library-for-java)
 - jsoup Java HTML Parser (from https://jsoup.org/)
 - micrometer-core (from https://github.com/micrometer-metrics/micrometer)
@@ -984,13 +982,6 @@ WTFPL
 The following software have components provided under the terms of this license:
 
 - Reflections (from http://code.google.com/p/reflections/, http://github.com/ronmamo/reflections)
-
-========================================================================
-X11
-========================================================================
-The following software have components provided under the terms of this license:
-
-- MongoDB Java Driver (from http://mongodb.org/, http://www.mongodb.org, https://www.mongodb.com/)
 
 ========================================================================
 cc-pd
