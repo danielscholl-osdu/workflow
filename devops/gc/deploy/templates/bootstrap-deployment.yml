@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{ printf "%s-bootstrap" .Values.conf.appName | quote }}
+    type: bootstrap
   name: {{ printf "%s-bootstrap" .Values.conf.appName | quote }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
