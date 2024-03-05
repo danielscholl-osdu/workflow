@@ -61,8 +61,8 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
     @Value("${aws.dynamodb.workflowRunTable.ssm.relativePath}")
     String workflowRunTableParameterRelativePath;
-
-    private static final String workflowRunHashKey = "runId";
+    
+    private static final String WORKFLOWRUNHASKEY = "runId";
 
     @PostConstruct
     public void init() {
@@ -77,7 +77,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         WorkflowRunDoc doc = WorkflowRunDoc.create(workflowRun, dataPartitionId);
 
         try {
-            queryHelper.saveWithHashCondition(doc, workflowRunHashKey);
+            queryHelper.saveWithHashCondition(doc, WORKFLOWRUNHASKEY);
         } catch (ConditionalCheckFailedException e) {
             throw new AppException(HttpStatus.BAD_REQUEST.value(),
                     HttpStatus.BAD_REQUEST.getReasonPhrase(), "Cannot save duplicate runId");
