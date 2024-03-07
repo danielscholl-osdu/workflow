@@ -16,17 +16,15 @@
 
 package org.opengroup.osdu.workflow.aws.service.s3;
 
-import com.amazonaws.services.s3.AmazonS3;
-import lombok.extern.slf4j.Slf4j;
+import javax.inject.Inject;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.aws.s3.IS3ClientFactory;
 import org.opengroup.osdu.core.aws.s3.S3ClientWithBucket;
-import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
+import com.amazonaws.services.s3.AmazonS3;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j

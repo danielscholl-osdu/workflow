@@ -23,6 +23,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -224,8 +225,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
     ObjectMapper objMapper = new ObjectMapper();
     Map<String, Object> executionContext = objMapper.convertValue(inputData.get("execution_context"), Map.class);
     Object userId = dpsHeaders.getUserId();
-    
-    LOGGER.debug(String.format("putting user id: %s in execution context", userId));
+
     executionContext.put("userId", userId);
     inputData.put("execution_context", executionContext);
   }
