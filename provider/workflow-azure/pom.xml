@@ -302,7 +302,7 @@
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/security/**</exclude>
           </excludes>
         </configuration>
-        <version>0.8.3</version>
+        <version>0.8.10</version>
         <executions>
           <execution>
             <goals>
