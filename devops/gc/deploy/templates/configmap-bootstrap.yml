@@ -11,10 +11,8 @@ metadata:
   name: {{ printf "%s-bootstrap" .Values.conf.configmap | quote }}
   namespace: {{ .Release.Namespace | quote }}
 data:
-  DATA_PARTITION_ID: {{- if not .Values.global.onPremEnabled }}
-    {{ "system" }}
-  {{- else }}
-    {{ .Values.global.dataPartitionId | quote }}
+  {{- if .Values.global.onPremEnabled }}
+  DATA_PARTITION_ID: {{ .Values.global.dataPartitionId | quote }}
   {{- end }}
   WORKFLOW_HOST: {{ .Values.data.workflowHost | quote }}
   PARTITION_HOST: {{ .Values.data.partitionHost | quote }}

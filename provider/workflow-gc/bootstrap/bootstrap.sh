@@ -9,7 +9,6 @@ source ./validate-env.sh "WORKFLOW_HOST"
 source ./validate-env.sh "PARTITION_HOST"
 source ./validate-env.sh "LEGAL_HOST"
 source ./validate-env.sh "SCHEMA_HOST"
-source ./validate-env.sh "DATA_PARTITION_ID"
 
 bootstrap_workflow_onprem() {
 
@@ -241,11 +240,14 @@ fi
 }
 
 if [ "${ONPREM_ENABLED}" == "true" ]; then
+    source ./validate-env.sh "DATA_PARTITION_ID"
     source ./validate-env.sh "OPENID_PROVIDER_URL"
     source ./validate-env.sh "OPENID_PROVIDER_CLIENT_ID"
     source ./validate-env.sh "OPENID_PROVIDER_CLIENT_SECRET"
     bootstrap_workflow_onprem
 else
+    # Specifying "system" partition for GC installation
+    export DATA_PARTITION_ID="system"
     bootstrap_workflow_gc
 fi
 
