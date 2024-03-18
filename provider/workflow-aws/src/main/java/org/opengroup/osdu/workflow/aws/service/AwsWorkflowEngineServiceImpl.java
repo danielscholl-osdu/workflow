@@ -23,6 +23,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -120,7 +121,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
         String runId = rq.getRunId();
         String workflowId = rq.getWorkflowId();
 
-        addUserIdToExecutionContext(inputData, rq);
+        addUserIdToExecutionContext(inputData);
 
         validateRunId(runId);
 
@@ -220,11 +221,12 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
     return null;
   }
 
-  private void addUserIdToExecutionContext(Map<String, Object> inputData, WorkflowEngineRequest rq) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, Object> executionContext = objectMapper.convertValue(inputData.get("execution_context"), Map.class);
-    LOGGER.debug(String.format("putting user id: %s in execution context", dpsHeaders.getUserId()));
-    executionContext.put("userId", dpsHeaders.getUserId());
+  private void addUserIdToExecutionContext(Map<String, Object> inputData) {
+    ObjectMapper objMapper = new ObjectMapper();
+    Map<String, Object> executionContext = objMapper.convertValue(inputData.get("execution_context"), Map.class);
+    Object userId = dpsHeaders.getUserId();
+
+    executionContext.put("userId", userId);
     inputData.put("execution_context", executionContext);
   }
 }
