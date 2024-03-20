@@ -16,7 +16,6 @@ data:
   schemaHost: "http://schema"
   legalHost: "http://legal"
   osduAirflowUrl: "http://airflow:8080"
-  springProfilesActive: "gcp"
   sharedTenantName: ""
   composerClient: "IAAP"
   workflowHost: "http://workflow"
