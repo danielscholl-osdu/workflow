@@ -41,7 +41,6 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | Name                     | Description           | Type   | Default               | Required |
 | ------------------------ | --------------------- | ------ | --------------------- | -------- |
 | **data.logLevel**             | logging level         | string | ERROR                  | yes      |
-| **data.springProfilesActive** | active spring profile | string | gcp                   | yes      |
 | **data.partitionHost**        | partition host        | string | "http://partition"    | yes      |
 | **data.entitlementsHost**     | entitlements host     | string | "http://entitlements" | yes      |
 | **data.legalHost** | legal host for creating a tag in bootstrap | string | "http://legal" | yes |
