@@ -1,5 +1,5 @@
 # Ingestion Workflow Service
-workflow-aws is a [Spring Boot](https://spring.io/projects/spring-boot) service that provides a set of APIs to interact with an orchestration engine to run workflows. Currently, the service is configured to interact with Airflow. 
+workflow-aws is a [Spring Boot](https://spring.io/projects/spring-boot) service that provides a set of APIs to interact with an orchestration engine to run workflows. Currently, the service is configured to interact with Airflow.
 
 ## Details unique to AWS
 
@@ -12,9 +12,9 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 Pre-requisites
 
-* JDK 8 (https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html)
+* JDK 17 (https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html)
 * Maven 3.8.3 or later
-* Lombok 1.16 or later
+* Lombok 1.28 or later
 * OSDU Instance deployed on AWS
 
 ### Service Configuration
@@ -33,7 +33,7 @@ In order to run the service locally or remotely, you will need to have the follo
 | `SSM_ENABLED` | `true` | yes | Set to 'true' to use SSM to resolve config properties, otherwise use env vars | no |
 | `SSL_ENABLED` | `false` | no | Set to 'false' to disable SSL for local development | no |
 | `OSDU_ENTITLEMENTS_URL` | `http://localhost:8081` or `https://some-hosted-url` | yes | Specify the base url for an entitlements service instance. Can be run locally or remote | no |
-| `PARTITION_BASE_URL` | `http://localhost:8082` or `https://some-hosted-url` | yes | Specify the base url for a partition service instance. Can be run locally or remote | no | 
+| `PARTITION_BASE_URL` | `http://localhost:8082` or `https://some-hosted-url` | yes | Specify the base url for a partition service instance. Can be run locally or remote | no |
 
 
 ### Run Locally
@@ -44,7 +44,7 @@ example:
 $ mvn --version
 Apache Maven 3.8.3 (ff8e977a158738155dc465c6a97ffaf31982d739)
 Maven home: /usr/local/Cellar/maven/3.8.3/libexec
-Java version: 1.8.0_312, vendor: Amazon.com Inc., runtime: /Library/Java/JavaVirtualMachines/amazon-corretto-8.jdk/Contents/Home/jre
+Java version: 17.0.7, vendor: Amazon.com Inc.
 ...
 ```
 
@@ -74,12 +74,12 @@ java -jar provider/workflow-aws/target/workflow-aws-*.*.*-SNAPSHOT-spring-boot.j
 ```
 
 ## Testing
- 
- ### Running Integration Tests 
+
+ ### Running Integration Tests
  This section describes how to run OSDU Integration tests (testing/storage-test-aws).
- 
+
  You will need to have the following environment variables defined.
- 
+
  | name | example value | description | sensitive?
  | ---  | ---   | ---         | ---        |
  | `AWS_ACCESS_KEY_ID` | `ASIAXXXXXXXXXXXXXX` | The AWS Access Key for a user with access to Backend Resources required by the service | yes |
@@ -105,15 +105,15 @@ java -jar provider/workflow-aws/target/workflow-aws-*.*.*-SNAPSHOT-spring-boot.j
 
  aws cognito-idp initiate-auth --auth-flow ${AWS_COGNITO_AUTH_FLOW} --client-id ${AWS_COGNITO_CLIENT_ID} --auth-parameters USERNAME=${AWS_COGNITO_AUTH_PARAMS_USER},PASSWORD=${AWS_COGNITO_AUTH_PARAMS_PASSWORD}
  ```
- 
+
  **Entitlements group configuration for integration accounts**
  <br/>
  In order to add user entitlements, run entitlements bootstrap scripts in the entitlements project
- 
+
  | AWS_COGNITO_AUTH_PARAMS_USER |
- | ---  | 
- | service.workflow.admin | 
- | service.workflow.creator | 
+ | ---  |
+ | service.workflow.admin |
+ | service.workflow.creator |
  | service.workflow.viewer |
 
  Execute following command to build code and run all the integration tests:
@@ -127,7 +127,7 @@ testing/workflow-test-aws/build-aws/prepare-dist.sh
 
 #Set Neccessary ENV Vars here as defined in run-tests.sh
 
-dist/testing/integration/build-aws/run-tests.sh 
+dist/testing/integration/build-aws/run-tests.sh
 ```
 
 ### Run Tests using mvn
@@ -141,13 +141,13 @@ mvn test -f testing/workflow-test-aws/pom.xml
 
 ## License
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- 
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
- 
+
 [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
- 
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

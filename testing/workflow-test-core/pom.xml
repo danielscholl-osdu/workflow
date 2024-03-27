@@ -32,8 +32,8 @@
   <description>Core test project for the workflow service</description>
 
   <properties>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
     <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
     <jersey.version>1.19.4</jersey.version>
     <os-core-common.version>0.25.0</os-core-common.version>
@@ -97,6 +97,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>1.18.26</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
