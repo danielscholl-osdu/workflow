@@ -39,7 +39,7 @@ export DYNAMO_DB_ENDPOINT=https://dynamodb.us-east-1.amazonaws.com
 export RESOURCE_PREFIX=$RESOURCE_PREFIX
 export TEST_DAG_NAME=my_first_dag
 export DEFAULT_DATA_PARTITION_ID_TENANT1=int-test-workflow
-export JAVA_HOME='/usr/lib/jvm/java-17-openjdk-amd64'
+export JAVA_HOME=$JAVA17_HOME
 
 #### RUN INTEGRATION TEST #########################################################################
 
