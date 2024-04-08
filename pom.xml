@@ -27,7 +27,7 @@
 
   <groupId>org.opengroup.osdu</groupId>
   <artifactId>os-workflow</artifactId>
-  <version>0.26.0-SNAPSHOT</version>
+  <version>0.27.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>os-workflow</name>
