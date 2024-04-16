@@ -41,13 +41,7 @@ phases:
       - mvn -version
       - echo $JAVA_HOME #WHY
       - mkdir -p /root/.m2
-      - cp ./provider/workflow-aws/maven/settings.xml /root/.m2/settings.xml # copy the AWS-specific settings.xml to the CodeBuild instance's .m2 folder
-      - export AWS_ACCOUNT_ID=`aws sts get-caller-identity | grep Account | cut -d':' -f 2 | cut -d'"' -f 2`
-      - export AWS_OSDU_DEV_MAVEN_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain $AWS_OSDU_DEV_MAVEN_DOMAIN --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text`
-      # Install git secrets
-      #TODO temporarily adding hotfix, due to https://github.com/awslabs/git-secrets/issues/220
-      - export SAY_LOCATION=`ln -s "$(which echo)" say`
-      - export PATH="$PATH:$SAY_LOCATION"
+      - cp ./.mvn/community-maven.settings.xml /root/.m2/settings.xml
 
       - git clone https://github.com/awslabs/git-secrets.git
       - cd git-secrets && make install && cd ..
@@ -80,7 +74,7 @@ phases:
 
       - echo "Building primary service assemblies..."
       - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
-      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow
+      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
       # Suspended until further notice
       # - echo "Copying assemblies to dist..."
       # - cp ./provider/workflow-aws/target/*spring-boot.jar ${OUTPUT_DIR}/bin # copy aws jars
