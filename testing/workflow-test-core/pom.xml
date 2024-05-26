@@ -34,10 +34,11 @@
   <properties>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
-    <spring-boot.version>3.2.5</spring-boot.version>
+    <spring-spring-framework-version.version>3.2.5</spring-spring-framework-version.version>
     <jersey.version>1.19.4</jersey.version>
     <os-core-common.version>0.27.0-rc1</os-core-common.version>
     <jackson-databind.version>2.13.2.2</jackson-databind.version>
+    <spring-security.version>6.3.0</spring-security.version>
   </properties>
 
   <dependencyManagement>
@@ -45,7 +46,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring-boot.version}</version>
+        <version>3.2.5</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

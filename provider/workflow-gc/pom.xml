@@ -37,6 +37,9 @@
     <google-cloud-libraries.version>26.13.0</google-cloud-libraries.version>
     <tomcat-embed-core.version>9.0.69</tomcat-embed-core.version>
     <spring-boot-dependencies.version>3.2.5</spring-boot-dependencies.version>
+    <spring-framework-version>6.1.6</spring-framework-version>
+    <spring-security.version>6.3.0</spring-security.version>
+    <google-cloud-libraries.version>26.13.0</google-cloud-libraries.version>
   </properties>
 
   <dependencyManagement>
