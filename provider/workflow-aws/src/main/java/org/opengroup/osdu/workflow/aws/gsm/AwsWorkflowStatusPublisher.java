@@ -59,9 +59,10 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
         validateInput(messages, attributesMap);
         PublishRequest publishRequest = new PublishRequestBuilder<Message>().generatePublishRequest(
             "data",
+            amazonSnsTopic,
             Arrays.asList(messages),
-            createMessageMap(attributesMap),
-            amazonSnsTopic);
+            createMessageMap(attributesMap)
+            );
         snsClient.publish(publishRequest);
     }
 
