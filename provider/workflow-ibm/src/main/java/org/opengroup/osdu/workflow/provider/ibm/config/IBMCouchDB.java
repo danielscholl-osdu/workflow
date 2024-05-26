@@ -6,7 +6,7 @@ package org.opengroup.osdu.workflow.provider.ibm.config;
 
 import java.net.MalformedURLException;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.common.cache.VmCache;

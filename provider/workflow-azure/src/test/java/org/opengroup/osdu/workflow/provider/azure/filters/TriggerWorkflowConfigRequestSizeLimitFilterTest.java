@@ -11,8 +11,8 @@ import org.opengroup.osdu.workflow.provider.azure.config.TriggerWorkflowConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
