@@ -7,11 +7,11 @@ import lombok.ToString;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.MediaType;
+import jakarta.net.ssl.HttpsURLConnection;
+import jakarta.net.ssl.SSLContext;
+import jakarta.net.ssl.TrustManager;
+import jakarta.net.ssl.X509TrustManager;
+import jakarta.ws.rs.core.MediaType;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;

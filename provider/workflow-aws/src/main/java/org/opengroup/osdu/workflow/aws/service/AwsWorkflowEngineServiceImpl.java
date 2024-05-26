@@ -18,7 +18,7 @@ package org.opengroup.osdu.workflow.aws.service;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 

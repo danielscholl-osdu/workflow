@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @Component
 @Slf4j
@@ -55,12 +55,12 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 			throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unexpected error", "Workflow doesn't exist", e);
 		}
 		if(result != null && result.getDocs().isEmpty()) {
-			throw new AppException(HttpStatus.SC_NOT_FOUND, "workflow not found", String.format("Workflow: %s doesn't exist", workflowName));			
+			throw new AppException(HttpStatus.SC_NOT_FOUND, "workflow not found", String.format("Workflow: %s doesn't exist", workflowName));
 		} else {
 			log.info("System workflow found :"+workflowName);
 			return result.getDocs().get(0).getWorkflowMetadata();
 		}
-			
+
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 	 * @param workflowName Name of the workflow for which metadata should be deleted.
 	 */
 	@Override
-	public void deleteSystemWorkflow(String workflowName) { 
+	public void deleteSystemWorkflow(String workflowName) {
 		Database db = getDatabase();
 		QueryResult<WorkflowMetadataDoc> result = null;
 		try {
@@ -108,7 +108,7 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 			if(result!=null && result.getDocs().size()>0) {
 				WorkflowMetadataDoc workflowMetadataDoc = result.getDocs().get(0);
 				db.remove(workflowMetadataDoc);
-			} 
+			}
 			else {
 				throw new AppException(HttpStatus.SC_NOT_FOUND, String.format("Workflow: %s doesn't exist", workflowName), "Document deletion failed");
 			}

@@ -10,7 +10,7 @@ import static com.cloudant.client.api.query.Expression.regex;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -35,13 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
-	
+
 	@Autowired
 	IBMCouchDB ibmCouchDB;
-	
+
 	final private String COLLECTION_NAME="WorkflowMetadata";
-	
-	@Inject 
+
+	@Inject
 	TenantInfo tenantInfo;
 
 	@Override
@@ -87,7 +87,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 		if(result != null && result.getDocs().isEmpty()) {
 			final String errorMessage = String.format("Workflow: %s doesn't exist", workflowName);
 			log.error(errorMessage);
-			throw new WorkflowNotFoundException(errorMessage);			
+			throw new WorkflowNotFoundException(errorMessage);
 		} else
 			return result.getDocs().get(0).getWorkflowMetadata();
 	}
@@ -101,7 +101,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 			if(result!=null && result.getDocs().size()>0) {
 				WorkflowMetadataDoc workflowMetadataDoc = result.getDocs().get(0);
 				db.remove(workflowMetadataDoc);
-			} 
+			}
 			else {
 				throw new AppException(HttpStatus.SC_NOT_FOUND, String.format("Workflow: %s doesn't exist", workflowName), "Document deletion failed");
 			}
@@ -110,7 +110,7 @@ public class WorkflowMetadataRepository implements IWorkflowMetadataRepository {
 			e.printStackTrace();
 			throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unexpected error", "Workflow doesn't exist", e);
 		}
-		
+
 
 	}
 
