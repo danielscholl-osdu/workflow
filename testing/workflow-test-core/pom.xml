@@ -34,7 +34,7 @@
   <properties>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
-    <spring-spring-framework-version.version>3.2.5</spring-spring-framework-version.version>
+    <spring-framework-version>6.1.6</spring-framework-version>
     <jersey.version>1.19.4</jersey.version>
     <os-core-common.version>0.27.0-rc1</os-core-common.version>
     <jackson-databind.version>2.13.2.2</jackson-databind.version>
