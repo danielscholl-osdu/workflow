@@ -36,7 +36,7 @@
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
     <google-cloud-libraries.version>26.13.0</google-cloud-libraries.version>
     <tomcat-embed-core.version>9.0.69</tomcat-embed-core.version>
-    <spring-boot-dependencies.version>2.7.18</spring-boot-dependencies.version>
+    <spring-boot-dependencies.version>3.2.5</spring-boot-dependencies.version>
   </properties>
 
   <dependencyManagement>
@@ -45,6 +45,21 @@
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
         <version>${google-cloud-libraries.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring-framework-version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-bom</artifactId>
+        <version>${spring-security.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -93,10 +108,10 @@
 
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-gc</artifactId>
-      <version>0.25.0</version>
+      <artifactId>core-lib-gc-spring6</artifactId>
+      <version>0.26.0-rc5</version>
     </dependency>
-    
+
     <dependency>
       <groupId>ch.qos.logback.contrib</groupId>
       <artifactId>logback-json-classic</artifactId>

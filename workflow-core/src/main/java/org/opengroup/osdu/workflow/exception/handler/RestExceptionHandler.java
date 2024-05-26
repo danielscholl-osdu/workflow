@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
@@ -31,10 +31,7 @@ import org.opengroup.osdu.workflow.exception.IntegrationException;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -88,9 +85,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-      HttpHeaders headers, HttpStatus status, WebRequest request) {
+                                                                HttpHeaders headers, HttpStatusCode status, WebRequest request) {
     ApiError apiError = ApiError.builder()
-        .status(status)
+        .status((HttpStatus) status)
         .message(ex.getLocalizedMessage())
         .build();
     return handleExceptionInternal(ex, apiError, headers, status, request);

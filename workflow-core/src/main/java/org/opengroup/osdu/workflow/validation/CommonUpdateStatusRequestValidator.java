@@ -22,7 +22,7 @@ import static org.opengroup.osdu.workflow.model.WorkflowStatusType.RUNNING;
 
 import java.util.Arrays;
 import java.util.List;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;

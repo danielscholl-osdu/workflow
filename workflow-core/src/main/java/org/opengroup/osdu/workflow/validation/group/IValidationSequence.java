@@ -16,8 +16,8 @@
 
 package org.opengroup.osdu.workflow.validation.group;
 
-import javax.validation.GroupSequence;
-import javax.validation.groups.Default;
+import jakarta.validation.GroupSequence;
+import jakarta.validation.groups.Default;
 
 @GroupSequence({Default.class, IExtended.class})
 public interface IValidationSequence {

@@ -16,7 +16,7 @@
 
 package org.opengroup.osdu.workflow.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.workflow.model.GetStatusRequest;

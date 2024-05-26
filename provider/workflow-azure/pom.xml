@@ -37,13 +37,35 @@
     <azure.appservice.plan />
     <azure.appservice.appname />
     <azure.appservice.subscription />
-    <spring-webmvc.version>5.3.22</spring-webmvc.version>
+    <spring-webmvc.version>6.1.6</spring-webmvc.version>
     <netty.version>4.1.101.Final</netty.version>
     <reactor-netty-http.version>1.1.14</reactor-netty-http.version>
+    <osdu.corelibazure.version>0.26.0-rc6</osdu.corelibazure.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring-framework-version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-bom</artifactId>
+        <version>${spring-security.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>3.2.5</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- netty-bom dependency to be declared before spring-boot-dependencies,
            to pull all netty-transitive dependencies with same version -->
       <dependency>
@@ -56,16 +78,17 @@
       <!-- Inherit managed dependencies from core-lib-azure -->
       <dependency>
         <groupId>org.opengroup.osdu</groupId>
-        <artifactId>core-lib-azure</artifactId>
+        <artifactId>core-lib-azure-spring6</artifactId>
         <version>${osdu.corelibazure.version}</version>
         <type>pom</type>
         <scope>import</scope>
-        <exclusions>
-          <exclusion>
-            <artifactId>azure-core</artifactId>
-            <groupId>com.azure</groupId>
-          </exclusion>
-        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>Hoxton.SR3</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -116,13 +139,7 @@
       <artifactId>spring-webmvc</artifactId>
       <version>${spring-webmvc.version}</version>
     </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Hoxton.SR3</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
@@ -134,20 +151,10 @@
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-azure</artifactId>
+      <artifactId>core-lib-azure-spring6</artifactId>
       <version>${osdu.corelibazure.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.simpleframework</groupId>
-          <artifactId>simple-xml</artifactId>
-        </exclusion>
-        <exclusion>
-          <!-- Removing azure core as we'll include the netty version-->
-          <groupId>com.azure</groupId>
-          <artifactId>azure-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
+
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-core</artifactId>
@@ -193,16 +200,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-storage-file-share</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>azure-storage-common</artifactId>
-          <groupId>com.azure</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
 
     <!-- WhiteSource updates -->
     <dependency>
@@ -234,10 +232,19 @@
       <artifactId>reactor-netty-http</artifactId>
       <version>${reactor-netty-http.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-share</artifactId>
+      <version>12.21.2</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
