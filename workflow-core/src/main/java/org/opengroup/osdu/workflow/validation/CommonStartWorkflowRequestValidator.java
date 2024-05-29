@@ -38,7 +38,7 @@ public class CommonStartWorkflowRequestValidator implements IStartWorkflowReques
     if (workflowType == null) {
       context.disableDefaultConstraintViolation();
       context
-          .buildConstraintViolationWithTemplate("{javax.validation.constraints.NotNull.message}")
+          .buildConstraintViolationWithTemplate("{jakarta.validation.constraints.NotNull.message}")
           .addPropertyNode(WORKFLOW_TYPE_FIELD)
           .addConstraintViolation();
       return false;
@@ -49,7 +49,7 @@ public class CommonStartWorkflowRequestValidator implements IStartWorkflowReques
     if (payload == null) {
       context.disableDefaultConstraintViolation();
       context
-          .buildConstraintViolationWithTemplate("{javax.validation.constraints.NotNull.message}")
+          .buildConstraintViolationWithTemplate("{jakarta.validation.constraints.NotNull.message}")
           .addPropertyNode(CONTEXT_FIELD)
           .addConstraintViolation();
       return false;

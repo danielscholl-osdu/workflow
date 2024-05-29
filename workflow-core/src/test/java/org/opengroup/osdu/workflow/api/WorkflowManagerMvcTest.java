@@ -17,6 +17,7 @@ import org.opengroup.osdu.workflow.model.WorkflowRole;
 import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
 import org.opengroup.osdu.workflow.security.AuthorizationFilter;
+import org.opengroup.osdu.workflow.security.ResponseHeaderFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -61,7 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(WorkflowManagerApi.class)
 @AutoConfigureMockMvc
-@Import({AuthorizationFilter.class, DpsHeaders.class})
+@Import({ResponseHeaderFilter.class, WorkflowManagerMvcTest.TestSecurityConfig.class})
 class WorkflowManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
@@ -124,6 +126,7 @@ class WorkflowManagerMvcTest {
   private AuthorizationResponse authorizationResponse;
 
   @Test
+  @WithMockUser(value = "spring")
   void testCreateApiWithSuccess() throws Exception {
     final CreateWorkflowRequest request = mapper
         .readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
@@ -137,8 +140,8 @@ class WorkflowManagerMvcTest {
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf())
+//            .headers(getHttpHeaders())
+//            .with(SecurityMockMvcRequestPostProcessors.csrf())
             .content(WORKFLOW_REQUEST))
         .andExpect(status().isOk())
         .andReturn();
@@ -152,6 +155,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
+  @WithMockUser(value = "spring")
   public void testCreateApiWithConflict() throws Exception {
     final CreateWorkflowRequest request = mapper.readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
     when(workflowManagerService.createWorkflow(eq(request)))
@@ -163,8 +167,8 @@ class WorkflowManagerMvcTest {
     final MvcResult mvcResult = mockMvc.perform(
         post(WORKFLOW_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf())
+//            .headers(getHttpHeaders())
+//            .with(SecurityMockMvcRequestPostProcessors.csrf())
             .content(WORKFLOW_REQUEST))
         .andExpect(status().isConflict())
         .andReturn();
@@ -178,6 +182,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
+  @WithMockUser(value = "spring")
   void testGetApiWithSuccess() throws Exception {
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
     when(workflowManagerService.getWorkflowByName(eq(WORKFLOW_NAME))).thenReturn(metadata);
@@ -187,9 +192,9 @@ class WorkflowManagerMvcTest {
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     final MvcResult mvcResult = mockMvc.perform(
         get(WORKFLOW_ENDPOINT + "/{workflow_name}", WORKFLOW_NAME)
-            .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf()))
+            .contentType(MediaType.APPLICATION_JSON))
+//            .headers(getHttpHeaders())
+//            .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isOk())
         .andReturn();
     verify(workflowManagerService).getWorkflowByName(eq(WORKFLOW_NAME));
@@ -202,6 +207,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
+  @WithMockUser(value = "spring")
   void testDeleteApiWithSuccess() throws Exception {
     doNothing().when(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
@@ -211,9 +217,9 @@ class WorkflowManagerMvcTest {
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
-            .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf()))
+            .contentType(MediaType.APPLICATION_JSON))
+//            .headers(getHttpHeaders())
+//            .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().is(204))
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
@@ -223,6 +229,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
+  @WithMockUser(value = "spring")
   void testDeleteApiWithError() throws Exception {
     doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService)
         .deleteWorkflow(eq(WORKFLOW_NAME));
@@ -232,9 +239,9 @@ class WorkflowManagerMvcTest {
     when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
     mockMvc.perform(
         delete("/v1/workflow/{workflow_name}", WORKFLOW_NAME)
-            .contentType(MediaType.APPLICATION_JSON)
-            .headers(getHttpHeaders())
-            .with(SecurityMockMvcRequestPostProcessors.csrf()))
+            .contentType(MediaType.APPLICATION_JSON))
+//            .headers(getHttpHeaders())
+//            .with(SecurityMockMvcRequestPostProcessors.csrf()))
         .andExpect(status().isNotFound())
         .andReturn();
     verify(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
@@ -244,6 +251,7 @@ class WorkflowManagerMvcTest {
   }
 
    @Test
+   @WithMockUser(value = "spring")
    public void testGetAllWorkflowsWithSuccess() throws Exception {
      final List<WorkflowMetadata> workflowMetadataList =
          mapper.readValue(WORKFLOW_METADATA_LIST_RESPONSE, List.class);
@@ -256,9 +264,9 @@ class WorkflowManagerMvcTest {
      when(dpsHeaders.getCorrelationId()).thenReturn(CORRELATION_ID);
      final MvcResult mvcResult = mockMvc.perform(
          get( String.format("/v1/workflow/?prefix=%s","Hello"))
-             .contentType(MediaType.APPLICATION_JSON)
-             .headers(getHttpHeaders())
-             .with(SecurityMockMvcRequestPostProcessors.csrf()))
+             .contentType(MediaType.APPLICATION_JSON))
+//             .headers(getHttpHeaders())
+//             .with(SecurityMockMvcRequestPostProcessors.csrf()))
          .andExpect(status().isOk())
          .andReturn();
      verify(workflowManagerService).getAllWorkflowForTenant(eq("Hello"));
