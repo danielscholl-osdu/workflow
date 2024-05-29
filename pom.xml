@@ -71,6 +71,30 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.opengroup.osdu</groupId>
+        <artifactId>os-core-common-spring6</artifactId>
+        <version>${os-core-common.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+
+
+      <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <version>${spring-framework-version}</version>
@@ -121,11 +145,6 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
-      <version>2.0.1</version>
-    </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -146,6 +165,20 @@
       <artifactId>os-core-common-spring6</artifactId>
       <version>${os-core-common.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.elasticsearch</groupId>
+          <artifactId>elasticsearch</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.elasticsearch.client</groupId>
+          <artifactId>elasticsearch-rest-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.elasticsearch.client</groupId>
+          <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
 
@@ -291,9 +324,8 @@
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-coyote</artifactId>
-      <version>11.0.0-M20</version>
+      <version>9.0.76</version>
     </dependency>
-
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>

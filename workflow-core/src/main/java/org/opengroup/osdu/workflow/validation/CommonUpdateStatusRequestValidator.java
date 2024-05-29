@@ -47,7 +47,7 @@ public class CommonUpdateStatusRequestValidator implements IUpdateStatusRequestV
     if (StringUtils.isBlank(workflowId)) {
       context.disableDefaultConstraintViolation();
       context
-          .buildConstraintViolationWithTemplate("{jakarta.validation.constraints.NotBlank.message}")
+          .buildConstraintViolationWithTemplate("{javax.validation.constraints.NotBlank.message}")
           .addPropertyNode(WORKFLOW_ID_FIELD)
           .addConstraintViolation();
       return false;
@@ -56,7 +56,7 @@ public class CommonUpdateStatusRequestValidator implements IUpdateStatusRequestV
     if (workflowStatusType == null) {
       context.disableDefaultConstraintViolation();
       context
-          .buildConstraintViolationWithTemplate("{jakarta.validation.constraints.NotNull.message}")
+          .buildConstraintViolationWithTemplate("{javax.validation.constraints.NotNull.message}")
           .addPropertyNode(WORKFLOW_STATUS_FIELD)
           .addConstraintViolation();
       return false;

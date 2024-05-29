@@ -36,7 +36,7 @@ public class CommonGetStatusRequestValidator implements IGetStatusRequestValidat
     if (StringUtils.isBlank(workflowId)) {
       context.disableDefaultConstraintViolation();
       context
-          .buildConstraintViolationWithTemplate("{jakarta.validation.constraints.NotBlank.message}")
+          .buildConstraintViolationWithTemplate("{javax.validation.constraints.NotBlank.message}")
           .addPropertyNode(WORKFLOW_ID_FIELD)
           .addConstraintViolation();
       return false;
