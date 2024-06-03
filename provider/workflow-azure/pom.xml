@@ -32,7 +32,6 @@
 
   <properties>
     <azure.version>3.4.0</azure.version>
-    <osdu.corelibazure.version>0.26.0-rc7</osdu.corelibazure.version>
     <azure.appservice.resourcegroup />
     <azure.appservice.plan />
     <azure.appservice.appname />
@@ -76,14 +75,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Inherit managed dependencies from core-lib-azure -->
-      <dependency>
-        <groupId>org.opengroup.osdu</groupId>
-        <artifactId>core-lib-azure-spring6</artifactId>
-        <version>${osdu.corelibazure.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
@@ -121,6 +112,17 @@
         </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>3.0.0-beta2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.36</version>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
       <exclusions>
@@ -154,6 +156,24 @@
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>core-lib-azure-spring6</artifactId>
       <version>${osdu.corelibazure.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.microsoft.azure</groupId>
+          <artifactId>applicationinsights-logging-log4j2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-log4j2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
