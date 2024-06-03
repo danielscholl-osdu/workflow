@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
@@ -33,6 +34,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +45,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -66,7 +70,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(WorkflowManagerApi.class)
 @AutoConfigureMockMvc
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
 @Import({AuthorizationFilter.class, DpsHeaders.class})
 public class WorkflowManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
@@ -105,37 +109,43 @@ public class WorkflowManagerMvcTest {
   private static final String EMPTY_PREFIX_ERROR =
       "Prefix cannot be Null or Empty. Please provide a value.";
 
-
+  @Autowired
   private MockMvc mockMvc;
 
   private ObjectMapper mapper = new ObjectMapper();
 
-  @Mock
+  @MockBean
   private IWorkflowManagerService workflowManagerService;
 
-  @Mock
+  @MockBean
   private IAuthorizationService authorizationService;
 
-  @Mock
+  @MockBean
   private IAdminAuthorizationService adminAuthorizationService;
 
-  @Mock
+  @MockBean
   private JaxRsDpsLog log;
 
-  @Mock
+  @MockBean
   private DpsHeaders dpsHeaders;
 
-  @Mock
+  @MockBean
   private AuthorizationResponse authorizationResponse;
 
   @InjectMocks
   private WorkflowManagerApi workflowManagerApi;
-
+  @Autowired
+  private WebApplicationContext context;
   @Before
   public void setup() {
-
+    //MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
+    mockMvc = MockMvcBuilders
+        .webAppContextSetup(context)
+        .apply(SecurityMockMvcConfigurers.springSecurity())
+        .build();
     dpsHeaders.put("data-partition-id", "common");
-    mockMvc = MockMvcBuilders.standaloneSetup(workflowManagerApi).build();
+   // mockMvc = MockMvcBuilders.standaloneSetup(workflowManagerApi).build();
   }
 
   @Test
@@ -208,9 +218,9 @@ public class WorkflowManagerMvcTest {
         .andExpect(status().isOk())
         .andReturn();
     verify(workflowManagerService).getWorkflowByName(eq(WORKFLOW_NAME));
-    //verify(authorizationService).authorizeAny(any(), any());
-   // verify(dpsHeaders).getAuthorization();
-    //verify(dpsHeaders).getPartitionId();
+    verify(authorizationService).authorizeAny(any(), any());
+    verify(dpsHeaders).getAuthorization();
+    verify(dpsHeaders).getPartitionId();
     final WorkflowMetadata responseMetadata =
         mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), WorkflowMetadata.class);
     assertThat(metadata, equalTo(responseMetadata));
@@ -300,12 +310,12 @@ public class WorkflowManagerMvcTest {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//      http
-//          .cors(AbstractHttpConfigurer::disable)
-//          .csrf(AbstractHttpConfigurer::disable)
-//          .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//          .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-//          .httpBasic(withDefaults());
+      http
+          .cors(AbstractHttpConfigurer::disable)
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+          .httpBasic(AbstractHttpConfigurer::disable);
       return http.build();
     }
 

@@ -121,7 +121,7 @@ class WorkflowRunMvcTest {
   private DpsHeaders dpsHeaders;
   @MockBean
   private JaxRsDpsLog logger;
-  @Mock
+  @MockBean
   private AuthorizationResponse authorizationResponse;
 
   @Test
