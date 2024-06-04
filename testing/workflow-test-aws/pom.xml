@@ -36,7 +36,7 @@
   <properties>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
-    <spring-boot.version>3.2.5</spring-boot.version>
+    <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.main.basedir>${project.basedir}</project.main.basedir>
     <junit-jupiter.version>5.5.2</junit-jupiter.version>
@@ -60,13 +60,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>2.17.1</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -74,7 +67,7 @@
     <dependency>
       <groupId>org.opengroup.osdu.core.aws</groupId>
       <artifactId>os-core-lib-aws</artifactId>
-      <version>0.26.0-spring6-rc1</version>
+      <version>0.23.0</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
@@ -85,6 +78,21 @@
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-cognitoidp</artifactId>
       <version>1.11.1018</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson-databind.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
   </dependencies>
 
@@ -109,3 +117,4 @@
     </plugins>
   </build>
 </project>
+

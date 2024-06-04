@@ -39,9 +39,9 @@
         <skipTests>false</skipTests>
         <test.data.file.name>testData.json</test.data.file.name>
         <test.data.directory>${project.build.directory}</test.data.directory>
-      <os-core-common.version>0.27.0-rc1</os-core-common.version>
-      <osdu.corelibazure.version>0.26.0-rc7</osdu.corelibazure.version>
-    </properties>
+      </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.opengroup.osdu</groupId>
@@ -71,8 +71,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>6.1.6</version>
+            <version>5.3.23</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+          <version>${jackson.version}</version>
+          <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -87,37 +93,38 @@
             <version>29.0-jre</version>
             <scope>test</scope>
         </dependency>
-      <!-- Added dependency of core-lib-Azure to add Azure Service Principle class -->
-      <dependency>
-        <groupId>org.opengroup.osdu</groupId>
-        <artifactId>core-lib-azure-spring6</artifactId>
-        <version>${osdu.corelibazure.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-all</artifactId>
-        <version>4.1.101.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opengroup.osdu</groupId>
-        <artifactId>os-core-common-spring6</artifactId>
-        <version>${os-core-common.version}</version>
-        <scope>provided</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-client</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
+    <!-- Added dependency of core-lib-Azure to add Azure Service Principle class -->
+    <dependency>
+      <groupId>org.opengroup.osdu</groupId>
+      <artifactId>core-lib-azure</artifactId>
+      <version>0.26.0-rc7</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-transport</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.micrometer</groupId>
+          <artifactId>micrometer-registry-azure-monitor</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob</artifactId>
+      <version>12.10.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.101.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opengroup.osdu</groupId>
+      <artifactId>os-core-common</artifactId>
+      <version>0.25.0</version>
+    </dependency>
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
@@ -133,27 +140,10 @@
         <artifactId>lombok</artifactId>
         <version>1.18.26</version>
         <scope>test</scope>
-      </dependency>
-    </dependencies>
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>com.fasterxml.jackson</groupId>
-      <artifactId>jackson-bom</artifactId>
-      <version>2.17.1</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-azure-spring6</artifactId>
-      <version>${osdu.corelibazure.version}</version>
-      <type>pom</type>
-      <scope>import</scope>
     </dependency>
   </dependencies>
-</dependencyManagement>
-    <build>
+
+      <build>
         <plugins>
           <!--
           <plugin>

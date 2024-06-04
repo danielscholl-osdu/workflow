@@ -18,8 +18,8 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
 		<junit-jupiter.version>5.5.2</junit-jupiter.version>
-    <os-core-lib-ibm.version>0.26.0-rc8</os-core-lib-ibm.version>
-    <spring-boot.version>3.2.5</spring-boot.version>
+    <os-core-lib-ibm.version>0.25.0</os-core-lib-ibm.version>
+		<spring-boot.version>2.2.2.RELEASE</spring-boot.version>
 	</properties>
 
 
@@ -58,16 +58,6 @@
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>os-core-lib-ibm</artifactId>
       <version>${os-core-lib-ibm.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>io.netty</groupId>
-          <artifactId>netty-codec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.tomcat.embed</groupId>
-          <artifactId>tomcat-embed-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 		<dependency>
 			<groupId>junit</groupId>

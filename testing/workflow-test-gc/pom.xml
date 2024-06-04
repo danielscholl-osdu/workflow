@@ -33,11 +33,11 @@
   <properties>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
+    <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.main.basedir>${project.basedir}</project.main.basedir>
     <google.oauth.version>0.9.0</google.oauth.version>
     <junit-jupiter.version>5.5.2</junit-jupiter.version>
-    <spring-boot.version>3.2.5</spring-boot.version>
   </properties>
 
   <dependencyManagement>
@@ -58,17 +58,7 @@
       <artifactId>workflow-test-core</artifactId>
       <version>0.27.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt</artifactId>
-      <version>0.9.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
     <dependency>
       <groupId>com.google.auth</groupId>
       <artifactId>google-auth-library-oauth2-http</artifactId>
