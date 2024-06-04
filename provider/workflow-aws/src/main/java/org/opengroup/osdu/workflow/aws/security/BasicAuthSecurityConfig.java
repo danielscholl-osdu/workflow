@@ -29,7 +29,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @SuppressWarnings("deprecation")
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class BasicAuthSecurityConfig {
 
   @Bean

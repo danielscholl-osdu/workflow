@@ -19,7 +19,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @ConditionalOnProperty(value = "azure.istio.auth.enabled", havingValue = "true", matchIfMissing = true)
 public class AzureIstioSecurityConfig {
   @Autowired

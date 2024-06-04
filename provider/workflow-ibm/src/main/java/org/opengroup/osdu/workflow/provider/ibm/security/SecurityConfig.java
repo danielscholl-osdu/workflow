@@ -20,7 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityConfig {
 

@@ -288,7 +288,7 @@ public class CustomOperatorMvcTest {
 
   @TestConfiguration
   @EnableWebSecurity
-  @EnableMethodSecurity(prePostEnabled = true)
+  @EnableMethodSecurity
   public static class TestSecurityConfig {
 
     @Bean

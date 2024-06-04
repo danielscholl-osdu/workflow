@@ -306,7 +306,7 @@ public class WorkflowManagerMvcTest {
 
   @TestConfiguration
   @EnableWebSecurity
-  @EnableMethodSecurity(prePostEnabled = true)
+  @EnableMethodSecurity
   public static class TestSecurityConfig {
 
     @Bean
