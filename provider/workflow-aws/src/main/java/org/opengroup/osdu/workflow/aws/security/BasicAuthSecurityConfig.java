@@ -16,6 +16,7 @@
 
 package org.opengroup.osdu.workflow.aws.security;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @SuppressWarnings("deprecation")
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 public class BasicAuthSecurityConfig {
 
   @Bean

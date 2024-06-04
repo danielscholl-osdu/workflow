@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.context.annotation.Bean;
@@ -281,7 +282,7 @@ class WorkflowRunMvcTest {
 
   @TestConfiguration
   @EnableWebSecurity
-  @EnableGlobalMethodSecurity(prePostEnabled = true)
+  @EnableMethodSecurity(prePostEnabled = true)
   public static class TestSecurityConfig {
 
     @Bean
