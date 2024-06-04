@@ -32,8 +32,6 @@
   <name>workflow-core</name>
   <description>Core project for the Workflow service</description>
 
-  <properties />
-
   <dependencies>
     <dependency>
       <groupId>jakarta.inject</groupId>
@@ -46,7 +44,6 @@
       <version>6.0.0</version>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -55,33 +52,15 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-cbor</artifactId>
-      <version>2.12.1</version>
-    </dependency>
-
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
     </dependency>
-
-
-
-    <dependency>
-      <groupId>org.apache.tomcat</groupId>
-      <artifactId>tomcat</artifactId>
-      <version>10.1.20</version>
-      <type>pom</type>
-    </dependency>
-
   </dependencies>
 
   <build>
