@@ -5,13 +5,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opengroup.osdu.core.common.exception.UnauthorizedException;
-import org.opengroup.osdu.workflow.provider.azure.WorkflowApplication;
+import org.opengroup.osdu.workflow.provider.azure.WorkflowAzureApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(classes = {WorkflowApplication.class})
+@SpringBootTest(classes = {WorkflowAzureApplication.class})
 public class AuthenticationServiceImplTest {
   private static final String AUTHORIZATION_TOKEN = "authToken";
   private static final String PARTITION = "partition";
