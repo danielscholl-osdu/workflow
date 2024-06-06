@@ -4,6 +4,7 @@
 
 package org.opengroup.osdu.workflow.provider.ibm.security;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -22,6 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Configuration
 public class SecurityConfig {
 
   @Bean
