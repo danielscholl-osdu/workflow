@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import static org.opengroup.osdu.workflow.provider.azure.security.AadSecurityConfig.AUTH_ALLOWLIST;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -24,13 +24,15 @@ public class AzureIstioSecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    return http
+    http
+        .cors(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement((sess) -> sess.sessionCreationPolicy(SessionCreationPolicy.NEVER))
-        .authorizeHttpRequests(request -> request.requestMatchers(AUTH_ALLOWLIST).permitAll())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
         .addFilterBefore(azureIstioSecurityFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
+        .httpBasic(withDefaults());
+    return http.build();
+
   }
 
 }
