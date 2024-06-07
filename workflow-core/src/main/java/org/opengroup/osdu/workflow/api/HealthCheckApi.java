@@ -16,7 +16,7 @@
 
 package org.opengroup.osdu.workflow.api;
 
-import javax.annotation.security.PermitAll;
+import jakarta.annotation.security.PermitAll;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

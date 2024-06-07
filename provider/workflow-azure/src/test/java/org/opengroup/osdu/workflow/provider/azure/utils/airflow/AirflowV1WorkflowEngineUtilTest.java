@@ -2,6 +2,7 @@ package org.opengroup.osdu.workflow.provider.azure.utils.airflow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,7 +100,7 @@ public class AirflowV1WorkflowEngineUtilTest {
   }
 
   @Test
-  public void testAddMicroSecParam() {
+  public void testAddMicroSecParam() throws JSONException {
     JSONObject requestBody = mock(JSONObject.class);
     JSONObject requestBodyObtained = airflowV1WorkflowEngineUtil.addMicroSecParam(requestBody);
 

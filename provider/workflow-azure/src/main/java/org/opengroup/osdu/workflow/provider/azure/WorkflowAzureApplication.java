@@ -35,8 +35,8 @@ import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
 @PropertySource("classpath:swagger.properties")
-public class WorkflowApplication {
+public class WorkflowAzureApplication {
   public static void main(String[] args) {
-    SpringApplication.run(WorkflowApplication.class, args);
+    SpringApplication.run(WorkflowAzureApplication.class, args);
   }
 }

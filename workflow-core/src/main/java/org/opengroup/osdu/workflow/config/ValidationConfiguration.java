@@ -52,7 +52,7 @@ public class ValidationConfiguration {
     }
 
     @Override
-    protected void postProcessConfiguration(javax.validation.Configuration<?> cfg) {
+    protected void postProcessConfiguration(jakarta.validation.Configuration<?> cfg) {
       if (cfg instanceof HibernateValidatorConfiguration) {
         HibernateValidatorConfiguration configuration = (HibernateValidatorConfiguration) cfg;
         this.contributors.forEach(contributor -> contributor.createConstraintMappings(() -> {

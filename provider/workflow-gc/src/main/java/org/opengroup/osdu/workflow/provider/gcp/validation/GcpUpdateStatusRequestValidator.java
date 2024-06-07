@@ -16,7 +16,7 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;
 import org.opengroup.osdu.workflow.validation.CommonUpdateStatusRequestValidator;

@@ -1,9 +1,14 @@
 package org.opengroup.osdu.workflow.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.entitlements.AuthorizationResponse;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
@@ -26,12 +31,24 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.context.annotation.Bean;
+
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.util.List;
 
@@ -54,8 +71,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(WorkflowManagerApi.class)
 @AutoConfigureMockMvc
+@RunWith(SpringRunner.class)
 @Import({AuthorizationFilter.class, DpsHeaders.class})
-class WorkflowManagerMvcTest {
+public class WorkflowManagerMvcTest {
   private static final String TEST_AUTH = "Bearer bla";
   private static final String PARTITION = "partition";
   private static final String CORRELATION_ID = "sample-correlation-id";
@@ -95,8 +113,7 @@ class WorkflowManagerMvcTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper mapper;
+  private ObjectMapper mapper = new ObjectMapper();
 
   @MockBean
   private IWorkflowManagerService workflowManagerService;
@@ -113,11 +130,27 @@ class WorkflowManagerMvcTest {
   @MockBean
   private DpsHeaders dpsHeaders;
 
-  @Mock
+  @MockBean
   private AuthorizationResponse authorizationResponse;
 
+  @InjectMocks
+  private WorkflowManagerApi workflowManagerApi;
+  @Autowired
+  private WebApplicationContext context;
+  @Before
+  public void setup() {
+    //MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
+    mockMvc = MockMvcBuilders
+        .webAppContextSetup(context)
+        .apply(SecurityMockMvcConfigurers.springSecurity())
+        .build();
+    dpsHeaders.put("data-partition-id", "common");
+   // mockMvc = MockMvcBuilders.standaloneSetup(workflowManagerApi).build();
+  }
+
   @Test
-  void testCreateApiWithSuccess() throws Exception {
+  public void testCreateApiWithSuccess() throws Exception {
     final CreateWorkflowRequest request = mapper
         .readValue(WORKFLOW_REQUEST, CreateWorkflowRequest.class);
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
@@ -171,7 +204,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
-  void testGetApiWithSuccess() throws Exception {
+  public void testGetApiWithSuccess() throws Exception {
     final WorkflowMetadata metadata = mapper.readValue(WORKFLOW_RESPONSE, WorkflowMetadata.class);
     when(workflowManagerService.getWorkflowByName(eq(WORKFLOW_NAME))).thenReturn(metadata);
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
@@ -195,7 +228,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
-  void testDeleteApiWithSuccess() throws Exception {
+  public void testDeleteApiWithSuccess() throws Exception {
     doNothing().when(workflowManagerService).deleteWorkflow(eq(WORKFLOW_NAME));
     when(authorizationService.authorizeAny(any(), eq(WorkflowRole.ADMIN)))
         .thenReturn(authorizationResponse);
@@ -216,7 +249,7 @@ class WorkflowManagerMvcTest {
   }
 
   @Test
-  void testDeleteApiWithError() throws Exception {
+  public void testDeleteApiWithError() throws Exception {
     doThrow(new WorkflowNotFoundException("not found")).when(workflowManagerService)
         .deleteWorkflow(eq(WORKFLOW_NAME));
     when(authorizationService.authorizeAny(any(), any())).thenReturn(authorizationResponse);
@@ -273,14 +306,26 @@ class WorkflowManagerMvcTest {
 
   @TestConfiguration
   @EnableWebSecurity
-  @EnableGlobalMethodSecurity(prePostEnabled = true)
-  public static class TestSecurityConfig extends WebSecurityConfigurerAdapter {
+  @EnableMethodSecurity
+  public static class TestSecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-      http.httpBasic().disable()
-          .csrf().disable();  //disable default authN. AuthN handled by endpoints proxy
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+      http
+          .cors(AbstractHttpConfigurer::disable)
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+          .httpBasic(AbstractHttpConfigurer::disable);
+      return http.build();
     }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+      return (web) -> web.ignoring().requestMatchers("/api-docs", "/info", "/swagger");
+    }
+
   }
+
+
 }

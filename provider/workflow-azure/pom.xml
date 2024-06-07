@@ -32,18 +32,41 @@
 
   <properties>
     <azure.version>3.4.0</azure.version>
-    <osdu.corelibazure.version>0.26.0-rc7</osdu.corelibazure.version>
     <azure.appservice.resourcegroup />
     <azure.appservice.plan />
     <azure.appservice.appname />
     <azure.appservice.subscription />
-    <spring-webmvc.version>5.3.22</spring-webmvc.version>
+    <spring-webmvc.version>6.1.6</spring-webmvc.version>
     <netty.version>4.1.101.Final</netty.version>
     <reactor-netty-http.version>1.1.14</reactor-netty-http.version>
+    <osdu.corelibazure.version>0.26.0-rc7</osdu.corelibazure.version>
+    <spring-framework-version>6.1.6</spring-framework-version>
+    <log4j.version>2.22.0</log4j.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring-framework-version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-bom</artifactId>
+        <version>${spring-security.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>3.2.5</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- netty-bom dependency to be declared before spring-boot-dependencies,
            to pull all netty-transitive dependencies with same version -->
       <dependency>
@@ -53,19 +76,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Inherit managed dependencies from core-lib-azure -->
       <dependency>
-        <groupId>org.opengroup.osdu</groupId>
-        <artifactId>core-lib-azure</artifactId>
-        <version>${osdu.corelibazure.version}</version>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>Hoxton.SR3</version>
         <type>pom</type>
         <scope>import</scope>
-        <exclusions>
-          <exclusion>
-            <artifactId>azure-core</artifactId>
-            <groupId>com.azure</groupId>
-          </exclusion>
-        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -78,8 +94,9 @@
           is the current version in core-lib-azure          -->
       <artifactId>azure-core-http-netty</artifactId>
       <groupId>com.azure</groupId>
-      <version>1.12.8</version>
+      <version>1.15.0</version>
     </dependency>
+
     <dependency>
       <!-- https://mvnrepository.com/artifact/com.azure.spring/spring-cloud-azure-starter-active-directory -->
         <groupId>com.azure.spring</groupId>
@@ -94,7 +111,37 @@
             <artifactId>logback-classic</artifactId>
             <groupId>ch.qos.logback</groupId>
           </exclusion>
+          <exclusion>
+            <artifactId>msal4j</artifactId>
+            <groupId>com.microsoft.azure</groupId>
+          </exclusion>
         </exclusions>
+    </dependency>
+    <!-- Log settings dependencies -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.36</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20240303</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -116,17 +163,10 @@
       <artifactId>spring-webmvc</artifactId>
       <version>${spring-webmvc.version}</version>
     </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Hoxton.SR3</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>5.6.9</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
@@ -134,20 +174,32 @@
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-azure</artifactId>
+      <artifactId>core-lib-azure-spring6</artifactId>
       <version>${osdu.corelibazure.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.simpleframework</groupId>
-          <artifactId>simple-xml</artifactId>
+          <groupId>com.microsoft.azure</groupId>
+          <artifactId>applicationinsights-logging-log4j2</artifactId>
         </exclusion>
         <exclusion>
-          <!-- Removing azure core as we'll include the netty version-->
-          <groupId>com.azure</groupId>
-          <artifactId>azure-core</artifactId>
+          <groupId>org.opengroup.osdu</groupId>
+          <artifactId>os-core-common-spring6</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-log4j2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-core</artifactId>
@@ -175,46 +227,60 @@
       <artifactId>netty-tcnative-boringssl-static</artifactId>
     </dependency>
     <!-- netty related dependencies -->
+    <!-- Testing packages -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>4.5.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>2.2.11.RELEASE</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
-          <groupId>com.vaadin.external.google</groupId>
-          <artifactId>android-json</artifactId>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-inline</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-storage-file-share</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>azure-storage-common</artifactId>
-          <groupId>com.azure</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
 
     <!-- WhiteSource updates -->
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-catalina</artifactId>
-      <version>9.0.76</version>
+      <version>10.1.20</version>
     </dependency>
 
     <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-core</artifactId>
-        <version>1.8.1</version>
     </dependency>
 
     <dependency>
@@ -230,14 +296,18 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>io.projectreactor.netty</groupId>
-      <artifactId>reactor-netty-http</artifactId>
-      <version>${reactor-netty-http.version}</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-share</artifactId>
+      <version>12.21.2</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -248,7 +318,7 @@
             </goals>
             <configuration>
               <classifier>spring-boot</classifier>
-              <mainClass>org.opengroup.osdu.workflow.provider.azure.WorkflowApplication</mainClass>
+              <mainClass>org.opengroup.osdu.workflow.provider.azure.WorkflowAzureApplication</mainClass>
             </configuration>
           </execution>
         </executions>

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -37,17 +37,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowRunRepository implements IWorkflowRunRepository {
 
-	
+
 	private static final int WORKFLOW_RUN_LIMIT = 100;
-	
+
 	@Autowired
 	IBMCouchDB ibmCouchDB;
-	
+
 	final private String COLLECTION_NAME="WorkflowRun";
-	
-	@Inject 
+
+	@Inject
 	TenantInfo tenantInfo;
-	
+
 	@Override
 	public WorkflowRun saveWorkflowRun(WorkflowRun workflowRun) {
 		Database db = getDatabase();
@@ -58,7 +58,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 		} catch (DocumentConflictException e) {
 			log.error("Conflict", e);
 			throw new AppException(e.getStatusCode(), "Conflict", "Workflow exists with workflowId"+workflowRun.getWorkflowId());
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			log.error("Save operation failed", e);
 			throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "data save operation failed", "Workflow details failed to persist in database", e);
 		}
@@ -72,7 +72,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 	public WorkflowRun getWorkflowRun(String workflowName, String runId) {
 		Database db = getDatabase();
 		QueryResult<WorkflowRunDoc> results = db.query(new QueryBuilder(and(eq("workflowName", workflowName), eq("_id", runId))).build(), WorkflowRunDoc.class);
-		if(results!=null && results.getDocs().size()>0) 
+		if(results!=null && results.getDocs().size()>0)
 			return results.getDocs().get(0).getWorkflowRun();
 		else
 			throw new AppException(HttpStatus.SC_NOT_FOUND, "Not Found", String.format("WorkflowRun: %s for Workflow: %s doesn't exist", runId, workflowName));
@@ -82,11 +82,11 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 	public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit, String cursor) {
 		Database db = getDatabase();
 		int numRecords = 0;
-		String initialId = validateCursor(cursor, db);		
-		
+		String initialId = validateCursor(cursor, db);
+
         if (limit != null) {
             numRecords = limit > 0 ? limit : WORKFLOW_RUN_LIMIT;
-        } 
+        }
         //_id = runid
 		QueryResult<WorkflowRunDoc> results = db.query(new QueryBuilder(
 				and(eq("workflowName", workflowName), gte("_id", initialId)))
@@ -97,7 +97,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 		page.setCursor("");
 		List<WorkflowRunDoc> workflowRunDocList = results.getDocs();
 		List<WorkflowRun> workflowRunList = workflowRunDocList.stream().map(wrd -> wrd.getWorkflowRun()).collect(Collectors.toList());
-		
+
 		if ((results.getDocs().size()) - 1 < numRecords) {
 			page.setCursor(null);
 			page.setItems(workflowRunList);
@@ -133,7 +133,7 @@ public class WorkflowRunRepository implements IWorkflowRunRepository {
 		if(results.getDocs().isEmpty()) {
 			throw new AppException(HttpStatus.SC_NOT_FOUND, "NOT_FOUND", String.format("WorkflowRun %s does not exists", workflowName));
 		}
-		
+
 		for(WorkflowRunDoc workflowRunDoc:results.getDocs()) {
 			db.remove(workflowRunDoc);
 		}

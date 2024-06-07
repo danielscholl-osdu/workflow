@@ -4,38 +4,43 @@
 
 package org.opengroup.osdu.workflow.provider.ibm.security;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-            // .authorizeRequests()
-            // 	.antMatchers("/v1/api-docs",
-			//         "/v3/api-docs",
-			//         "/v3/api-docs/swagger-config",
-		    //         "/configuration/ui",
-			//         "/swagger-ui/**",
-		    //         "/swagger-resources/**",
-		    //         "/configuration/security",
-		    //         "/swagger-ui.html",
-		    //         "/swagger",
-            //     "/info",
-		    //         "/webjars/**",
-		    //         "/liveness_check",
-		    //         "/readiness_check").permitAll()
-            // 	.anyRequest()
-            // 		.authenticated()
-            // 		.and()
-            // 	.oauth2ResourceServer().jwt();
-    }
+@Configuration
+public class SecurityConfig {
+
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(AbstractHttpConfigurer::disable)
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+        .httpBasic(withDefaults());
+    return http.build();
+  }
+
+  @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return (web) -> web.ignoring().requestMatchers("/api-docs", "/info", "/swagger");
+  }
+
 }
 

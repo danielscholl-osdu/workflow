@@ -200,11 +200,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
     createdWorkflowRuns.add(workflowRunInfo);
   }
 
-	/*
-	 * after switch to airflow 2.0 stable API, this has to be marked as ignore or
-	 * removed. Airflow 2.x stable API will always throw 409 Conflicts instead of 400
-	 * BAD REQUEST when you pass duplicate run id
-	 */
+  /*
+   * after switch to airflow 2.0 stable API, this has to be marked as ignore or
+   * removed. Airflow 2.x stable API will always throw 409 Conflicts instead of 400
+   * BAD REQUEST when you pass duplicate run id
+   */
   @Test
   public void triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId() throws  Exception {
     String workflowResponseBody = createWorkflow();
@@ -227,11 +227,11 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, duplicateRunIdResponse.getStatus());
   }
-  
-	/*
-	 * Enable this Integration test for airflow 2.0 stable API by removing 
-	 * '@Disbaled'
-	 */
+
+  /*
+   * Enable this Integration test for airflow 2.0 stable API by removing
+   * '@Disbaled'
+   */
   @Test
   @Disabled("Until switch to airflow 2.0 stable api")
   public void triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API() throws  Exception {

@@ -34,9 +34,7 @@
 
   <properties>
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-    <google-cloud-libraries.version>26.13.0</google-cloud-libraries.version>
-    <tomcat-embed-core.version>9.0.69</tomcat-embed-core.version>
-    <spring-boot-dependencies.version>2.7.18</spring-boot-dependencies.version>
+    <google-cloud-libraries.version>26.40.0</google-cloud-libraries.version>
   </properties>
 
   <dependencyManagement>
@@ -45,13 +43,6 @@
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
         <version>${google-cloud-libraries.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring-boot-dependencies.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -93,55 +84,38 @@
 
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-gc</artifactId>
-      <version>0.25.0</version>
+      <artifactId>core-lib-gc-spring6</artifactId>
+      <version>0.26.0-rc5</version>
     </dependency>
-    
+
     <dependency>
       <groupId>ch.qos.logback.contrib</groupId>
       <artifactId>logback-json-classic</artifactId>
       <version>0.1.5</version>
     </dependency>
-
     <!-- Mappers -->
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>oqm</artifactId>
-      <version>0.25.0</version>
+      <version>0.26.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.opengroup.osdu</groupId>
+          <artifactId>os-core-common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>osm</artifactId>
-      <version>0.25.0</version>
+      <version>0.26.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.opengroup.osdu</groupId>
+          <artifactId>os-core-common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
-    <!-- WhiteSource updates -->
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson-databind.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson-databind.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson-databind.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-core</artifactId>
-      <version>${tomcat-embed-core.version}</version>
-    </dependency>
-
   </dependencies>
 
   <build>

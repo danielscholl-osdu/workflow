@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.api.client.util.Strings;
 import org.apache.http.HttpStatus;

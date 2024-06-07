@@ -12,7 +12,7 @@ import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
 import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.provider.azure.WorkflowApplication;
+import org.opengroup.osdu.workflow.provider.azure.WorkflowAzureApplication;
 import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
 import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(classes = {WorkflowApplication.class})
+@SpringBootTest(classes = {WorkflowAzureApplication.class})
 public class WorkflowTasksSharingRepositoryTest {
 
   private static final String TEST_WORKFLOW_NAME = "test-workflow-name";

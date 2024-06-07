@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -237,7 +238,7 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflowWithSuccessExecution() throws JsonProcessingException {
+  public void testTriggerWorkflowWithSuccessExecution() throws JsonProcessingException, JSONException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();
@@ -304,7 +305,7 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflowWithSuccessExecution_multiPartitionAirflow() throws JsonProcessingException {
+  public void testTriggerWorkflowWithSuccessExecution_multiPartitionAirflow() throws JsonProcessingException, JSONException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();
@@ -347,7 +348,7 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflow_whenUnableToObtainActiveDagRunsFromDb() throws JsonProcessingException {
+  public void testTriggerWorkflow_whenUnableToObtainActiveDagRunsFromDb() throws JsonProcessingException, JSONException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();
@@ -470,7 +471,7 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflowWithExceptionFromAirflow() throws JsonProcessingException {
+  public void testTriggerWorkflowWithExceptionFromAirflow() throws JsonProcessingException, JSONException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();
@@ -523,7 +524,7 @@ public class WorkflowEngineServiceImplTest {
   }
 
   @Test
-  public void testTriggerWorkflowWithControllerDag() throws JsonProcessingException {
+  public void testTriggerWorkflowWithControllerDag() throws JsonProcessingException, JSONException {
     PartitionInfoAzure partitionInfoAzure = mock(PartitionInfoAzure.class);
     Map<String, Object> INPUT_DATA = new HashMap<>();
     Map<String, Object> executionContext = new HashMap<>();

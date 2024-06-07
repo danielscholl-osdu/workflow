@@ -21,9 +21,9 @@
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
 		<osdu.ibmcore.version>0.25.0</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
-		<!--<tomcat.embed.core.version>9.0.69</tomcat.embed.core.version>-->
+    <os-core-lib-ibm.version>0.26.0-rc8</os-core-lib-ibm.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
-    <spring-security-core.version>5.7.11</spring-security-core.version>
+    <spring-security-core.version>6.3.0</spring-security-core.version>
 	</properties>
 
 	<dependencies>
@@ -121,8 +121,8 @@
 		</dependency>-->
 		<dependency>
 			<groupId>org.opengroup.osdu</groupId>
-			<artifactId>os-core-lib-ibm</artifactId>
-			<version>${osdu.ibmcore.version}</version>
+      <artifactId>os-core-lib-ibm</artifactId>
+      <version>${os-core-lib-ibm.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>io.netty</groupId>
@@ -210,7 +210,7 @@
 		<dependency>
     		<groupId>org.springframework.security</groupId>
     		<artifactId>spring-security-web</artifactId>
-    		<version>5.7.8</version>
+    		<version>6.1.6</version>
     		<exclusions>
 				<exclusion>
             		<groupId>org.springframework.security</groupId>
@@ -257,16 +257,7 @@
 			<artifactId>lucene-core</artifactId>
 			<version>${lucene.core.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.yaml</groupId>
-					<artifactId>snakeyaml</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -280,7 +271,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>5.3.27</version>
+			<version>6.1.6</version>
 		</dependency>
 	</dependencies>
 	<!-- <repositories> <repository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/groups/17/-/packages/maven</url>
@@ -289,10 +280,32 @@
 		</repository> <snapshotRepository> <id>${gitlab-server}</id> <url>https://community.opengroup.org/api/v4/projects/146/packages/maven</url>
 		</snapshotRepository> </distributionManagement> -->
 
+  <dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-framework-bom</artifactId>
+      <version>${spring-framework-version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
 
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-bom</artifactId>
+      <version>${spring-security.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+  </dependencyManagement>
 
 	<build>
 		<plugins>
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

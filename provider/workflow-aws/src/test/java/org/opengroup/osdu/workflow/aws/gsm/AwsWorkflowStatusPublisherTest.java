@@ -1,12 +1,12 @@
 /**
 * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *      http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,20 +68,20 @@ public class AwsWorkflowStatusPublisherTest {
 
         try (MockedConstruction<K8sLocalParameterProvider> provider = Mockito.mockConstruction(K8sLocalParameterProvider.class, (mockProvider, context) -> {
             when(mockProvider.getParameterAsStringOrDefault(Mockito.anyString(), Mockito.any())).thenReturn(amazonSnsTopic);
-        })) {  
+        })) {
             try (MockedConstruction<AmazonSNSConfig> snsConfig = Mockito.mockConstruction(AmazonSNSConfig.class, (mockSnsConfig, context) -> {
                 when(mockSnsConfig.AmazonSNS()).thenReturn(snsClient);
-            })) {  
+            })) {
                 try (MockedConstruction<PublishRequestBuilder> builder= Mockito.mockConstruction(PublishRequestBuilder.class, (mockBuilder, context) -> {
-                when(mockBuilder.generatePublishRequest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.anyString())).thenReturn(publishRequest);
-                })) { 
+                when(mockBuilder.generatePublishRequest(Mockito.anyString(),Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(publishRequest);
+                })) {
                     publisher.init();
 
                     publisher.publish(messages, attributeMap);
 
                     Mockito.verify(snsClient, Mockito.times(1)).publish(publishRequest);
                 }
-            }     
+            }
         }
     }
 
@@ -97,14 +97,14 @@ public class AwsWorkflowStatusPublisherTest {
 
         try (MockedConstruction<K8sLocalParameterProvider> provider = Mockito.mockConstruction(K8sLocalParameterProvider.class, (mockProvider, context) -> {
             when(mockProvider.getParameterAsStringOrDefault(Mockito.anyString(), Mockito.any())).thenReturn(amazonSnsTopic);
-        })) {  
+        })) {
             try (MockedConstruction<AmazonSNSConfig> snsConfig = Mockito.mockConstruction(AmazonSNSConfig.class, (mockSnsConfig, context) -> {
                 when(mockSnsConfig.AmazonSNS()).thenReturn(snsClient);
-            })) {  
+            })) {
                 publisher.init();
 
                 publisher.publish(messages, attributeMap);
-            }     
+            }
         }
     }
 
@@ -119,14 +119,14 @@ public class AwsWorkflowStatusPublisherTest {
 
         try (MockedConstruction<K8sLocalParameterProvider> provider = Mockito.mockConstruction(K8sLocalParameterProvider.class, (mockProvider, context) -> {
             when(mockProvider.getParameterAsStringOrDefault(Mockito.anyString(), Mockito.any())).thenReturn(amazonSnsTopic);
-        })) {  
+        })) {
             try (MockedConstruction<AmazonSNSConfig> snsConfig = Mockito.mockConstruction(AmazonSNSConfig.class, (mockSnsConfig, context) -> {
                 when(mockSnsConfig.AmazonSNS()).thenReturn(snsClient);
-            })) {  
+            })) {
                 publisher.init();
 
                 publisher.publish(messages, attributeMap);
-            }     
+            }
         }
     }
 
@@ -142,14 +142,14 @@ public class AwsWorkflowStatusPublisherTest {
 
         try (MockedConstruction<K8sLocalParameterProvider> provider = Mockito.mockConstruction(K8sLocalParameterProvider.class, (mockProvider, context) -> {
             when(mockProvider.getParameterAsStringOrDefault(Mockito.anyString(), Mockito.any())).thenReturn(amazonSnsTopic);
-        })) {  
+        })) {
             try (MockedConstruction<AmazonSNSConfig> snsConfig = Mockito.mockConstruction(AmazonSNSConfig.class, (mockSnsConfig, context) -> {
                 when(mockSnsConfig.AmazonSNS()).thenReturn(snsClient);
-            })) {  
+            })) {
                 publisher.init();
 
                 publisher.publish(messages, attributeMap);
-            }     
+            }
         }
     }
 
@@ -165,14 +165,14 @@ public class AwsWorkflowStatusPublisherTest {
 
         try (MockedConstruction<K8sLocalParameterProvider> provider = Mockito.mockConstruction(K8sLocalParameterProvider.class, (mockProvider, context) -> {
             when(mockProvider.getParameterAsStringOrDefault(Mockito.anyString(), Mockito.any())).thenReturn(amazonSnsTopic);
-        })) {  
+        })) {
             try (MockedConstruction<AmazonSNSConfig> snsConfig = Mockito.mockConstruction(AmazonSNSConfig.class, (mockSnsConfig, context) -> {
                 when(mockSnsConfig.AmazonSNS()).thenReturn(snsClient);
-            })) {  
+            })) {
                 publisher.init();
 
                 publisher.publish(messages, attributeMap);
-            }     
+            }
         }
     }
 }

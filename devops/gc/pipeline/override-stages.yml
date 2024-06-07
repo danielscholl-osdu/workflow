@@ -6,3 +6,4 @@ variables:
 gc-baremetal-test:
   variables:
     GC_VENDOR: baremetal
+    TEST_DAG_NAME: "airflow_monitoring"
