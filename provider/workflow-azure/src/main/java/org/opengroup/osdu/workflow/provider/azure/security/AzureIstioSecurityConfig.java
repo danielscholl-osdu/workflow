@@ -18,16 +18,19 @@ import static org.opengroup.osdu.workflow.provider.azure.security.AadSecurityCon
 @EnableMethodSecurity
 @ConditionalOnProperty(value = "azure.istio.auth.enabled", havingValue = "true", matchIfMissing = true)
 public class AzureIstioSecurityConfig {
+
   @Autowired
   AzureIstioSecurityFilter azureIstioSecurityFilter;
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-      return http
-          .csrf(AbstractHttpConfigurer::disable)
-          .sessionManagement((sess) -> sess.sessionCreationPolicy(SessionCreationPolicy.NEVER))
-          .authorizeHttpRequests(request -> request.requestMatchers(AUTH_ALLOWLIST).permitAll())
-          .addFilterBefore(azureIstioSecurityFilter, UsernamePasswordAuthenticationFilter.class)
-          .build();
-    }
+
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http
+        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement((sess) -> sess.sessionCreationPolicy(SessionCreationPolicy.NEVER))
+        .authorizeHttpRequests(request -> request.requestMatchers(AUTH_ALLOWLIST).permitAll())
+        .addFilterBefore(azureIstioSecurityFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
+  }
 
 }
