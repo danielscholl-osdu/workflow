@@ -34,7 +34,7 @@
 
   <properties>
     <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-    <google-cloud-libraries.version>26.13.0</google-cloud-libraries.version>
+    <google-cloud-libraries.version>26.40.0</google-cloud-libraries.version>
   </properties>
 
   <dependencyManagement>
