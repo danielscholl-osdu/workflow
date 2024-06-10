@@ -26,7 +26,7 @@ In order to run this service locally, you will need the following:
 
 ### Google Cloud
 
-[Google cloud service configuration](docs/gc/README.md)
+[Google cloud service configuration](docs/gcp/README.md)
 
 ### Test the application
 
@@ -38,7 +38,7 @@ After the service has started it should be accessible via a web browser by visit
 
 ### Google Cloud test configuration
 
-[Google Cloud service configuration](docs/gc/README.md)
+[Google Cloud service configuration](docs/gcp/README.md)
 
 ### Run Locally
 
