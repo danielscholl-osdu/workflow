@@ -39,7 +39,7 @@
     <spring-webmvc.version>6.1.6</spring-webmvc.version>
     <netty.version>4.1.101.Final</netty.version>
     <reactor-netty-http.version>1.1.14</reactor-netty-http.version>
-    <osdu.corelibazure.version>0.26.0-rc7</osdu.corelibazure.version>
+    <osdu.corelibazure.version>0.27.0-rc3</osdu.corelibazure.version>
     <spring-framework-version>6.1.6</spring-framework-version>
     <log4j.version>2.22.0</log4j.version>
   </properties>
