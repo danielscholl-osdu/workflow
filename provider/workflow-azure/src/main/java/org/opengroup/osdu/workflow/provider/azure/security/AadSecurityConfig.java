@@ -1,9 +1,8 @@
 package org.opengroup.osdu.workflow.provider.azure.security;
-import com.azure.spring.autoconfigure.aad.AADAppRoleStatelessAuthenticationFilter;
+import com.azure.spring.cloud.autoconfigure.implementation.aad.filter.AadAppRoleStatelessAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,7 +24,7 @@ public class AadSecurityConfig  {
       "/swagger-ui/**",
   };
   @Autowired
-  private AADAppRoleStatelessAuthenticationFilter aadAppRoleStatelessAuthenticationFilter;
+  private AadAppRoleStatelessAuthenticationFilter aadAppRoleStatelessAuthenticationFilter;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

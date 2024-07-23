@@ -1,6 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.security;
 
-import com.azure.spring.autoconfigure.aad.UserPrincipal;
+import com.azure.spring.cloud.autoconfigure.implementation.aad.filter.UserPrincipal;
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONArray;
 import org.opengroup.osdu.core.common.model.http.AppException;
