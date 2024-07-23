@@ -1,7 +1,7 @@
 package org.opengroup.osdu.workflow.provider.azure.service;
 
 
-import com.azure.spring.autoconfigure.aad.UserPrincipal;
+import com.azure.spring.cloud.autoconfigure.implementation.aad.filter.UserPrincipal;
 import org.opengroup.osdu.workflow.provider.interfaces.IAdminAuthorizationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
