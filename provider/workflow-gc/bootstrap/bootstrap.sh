@@ -129,9 +129,9 @@ fi
 
 bootstrap_workflow_gc() {
 
-    # Getting ACCESS_TOKEN from context
-    ACCESS_TOKEN="$(gcloud auth print-access-token)"
-    export ACCESS_TOKEN
+    # Getting IDENTITY_TOKEN from context
+    IDENTITY_TOKEN="$(gcloud auth print-identity-token)"
+    export IDENTITY_TOKEN
 
     # Iterating over dag names
     IFS=","
@@ -143,7 +143,7 @@ bootstrap_workflow_gc() {
         status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow/system" \
             --write-out "%{http_code}" --silent --output "output.txt" \
             --header 'Content-Type: application/json' \
-            --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+            --header "Authorization: Bearer ${IDENTITY_TOKEN}" \
             --data-binary '{ "workflowName": "'"${DAG_NAME}"'", "registrationInstructions": { "dagName": "'"${DAG_NAME}"'", "etc": "string" }, "description": "'"${DAG_NAME}"'" }')
 
         # Checking result code
@@ -166,7 +166,7 @@ if [ "${USE_EDS_DAG}" == "true" ]; then
     status_code_schema=$(curl --location --globoff --request GET "${SCHEMA_HOST}/api/schema-service/v1/schema/osdu:wks:reference-data--WorkflowUsageType:1.0.0" \
         --write-out "%{http_code}" --silent --output "output_schema.txt" \
         --header 'Content-Type: application/json' \
-        --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+        --header "Authorization: Bearer ${IDENTITY_TOKEN}" \
         --header "data-partition-id: ${DATA_PARTITION_ID}")
 
     # Checking result code
@@ -200,7 +200,7 @@ if [ "${USE_EDS_DAG}" == "true" ]; then
     status_code_legal=$(curl --location --globoff --request POST "${LEGAL_HOST}/api/legal/v1/legaltags" \
         --write-out "%{http_code}" --silent --output "output_legal.txt" \
         --header 'Content-Type: application/json' \
-        --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+        --header "Authorization: Bearer ${IDENTITY_TOKEN}" \
         --header "data-partition-id: ${DATA_PARTITION_ID}" \
         --data-binary @legal_tag.json)
 
@@ -222,7 +222,7 @@ if [ "${USE_EDS_DAG}" == "true" ]; then
         status_code=$(curl --location --globoff --request POST "${WORKFLOW_HOST}/api/workflow/v1/workflow/Osdu_ingest/workflowRun" \
             --write-out "%{http_code}" --silent --output "output.txt" \
             --header 'Content-Type: application/json' \
-            --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+            --header "Authorization: Bearer ${IDENTITY_TOKEN}" \
             --header "data-partition-id: ${DATA_PARTITION_ID}" \
             --data-binary @$(basename $file))
 
