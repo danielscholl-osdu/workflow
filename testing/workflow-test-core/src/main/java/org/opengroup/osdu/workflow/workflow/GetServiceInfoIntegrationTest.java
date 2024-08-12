@@ -70,4 +70,44 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
     assertNotNull(responseObject.commitMessage);
     assertNotEquals("", responseObject.commitMessage);
   }
+
+  @Test
+  public void should_returnInfo_withTrailingSlash() throws Exception {
+    String url = TestConstants.GET_SERVICE_INFO_URL+"/";
+
+    ClientResponse response = client.send(
+        HttpMethod.GET,
+        url,
+        null,
+        headers,
+        ""
+    );
+
+    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
+
+    VersionInfoUtils.VersionInfo responseObject = VERSION_INFO_UTILS.getVersionInfoFromResponse(response);
+
+    assertNotNull(responseObject.groupId);
+    assertNotEquals("", responseObject.groupId);
+
+    assertNotNull(responseObject.artifactId);
+    assertNotEquals("", responseObject.artifactId);
+
+    assertNotNull(responseObject.version);
+    assertNotEquals("", responseObject.version);
+
+    assertNotNull(responseObject.buildTime);
+    assertNotEquals("", responseObject.buildTime);
+
+    assertNotNull(responseObject.branch);
+    assertNotEquals("", responseObject.branch);
+
+    assertNotNull(responseObject.commitId);
+    assertNotEquals("", responseObject.commitId);
+
+    assertNotNull(responseObject.commitMessage);
+    assertNotEquals("", responseObject.commitMessage);
+  }
+
+
 }
