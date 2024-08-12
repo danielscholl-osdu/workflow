@@ -45,30 +45,7 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
         ""
     );
 
-    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
-
-    VersionInfoUtils.VersionInfo responseObject = VERSION_INFO_UTILS.getVersionInfoFromResponse(response);
-
-    assertNotNull(responseObject.groupId);
-    assertNotEquals("", responseObject.groupId);
-
-    assertNotNull(responseObject.artifactId);
-    assertNotEquals("", responseObject.artifactId);
-
-    assertNotNull(responseObject.version);
-    assertNotEquals("", responseObject.version);
-
-    assertNotNull(responseObject.buildTime);
-    assertNotEquals("", responseObject.buildTime);
-
-    assertNotNull(responseObject.branch);
-    assertNotEquals("", responseObject.branch);
-
-    assertNotNull(responseObject.commitId);
-    assertNotEquals("", responseObject.commitId);
-
-    assertNotNull(responseObject.commitMessage);
-    assertNotEquals("", responseObject.commitMessage);
+    assertCommanCode(response);
   }
 
   @Test
@@ -82,6 +59,11 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
         headers,
         ""
     );
+    assertCommanCode( response);
+  }
+
+assertCommanCode( ClientResponse response)
+  {
 
     assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
 
@@ -108,6 +90,4 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
     assertNotNull(responseObject.commitMessage);
     assertNotEquals("", responseObject.commitMessage);
   }
-
-
 }
