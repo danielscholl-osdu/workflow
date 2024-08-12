@@ -59,10 +59,10 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
         headers,
         ""
     );
-    assertCommanCode( response);
+    assertCommanCode(response);
   }
 
-assertCommanCode( ClientResponse response)
+assertCommanCode(ClientResponse response)
   {
 
     assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
