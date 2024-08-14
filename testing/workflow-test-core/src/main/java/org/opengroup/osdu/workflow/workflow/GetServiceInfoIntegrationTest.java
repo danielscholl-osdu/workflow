@@ -34,47 +34,47 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
   protected static final VersionInfoUtils VERSION_INFO_UTILS = new VersionInfoUtils();
 
   @Test
-  public void should_returnInfo() throws Exception {
-    String url = TestConstants.GET_SERVICE_INFO_URL;
-
-    ClientResponse response = client.send(
-        HttpMethod.GET,
-        url,
-        null,
-        headers,
-        ""
-    );
-
-    assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
+  public void should_returnInfo() {
+    ClientResponse response = callInfoApi(TestConstants.GET_SERVICE_INFO_URL);
 
     VersionInfoUtils.VersionInfo responseObject = VERSION_INFO_UTILS.getVersionInfoFromResponse(response);
 
-    assertNotNull(responseObject.groupId);
-    assertNotEquals("", responseObject.groupId);
-
-    assertNotNull(responseObject.artifactId);
-    assertNotEquals("", responseObject.artifactId);
-
-    assertNotNull(responseObject.version);
-    assertNotEquals("", responseObject.version);
-
-    assertNotNull(responseObject.buildTime);
-    assertNotEquals("", responseObject.buildTime);
-
-    assertNotNull(responseObject.branch);
-    assertNotEquals("", responseObject.branch);
-
-    assertNotNull(responseObject.commitId);
-    assertNotEquals("", responseObject.commitId);
-
-    assertNotNull(responseObject.commitMessage);
-    assertNotEquals("", responseObject.commitMessage);
+    validateInfoObjectProperties(responseObject);
   }
 
   @Test
-  public void should_returnInfo_withTrailingSlash() throws Exception {
-    String url = TestConstants.GET_SERVICE_INFO_URL+"/";
+  public void should_returnInfo_withTrailingSlash() {
+    ClientResponse response = callInfoApi(TestConstants.GET_SERVICE_INFO_URL+"/");
 
+    VersionInfoUtils.VersionInfo responseObject = VERSION_INFO_UTILS.getVersionInfoFromResponse(response);
+
+    validateInfoObjectProperties(responseObject);
+  }
+
+  private void validateInfoObjectProperties(VersionInfoUtils.VersionInfo versionInfo) {
+    assertNotNull(versionInfo.groupId);
+    assertNotEquals("", versionInfo.groupId);
+
+    assertNotNull(versionInfo.artifactId);
+    assertNotEquals("", versionInfo.artifactId);
+
+    assertNotNull(versionInfo.version);
+    assertNotEquals("", versionInfo.version);
+
+    assertNotNull(versionInfo.buildTime);
+    assertNotEquals("", versionInfo.buildTime);
+
+    assertNotNull(versionInfo.branch);
+    assertNotEquals("", versionInfo.branch);
+
+    assertNotNull(versionInfo.commitId);
+    assertNotEquals("", versionInfo.commitId);
+
+    assertNotNull(versionInfo.commitMessage);
+    assertNotEquals("", versionInfo.commitMessage);
+  }
+
+  private ClientResponse callInfoApi(String url) {
     ClientResponse response = client.send(
         HttpMethod.GET,
         url,
@@ -84,30 +84,6 @@ public abstract class GetServiceInfoIntegrationTest extends TestBase {
     );
 
     assertEquals(HttpStatus.SC_OK, response.getStatus(), response.toString());
-
-    VersionInfoUtils.VersionInfo responseObject = VERSION_INFO_UTILS.getVersionInfoFromResponse(response);
-
-    assertNotNull(responseObject.groupId);
-    assertNotEquals("", responseObject.groupId);
-
-    assertNotNull(responseObject.artifactId);
-    assertNotEquals("", responseObject.artifactId);
-
-    assertNotNull(responseObject.version);
-    assertNotEquals("", responseObject.version);
-
-    assertNotNull(responseObject.buildTime);
-    assertNotEquals("", responseObject.buildTime);
-
-    assertNotNull(responseObject.branch);
-    assertNotEquals("", responseObject.branch);
-
-    assertNotNull(responseObject.commitId);
-    assertNotEquals("", responseObject.commitId);
-
-    assertNotNull(responseObject.commitMessage);
-    assertNotEquals("", responseObject.commitMessage);
+    return response;
   }
-
-
 }
