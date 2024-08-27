@@ -1,6 +1,6 @@
 package org.opengroup.osdu.workflow.provider.azure.cache;
 
-import com.lambdaworks.redis.codec.RedisCodec;
+import io.lettuce.core.codec.RedisCodec;
 import org.opengroup.osdu.core.common.cache.JsonCodec;
 import org.opengroup.osdu.core.common.cache.RedisCache;
 import org.opengroup.osdu.workflow.provider.azure.config.RedisConfig;
