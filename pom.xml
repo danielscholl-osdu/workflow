@@ -37,6 +37,7 @@
 
   <modules>
     <module>workflow-core</module>
+    <module>workflow-core-plus</module>
     <module>provider/workflow-aws</module>
     <module>provider/workflow-azure</module>
     <module>provider/workflow-gc</module>

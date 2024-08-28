@@ -1,0 +1,7 @@
+variables:
+  CORE_SERVICE: workflow
+
+core-test:
+  variables:
+    ENVIRONMENT: $CORE_ENVIRONMENT
+    REGISTER_BASE_URL: $CORE_REGISTER_BASE_URL
