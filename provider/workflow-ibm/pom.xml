@@ -21,7 +21,7 @@
 		<!-- <spring-boot.repackage.skip>true</spring-boot.repackage.skip> -->
 		<osdu.ibmcore.version>0.25.0</osdu.ibmcore.version>
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
-    <os-core-lib-ibm.version>0.26.0-rc8</os-core-lib-ibm.version>
+    <os-core-lib-ibm.version>0.26.0</os-core-lib-ibm.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
     <spring-security-core.version>6.3.0</spring-security-core.version>
 	</properties>
