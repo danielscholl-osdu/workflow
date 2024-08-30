@@ -41,17 +41,17 @@ include:
   - project: "osdu/platform/ci-cd-pipelines"
     file: "cloud-providers/gc-global.yml"
 
-  - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/ibm.yml"
+  # - project: "osdu/platform/ci-cd-pipelines"
+  #   file: "cloud-providers/ibm.yml"
 
-  - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/aws-global.yml"
+  # - project: "osdu/platform/ci-cd-pipelines"
+  #   file: "cloud-providers/aws-global.yml"
 
-  - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/aws-maven.yml"
+  # - project: "osdu/platform/ci-cd-pipelines"
+  #   file: "cloud-providers/aws-maven.yml"
 
-  - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/azure.yml"
+  # - project: "osdu/platform/ci-cd-pipelines"
+  #   file: "cloud-providers/azure.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
     file: "cloud-providers/core-global.yml"
@@ -61,7 +61,7 @@ include:
 
 .maven:
   image: maven:3.9.3-eclipse-temurin-17
-  tags: ['osdu-medium']
+  tags: ["osdu-medium"]
   variables:
     MAVEN_REPO_PATH: "$CI_PROJECT_DIR/.m2/repository"
     MAVEN_CLI_OPTS: "--batch-mode --settings=$CI_PROJECT_DIR/.mvn/community-maven.settings.xml"
@@ -123,7 +123,6 @@ include:
               sys.stdout.write(dir + '\0')
       EOF
     - xargs -0rn 1 echo < $ALL_MAVEN_BUILD_DIRS_Z
-
     # This creates a script for running maven, capturing output to a file.
     # - First argument is the directory to build from
     # - Second argument is the name to use for the logfile
@@ -180,20 +179,19 @@ download_plugins:
     variables:
       - $CORE == '1'
 
-
 gemnasium-maven-dependency_scanning:
   variables:
     DS_JAVA_VERSION: 17
 
-azure_containerize:
-  variables:
-    AZURE_CONTAINERIZE_REPOSITORY: "-b jdk-17 https://gitlab-ci-token:${CI_JOB_TOKEN}@community.opengroup.org/osdu/platform/deployment-and-operations/base-containers-azure/service-base-image"
+# azure_containerize:
+#   variables:
+#     AZURE_CONTAINERIZE_REPOSITORY: "-b jdk-17 https://gitlab-ci-token:${CI_JOB_TOKEN}@community.opengroup.org/osdu/platform/deployment-and-operations/base-containers-azure/service-base-image"
 
-azure_test:
-  image: community.opengroup.org:5555/osdu/platform/deployment-and-operations/base-containers-azure/azure-maven17:v0.0.1
+# azure_test:
+#   image: community.opengroup.org:5555/osdu/platform/deployment-and-operations/base-containers-azure/azure-maven17:v0.0.1
 
-aws-test-java:
-  image: $CI_REGISTRY/osdu/platform/deployment-and-operations/base-containers-aws/aws-maven/aws-maven:v2.0
+# aws-test-java:
+#   image: $CI_REGISTRY/osdu/platform/deployment-and-operations/base-containers-aws/aws-maven/aws-maven:v2.0
 
 fossa-analyze:
   image: $CI_REGISTRY/divido/fossa-with-cache:v0.9-jdk17
