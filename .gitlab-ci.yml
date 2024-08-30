@@ -162,9 +162,9 @@ download_plugins:
   stage: build
   variables:
     OSM_PACKAGE_REGISTRY_URL: "https://community.opengroup.org/api/v4/projects/1448/packages/maven"
-    OSM_VERSION: "0.26.0"
+    OSM_VERSION: "0.27.0-rc3"
     OQM_PACKAGE_REGISRTY_URL: "https://community.opengroup.org/api/v4/projects/1450/packages/maven"
-    OQM_VERSION: "0.26.0"
+    OQM_VERSION: "0.27.0-rc2"
 
   artifacts:
     paths:

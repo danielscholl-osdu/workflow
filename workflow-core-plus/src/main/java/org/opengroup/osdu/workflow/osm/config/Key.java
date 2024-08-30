@@ -28,8 +28,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Key {
 
-  private Long id;
-
   private String name;
 }
 

@@ -22,12 +22,12 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
-@ConfigurationPropertiesScan("org.opengroup.osdu.workflow.provider.gcp.config")
+@ConfigurationPropertiesScan("org.opengroup.osdu.workflow.config")
 @PropertySource("classpath:swagger.properties")
-public class WorkflowCorePlusDatastoreApplication {
+public class WorkflowCorePlusApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(WorkflowCorePlusDatastoreApplication.class, args);
+    SpringApplication.run(WorkflowCorePlusApplication.class, args);
   }
 
 }

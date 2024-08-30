@@ -2,8 +2,12 @@ FROM azul/zulu-openjdk:17
 WORKDIR /app
 ARG PROVIDER_NAME
 ENV PROVIDER_NAME core-plus
+
+COPY tmp/os-oqm-rabbitmq-*.jar plugins/oqm-rabbitmq.jar
+COPY tmp/os-osm-postgres-*.jar plugins/osm-postgres.jar
+
 # Copy the jar to the production image from the builder stage.
-COPY workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*.jar workflow-${PROVIDER_NAME}.jar
+COPY workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*-spring-boot.jar workflow-${PROVIDER_NAME}.jar
 
 # Add a non-root user
 RUN groupadd -g 10001 -r nonroot \
@@ -19,7 +23,7 @@ CMD java --add-opens java.base/java.lang=ALL-UNNAMED \
          -Dserver.port=${PORT} \
          -Dlog4j.formatMsgNoLookups=true \
          -Dloader.path=plugins/ \
-         -Dloader.main=org.opengroup.osdu.workflow.WorkflowCorePlusDatastoreApplication \
+         -Dloader.main=org.opengroup.osdu.workflow.WorkflowCorePlusApplication \
          -XX:+UseG1GC \
          -XX:+UseStringDeduplication \
          -XX:InitiatingHeapOccupancyPercent=45 \
