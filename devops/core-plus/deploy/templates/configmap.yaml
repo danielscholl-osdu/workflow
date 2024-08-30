@@ -7,5 +7,5 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   LOG_LEVEL: {{ .Values.data.logLevel | quote }}
-  ENTITLEMENTS_HOST: { { .Values.data.entitlementsHost  | quote } }
-  PARTITION_HOST: { { .Values.data.partitionHost  | quote } }
+  ENTITLEMENTS_HOST: {{ .Values.data.entitlementsHost  | quote }}
+  PARTITION_HOST: {{ .Values.data.partitionHost  | quote }}
