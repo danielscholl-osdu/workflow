@@ -3,6 +3,7 @@ package org.opengroup.osdu.workflow.provider.azure.config;
 import com.azure.identity.DefaultAzureCredential;
 import org.opengroup.osdu.azure.blobstorage.BlobStore;
 import org.opengroup.osdu.azure.blobstorage.IBlobServiceClientFactory;
+import org.opengroup.osdu.azure.logging.DependencyLogger;
 import org.opengroup.osdu.azure.partition.PartitionServiceClient;
 import org.opengroup.osdu.core.common.logging.ILogger;
 import org.opengroup.osdu.workflow.provider.azure.cache.IngestBlobServiceClientCache;
@@ -33,7 +34,7 @@ public class BlobStoreProviderIngest {
 
   @Bean
   @Qualifier("IngestBlobStore")
-  public BlobStore buildBlobStore(@Qualifier("IngestBlobServiceClientFactory") final IBlobServiceClientFactory blobServiceClientFactory, final ILogger logger) {
-    return new BlobStore(blobServiceClientFactory, logger);
+  public BlobStore buildBlobStore(@Qualifier("IngestBlobServiceClientFactory") final IBlobServiceClientFactory blobServiceClientFactory, final ILogger logger, DependencyLogger depLogger) {
+    return new BlobStore(blobServiceClientFactory, logger, depLogger);
   }
 }
