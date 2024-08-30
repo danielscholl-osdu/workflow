@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2022 Google LLC
+ *  Copyright 2020-2022 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,14 +15,21 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.config;
 
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
+public class AirflowConfigConstants {
 
-public interface IDestinationProvider {
+  public static final String COMPOSER_CLIENT = "composer.client";
 
-  Destination getDestination(String tenantName, String kindName);
+  public static final String IS_AIRFLOW_API_VERSION_2 = "osdu.airflow.version2";
 
-  Destination getDestination(TenantInfo tenantInfo, String kindName);
+  public static final String V2 = "V2";
+
+  public static final String IAAP = "IAAP";
+
+  public static final String NONE = "NONE";
+
+
+  private AirflowConfigConstants() {
+  }
 }

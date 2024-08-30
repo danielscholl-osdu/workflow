@@ -15,10 +15,10 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.osm.config;
 
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
+import org.opengroup.osdu.core.gcp.osm.model.Destination;
 
 public interface IDestinationProvider {
 

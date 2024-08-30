@@ -2,7 +2,7 @@ FROM google/cloud-sdk:alpine
 
 WORKDIR /opt
 
-COPY ./provider/workflow-gc/bootstrap/ /opt/
+COPY workflow-core-plus/bootstrap/ /opt/
 
 RUN apk add jq
 RUN chmod +x bootstrap.sh validate-env.sh

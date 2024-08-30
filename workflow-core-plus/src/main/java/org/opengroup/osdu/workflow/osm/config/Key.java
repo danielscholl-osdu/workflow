@@ -1,6 +1,7 @@
+package org.opengroup.osdu.workflow.osm.config;
+
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2024 Google LLC
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,15 +15,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-package org.opengroup.osdu.workflow.osm.config;
+@Setter
+@Getter
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
+public class Key {
 
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
+  private Long id;
 
-public interface IDestinationProvider {
-
-  Destination getDestination(String tenantName, String kindName);
-
-  Destination getDestination(TenantInfo tenantInfo, String kindName);
+  private String name;
 }
+

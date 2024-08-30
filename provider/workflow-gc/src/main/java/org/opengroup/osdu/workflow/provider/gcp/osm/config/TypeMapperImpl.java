@@ -15,17 +15,18 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.osm.config;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
-import java.sql.Timestamp;
+import com.google.cloud.Timestamp;
+import com.google.cloud.datastore.Key;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
-import org.opengroup.osdu.core.osm.core.persistence.IdentityTranslator;
-import org.opengroup.osdu.core.osm.core.translate.Instrumentation;
-import org.opengroup.osdu.core.osm.core.translate.TypeMapper;
+import org.opengroup.osdu.core.gcp.osm.persistence.IdentityTranslator;
+import org.opengroup.osdu.core.gcp.osm.translate.Instrumentation;
+import org.opengroup.osdu.core.gcp.osm.translate.TypeMapper;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope(SCOPE_SINGLETON)
+@ConditionalOnProperty(name = "osmDriver")
 public class TypeMapperImpl extends TypeMapper {
 
   public TypeMapperImpl() {

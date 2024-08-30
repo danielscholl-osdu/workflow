@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.repository;
+package org.opengroup.osdu.workflow.provider.gcp.osm.repository;
 
 import com.google.api.client.http.HttpStatusCodes;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
-import org.opengroup.osdu.core.osm.core.model.Kind;
-import org.opengroup.osdu.core.osm.core.model.Namespace;
-import org.opengroup.osdu.core.osm.core.model.query.GetQuery;
-import org.opengroup.osdu.core.osm.core.service.Context;
-import org.opengroup.osdu.core.osm.core.translate.TranslatorException;
+import org.opengroup.osdu.core.gcp.osm.model.Destination;
+import org.opengroup.osdu.core.gcp.osm.model.Kind;
+import org.opengroup.osdu.core.gcp.osm.model.Namespace;
+import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
+import org.opengroup.osdu.core.gcp.osm.service.Context;
+import org.opengroup.osdu.core.gcp.osm.translate.TranslatorException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
-import org.opengroup.osdu.workflow.config.WorkflowPropertiesConfiguration;
-import org.opengroup.osdu.workflow.osm.config.IDestinationProvider;
-import org.opengroup.osdu.workflow.repository.ICommonMetadataRepository;
+import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
+import org.opengroup.osdu.workflow.provider.gcp.osm.config.IDestinationProvider;
+import org.opengroup.osdu.workflow.provider.gcp.repository.ICommonMetadataRepository;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.opengroup.osdu.core.osm.core.model.where.predicate.Eq.eq;
+import static org.opengroup.osdu.core.gcp.osm.model.where.predicate.Eq.eq;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
 @Repository

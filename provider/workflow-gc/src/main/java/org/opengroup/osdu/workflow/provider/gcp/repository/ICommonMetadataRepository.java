@@ -15,14 +15,18 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.repository;
 
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
+import java.util.List;
+import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 
-public interface IDestinationProvider {
+public interface ICommonMetadataRepository {
 
-  Destination getDestination(String tenantName, String kindName);
+  WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata, boolean isSystemWorkflow);
 
-  Destination getDestination(TenantInfo tenantInfo, String kindName);
+  WorkflowMetadata getWorkflow(String workflowName, boolean isSystemWorkflow);
+
+  void deleteWorkflow(String workflowName, boolean isSystemWorkflow);
+
+  List<WorkflowMetadata> getAllWorkflowForTenant(final String prefix, boolean isSystemWorkflow);
 }

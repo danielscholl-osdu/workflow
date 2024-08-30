@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2022 Google LLC
+ *  Copyright 2020-2022 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.service;
 
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.Destination;
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 
-public interface IDestinationProvider {
+public interface ComposerClient {
 
-  Destination getDestination(String tenantName, String kindName);
-
-  Destination getDestination(TenantInfo tenantInfo, String kindName);
+  ClientResponse sendAirflowRequest(String httpMethod, String url, String stringData,
+      WorkflowEngineRequest rq);
 }

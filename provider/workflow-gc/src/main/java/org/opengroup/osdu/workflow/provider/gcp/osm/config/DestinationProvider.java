@@ -15,15 +15,15 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.osm.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
 import org.opengroup.osdu.core.common.provider.interfaces.ITenantFactory;
-import org.opengroup.osdu.core.osm.core.model.Destination;
-import org.opengroup.osdu.core.osm.core.model.Kind;
-import org.opengroup.osdu.core.osm.core.model.Namespace;
+import org.opengroup.osdu.core.gcp.osm.model.Destination;
+import org.opengroup.osdu.core.gcp.osm.model.Kind;
+import org.opengroup.osdu.core.gcp.osm.model.Namespace;
 import org.springframework.stereotype.Service;
 
 @Service

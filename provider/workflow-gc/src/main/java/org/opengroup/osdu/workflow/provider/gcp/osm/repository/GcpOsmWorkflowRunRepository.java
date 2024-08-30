@@ -15,10 +15,10 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.osm.repository;
+package org.opengroup.osdu.workflow.provider.gcp.osm.repository;
 
-import static org.opengroup.osdu.core.osm.core.model.where.condition.And.and;
-import static org.opengroup.osdu.core.osm.core.model.where.predicate.Eq.eq;
+import static org.opengroup.osdu.core.gcp.osm.model.where.condition.And.and;
+import static org.opengroup.osdu.core.gcp.osm.model.where.predicate.Eq.eq;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
 import com.google.api.client.http.HttpStatusCodes;
@@ -31,15 +31,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.legal.PersistenceException;
 import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.osm.core.model.query.GetQuery;
-import org.opengroup.osdu.core.osm.core.service.Context;
-import org.opengroup.osdu.core.osm.core.service.Results;
-import org.opengroup.osdu.core.osm.core.translate.TranslatorException;
+import org.opengroup.osdu.core.gcp.osm.model.query.GetQuery;
+import org.opengroup.osdu.core.gcp.osm.service.Context;
+import org.opengroup.osdu.core.gcp.osm.service.Results;
+import org.opengroup.osdu.core.gcp.osm.translate.TranslatorException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
-import org.opengroup.osdu.workflow.config.WorkflowPropertiesConfiguration;
-import org.opengroup.osdu.workflow.osm.config.IDestinationProvider;
+import org.opengroup.osdu.workflow.provider.gcp.config.WorkflowPropertiesConfiguration;
+import org.opengroup.osdu.workflow.provider.gcp.osm.config.IDestinationProvider;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;

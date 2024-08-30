@@ -3,7 +3,7 @@ WORKDIR /app
 ARG PROVIDER_NAME
 ENV PROVIDER_NAME core-plus
 # Copy the jar to the production image from the builder stage.
-COPY provider/workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*.jar workflow-${PROVIDER_NAME}.jar
+COPY workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*.jar workflow-${PROVIDER_NAME}.jar
 
 # Add a non-root user
 RUN groupadd -g 10001 -r nonroot \
@@ -19,6 +19,7 @@ CMD java --add-opens java.base/java.lang=ALL-UNNAMED \
          -Dserver.port=${PORT} \
          -Dlog4j.formatMsgNoLookups=true \
          -Dloader.path=plugins/ \
+         -Dloader.main=org.opengroup.osdu.workflow.WorkflowCorePlusDatastoreApplication \
          -XX:+UseG1GC \
          -XX:+UseStringDeduplication \
          -XX:InitiatingHeapOccupancyPercent=45 \
