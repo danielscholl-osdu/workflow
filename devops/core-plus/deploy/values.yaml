@@ -42,3 +42,11 @@ conf:
   rabbitmqSecretName: "rabbitmq-secret"
   bootstrapSecretName: "datafier-secret"
   replicas: 1
+
+istio:
+  proxyCPU: "5m"
+  proxyCPULimit: "200m"
+  proxyMemory: "50Mi"
+  proxyMemoryLimit: "256Mi"
+  bootstrapProxyCPU: "5m"
+  bootstrapProxyCPULimit: "50m"
