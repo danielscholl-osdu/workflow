@@ -31,7 +31,6 @@ Defined in default application property file but possible to override:
 | `MANAGEMENT_ENDPOINTS_WEB_BASE`    | ex `/`                                          | Web base for Actuator                                                                                                                                  | no         | -                                   |
 | `MANAGEMENT_SERVER_PORT`           | ex `8081`                                       | Port for Actuator                                                                                                                                      | no         | -                                   |
 
-
 These variables define service behavior, and are used to switch between `Reference` or `Google Cloud` environments, their overriding
 and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
 
@@ -40,7 +39,7 @@ and usage in the mixed mode were not tested. Usage of spring profiles is preferr
 | `PARTITION_AUTH_ENABLED` | ex `true` or `false` | Disable or enable auth token provisioning for requests to Partition service | no | - |
 | `OQMDRIVER` | `rabbitmq` or `pubsub` | OQM driver mode that defines which message broker will be used | no | - |
 | `OSMDRIVER` | `postgres` OR `datastore` | OSM driver mode that defines which storage will be used | no | - |
-| `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
+| `SYSTEM_WORKFLOW_NAMESPACE` | ex `system_workflow_namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
 
 ### Properties set in Partition service
 
