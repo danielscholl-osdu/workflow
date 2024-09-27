@@ -1,0 +1,9 @@
+variables:
+  CORE_SERVICE: workflow
+  CORE_ENABLE_BOOTSTRAP: "true"
+
+core-test:
+  variables:
+    TEST_DAG_NAME: "airflow_monitoring"
+    FINISHED_WORKFLOW_ID: "79447ca3-e313-41e0-b8a5-2ea0cbec24c5"
+    WORKFLOW_HOST: "https://osdu.core-dev.gcp.gnrg-osdu.projects.epam.com/api/workflow/"
