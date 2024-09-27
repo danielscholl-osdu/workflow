@@ -14,7 +14,7 @@ source ./validate-env.sh "OPENID_PROVIDER_URL"
 source ./validate-env.sh "OPENID_PROVIDER_CLIENT_ID"
 source ./validate-env.sh "OPENID_PROVIDER_CLIENT_SECRET"
 
-bootstrap_workflow_onprem() {
+bootstrap_workflow() {
 
     # Getting ID_TOKEN from OpenID provider
     ID_TOKEN="$(curl --location --silent --globoff --request POST "${OPENID_PROVIDER_URL}/protocol/openid-connect/token" \
