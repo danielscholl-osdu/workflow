@@ -156,7 +156,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-      <version>4.1.72.Final</version>
+      <version>4.1.114.Final</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -171,7 +171,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
-      <version>4.1.68.Final</version>
+      <version>4.1.114.Final</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -182,7 +182,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-common</artifactId>
-      <version>4.1.71.Final</version>
+      <version>4.1.114.Final</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
