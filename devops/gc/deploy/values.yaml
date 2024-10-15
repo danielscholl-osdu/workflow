@@ -7,6 +7,8 @@ global:
   onPremEnabled: false
   limitsEnabled: true
   dataPartitionId: ""
+  tier: ""
+  autoscaling: true
 
 data:
   #Configmap variables
@@ -54,3 +56,20 @@ istio:
   proxyMemoryLimit: "256Mi"
   bootstrapProxyCPU: "5m"
   bootstrapProxyCPULimit: "50m"
+
+hpa:
+  minReplicas: 6
+  maxReplicas: 15
+  targetType: "AverageValue"
+  targetValue: 140 # 80*0.86*2
+  behaviorScaleUpStabilizationWindowSeconds: 10
+  behaviorScaleUpPoliciesValue: 50
+  behaviorScaleUpPoliciesPeriodSeconds: 15
+  behaviorScaleDownStabilizationWindowSeconds: 60
+  behaviorScaleDownPoliciesValue: 25
+  behaviorScaleDownPoliciesPeriodSeconds: 60
+
+limits:
+  maxTokens: 80
+  tokensPerFill: 80
+  fillInterval: "1s"
