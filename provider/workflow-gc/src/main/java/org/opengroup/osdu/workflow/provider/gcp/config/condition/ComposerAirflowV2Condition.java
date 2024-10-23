@@ -17,9 +17,9 @@
 
 package org.opengroup.osdu.workflow.provider.gcp.config.condition;
 
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.COMPOSER_CLIENT;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.IS_AIRFLOW_API_VERSION_2;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.NONE;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.COMPOSER_CLIENT;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.IS_AIRFLOW_API_VERSION_2;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.NONE;
 
 import com.google.common.base.Strings;
 import org.springframework.context.annotation.Condition;

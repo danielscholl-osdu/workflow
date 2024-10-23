@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2024 Google LLC
+ *  Copyright 2020-2024 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package org.opengroup.osdu.workflow.provider.gcp.service;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.COMPOSER_CLIENT;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.IAAP;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.COMPOSER_CLIENT;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.IAAP;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -50,7 +50,7 @@ public class ComposerIaapClient implements ComposerClient {
   @Override
   public ClientResponse sendAirflowRequest(
       String httpMethod, String url, String stringData, WorkflowEngineRequest rq) {
-    log.info(
+    log.debug(
         "Calling airflow endpoint with Google API. Http method: {}, Endpoint: {}, request body: {}",
         httpMethod, url, getTruncatedData(stringData));
     String airflowUrl = this.airflowConfig.getUrl();
@@ -78,7 +78,7 @@ public class ComposerIaapClient implements ComposerClient {
     } catch (IOException e) {
       String errorMessage = format("Unable to send request to Airflow. %s", e.getMessage());
       log.error(errorMessage, e);
-      throw new AppException(500, "Failed to send request.", errorMessage);
+      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to send request.", errorMessage);
     }
   }
 

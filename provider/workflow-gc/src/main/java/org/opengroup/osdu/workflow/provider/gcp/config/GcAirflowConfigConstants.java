@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2021 Google LLC
- *  Copyright 2020-2021 EPAM Systems, Inc
+ *  Copyright 2020-2024 Google LLC
+ *  Copyright 2020-2024 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  *  limitations under the License.
  */
 
-package org.opengroup.osdu.workflow.provider.gcp.osm.config;
+package org.opengroup.osdu.workflow.provider.gcp.config;
 
-import org.opengroup.osdu.core.common.model.tenant.TenantInfo;
-import org.opengroup.osdu.core.gcp.osm.model.Destination;
+import org.opengroup.osdu.workflow.config.AirflowConfigConstants;
 
-public interface IDestinationProvider {
+public class GcAirflowConfigConstants extends AirflowConfigConstants {
 
-  Destination getDestination(String tenantName, String kindName);
-
-  Destination getDestination(TenantInfo tenantInfo, String kindName);
+  public static final String COMPOSER_CLIENT = "composer.client";
 }

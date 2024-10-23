@@ -19,8 +19,6 @@ package org.opengroup.osdu.workflow.config;
 
 public class AirflowConfigConstants {
 
-  public static final String COMPOSER_CLIENT = "composer.client";
-
   public static final String IS_AIRFLOW_API_VERSION_2 = "osdu.airflow.version2";
 
   public static final String V2 = "V2";
@@ -28,8 +26,4 @@ public class AirflowConfigConstants {
   public static final String IAAP = "IAAP";
 
   public static final String NONE = "NONE";
-
-
-  private AirflowConfigConstants() {
-  }
 }

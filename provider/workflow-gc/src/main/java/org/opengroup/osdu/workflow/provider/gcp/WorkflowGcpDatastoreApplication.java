@@ -1,5 +1,6 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020-2024 Google LLC
+ *  Copyright 2020-2024 EPAM Systems, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +23,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication(scanBasePackages = "org.opengroup.osdu.workflow")
-@ConfigurationPropertiesScan("org.opengroup.osdu.workflow.provider.gcp.config")
+@ConfigurationPropertiesScan("org.opengroup.osdu.workflow.config")
 @PropertySource("classpath:swagger.properties")
 public class WorkflowGcpDatastoreApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(WorkflowGcpDatastoreApplication.class, args);
   }
-
 }

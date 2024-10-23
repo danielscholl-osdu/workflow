@@ -20,8 +20,8 @@ package org.opengroup.osdu.workflow.provider.gcp.service;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.COMPOSER_CLIENT;
-import static org.opengroup.osdu.workflow.provider.gcp.config.AirflowConfigConstants.V2;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.COMPOSER_CLIENT;
+import static org.opengroup.osdu.workflow.provider.gcp.config.GcAirflowConfigConstants.V2;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -44,6 +44,7 @@ import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -55,7 +56,6 @@ public class ComposerV2Client implements ComposerClient {
   private final HttpTransport httpTransport = new NetHttpTransport();
 
   private final GoogleCredentials credentials;
-
 
   public ComposerV2Client() throws IOException {
     try {
@@ -70,7 +70,7 @@ public class ComposerV2Client implements ComposerClient {
   @Override
   public ClientResponse sendAirflowRequest(String httpMethod, String url, String stringData,
       WorkflowEngineRequest rq) {
-    log.info(
+    log.debug(
         "Calling airflow endpoint with Google API. Http method: {}, Endpoint: {}, request body: {}",
         httpMethod, url, getTruncatedData(stringData));
 
@@ -78,7 +78,7 @@ public class ComposerV2Client implements ComposerClient {
 
     if (Objects.nonNull(stringData)) {
       inputStreamContent =
-          new InputStreamContent("application/json",
+          new InputStreamContent(MediaType.APPLICATION_JSON_VALUE,
               new ByteArrayInputStream(stringData.getBytes()));
     }
 

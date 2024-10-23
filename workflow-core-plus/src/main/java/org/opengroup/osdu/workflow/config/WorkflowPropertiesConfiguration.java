@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("gcp.datastore.conf")
+@ConfigurationProperties("datastore.conf")
 public class WorkflowPropertiesConfiguration {
   private String workflowRunKind;
   private String workflowKind;
