@@ -4,7 +4,6 @@
 
 global:
   domain: ""
-  onPremEnabled: false
   limitsEnabled: true
   dataPartitionId: ""
   tier: ""
@@ -43,10 +42,6 @@ data:
 conf:
   configmap: "workflow-config"
   appName: "workflow"
-  workflowAirflowSecretName: "workflow-airflow-secret"
-  workflowPostgresSecretName: "workflow-postgres-secret"
-  rabbitmqSecretName: "rabbitmq-secret"
-  bootstrapSecretName: "datafier-secret"
   replicas: 1
 
 istio:

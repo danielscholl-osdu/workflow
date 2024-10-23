@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2022 Google LLC
- *  Copyright 2020-2022 EPAM Systems, Inc
+ *  Copyright 2020-2024 Google LLC
+ *  Copyright 2020-2024 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,22 +14,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.opengroup.osdu.workflow.provider.gcp.formatter;
 
-package org.opengroup.osdu.workflow.provider.gcp.config;
+import ch.qos.logback.contrib.jackson.JacksonJsonFormatter;
+import java.io.IOException;
+import java.util.Map;
 
-public class AirflowConfigConstants {
-
-  public static final String COMPOSER_CLIENT = "composer.client";
-
-  public static final String IS_AIRFLOW_API_VERSION_2 = "osdu.airflow.version2";
-
-  public static final String V2 = "V2";
-
-  public static final String IAAP = "IAAP";
-
-  public static final String NONE = "NONE";
-
-
-  private AirflowConfigConstants() {
+public class GoogleJsonFormatter extends JacksonJsonFormatter {
+  @Override
+  public String toJsonString(Map map) throws IOException {
+    map.put("severity", map.remove("level"));
+    return super.toJsonString(map);
   }
 }

@@ -42,8 +42,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.opengroup.osdu.workflow.exception.GoogleIamException;
 import org.opengroup.osdu.workflow.exception.RuntimeException;
-import org.opengroup.osdu.workflow.provider.gcp.exception.GoogleIamException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 

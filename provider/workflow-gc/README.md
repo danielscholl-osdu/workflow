@@ -1,6 +1,6 @@
-# workflow-gc
+# Workflow GC
 
-The OSDU R3 Workflow service is designed to start business processes in the system. In the OSDU R3
+The OSDU Workflow service is designed to start business processes in the system. In the OSDU R3
 prototype phase, the service allows you to work with workflow metadata, supporting CRUD operations
 and also trigger workflow in airflow, get, delete and change the status of process startup records.
 
@@ -20,10 +20,6 @@ In order to run this service locally, you will need the following:
 
 ## Service Configuration
 
-### Baremetal
-
-[Baremetal service configuration](docs/baremetal/README.md)
-
 ### Google Cloud
 
 [Google cloud service configuration](docs/gcp/README.md)
@@ -31,10 +27,6 @@ In order to run this service locally, you will need the following:
 ### Test the application
 
 After the service has started it should be accessible via a web browser by visiting [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). If the request does not fail, you can then run the integration tests.
-
-### Baremetal test configuration
-
-[Baremetal service configuration](docs/baremetal/README.md)
 
 ### Google Cloud test configuration
 
@@ -116,13 +108,32 @@ mvn clean install -DskipTests
 
 After configuring your environment as specified above, you can follow these steps to build and run the application. These steps should be invoked from the *repository root.*
 
+* Download plugins:
+GC OSM is used for `Google Cloud Datastore` or `PostgreSQL`.
+
 ```bash
-cd provider/workflow-gc-datastore/ && mvn spring-boot:run
+mvn dependency:copy -DrepoUrl="https://community.opengroup.org/api/v4/projects/1476/packages/maven" -Dartifact="org.opengroup.osdu:gc-osm-datastore:${VERSION}:jar:plugin" -Dtransitive=false -DoutputDirectory="./tmp-gc"
+```
+GC OQM is used for `Google Cloud Pub/Sub` or `RabbitMQ`.
+
+```bash
+mvn dependency:copy -DrepoUrl="https://community.opengroup.org/api/v4/projects/1477/packages/maven" -Dartifact="org.opengroup.osdu:gc-oqm-pubsub:${VERSION}:jar:plugin" -Dtransitive=false -DoutputDirectory="./tmp-gc"
+```
+
+```bash
+cd provider/workflow-gc/
+
+bash
+CMD java --add-opens java.base/java.lang=ALL-UNNAMED \
+         --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+         -Dloader.main=org.opengroup.osdu.workflow.provider.gcp.WorkflowGcpDatastoreApplication \
+         -Dloader.path=../../tmp-gc
+         -jar /target/workflow-gc-***-spring-boot.jar
 ```
 
 ## Deployment
 
-Workflow Service is compatible with App Engine Flexible Environment and Cloud Run.
+Workflow Service is compatible with App Engine Flexible Environment, Cloud Run and GKE.
 
 - To deploy into Cloud run, please, use this documentation:
   <https://cloud.google.com/run/docs/quickstarts/build-and-deploy>
