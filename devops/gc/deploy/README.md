@@ -76,6 +76,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **conf.workflowAirflowSecretName**  | secret for airflow         | string  | workflow-airflow-secret  | yes      |
 | **conf.rabbitmqSecretName**         | secret for rabbitmq        | string  | rabbitmq-secret          | yes      |
 | **conf.bootstrapSecretName**        | Secret name for bootstrap  | string  | datafier-secret          | yes      |
+| **conf.replicas**                   | Number of pods for service | integer | 2                        | yes      |
 
 ### Istio variables
 
