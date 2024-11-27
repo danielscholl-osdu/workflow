@@ -42,7 +42,7 @@ data:
 conf:
   configmap: "workflow-config"
   appName: "workflow"
-  replicas: 1
+  replicas: 2
 
 istio:
   proxyCPU: "5m"
