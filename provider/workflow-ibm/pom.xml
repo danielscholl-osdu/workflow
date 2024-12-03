@@ -23,7 +23,6 @@
 		<start-class>org.opengroup.osdu.workflow.provider.ibm.WorkflowIBMApplication</start-class>
     <os-core-lib-ibm.version>0.26.0</os-core-lib-ibm.version>
 		<lucene.core.version>8.10.0</lucene.core.version>
-    <spring-security-core.version>6.3.0</spring-security-core.version>
 	</properties>
 
 	<dependencies>
@@ -85,14 +84,6 @@
 <!--					<groupId>org.apache.tomcat</groupId>-->
 <!--					<artifactId>tomcat-websocket</artifactId>-->
 <!--				</exclusion>-->
-				<exclusion>
-            		<groupId>org.springframework.security</groupId>
-            		<artifactId>spring-security-core</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>org.springframework.security</groupId>
-            		<artifactId>spring-security-web</artifactId>
-            	</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -103,7 +94,7 @@
             		<groupId>org.springframework.security</groupId>
             		<artifactId>spring-security-core</artifactId>
             	</exclusion>
-            	<exclusion>
+              <exclusion>
             		<groupId>org.springframework.security</groupId>
             		<artifactId>spring-security-web</artifactId>
             	</exclusion>
@@ -206,22 +197,6 @@
             		<artifactId>spring-security-core</artifactId>
             	</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-    		<groupId>org.springframework.security</groupId>
-    		<artifactId>spring-security-web</artifactId>
-    		<version>6.1.6</version>
-    		<exclusions>
-				<exclusion>
-            		<groupId>org.springframework.security</groupId>
-            		<artifactId>spring-security-core</artifactId>
-            	</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-    		<groupId>org.springframework.security</groupId>
-    		<artifactId>spring-security-core</artifactId>
-    		<version>${spring-security-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
