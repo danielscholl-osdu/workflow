@@ -32,7 +32,6 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | Name | Description | Type | Default |Required |
 |------|-------------|------|---------|---------|
 | **global.domain** | your domain for the external endpoint, ex `example.com` | string | - | yes |
-| **global.onPremEnabled** | whether on-prem is enabled | boolean | false | yes |
 | **global.limitsEnabled** | whether CPU and memory limits are enabled | boolean | true | yes |
 | **global.dataPartitionId** | ID of data partition | string | - | yes |
 | **global.tier** | Only PROD must be used to enable autoscaling | string | "" | no |
@@ -48,9 +47,7 @@ First you need to set variables in **values.yaml** file using any code editor. S
 | **data.legalHost** | legal host for creating a tag in bootstrap | string | "<http://legal>" | yes |
 | **data.schemaHost** | schema host for checking schema status in bootstrap | string | "<http://schema>" | yes |
 | **data.osduAirflowUrl**       | airflow url           | string | "<http://airflow:8080>" | yes      |
-| **data.sharedTenantName**     | tenant name           | string | -                     | yes      |
 | **data.worflowHost**     | Workflow host URL    | string | "<http://workflow>" | yes      |
-| **data.composerClient**  | authentication method used by Workflow to authenticate its requests to Airflow | string | IAAP | no |
 
 ### Deployment variables
 

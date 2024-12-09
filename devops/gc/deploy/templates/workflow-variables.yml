@@ -10,6 +10,3 @@ data:
   PARTITION_HOST: {{ .Values.data.partitionHost | quote }}
   ENTITLEMENTS_HOST: {{ .Values.data.entitlementsHost | quote }}
   OSDU_AIRFLOW_URL: {{ .Values.data.osduAirflowUrl | quote }}
-  SHARED_TENANT_NAME: {{ "system" }}
-  SPRING_PROFILES_ACTIVE: "gcp"
-  COMPOSER_CLIENT: {{ .Values.data.composerClient | quote  }}
