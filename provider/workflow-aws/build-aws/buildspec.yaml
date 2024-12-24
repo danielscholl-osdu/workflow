@@ -75,10 +75,6 @@ phases:
       - echo "Building primary service assemblies..."
       - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
       - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
-      # Suspended until further notice
-      # - echo "Copying assemblies to dist..."
-      # - cp ./provider/workflow-aws/target/*spring-boot.jar ${OUTPUT_DIR}/bin # copy aws jars
-      # - cp ./workflow-core/target/*.jar ${OUTPUT_DIR}/bin # copy core jar
 
       - echo "Building integration testing assemblies and gathering artifacts..."
       - ./testing/workflow-test-aws/build-aws/prepare-dist.sh
@@ -90,12 +86,10 @@ phases:
       - echo "Logging into Docker Hub..."
       - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-      - echo "Building docker image..."
-      - docker build -f provider/workflow-aws/build-aws/Dockerfile -t ${ECR_IMAGE} .
-      - docker tag  ${ECR_IMAGE} ${ECR_IMAGE_BRANCH_LATEST}
-      - echo "Pushing docker image..."
-      - docker push ${ECR_IMAGE}
-      - docker push ${ECR_IMAGE_BRANCH_LATEST}
+      - echo "Build and push docker image..."
+      - docker buildx create --driver docker-container --use
+      - docker buildx inspect --bootstrap
+      - docker buildx build --platform linux/arm64/v8,linux/amd64 --pull --push -f provider/workflow-aws/build-aws/Dockerfile -t ${ECR_IMAGE} -t ${ECR_IMAGE_BRANCH_LATEST} .
 
       - echo "Generate build-info.json"
       - |
