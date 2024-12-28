@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   Copyright © Microsoft Corporation
 
@@ -14,8 +13,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
-
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opengroup.osdu</groupId>
@@ -31,70 +29,40 @@
   <packaging>jar</packaging>
 
   <properties>
-    <azure.version>3.4.0</azure.version>
-    <azure.appservice.resourcegroup />
-    <azure.appservice.plan />
-    <azure.appservice.appname />
-    <azure.appservice.subscription />
-    <reactor-netty-http.version>1.1.14</reactor-netty-http.version>
-    <osdu.corelibazure.version>1.0.0</osdu.corelibazure.version>
-    <log4j.version>2.22.0</log4j.version>
+    <core-lib-azure.version>2.0.2</core-lib-azure.version>
+    <json.version>20240303</json.version>
+    <!-- Plugin Versions -->
+    <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Hoxton.SR3</version>
+        <groupId>org.opengroup.osdu</groupId>
+        <artifactId>core-lib-azure</artifactId>
+        <version>${core-lib-azure.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+
   <dependencies>
+    <!-- OSDU Dependencies -->
     <dependency>
-      <!--Azure core has xml deserialization issue after 1.34 due to headers not fetched from
-          NettyToAzureCoreHttpHeadersWrapper class and fails for decoding the xml responses used in
-          workflow sharing via sas token
-          If we use azure-core-http-netty there is no such issue and we get azure-core 1.35 which
-          is the current version in core-lib-azure          -->
-      <artifactId>azure-core-http-netty</artifactId>
-      <groupId>com.azure</groupId>
-      <version>1.15.0</version>
+      <groupId>org.opengroup.osdu</groupId>
+      <artifactId>workflow-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opengroup.osdu</groupId>
+      <artifactId>core-lib-azure</artifactId>
+      <version>${core-lib-azure.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.azure.spring</groupId>
-      <artifactId>spring-cloud-azure-starter-active-directory</artifactId>
-      <version>5.13.0</version>
-    </dependency>
-    <!-- Log settings dependencies -->
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.36</version>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20240303</version>
-    </dependency>
+    <!-- Spring Dependencies -->
+    <!-- Versions managed by parent pom -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
@@ -108,156 +76,49 @@
           <artifactId>log4j-to-slf4j</artifactId>
         </exclusion>
       </exclusions>
-
     </dependency>
     <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-oauth2-client</artifactId>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-oauth2-jose</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-azure</artifactId>
-      <version>${osdu.corelibazure.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.microsoft.azure</groupId>
-          <artifactId>applicationinsights-logging-log4j2</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.opengroup.osdu</groupId>
-          <artifactId>os-core-common</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-to-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-log4j2</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-        <exclusion>
-          <artifactId>okio</artifactId>
-          <groupId>com.squareup.okio</groupId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     </dependency>
 
+
+    <!-- Project Dependencies -->
     <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>workflow-core</artifactId>
-      <version>0.28.0-SNAPSHOT</version>
-    </dependency>
-    <!-- netty related dependencies -->
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
+      <groupId>com.azure.spring</groupId>
+      <artifactId>spring-cloud-azure-starter-active-directory</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-storage-file-share</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-codec</artifactId>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>${json.version}</version>
     </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-tcnative-boringssl-static</artifactId>
-    </dependency>
-    <!-- netty related dependencies -->
+
     <!-- Testing packages -->
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <version>5.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>4.5.1</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.junit.vintage</groupId>
-          <artifactId>junit-vintage-engine</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-inline</artifactId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xmlunit-core</artifactId>
-          <groupId>org.xmlunit</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
-
-
-    <!-- WhiteSource updates -->
-    <dependency>
-      <groupId>org.apache.tomcat</groupId>
-      <artifactId>tomcat-catalina</artifactId>
-      <version>10.1.30</version>
-    </dependency>
-
-    <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>net.minidev</groupId>
-      <artifactId>accessors-smart</artifactId>
-      <version>2.4.7</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-storage-file-share</artifactId>
-      <version>12.21.2</version>
-    </dependency>
   </dependencies>
 
+  <!-- Build Configuration -->
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
+      <!-- Spring Boot Maven Plugin -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -273,37 +134,8 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>com.microsoft.azure</groupId>
-        <artifactId>azure-webapp-maven-plugin</artifactId>
-        <version>1.7.0</version>
-        <configuration>
-          <schemaVersion>V2</schemaVersion>
-          <authentication>
-            <serverId>azure-auth</serverId>
-          </authentication>
-          <subscriptionId>${azure.appservice.subscription}</subscriptionId>
-          <resourceGroup>${azure.appservice.resourcegroup}</resourceGroup>
-          <appServicePlanName>${azure.appservice.plan}</appServicePlanName>
-          <appName>${azure.appservice.appname}</appName>
-          <appSettings>
-            <property>
-              <name>JAVA_OPTS</name>
-              <value>-Dserver.port=80</value>
-            </property>
-          </appSettings>
-          <deployment>
-            <resources>
-              <resource>
-                <directory>${project.basedir}/target</directory>
-                <includes>
-                  <include>*spring-boot.jar</include>
-                </includes>
-              </resource>
-            </resources>
-          </deployment>
-        </configuration>
-      </plugin>
+
+      <!-- JaCoCo Plugin -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -322,7 +154,7 @@
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/security/**</exclude>
           </excludes>
         </configuration>
-        <version>0.8.10</version>
+        <version>${jacoco-plugin.version}</version>
         <executions>
           <execution>
             <goals>
