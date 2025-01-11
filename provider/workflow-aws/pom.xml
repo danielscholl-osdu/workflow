@@ -33,9 +33,6 @@
   <properties>
     <aws.version>1.12.738</aws.version>
     <log4j2.version>2.17.1</log4j2.version>
-    <spring-security.version>6.3.4</spring-security.version>
-    <spring-framework-version>6.1.16</spring-framework-version>
-    <spring-boot.version> 3.3.7</spring-boot.version>
   </properties>
 
   <dependencyManagement>
