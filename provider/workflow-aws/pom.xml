@@ -33,8 +33,6 @@
   <properties>
     <aws.version>1.12.738</aws.version>
     <log4j2.version>2.17.1</log4j2.version>
-    <spring-security.version>6.3.4</spring-security.version>
-    <spring-framework-version>6.1.13</spring-framework-version>
   </properties>
 
   <dependencyManagement>
@@ -56,7 +54,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>3.2.5</version>
+        <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
