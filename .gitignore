@@ -48,3 +48,6 @@ buildNumber.properties
 .DS_Store
 
 dist/
+
+# Environment configuration
+*.env
