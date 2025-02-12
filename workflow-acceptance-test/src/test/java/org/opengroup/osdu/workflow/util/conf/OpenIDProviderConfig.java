@@ -25,61 +25,66 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 public class OpenIDProviderConfig {
 
-  private String clientId;
-  private String clientSecret;
-  private String noAccessClientId;
-  private String noAccessClientSecret;
-  private String url;
-  private final String[] scopes = {"openid"};
-  private static final OpenIDProviderConfig openIDProviderConfig = new OpenIDProviderConfig();
-  private static OIDCProviderMetadata providerMetadata;
+	private String clientId;
+	private String clientSecret;
+	private String noAccessClientId;
+	private String noAccessClientSecret;
+	private String url;
+	private final String[] scopes = { "openid" };
+	private static final OpenIDProviderConfig openIDProviderConfig = new OpenIDProviderConfig();
+	private static OIDCProviderMetadata providerMetadata;
 
-  public static OpenIDProviderConfig Instance() {
-    try {
-      openIDProviderConfig.clientId = System.getProperty("TEST_OPENID_PROVIDER_CLIENT_ID",
-          System.getenv("TEST_OPENID_PROVIDER_CLIENT_ID"));
-      openIDProviderConfig.clientSecret = System.getProperty("TEST_OPENID_PROVIDER_CLIENT_SECRET",
-          System.getenv("TEST_OPENID_PROVIDER_CLIENT_SECRET"));
-      openIDProviderConfig.noAccessClientId =
-          System.getProperty("TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID",
-              System.getenv("TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID"));
-      openIDProviderConfig.noAccessClientSecret =
-          System.getProperty("TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET",
-              System.getenv("TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET"));
-      openIDProviderConfig.url =
-          System.getProperty("TEST_OPENID_PROVIDER_URL", System.getenv("TEST_OPENID_PROVIDER_URL"));
-      Issuer issuer = new Issuer(openIDProviderConfig.url);
-      OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
-      HTTPRequest httpRequest = request.toHTTPRequest();
-      HTTPResponse httpResponse = httpRequest.send();
-      providerMetadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
-    } catch (Exception e) {
-      throw new RuntimeException("Malformed token provider configuration", e);
-    }
-    return openIDProviderConfig;
-  }
+	public static final String TEST_OPENID_PROVIDER_CLIENT_ID = "PRIVILEGED_USER_OPENID_PROVIDER_CLIENT_ID";
+	public static final String TEST_OPENID_PROVIDER_CLIENT_SECRET = "PRIVILEGED_USER_OPENID_PROVIDER_CLIENT_SECRET";
+	public static final String TEST_OPENID_PROVIDER_URL = "TEST_OPENID_PROVIDER_URL";
 
-  public String getClientId() {
-    return clientId;
-  }
+	public static final String TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID = "NO_ACCESS_USER_OPENID_PROVIDER_CLIENT_ID";
+	public static final String TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET = "NO_ACCESS_USER_OPENID_PROVIDER_CLIENT_SECRET";
 
-  public String getClientSecret() {
-    return clientSecret;
-  }
+	public static OpenIDProviderConfig Instance() {
+		try {
+			openIDProviderConfig.clientId = System.getProperty(TEST_OPENID_PROVIDER_CLIENT_ID,
+					System.getenv(TEST_OPENID_PROVIDER_CLIENT_ID));
+			openIDProviderConfig.clientSecret = System.getProperty(TEST_OPENID_PROVIDER_CLIENT_SECRET,
+					System.getenv(TEST_OPENID_PROVIDER_CLIENT_SECRET));
+			openIDProviderConfig.noAccessClientId = System.getProperty(TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID,
+					System.getenv(TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_ID));
+			openIDProviderConfig.noAccessClientSecret = System.getProperty(TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET,
+					System.getenv(TEST_NO_ACCESS_OPENID_PROVIDER_CLIENT_SECRET));
+			openIDProviderConfig.url = System.getProperty(TEST_OPENID_PROVIDER_URL,
+					System.getenv(TEST_OPENID_PROVIDER_URL));
+			Issuer issuer = new Issuer(openIDProviderConfig.url);
+			OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
+			HTTPRequest httpRequest = request.toHTTPRequest();
+			HTTPResponse httpResponse = httpRequest.send();
+			providerMetadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
+		} catch (Exception e) {
+			throw new RuntimeException("Malformed token provider configuration", e);
+		}
+		return openIDProviderConfig;
+	}
 
-  public String getNoAccessClientId() {
-    return noAccessClientId;
-  }
+	public String getClientId() {
+		return clientId;
+	}
 
-  public String getNoAccessClientSecret() {
-    return noAccessClientSecret;
-  }
+	public String getClientSecret() {
+		return clientSecret;
+	}
 
-  public String[] getScopes() {
-    return scopes;
-  }
+	public String getNoAccessClientId() {
+		return noAccessClientId;
+	}
 
-  public OIDCProviderMetadata getProviderMetadata() {
-    return providerMetadata;
-  }
+	public String getNoAccessClientSecret() {
+		return noAccessClientSecret;
+	}
+
+	public String[] getScopes() {
+		return scopes;
+	}
+
+	public OIDCProviderMetadata getProviderMetadata() {
+		return providerMetadata;
+	}
 }
