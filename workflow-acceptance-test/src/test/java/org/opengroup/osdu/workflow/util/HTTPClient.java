@@ -38,7 +38,7 @@ public class HTTPClient {
 
 	private OpenIDTokenProvider openIDTokenProvider;
 	public static final String INTEGRATION_TESTER_TOKEN = "PRIVILEGED_USER_TOKEN";
-	public static final String INTEGRATION_TESTER_NOACCESS_TOKEN = "PRIVILEGED_USER_NOACCESS_TOKEN";
+	public static final String INTEGRATION_TESTER_NOACCESS_TOKEN = "NO_ACCESS_USER_TOKEN";
 
 	protected static String token = null;
 	protected static String noAccessToken = null;
