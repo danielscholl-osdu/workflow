@@ -16,6 +16,8 @@ import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildWorkflowIdPay
 import javax.ws.rs.HttpMethod;
 
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.TestBase;
@@ -24,8 +26,22 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.ClientResponse;
 
-public abstract class PostStartWorkflowIntegrationTests extends TestBase {
+public final class PostStartWorkflowIntegrationTests extends TestBase {
 
+	@BeforeEach
+	@Override
+	public void setup() throws Exception {
+		this.client = new HTTPClient();
+		this.headers = this.client.getCommonHeader();
+	}
+
+	@AfterEach
+	@Override
+	public void tearDown() throws Exception {
+		this.client = null;
+		this.headers = null;
+	}
+	
 	@Test
 	public void should_returnWorkflowId_when_givenValidRequest() throws Exception {
 		ClientResponse response = client.send(HttpMethod.POST, START_WORKFLOW_URL, getValidWorkflowPayload(), headers,

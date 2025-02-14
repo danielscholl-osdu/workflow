@@ -34,7 +34,7 @@ import org.opengroup.osdu.workflow.util.VersionInfoUtils;
 
 import com.sun.jersey.api.client.ClientResponse;
 
-public class GetServiceInfoIntegrationTest extends TestBase {
+public final class GetServiceInfoIntegrationTest extends TestBase {
 
 	protected static final VersionInfoUtils VERSION_INFO_UTILS = new VersionInfoUtils();
 

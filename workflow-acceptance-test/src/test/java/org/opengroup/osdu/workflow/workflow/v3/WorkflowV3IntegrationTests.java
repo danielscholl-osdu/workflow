@@ -56,7 +56,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.ClientResponse;
 
-public abstract class WorkflowV3IntegrationTests extends TestBase {
+public final class WorkflowV3IntegrationTests extends TestBase {
 
 	public static final String WORKFLOW_NOT_FOUND_MESSAGE = "Workflow: %s doesn't exist";
 	private static String CORRELATION_ID = "test-correlation-id";

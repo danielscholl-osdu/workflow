@@ -41,7 +41,7 @@ import org.opengroup.osdu.workflow.util.v3.TestBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
 
-public class GetWorkflowRunLatestTaskInfoTest extends TestBase {
+public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 
 	public static final String GET_LATEST_DETAILS_BY_ID_API_ENDPOINT = getEnvironmentVariableOrDefaultKey(WORKFLOW_HOST)
 			+ "v1/workflow/%s/workflowRun/%s/latestInfo";

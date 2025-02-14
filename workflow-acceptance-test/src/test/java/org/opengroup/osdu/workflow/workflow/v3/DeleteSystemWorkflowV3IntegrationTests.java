@@ -10,13 +10,30 @@ import java.util.Map;
 import javax.ws.rs.HttpMethod;
 
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 
 import com.sun.jersey.api.client.ClientResponse;
 
-public abstract class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
+public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 
+	@BeforeEach
+	@Override
+	public void setup() throws Exception {
+		this.client = new HTTPClient();
+		this.headers = this.client.getCommonHeader();
+	}
+
+	@AfterEach
+	@Override
+	public void tearDown() throws Exception {
+		this.client = null;
+		this.headers = null;
+	}
+	
 	@Test
 	public void should_delete_when_givenValidWorkflowName() throws Exception {
 		String responseBody = createSystemWorkflow();

@@ -59,7 +59,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.ClientResponse;
 
-public class WorkflowRunV3IntegrationTests extends TestBase {
+public final class WorkflowRunV3IntegrationTests extends TestBase {
 	private static final String INVALID_PREFIX = "backfill";
 	private static final Integer INVALID_LIMIT = 1000;
 

@@ -14,14 +14,30 @@ import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.HTTPClient;
 import org.opengroup.osdu.workflow.util.TestBase;
 
 import com.sun.jersey.api.client.ClientResponse;
 
-public abstract class PostGetStatusIntegrationTests extends TestBase {
+public final class PostGetStatusIntegrationTests extends TestBase {
 
+	@BeforeEach
+	@Override
+	public void setup() throws Exception {
+		this.client = new HTTPClient();
+		this.headers = this.client.getCommonHeader();
+	}
+
+	@AfterEach
+	@Override
+	public void tearDown() throws Exception {
+		this.client = null;
+		this.headers = null;
+	}
+	
 	@Test
 	public void should_returnFinished_when_givenFinishedWorkflowId() throws Exception {
 		ClientResponse response = client.send(HttpMethod.POST, GET_STATUS_URL,
