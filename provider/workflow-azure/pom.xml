@@ -29,7 +29,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <core-lib-azure.version>2.0.2</core-lib-azure.version>
+    <core-lib-azure.version>2.0.4</core-lib-azure.version>
     <json.version>20240303</json.version>
     <!-- Plugin Versions -->
     <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
