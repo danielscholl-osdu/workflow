@@ -55,7 +55,7 @@ public class HTTPClient {
 				token = openIDTokenProvider.getToken();
 
 			if (Strings.isNullOrEmpty(noAccessToken))
-				noAccessToken = openIDTokenProvider.getToken();
+				noAccessToken = openIDTokenProvider.getNoAccessToken();
 		}
 	}
 
