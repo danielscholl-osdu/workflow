@@ -70,8 +70,8 @@ phases:
       - if [ "$GIT_SECRETS_SCAN_RESULT" = "FAILED" ]; then echo "Secrets detected!" && exit 1; fi
 
       - echo "Building primary service assemblies..."
-      - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
-      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
+      - mvn -B test install -pl .,workflow-core,provider/workflow-aws -P core,aws -Ddeployment.environment=prod
+      - mvn sonar:sonar -pl .,provider/workflow-aws -P aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
 
       - echo "Building integration testing assemblies and gathering artifacts..."
       - ./testing/workflow-test-aws/build-aws/prepare-dist.sh
