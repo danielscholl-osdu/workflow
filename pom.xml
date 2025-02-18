@@ -35,15 +35,6 @@
   <name>os-workflow</name>
   <description>Demo project for Spring Boot</description>
 
-  <modules>
-    <module>workflow-core</module>
-    <module>workflow-core-plus</module>
-    <module>provider/workflow-aws</module>
-    <module>provider/workflow-azure</module>
-    <module>provider/workflow-gc</module>
-    <module>provider/workflow-ibm</module>
-  </modules>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
@@ -464,6 +455,40 @@
         <publish.releases.url>https://community.opengroup.org/api/v4/projects/146/packages/maven
         </publish.releases.url>
       </properties>
+    </profile>
+    <profile>
+      <id>core</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>workflow-core</module>
+        <module>workflow-core-plus</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>aws</id>
+      <modules>
+        <module>provider/workflow-aws</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>azure</id>
+      <modules>
+        <module>provider/workflow-azure</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>ibm</id>
+      <modules>
+        <module>provider/workflow-ibm</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>gc</id>
+      <modules>
+        <module>provider/workflow-gc</module>
+      </modules>
     </profile>
   </profiles>
 
