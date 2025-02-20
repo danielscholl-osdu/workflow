@@ -18,9 +18,9 @@ public class TestConstants {
 	public static final String HEADER_USER = "user";
 
 	// Api endpoints
-	public static final String START_WORKFLOW_API_ENDPOINT = "/startWorkflow";
-	public static final String GET_STATUS_API_ENDPOINT = "/getStatus";
-	public static final String UPDATE_STATUS_API_ENDPOINT = "/updateStatus";
+	public static final String START_WORKFLOW_API_ENDPOINT = "startWorkflow";
+	public static final String GET_STATUS_API_ENDPOINT = "getStatus";
+	public static final String UPDATE_STATUS_API_ENDPOINT = "updateStatus";
 
 	public static final String CREATE_WORKFLOW_API_ENDPOINT = "v1/workflow";
 	public static final String CREATE_WORKFLOW_RUN_API_ENDPOINT = CREATE_WORKFLOW_API_ENDPOINT + "/%s/workflowRun";
