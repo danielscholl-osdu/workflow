@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_SYSTEM_WORKFLOW_BY_ID_URL;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.ws.rs.HttpMethod;
@@ -18,22 +19,42 @@ import org.opengroup.osdu.workflow.util.v3.TestBase;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 
 	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		this.client = new HTTPClient();
-		this.headers = this.client.getCommonHeader();
+		this.headers = client.getCommonHeaderWithoutPartition();
+		try {
+			deleteTestSystemWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 
 	@AfterEach
 	@Override
-	public void tearDown() throws Exception {
+	public void tearDown() {
+		deleteAllTestWorkflowRecords();
 		this.client = null;
 		this.headers = null;
+		this.createdWorkflows = new ArrayList<>();
 	}
-	
+
+	private void deleteAllTestWorkflowRecords() {
+		createdWorkflows.stream().forEach(c -> {
+			try {
+				deleteTestSystemWorkflows(c.get(WORKFLOW_NAME_FIELD));
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		});
+	}
+
 	@Test
 	public void should_delete_when_givenValidWorkflowName() throws Exception {
 		String responseBody = createSystemWorkflow();
