@@ -266,9 +266,12 @@ You will need to have the following environment variables defined.
 
 **Entitlements configuration for integration accounts**
 
-| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
-| ---  | ---   |
-| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+user impersonatetestmember@test.com  doesn't need to exist in any identity provider(Keycloak), just configure at Entitlement Service
+
+| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER | impersonatetestmember@test.com |
+| ---  | ---   | ---   |
+| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users | service.workflow.creator<br/>data.default.owners<br/>data.wke.viewers<br/>users<br/>service.entitlements.user<br/>users.datalake.impersonation<br/>data.wke.owners<br/>data.default.viewers<br/>service.reservoir-dms.viewers<br/>data.ihs.viewers<br/> |
+
 
 ```bash
 # build + install integration test core

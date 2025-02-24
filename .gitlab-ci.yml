@@ -54,7 +54,7 @@ include:
     file: "cloud-providers/azure.yml"
 
   - project: "osdu/platform/ci-cd-pipelines"
-    file: "cloud-providers/core-global.yml"
+    file: "cloud-providers/cimpl-global.yml"
 
   - local: "devops/core-plus/pipeline/override-stages.yml"
 
@@ -191,7 +191,7 @@ download_plugins:
 
   only:
     variables:
-      - $CORE == '1'
+      - $CIMPL == '1'
 
 
 gemnasium-maven-dependency_scanning:
