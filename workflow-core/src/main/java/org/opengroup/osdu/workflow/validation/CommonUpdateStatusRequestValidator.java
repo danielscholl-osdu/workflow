@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.workflow.model.UpdateStatusRequest;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
@@ -63,8 +64,16 @@ public class CommonUpdateStatusRequestValidator implements IUpdateStatusRequestV
     }
 
     if (!VALID_STATUSES.contains(workflowStatusType)) {
+      // need sanitize the user's input because inputs may contain EL expressions like ${expression}
+      String workflowStatusTypeSanitized = StringEscapeUtils.escapeHtml4(workflowStatusType.toString());
+      workflowStatusTypeSanitized = workflowStatusTypeSanitized
+          .replace("#{", "")
+          .replace("${", "")
+          .replace("}", "")
+          .replace("'", "")
+          .replace("\"", "");
       String msg = String
-          .format("Not allowed workflow status type: %s, Should be one of: %s", workflowStatusType,
+          .format("Not allowed workflow status type: %s, Should be one of: %s", workflowStatusTypeSanitized,
               VALID_STATUSES);
       context.disableDefaultConstraintViolation();
       context
