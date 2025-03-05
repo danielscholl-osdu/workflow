@@ -130,7 +130,7 @@ public class WorkflowSystemMetadataRepository implements IWorkflowSystemMetadata
 	@Override
 	public List<WorkflowMetadata> getAllSystemWorkflow(String prefix) {
 		Database db = getDatabase();
-		QueryResult<WorkflowMetadataDoc> result = db.query(new QueryBuilder(Expression.regex("workflowName", prefix)).build(), WorkflowMetadataDoc.class);
+		QueryResult<WorkflowMetadataDoc> result = db.query(new QueryBuilder(Expression.regex("workflowName",prefix!=null?prefix:"")).build(), WorkflowMetadataDoc.class);
 		List<WorkflowMetadata> workflowMetadataList = result.getDocs().stream().map(i -> i.getWorkflowMetadata()).collect(Collectors.toList());
 		return workflowMetadataList;
 	}

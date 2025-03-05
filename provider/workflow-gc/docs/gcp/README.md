@@ -6,12 +6,11 @@ Define the following environment variables.
 
 Must have:
 
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `SPRING_PROFILES_ACTIVE` | ex `gcp` | Spring profile that activate default configuration for Google Cloud environment | false | - |
-| `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
-| `GCP_AIRFLOW_URL` | ex `https://********-tp.appspot.com` | Airflow endpoint | yes | - |
-| `SHARED_TENANT_NAME` | ex `osdu` | Shared account id | no | - |
+| name                     | value                                | description                                                                     | sensitive? | source |
+|--------------------------|--------------------------------------|---------------------------------------------------------------------------------|------------|--------|
+| `SHARED_TENANT_NAME`     | ex `osdu`                            | Shared account id                                                               | no         | -      |
+| `GCP_AIRFLOW_URL`        | ex `https://********-tp.appspot.com` | Airflow endpoint                                                                | yes        | -      |
+| `SHARED_TENANT_NAME`     | ex `osdu`                            | Shared account id                                                               | no         | -      |
 
 Defined in default application property file but possible to override:
 
@@ -27,17 +26,7 @@ Defined in default application property file but possible to override:
 | `COMPOSER_CLIENT`                  | `IAAP` OR `V2` OR `NONE`                      | Allows to configure authentication method used by Workflow to authenticate its requests to Airflow, by default `IAAP` is used                          | no         | -                                                            |
 | `MANAGEMENT_ENDPOINTS_WEB_BASE`    | ex `/`                                        | Web base for Actuator                                                                                                                                  | no         | -                                                            |
 | `MANAGEMENT_SERVER_PORT`           | ex `8081`                                     | Port for Actuator                                                                                                                                      | no         | -                                                            |
-
-
-These variables define service behavior, and are used to switch between `Reference` or `Google Cloud` environments, their overriding
-and usage in the mixed mode were not tested. Usage of spring profiles is preferred.
-
-| name | value | description | sensitive? | source |
-| ---  | ---   | ---         | ---        | ---    |
-| `PARTITION_AUTH_ENABLED` | ex `true` or `false` | Disable or enable auth token provisioning for requests to Partition service | no | - |
-| `OQMDRIVER` | `rabbitmq` or `pubsub` | OQM driver mode that defines which message broker will be used | no | - |
-| `OSMDRIVER` | `postgres` OR `datastore` | Osm driver mode that defines which storage will be used | no | - |
-| `SYSTEM_WORKFLOW_NAMESPACE` | ex `system-workflow-namespace` | Namespace for System Workflows | no | output of infrastructure deployment |
+| `DESTINATION_RESOLVER`             | ex `partition`                                | Destination resolver is getting product properties from the Partition Service                                                                          | no         | -                                                            |
 
 ### Running E2E Tests
 
@@ -59,9 +48,9 @@ You will need to have the following environment variables defined.
 
 **Entitlements configuration for integration accounts**
 
-| INTEGRATION_TESTER | NO_DATA_ACCESS_TESTER |
-| ---  | ---   |
-| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users |
+| INTEGRATION_TESTER                                                                                                                                                                                                                                  | NO_DATA_ACCESS_TESTER |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
+| service.workflow.system-admin<br/>users<br/>service.entitlements.user<br/>service.workflow.admin<br/>service.workflow.creator<br/>service.workflow.viewer<br/>service.legal.admin<br/>service.legal.editor<br/>data.test1<br/>data.integration.test | users                 |
 
 ```bash
 # build + install integration test core
@@ -84,7 +73,7 @@ Example:
 
 Kinds `workflow_osm` and `workflow_run_osm` will be created by the service if it does not exist.
 
-## Pubsub configuration
+## Pub/Sub configuration
 
 At Pubsub should be created a topic with the name:
 
@@ -100,5 +89,22 @@ It can be overridden by:
 TBD
 
 | Required roles |
-| ---    |
-| - |
+|----------------|
+| -              |
+
+## License
+
+Copyright © Google LLC
+Copyright © EPAM Systems
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

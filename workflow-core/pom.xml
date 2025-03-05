@@ -21,17 +21,27 @@
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>os-workflow</artifactId>
-    <version>0.28.0-SNAPSHOT</version>
+    <version>0.29.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>workflow-core</artifactId>
-  <version>0.28.0-SNAPSHOT</version>
+  <version>0.29.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>workflow-core</name>
   <description>Core project for the Workflow service</description>
-
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-bom</artifactId>
+      <version>4.1.118.Final</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>jakarta.inject</groupId>
@@ -57,10 +67,7 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-codec</artifactId>
-    </dependency>
+
   </dependencies>
 
   <build>

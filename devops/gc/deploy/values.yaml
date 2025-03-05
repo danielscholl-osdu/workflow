@@ -4,9 +4,10 @@
 
 global:
   domain: ""
-  onPremEnabled: false
   limitsEnabled: true
   dataPartitionId: ""
+  tier: ""
+  autoscaling: true
 
 data:
   #Configmap variables
@@ -16,8 +17,6 @@ data:
   schemaHost: "http://schema"
   legalHost: "http://legal"
   osduAirflowUrl: "http://airflow:8080"
-  sharedTenantName: ""
-  composerClient: "IAAP"
   workflowHost: "http://workflow"
   dagNames:
     - csv_ingestion
@@ -27,6 +26,7 @@ data:
     - Segy_to_vds_conversion_sdms
     - Segy_to_zgy_conversion
     - Osdu_ingest_by_reference
+    - segy_to_mdio_conversion
   # Deployment variables
   requestsCpu: "5m"
   requestsMemory: "650Mi"
@@ -41,11 +41,7 @@ data:
 conf:
   configmap: "workflow-config"
   appName: "workflow"
-  workflowAirflowSecretName: "workflow-airflow-secret"
-  workflowPostgresSecretName: "workflow-postgres-secret"
-  rabbitmqSecretName: "rabbitmq-secret"
-  bootstrapSecretName: "datafier-secret"
-  replicas: 1
+  replicas: 2
 
 istio:
   proxyCPU: "5m"
@@ -54,3 +50,20 @@ istio:
   proxyMemoryLimit: "256Mi"
   bootstrapProxyCPU: "5m"
   bootstrapProxyCPULimit: "50m"
+
+hpa:
+  minReplicas: 6
+  maxReplicas: 15
+  targetType: "AverageValue"
+  targetValue: 140 # 80*0.86*2
+  behaviorScaleUpStabilizationWindowSeconds: 10
+  behaviorScaleUpPoliciesValue: 50
+  behaviorScaleUpPoliciesPeriodSeconds: 15
+  behaviorScaleDownStabilizationWindowSeconds: 60
+  behaviorScaleDownPoliciesValue: 25
+  behaviorScaleDownPoliciesPeriodSeconds: 60
+
+limits:
+  maxTokens: 80
+  tokensPerFill: 80
+  fillInterval: "1s"

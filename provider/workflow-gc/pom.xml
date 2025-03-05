@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  ~ Copyright 2020 Google LLC
+  ~ Copyright 2020-2024 Google LLC
+  ~ Copyright 2020-2024 EPAM Systems, Inc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -21,168 +22,57 @@
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>os-workflow</artifactId>
-    <version>0.28.0-SNAPSHOT</version>
+    <version>0.29.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>workflow-gc</artifactId>
-  <version>0.28.0-SNAPSHOT</version>
+  <version>0.29.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>workflow-gc</name>
   <description>Google Cloud implementation of Workflow service APIs for Datastore</description>
 
   <properties>
-    <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
     <google-cloud-libraries.version>26.40.0</google-cloud-libraries.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>libraries-bom</artifactId>
-        <version>${google-cloud-libraries.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
-      <artifactId>workflow-core</artifactId>
-      <version>0.28.0-SNAPSHOT</version>
+      <artifactId>workflow-core-plus</artifactId>
+      <version>0.29.0-SNAPSHOT</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>1.17.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>2.13.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.6</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>core-lib-gc-spring6</artifactId>
-      <version>0.26.0-rc5</version>
-    </dependency>
-
     <dependency>
       <groupId>ch.qos.logback.contrib</groupId>
       <artifactId>logback-json-classic</artifactId>
       <version>0.1.5</version>
     </dependency>
-    <!-- Mappers -->
     <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>oqm</artifactId>
-      <version>0.26.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.opengroup.osdu</groupId>
-          <artifactId>os-core-common</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-jackson</artifactId>
+      <version>0.1.5</version>
     </dependency>
-    <dependency>
-      <groupId>org.opengroup.osdu</groupId>
-      <artifactId>osm</artifactId>
-      <version>0.26.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.opengroup.osdu</groupId>
-          <artifactId>os-core-common</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <classifier>spring-boot</classifier>
-          <mainClass>org.opengroup.osdu.workflow.WorkflowApplication</mainClass>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>${maven-shade-plugin.version}</version>
-        <configuration>
-          <keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
-          <createDependencyReducedPom>true</createDependencyReducedPom>
-          <filters>
-            <filter>
-              <artifact>*:*</artifact>
-              <excludes>
-                <exclude>META-INF/*.SF</exclude>
-                <exclude>META-INF/*.DSA</exclude>
-                <exclude>META-INF/*.RSA</exclude>
-              </excludes>
-            </filter>
-          </filters>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>${spring-boot.version}</version>
-          </dependency>
-        </dependencies>
+        <version>3.2.2</version>
         <executions>
           <execution>
-            <id>shade-my-jar</id>
             <goals>
-              <goal>shade</goal>
+              <goal>repackage</goal>
             </goals>
-            <phase>package</phase>
             <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/spring.handlers</resource>
-                </transformer>
-                <transformer implementation="org.springframework.boot.maven.PropertiesMergingResourceTransformer">
-                  <resource>META-INF/spring.factories</resource>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/spring.schemas</resource>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.opengroup.osdu.workflow.WorkflowApplication</mainClass>
-                </transformer>
-              </transformers>
+              <classifier>spring-boot</classifier>
+              <mainClass>
+                org.springframework.boot.loader.launch.PropertiesLauncher
+              </mainClass>
             </configuration>
           </execution>
         </executions>

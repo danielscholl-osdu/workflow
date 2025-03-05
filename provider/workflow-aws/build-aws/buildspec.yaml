@@ -34,7 +34,6 @@ phases:
     commands:
        # fix error noted here: https://github.com/yarnpkg/yarn/issues/7866
       - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-      - if [ $(echo $CODEBUILD_SOURCE_VERSION | grep -c  ^refs/heads.*) -eq 1 ]; then echo "Branch name found"; else echo "This build only supports branch builds" && exit 1; fi
       - apt-get update -y
       - apt-get install -y maven
       - java -version
@@ -54,10 +53,8 @@ phases:
       - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
   build:
     commands:
-      - export REPO_NAME=${PWD##*/}
       - export OUTPUT_DIR="dist"
-      - export BRANCH_NAME=`echo ${CODEBUILD_SOURCE_VERSION} | awk '{gsub("refs/heads/","");gsub("\\.","-");gsub("[[:space:]]","-")}1' | sed 's/\//-/g' | awk '{print tolower($0)}'`
-      - export ECR_TAG=`echo build.${BRANCH_NAME}.${CODEBUILD_BUILD_NUMBER}.${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-120`
+      - export ECR_TAG=`echo build.${BRANCH_NAME}.${CODEBUILD_BUILD_NUMBER}.${COMMIT_ID} | cut -c 1-120`
       - export ECR_IMAGE=${ECR_REGISTRY}:${ECR_TAG}
       - export ECR_IMAGE_BRANCH_LATEST=${ECR_REGISTRY}:${BRANCH_NAME}
       - export INTEGRATION_TEST_OUTPUT=${OUTPUT_DIR}/testing/integration
@@ -73,35 +70,26 @@ phases:
       - if [ "$GIT_SECRETS_SCAN_RESULT" = "FAILED" ]; then echo "Secrets detected!" && exit 1; fi
 
       - echo "Building primary service assemblies..."
-      - mvn -B test install -pl .,workflow-core,provider/workflow-aws -Ddeployment.environment=prod
-      - mvn sonar:sonar -pl .,provider/workflow-aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
-      # Suspended until further notice
-      # - echo "Copying assemblies to dist..."
-      # - cp ./provider/workflow-aws/target/*spring-boot.jar ${OUTPUT_DIR}/bin # copy aws jars
-      # - cp ./workflow-core/target/*.jar ${OUTPUT_DIR}/bin # copy core jar
+      - mvn -B test install -pl .,workflow-core,provider/workflow-aws -P core,aws -Ddeployment.environment=prod
+      - mvn sonar:sonar -pl .,provider/workflow-aws -P aws -Dsonar.projectKey=org.opengroup.osdu:os-ingestion-workflow -Dsonar.login=${SONAR_USERNAME} -Dsonar.password=${SONAR_PASSWORD} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.projectName=os-ingestion-workflow  -Dsonar.host.url=${SONAR_URL}
 
       - echo "Building integration testing assemblies and gathering artifacts..."
       - ./testing/workflow-test-aws/build-aws/prepare-dist.sh
 
-      - sed -i "s|__CONTAINER__|$ECR_IMAGE|"  devops/aws/chart/values.yaml
-      - echo "--Copying Helm Charts to ${OUTPUT_DIR:-dist}--"
-      - rsync -r devops/aws/* "${OUTPUT_DIR:-dist}"
-
       - echo "Logging into Docker Hub..."
       - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-      - echo "Building docker image..."
-      - docker build -f provider/workflow-aws/build-aws/Dockerfile -t ${ECR_IMAGE} .
-      - docker tag  ${ECR_IMAGE} ${ECR_IMAGE_BRANCH_LATEST}
-      - echo "Pushing docker image..."
-      - docker push ${ECR_IMAGE}
-      - docker push ${ECR_IMAGE_BRANCH_LATEST}
+      - echo "Build and push docker image..."
+      - docker buildx create --driver docker-container --use
+      - docker buildx inspect --bootstrap
+      - docker buildx build --platform linux/arm64/v8,linux/amd64 --pull --push -f provider/workflow-aws/build-aws/Dockerfile -t ${ECR_IMAGE} -t ${ECR_IMAGE_BRANCH_LATEST} .
 
       - echo "Generate build-info.json"
       - |
-        python provider/workflow-aws/build-aws/build-info.py --branch ${CODEBUILD_SOURCE_VERSION} --commit ${CODEBUILD_RESOLVED_SOURCE_VERSION} \
-          --buildid ${CODEBUILD_BUILD_ID} --buildnumber ${CODEBUILD_BUILD_NUMBER} --reponame ${REPO_NAME} --outdir ${OUTPUT_DIR} \
-          --artifact ${ECR_IMAGE}
+        python provider/workflow-aws/build-aws/build-info.py --branch ${BRANCH_NAME} --commitId ${COMMIT_ID} \
+        --commitMessage "\"${COMMIT_MESSAGE}\"" --commitAuthor "\"${COMMIT_AUTHOR}\"" --commitDate "\"${COMMIT_DATE}\"" \
+        --buildid ${CODEBUILD_BUILD_ID} --buildnumber ${CODEBUILD_BUILD_NUMBER} --reponame ${REPO_NAME} --outdir ${OUTPUT_DIR} \
+        --artifact ${ECR_IMAGE}
 
 reports:
   SurefireReports: # CodeBuild will create a report group called "SurefireReports".
@@ -113,7 +101,7 @@ artifacts:
   files:
     - "**/*"
   base-directory: "dist"
-  name: ${REPO_NAME}_${BRANCH_NAME}_$(date +%F)_${CODEBUILD_BUILD_NUMBER}.zip
+  name: ${BRANCH_NAME}/${PACKAGE_NAME}.zip
 cache:
   paths:
     - "/root/.m2/**/*"

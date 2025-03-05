@@ -23,25 +23,17 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.7</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opengroup.osdu</groupId>
   <artifactId>os-workflow</artifactId>
-  <version>0.28.0-SNAPSHOT</version>
+  <version>0.29.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>os-workflow</name>
   <description>Demo project for Spring Boot</description>
-
-  <modules>
-    <module>workflow-core</module>
-    <module>provider/workflow-aws</module>
-    <module>provider/workflow-azure</module>
-    <module>provider/workflow-gc</module>
-    <module>provider/workflow-ibm</module>
-  </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,11 +42,11 @@
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <os-core-common.version>2.0.0</os-core-common.version>
     <openapi.version>2.5.0</openapi.version>
-    <json-smart.version>2.5.0</json-smart.version>
+    <json-smart.version>2.5.2</json-smart.version>
     <jackson-databind.version>2.17.1</jackson-databind.version>
-    <spring-framework-version>6.1.10</spring-framework-version>
-    <spring-boot.version>3.3.1</spring-boot.version>
-    <spring-security.version>6.3.1</spring-security.version>
+    <spring-framework-version>6.1.16</spring-framework-version>
+    <spring-boot.version>3.3.7</spring-boot.version>
+    <spring-security.version>6.3.4</spring-security.version>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
   </properties>
@@ -133,6 +125,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
+      <version>4.1.118.Final</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -155,7 +148,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-      <version>4.1.72.Final</version>
+      <version>4.1.118.Final</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -170,7 +163,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
-      <version>4.1.68.Final</version>
+      <version>4.1.118.Final</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -181,7 +174,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-common</artifactId>
-      <version>4.1.71.Final</version>
+      <version>4.1.118.Final</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -462,6 +455,40 @@
         <publish.releases.url>https://community.opengroup.org/api/v4/projects/146/packages/maven
         </publish.releases.url>
       </properties>
+    </profile>
+    <profile>
+      <id>core</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>workflow-core</module>
+        <module>workflow-core-plus</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>aws</id>
+      <modules>
+        <module>provider/workflow-aws</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>azure</id>
+      <modules>
+        <module>provider/workflow-azure</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>ibm</id>
+      <modules>
+        <module>provider/workflow-ibm</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>gc</id>
+      <modules>
+        <module>provider/workflow-gc</module>
+      </modules>
     </profile>
   </profiles>
 

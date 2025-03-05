@@ -30,14 +30,6 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.conf.configmap | quote }}
-        {{- if .Values.global.onPremEnabled }}
-        - secretRef:
-            name: {{ .Values.conf.workflowAirflowSecretName | quote }}
-        - secretRef:
-            name: {{ .Values.conf.rabbitmqSecretName | quote }}
-        - secretRef:
-            name: {{ .Values.conf.workflowPostgresSecretName | quote }}
-        {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
@@ -66,3 +58,8 @@ spec:
             memory: {{ .Values.data.limitsMemory | quote }}
           {{- end }}
       serviceAccountName: {{ .Values.data.serviceAccountName | quote }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0

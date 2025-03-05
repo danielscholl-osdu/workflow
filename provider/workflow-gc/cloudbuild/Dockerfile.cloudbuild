@@ -2,8 +2,14 @@ FROM azul/zulu-openjdk:17
 WORKDIR /app
 ARG PROVIDER_NAME
 ENV PROVIDER_NAME $PROVIDER_NAME
+
+ENV LOADER_PATH="gc/"
+
+COPY tmp-gc/gc-osm-datastore-*.jar gc/osm-datastore.jar
+COPY tmp-gc/gc-oqm-pubsub-*.jar gc/oqm-pubsub.jar
+
 # Copy the jar to the production image from the builder stage.
-COPY provider/workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*.jar workflow-${PROVIDER_NAME}.jar
+COPY provider/workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*-spring-boot.jar workflow-${PROVIDER_NAME}.jar
 
 # Add a non-root user
 RUN groupadd -g 10001 -r nonroot \
@@ -21,5 +27,5 @@ CMD java --add-opens java.base/java.lang=ALL-UNNAMED \
          -XX:+UseG1GC \
          -XX:+UseStringDeduplication \
          -XX:InitiatingHeapOccupancyPercent=45 \
+         -Dloader.main=org.opengroup.osdu.workflow.provider.gcp.WorkflowGcpDatastoreApplication \
          -jar /app/workflow-${PROVIDER_NAME}.jar
-

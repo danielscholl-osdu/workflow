@@ -27,7 +27,6 @@ import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.provider.gcp.config.condition.ComposerAirflowV2Condition;
 import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension;
-import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineServiceImpl;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
