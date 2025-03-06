@@ -42,7 +42,7 @@ public class WorkflowTasksSharingRepository implements IWorkflowTasksSharingRepo
   public String getSignedUrl(String workflowName, String runId) {
     final String dataPartitionId = dpsHeaders.getPartitionId();
     final OffsetDateTime startTime = OffsetDateTime.now();
-    final int expiryDays = 7;
+    final int expiryDays = 1;
     final OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(expiryDays);
     // TODO 18.03.21 (expires at 18.09.21): Add support for custom permission (?)
     final BlobContainerSasPermission permissions = new BlobContainerSasPermission()

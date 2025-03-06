@@ -21,6 +21,7 @@ variables:
   AZURE_COVERAGE_THRESHOLD: $AZURE_CODE_COVERAGE_THRESHOLD
   AZURE_HELM_SUBDIR: osdu-azure/workflow
   # End azure specific variables
+  ACCEPTANCE_TEST_DIR: "workflow-acceptance-test"
 
 include:
   - project: "osdu/platform/ci-cd-pipelines"
