@@ -14,7 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opengroup.osdu</groupId>
     <artifactId>os-workflow</artifactId>
@@ -31,7 +33,7 @@
   <properties>
     <core-lib-azure.version>2.0.6</core-lib-azure.version>
     <json.version>20240303</json.version>
-    <!-- Plugin Versions --> 
+    <!-- Plugin Versions -->
     <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
   </properties>
 
@@ -53,7 +55,7 @@
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-core</artifactId>
-      <version>${project.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
@@ -78,8 +80,8 @@
       </exclusions>
     </dependency>
     <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
@@ -93,8 +95,8 @@
       <artifactId>spring-cloud-azure-starter-active-directory</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.azure</groupId>
-        <artifactId>azure-storage-file-share</artifactId>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-share</artifactId>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
@@ -141,16 +143,23 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AuthenticationConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureBootstrapConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/AuthenticationConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/AzureBootstrapConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/CosmosConfig.class</exclude>
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/RedisConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/CustomObjectMapperConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/CustomObjectMapperConfig.class</exclude>
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/ActiveDagRunsConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
-            <exclude>**/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/AzureWorkflowEngineConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
+            <exclude>
+              **/*org/opengroup/osdu/workflow/provider/azure/config/MessagePublisherConfig.class</exclude>
             <exclude>**/*org/opengroup/osdu/workflow/provider/azure/security/**</exclude>
           </excludes>
         </configuration>
