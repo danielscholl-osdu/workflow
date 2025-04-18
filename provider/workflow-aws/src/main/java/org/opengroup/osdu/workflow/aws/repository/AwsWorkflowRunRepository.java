@@ -139,7 +139,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
             docsCursor = docs.cursor;
         }
         else {
-            items = new ArrayList<WorkflowRun>();
+            items = new ArrayList<>();
         }
 
         return WorkflowRunsPage.builder()

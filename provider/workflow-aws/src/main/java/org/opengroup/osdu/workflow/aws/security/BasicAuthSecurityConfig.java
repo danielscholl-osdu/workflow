@@ -15,7 +15,6 @@
 */
 
 package org.opengroup.osdu.workflow.aws.security;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,7 +44,7 @@ public class BasicAuthSecurityConfig {
 
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring().requestMatchers("/api-docs", "/info", "/swagger");
+    return web -> web.ignoring().requestMatchers("/api-docs", "/info", "/swagger");
   }
 
 }
