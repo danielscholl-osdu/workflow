@@ -16,20 +16,20 @@
 
 package org.opengroup.osdu.workflow.aws.repository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-
 import org.apache.commons.lang3.StringUtils;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
+import org.apache.http.HttpStatus;
+import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
+import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFactory;
+import org.opengroup.osdu.core.aws.v2.dynamodb.model.QueryPageResult;
+import org.opengroup.osdu.core.aws.v2.dynamodb.util.RequestBuilderUtil;
+import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
@@ -37,129 +37,147 @@ import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
+
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+import software.amazon.awssdk.services.dynamodb.model.InternalServerErrorException;
 
 @Repository
 @RequestScope
 public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
-    @Inject
-    private AwsServiceConfig config;
 
-    @Inject
-    DpsHeaders headers;
+    private final AwsServiceConfig config;
+    private final IDynamoDBQueryHelperFactory queryHelperFactory;
+    private final DpsHeaders headers;
+    private final String workflowMetadataTableParameterRelativePath;
+    private final DynamoDBQueryHelper<WorkflowMetadataDoc> queryHelper;
 
-    @Inject
-    private DynamoDBQueryHelperFactory dynamoDBQueryHelperFactory;
-
-    private DynamoDBQueryHelperV2 queryHelper;
-
-    @Value("${aws.dynamodb.workflowMetadataTable.ssm.relativePath}")
-    String workflowMetadataTableParameterRelativePath;
-
-    @PostConstruct
-    public void init() {
-      queryHelper = dynamoDBQueryHelperFactory.getQueryHelperForPartition(headers, workflowMetadataTableParameterRelativePath);
+    @Autowired
+    public AwsWorkflowMetadataRepository(IDynamoDBQueryHelperFactory queryHelperFactory,
+            @Value("${aws.dynamodb.workflowMetadataTable.ssm.relativePath}") String workflowMetadataTableParameterRelativePath,
+            DpsHeaders headers, AwsServiceConfig config) {
+        this.queryHelperFactory = queryHelperFactory;
+        this.headers = headers;
+        this.workflowMetadataTableParameterRelativePath = workflowMetadataTableParameterRelativePath;
+        this.config = config;
+        this.queryHelper = getWorkflowMetadataRepositoryQueryHelper();
     }
 
+    private DynamoDBQueryHelper<WorkflowMetadataDoc> getWorkflowMetadataRepositoryQueryHelper() {
+        return queryHelperFactory.createQueryHelper(headers,
+                workflowMetadataTableParameterRelativePath, WorkflowMetadataDoc.class);
+    }
+
+    private String getDataPartitionId() {
+        return headers.getPartitionIdWithFallbackToAccountId();
+    }
 
     @Override
     public WorkflowMetadata createWorkflow(WorkflowMetadata workflowMetadata) {
-      String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
-      workflowMetadata.setWorkflowId(generateWorkflowId(workflowMetadata.getWorkflowName(), dataPartitionId)); //name should be unique. Enforce it via using name/id as same field
+        String dataPartitionId = getDataPartitionId();
+        workflowMetadata.setWorkflowId(generateWorkflowId(workflowMetadata.getWorkflowName(), dataPartitionId));
 
-      if (workflowExists(workflowMetadata.getWorkflowName(), dataPartitionId)) { //don't update if workflow already exists
-        throw new ResourceConflictException(workflowMetadata.getWorkflowName(), "Workflow with same name already exists");
-      }
+        WorkflowMetadataDoc doc = WorkflowMetadataDoc.create(workflowMetadata, dataPartitionId);
 
-      WorkflowMetadataDoc doc = WorkflowMetadataDoc.create(workflowMetadata, dataPartitionId);
+        try {
+            PutItemEnhancedRequest<WorkflowMetadataDoc> request = PutItemEnhancedRequest.builder(WorkflowMetadataDoc.class)
+                    .item(doc)
+                    .conditionExpression(Expression.builder()
+                            .expression("attribute_not_exists(workflowId)")
+                            .build())
+                    .build();
 
-      // try {
-        queryHelper.save(doc);
-      // }
-      // catch(Exception e) {
-      //   System.out.println(">>>>>>>>>>>>>")
-      //   System.out.println
-      //   throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-      //                         HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-      //                         "Failed to save workflowMetadata to db");
-      // }
-
-
-      return doc.convertToWorkflowMetadata(); //eliminate fields that might exist that aren't stored
-    }
-
-
-    private String generateWorkflowId(String workflowName, String dataPartitionId) {
-      return String.format("%s:%s", dataPartitionId, workflowName);
-    }
-
-    private boolean workflowExists(String workflowId) {
-      // Set GSI hash key
-      WorkflowMetadataDoc workflowMetadataDoc = new WorkflowMetadataDoc();
-      workflowMetadataDoc.setWorkflowId(workflowId);
-
-      // Check if the tenant exists in the table by name
-      return queryHelper.keyExistsInTable(WorkflowMetadataDoc.class, workflowMetadataDoc);
-    }
-
-    private boolean workflowExists(String workflowName, String dataPartitionId) {
-       return workflowExists(generateWorkflowId(workflowName, dataPartitionId));
+            queryHelper.putItem(request);
+            return doc.convertToWorkflowMetadata();
+        } catch (ConditionalCheckFailedException e) {
+            throw new ResourceConflictException(workflowMetadata.getWorkflowName(), 
+                    "Workflow with same name already exists");
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error creating workflow",
+                    e.getMessage());
+        }
     }
 
     @Override
     public WorkflowMetadata getWorkflow(String workflowName) {
-
-        String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
+        String dataPartitionId = getDataPartitionId();
         String workflowId = generateWorkflowId(workflowName, dataPartitionId);
 
-        WorkflowMetadataDoc doc = queryHelper.loadByPrimaryKey(WorkflowMetadataDoc.class, workflowId, dataPartitionId);
+        try {
+            Optional<WorkflowMetadataDoc> docOptional = queryHelper.getItem(workflowId, dataPartitionId);
 
-        if (doc == null) {
-          throw new WorkflowNotFoundException(String.format("Workflow: '%s' not found", workflowName));
+            if (docOptional.isEmpty()) {
+                throw new WorkflowNotFoundException(String.format("Workflow: '%s' not found", workflowName));
+            }
+            
+            return docOptional.get().convertToWorkflowMetadata();
+        } catch (WorkflowNotFoundException e) {
+            throw e;
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error retrieving workflow", 
+                    e.getMessage());
         }
-
-       return doc.convertToWorkflowMetadata();
     }
 
     @Override
     public void deleteWorkflow(String workflowName) {
-        String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
+        String dataPartitionId = getDataPartitionId();
         String workflowId = generateWorkflowId(workflowName, dataPartitionId);
 
-        queryHelper.deleteByPrimaryKey(WorkflowMetadataDoc.class, workflowId, dataPartitionId);
-
+        try {
+            queryHelper.deleteItem(workflowId, dataPartitionId);
+        } catch (InternalServerErrorException e) {
+            throw new AppException(HttpStatus.SC_SERVICE_UNAVAILABLE, "Service error occurred",
+                    e.getMessage());
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error deleting workflow",
+                    e.getMessage());
+        }
     }
 
     @Override
     public List<WorkflowMetadata> getAllWorkflowForTenant(String prefix) {
+        try {
+            ScanEnhancedRequest request = buildScanRequest(prefix);
+            QueryPageResult<WorkflowMetadataDoc> pageResult = queryHelper.scanPage(request);
+            List<WorkflowMetadataDoc> docs = (pageResult != null) ? pageResult.getItems() : Collections.emptyList();
 
-        String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
-        String filterExpression = "dataPartitionId = :partitionId";
-
-        AttributeValue dataPartitionAttributeValue = new AttributeValue(dataPartitionId);
-
-
-        Map<String, AttributeValue> eav = new HashMap<>();
-        eav.put(":partitionId", dataPartitionAttributeValue);
-
-        if (StringUtils.isNotBlank(prefix)) {
-          filterExpression += " AND begins_with ( workflowName, :workflowNamePrefix )";
-          AttributeValue workflowNamePrefixAttributeValue = new AttributeValue(prefix);
-          eav.put(":workflowNamePrefix", workflowNamePrefixAttributeValue);
+            return docs.stream()
+                    .map(WorkflowMetadataDoc::convertToWorkflowMetadata)
+                       .collect(Collectors.toList());
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error listing workflows",
+                    e.getMessage());
         }
-
-        ArrayList<WorkflowMetadataDoc> docs = queryHelper.scanTable(WorkflowMetadataDoc.class, filterExpression, eav);
-
-        if (!docs.isEmpty()) {
-          return docs.stream().map(x -> x.convertToWorkflowMetadata()).collect(Collectors.toList());
-        }
-        else {
-          return new ArrayList<WorkflowMetadata>();
-        }
-
     }
 
+    private ScanEnhancedRequest buildScanRequest(String prefix) {
+        String filterExpression = "dataPartitionId = :partitionId";
+        AttributeValue partitionValue = AttributeValue.builder().s(getDataPartitionId()).build();
+        Map<String, AttributeValue> expressionValues = new HashMap<>();
+        expressionValues.put(":partitionId", partitionValue);
+
+        if (StringUtils.isNotBlank(prefix)) {
+            filterExpression += " AND begins_with(workflowName, :workflowNamePrefix)";
+            AttributeValue prefixValue = AttributeValue.builder().s(prefix).build();
+            expressionValues.put(":workflowNamePrefix", prefixValue);
+        }
+
+        return RequestBuilderUtil.ScanRequestBuilder.forScan(WorkflowMetadataDoc.class)
+                .filterExpression(filterExpression, expressionValues)
+                .build();
+    }
+
+    private String generateWorkflowId(String workflowName, String dataPartitionId) {
+        return String.format("%s:%s", dataPartitionId, workflowName);
+    }
 }

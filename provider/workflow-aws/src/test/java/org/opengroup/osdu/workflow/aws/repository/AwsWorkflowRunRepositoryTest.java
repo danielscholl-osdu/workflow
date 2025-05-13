@@ -16,247 +16,285 @@
 
 package org.opengroup.osdu.workflow.aws.repository;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.when;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
-import org.opengroup.osdu.core.aws.dynamodb.QueryPageResult;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
+import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFactory;
+import org.opengroup.osdu.core.aws.v2.dynamodb.model.GsiQueryRequest;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
+import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowRunDoc;
 import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
+
+
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
-import org.springframework.boot.test.context.SpringBootTest;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-@RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(classes={S3Client.class})
-public class AwsWorkflowRunRepositoryTest {
+@ExtendWith(MockitoExtension.class)
+class AwsWorkflowRunRepositoryTest {
 
-    private final String partition = "data-partition-id";
-    private final String workflowRunHashKey = "runId";
-    private final String workflowName = "workflowName";
-    private final String runId = "runId";
-    private final String cursor = "cursor";
+    private final String PARTITION = "data-partition-id";
+    private final String WORKFLOWNAME = "workflowName";
+    private final String RUNID = "runId";
+    private final String CURSOR = "{\"dummyKey\":{\"S\":\"dummyValue\"}}";;
+    private final String TABLEPARAMETERPATH = "workflowRunTablePath";
 
-    @InjectMocks
-    private AwsWorkflowRunRepository repo = new AwsWorkflowRunRepository();
+    private AwsWorkflowRunRepository repo;
 
     @Mock
     private DpsHeaders headers;
 
     @Mock
-    private DynamoDBQueryHelperFactory dynamoDBQueryHelperFactory;
+    private IDynamoDBQueryHelperFactory queryHelperFactory;
 
     @Mock
-    private DynamoDBQueryHelperV2 queryHelper;
+    private DynamoDBQueryHelper<WorkflowRunDoc> queryHelper;
+
+    @Mock
+    private AwsServiceConfig awsServiceConfig;
+
+    @BeforeEach
+    void setup() {
+        when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(PARTITION);
+        when(queryHelperFactory.createQueryHelper(
+                headers, TABLEPARAMETERPATH, WorkflowRunDoc.class))
+                .thenReturn(queryHelper);
+        
+        repo = new AwsWorkflowRunRepository(queryHelperFactory, TABLEPARAMETERPATH, headers, awsServiceConfig);
+    }
+
+
 
     @Test
-    public void testSaveWorkflowRun()
-    {
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
-
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
+    void testSaveWorkflowRun_success() {
+        WorkflowRun workflowRun = mock(WorkflowRun.class);
+        
         repo.saveWorkflowRun(workflowRun);
 
-        Mockito.verify(queryHelper, Mockito.times(1)).saveWithHashCondition(Mockito.any(WorkflowRunDoc.class), Mockito.eq(workflowRunHashKey));
+        verify(queryHelper, times(1)).putItem(Mockito.any(PutItemEnhancedRequest.class));
+    }
+
+
+    @Test
+    void testSaveWorkflowRunConditionalCheckFailedException() {
+        WorkflowRun workflowRun = mock(WorkflowRun.class);
+
+        // Act - should throw ResourceConflictException
+        doThrow(ConditionalCheckFailedException.class).when(queryHelper).putItem(any(PutItemEnhancedRequest.class));
+
+        // Assert
+        Assertions.assertThrows(AppException.class, () -> {
+            repo.saveWorkflowRun(workflowRun);
+        });
+    }
+
+
+    @Test
+    void testSaveWorkflowRunException() {
+        WorkflowRun workflowRun = mock(WorkflowRun.class);
+
+        doThrow(DynamoDbException.class)
+               .when(queryHelper).putItem(any(PutItemEnhancedRequest.class));
+
+        // Assert
+        Assertions.assertThrows(AppException.class, () -> {
+            repo.saveWorkflowRun(workflowRun);
+        });
+    }
+
+
+    @Test
+    void testGetWorkflowRun() {
+        WorkflowRunDoc doc = new WorkflowRunDoc(RUNID, PARTITION, WORKFLOWNAME, WORKFLOWNAME,
+                                                1L, 1L, null, "", "");
+
+        Mockito.when(queryHelper.getItem(any(), any()))
+               .thenReturn(Optional.of(doc));
+
+        WorkflowRun result = repo.getWorkflowRun(WORKFLOWNAME, RUNID);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(RUNID, result.getRunId());
+        Assertions.assertEquals(WORKFLOWNAME, result.getWorkflowName());
+    }
+
+
+    @Test
+    void testGetWorkflowRunWorkflowRunNotFound() {
+        when(queryHelper.getItem(Mockito.eq(RUNID), Mockito.eq(PARTITION)))
+               .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(WorkflowRunNotFoundException.class, () -> {
+            repo.getWorkflowRun(WORKFLOWNAME, RUNID);
+        });
+    }
+
+
+    @Test
+    void testGetWorkflowRunInvalidWorkflowRun() {
+        WorkflowRunDoc doc = mock(WorkflowRunDoc.class);
+
+        when(queryHelper.getItem(Mockito.eq(RUNID), Mockito.eq(PARTITION)))
+               .thenReturn(Optional.of(doc));
+
+        when(doc.getWorkflowName()).thenReturn(WORKFLOWNAME);
+        Mockito.when(doc.getDataPartitionId()).thenReturn("different-partition");
+
+        Assertions.assertThrows(AppException.class, () -> {
+            repo.getWorkflowRun(WORKFLOWNAME, RUNID);
+        });
 
     }
 
-    @Test (expected = AppException.class)
-    public void testSaveWorkflowRunConditionalCheckFailedException()
-    {
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
 
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
+    @Test
+    void testGetWorkflowRunsByWorkflowName() {
+        List<WorkflowRunDoc> results = new ArrayList<>();
+        WorkflowRunDoc doc = mock(WorkflowRunDoc.class);
+        results.add(doc);
 
-        Mockito.doThrow(new ConditionalCheckFailedException("exception")).when(queryHelper).saveWithHashCondition(Mockito.any(WorkflowRunDoc.class), Mockito.eq(workflowRunHashKey));
+        when(queryHelper.queryByGSI(any(GsiQueryRequest.class))).thenReturn(results);
 
-        repo.saveWorkflowRun(workflowRun);
+        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
 
-        Mockito.verify(queryHelper, Mockito.times(1)).saveWithHashCondition(Mockito.any(WorkflowRunDoc.class), Mockito.eq(workflowRunHashKey));
-
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.getItems().size());
     }
 
-    @Test (expected = AppException.class)
-    public void testSaveWorkflowRunException()
-    {
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
 
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
+    @Test
+    void testGetWorkflowRunsByWorkflowNameNullDocs() {
+        
+        when(queryHelper.queryByGSI(any(GsiQueryRequest.class)))
+               .thenReturn(List.of());
 
-        Mockito.doThrow(new UnsupportedOperationException()).when(queryHelper).saveWithHashCondition(Mockito.any(WorkflowRunDoc.class), Mockito.eq(workflowRunHashKey));
+        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
 
-        repo.saveWorkflowRun(workflowRun);
-
-        Mockito.verify(queryHelper, Mockito.times(1)).saveWithHashCondition(Mockito.any(WorkflowRunDoc.class), Mockito.eq(workflowRunHashKey));
-
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.getItems().isEmpty());
     }
 
     @Test
-    public void testGetWorkflow()
-    {
+    void testGetWorkflowRunsByWorkflowNameException() {
+        when(queryHelper.queryByGSI(any(GsiQueryRequest.class)))
+               .thenThrow(new IllegalArgumentException("Test exception"));
 
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        Mockito.when(queryHelper.loadByPrimaryKey(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(new WorkflowRunDoc(runId, partition, workflowName, workflowName, 1l, 1l, null, "", ""));
-
-        WorkflowRun result = repo.getWorkflowRun(workflowName, runId);
-
-        Assert.assertNotNull(result);
+        Assertions.assertThrows(AppException.class, () -> repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR));
     }
 
-    @Test (expected = WorkflowRunNotFoundException.class)
-    public void testGetWorkflowRunWorkflowRunNotFound()
-    {
-
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        Mockito.when(queryHelper.loadByPrimaryKey(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(null);
-
-        repo.getWorkflowRun(workflowName, runId);
-    }
-
-    @Test (expected = AppException.class)
-    public void testGetWorkflowRunInvalidWorkflowRun()
-    {
-        WorkflowRunDoc doc = Mockito.mock(WorkflowRunDoc.class);
-
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        Mockito.when(queryHelper.loadByPrimaryKey(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(doc);
-
-        Mockito.when(doc.getWorkflowName()).thenReturn(workflowName);
-
-        Mockito.when(doc.getDataPartitionId()).thenReturn("");
-
-        repo.getWorkflowRun(workflowName, runId);
-    }
 
     @Test
-    public void testGetWorkflowRunsByWorkflowName() throws IllegalArgumentException, UnsupportedEncodingException
-    {
-        List<WorkflowRunDoc> results = new ArrayList<WorkflowRunDoc>();
-        results.add(Mockito.mock(WorkflowRunDoc.class));
-
-        QueryPageResult<WorkflowRunDoc> docs = new QueryPageResult<WorkflowRunDoc>(cursor, results);
-
-        Mockito.when(queryHelper.queryByGSI(Mockito.any(), Mockito.any(WorkflowRunDoc.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyString())).thenReturn(docs);
-
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(workflowName, 1, cursor);
-
-        Assert.assertNotNull(result);
-    }
-
-    @Test
-    public void testGetWorkflowRunsByWorkflowNameNullDocs()
-    {
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(workflowName, 1, cursor);
-
-        Assert.assertNotNull(result);
-    }
-
-    @Test (expected = AppException.class)
-    public void testGetWorkflowRunsByWorkflowNameException() throws IllegalArgumentException, UnsupportedEncodingException
-    {
-        Mockito.when(queryHelper.queryByGSI(Mockito.any(), Mockito.any(WorkflowRunDoc.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyString())).thenThrow(new IllegalArgumentException());
-
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        repo.getWorkflowRunsByWorkflowName(workflowName, 1, cursor);
-    }
-
-    @Test
-    public void testDeleteWorkflowRuns()
-    {
-        List<String> list = new ArrayList<String>();
-
+    void testDeleteWorkflowRuns() {
+        List<String> list = new ArrayList<>();
         list.add("id1");
         list.add("id2");
 
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
+        repo.deleteWorkflowRuns(WORKFLOWNAME, list);
 
-        repo.deleteWorkflowRuns(workflowName, list);
-
-        Mockito.verify(queryHelper, Mockito.times(2)).deleteByPrimaryKey(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        verify(queryHelper, times(2)).deleteItem(anyString(), Mockito.eq(PARTITION));
     }
 
     @Test
-    public void testUpdateWorkflowRun()
-    {
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
+    void testDeleteWorkflowRunsException() {
+        doThrow(DynamoDbException.class).when(queryHelper).deleteItem(anyString(), any());
+        List<String> list = List.of("id1", "id2");
 
-        Mockito.when(queryHelper.keyExistsInTable(Mockito.any(), Mockito.any(WorkflowRunDoc.class), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-    
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
+        Assertions.assertThrows(AppException.class, () -> repo.deleteWorkflowRuns(WORKFLOWNAME, list));
+    }
+
+
+    @Test
+    void testUpdateWorkflowRun() {
+        WorkflowRun workflowRun = mock(WorkflowRun.class);
 
         WorkflowRun result = repo.updateWorkflowRun(workflowRun);
 
-        Assert.assertNotNull(result);
-
-        Mockito.verify(queryHelper, Mockito.times(1)).save(Mockito.any(WorkflowRunDoc.class));
+        Assertions.assertNotNull(result);
+        verify(queryHelper, times(1)).putItem(any(PutItemEnhancedRequest.class));
     }
 
-    @Test (expected = AppException.class)
-    public void testUpdateWorkflowRunNonExist()
-    {
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        Mockito.when(queryHelper.keyExistsInTable(Mockito.any(), Mockito.any(WorkflowRunDoc.class), Mockito.anyString(), Mockito.anyString())).thenReturn(false);
-    
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
-
-        repo.updateWorkflowRun(workflowRun);
-    }
-
-    @Test (expected = AppException.class)
-    public void testUpdateWorkflowRunException()
-    {
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
-
-        Mockito.when(queryHelper.keyExistsInTable(Mockito.any(), Mockito.any(WorkflowRunDoc.class), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-
-        Mockito.doThrow(new UnsupportedOperationException()).when(queryHelper).save(Mockito.any(WorkflowRunDoc.class));
-    
-        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
-
-        repo.updateWorkflowRun(workflowRun);
-    }
 
     @Test
-    public void testGetAllRunInstancesOfWorkflow()
-    {
-        Mockito.when(headers.getPartitionIdWithFallbackToAccountId()).thenReturn(partition);
+    void testUpdateWorkflowRunNonExist() {
+        WorkflowRun workflowRun = mock(WorkflowRun.class);
 
-        List<WorkflowRun> result = repo.getAllRunInstancesOfWorkflow(workflowName, null);
+        doThrow(ConditionalCheckFailedException.class)
+               .when(queryHelper).putItem(any(PutItemEnhancedRequest.class));
 
-        Assert.assertNotNull(result);
+        Assertions.assertThrows(AppException.class, () -> repo.updateWorkflowRun(workflowRun));
     }
 
+
     @Test
-    public void testRunExist()
-    {
-        repo.runExists(runId);
+    void testUpdateWorkflowRunException() {
+        WorkflowRun workflowRun = Mockito.mock(WorkflowRun.class);
+
+        doThrow(DynamoDbException.class)
+               .when(queryHelper).putItem(any(PutItemEnhancedRequest.class));
+
+        Assertions.assertThrows(AppException.class, () -> repo.updateWorkflowRun(workflowRun));
+    }
+
+
+
+    @Test
+    void testGetAllRunInstancesOfWorkflow() {
+        // Setup for first call
+        List<WorkflowRunDoc> firstResults = new ArrayList<>();
+        WorkflowRunDoc doc1 = Mockito.mock(WorkflowRunDoc.class);
+        firstResults.add(doc1);
         
-        Mockito.verify(queryHelper, Mockito.times(1)).keyExistsInTable(Mockito.any(), Mockito.any(WorkflowRunDoc.class));
+        // Setup for second call (no more results)
+        List<WorkflowRunDoc> secondPageResult = List.of();
+
+        
+        when(queryHelper.queryByGSI(Mockito.any(GsiQueryRequest.class)))
+               .thenReturn(firstResults)
+               .thenReturn(secondPageResult);
+
+        List<WorkflowRun> result = repo.getAllRunInstancesOfWorkflow(WORKFLOWNAME, null);
+
+        // assert
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
     }
+
+    @Test
+    void testRunExistsTrue() {
+        when(queryHelper.getItem(anyString(), anyString())).thenReturn(Optional.of(new WorkflowRunDoc()));
+
+        // assert
+        Assertions.assertTrue(repo.runExists(RUNID));
+    }
+
+    @Test
+    void testRunExistsFalse() {
+        when(queryHelper.getItem(anyString(), anyString())).thenReturn(Optional.empty());
+
+        // assert
+        Assertions.assertFalse(repo.runExists(RUNID));
+    }
+
 }

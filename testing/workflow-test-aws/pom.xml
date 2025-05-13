@@ -42,6 +42,7 @@
     <junit-jupiter.version>5.5.2</junit-jupiter.version>
     <jackson-databind.version>2.13.2.2</jackson-databind.version>
     <jackson.version>2.13.2</jackson.version>
+    <awsv2.version>2.30.32</awsv2.version>
   </properties>
 
   <dependencyManagement>
@@ -67,17 +68,23 @@
     <dependency>
       <groupId>org.opengroup.osdu.core.aws</groupId>
       <artifactId>os-core-lib-aws</artifactId>
-      <version>0.23.0</version>
+      <version>5.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.opengroup.osdu</groupId>
       <artifactId>workflow-test-core</artifactId>
       <version>0.29.0-SNAPSHOT</version>
     </dependency>
+    <!-- AWS SDK v2 dependencies -->
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-cognitoidp</artifactId>
-      <version>1.11.1018</version>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>cognitoidentityprovider</artifactId>
+      <version>${awsv2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>utils</artifactId>
+      <version>${awsv2.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

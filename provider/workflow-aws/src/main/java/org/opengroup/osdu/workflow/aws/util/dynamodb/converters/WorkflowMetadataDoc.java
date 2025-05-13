@@ -16,12 +16,10 @@
 
 package org.opengroup.osdu.workflow.aws.util.dynamodb.converters;
 
-import java.util.Map;
-
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 
@@ -34,37 +32,59 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@DynamoDBTable(tableName = "WorkflowMetadataRepository")
+@DynamoDbBean
 public class WorkflowMetadataDoc {
 
-    @DynamoDBRangeKey(attributeName = "dataPartitionId")
     private String dataPartitionId;
-
-    @DynamoDBHashKey(attributeName = "workflowId")
     private String workflowId;
-
-    @DynamoDBAttribute(attributeName = "workflowName")
     private String workflowName;
-
-    @DynamoDBAttribute(attributeName = "description")
     private String description;
-
-    @DynamoDBAttribute(attributeName = "createdBy")
     private String createdBy;
-
-    @DynamoDBAttribute(attributeName = "creationTimestamp")
     private Long creationTimestamp;
-
-    @DynamoDBAttribute(attributeName = "version")
     private Long version;
-
-    @DynamoDBAttribute(attributeName = "isDeployedThroughWorkflowService")
     private Boolean isDeployedThroughWorkflowService;
 
-    // This breaks workflow service, throws dynamo mapping exception
-//    @DynamoDBAttribute(attributeName = "registrationInstructions")
-//    private Map<String,Object> registrationInstructions;
+    @DynamoDbSortKey
+    @DynamoDbAttribute("dataPartitionId")
+    public String getDataPartitionId() {
+        return dataPartitionId;
+    }
 
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute("workflowId")
+    public String getWorkflowId() {
+        return workflowId;
+    }
+
+    @DynamoDbAttribute("workflowName")
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    @DynamoDbAttribute("description")
+    public String getDescription() {
+        return description;
+    }
+
+    @DynamoDbAttribute("createdBy")
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    @DynamoDbAttribute("creationTimestamp")
+    public Long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
+    @DynamoDbAttribute("version")
+    public Long getVersion() {
+        return version;
+    }
+
+    @DynamoDbAttribute("isDeployedThroughWorkflowService")
+    public Boolean getIsDeployedThroughWorkflowService() {
+        return isDeployedThroughWorkflowService;
+    }
 
     public static WorkflowMetadataDoc create(WorkflowMetadata workflowMetadata, String dataPartitionId) {
         return WorkflowMetadataDoc.builder()

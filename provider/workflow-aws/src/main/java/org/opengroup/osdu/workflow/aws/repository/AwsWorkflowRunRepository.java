@@ -16,20 +16,20 @@
 
 package org.opengroup.osdu.workflow.aws.repository;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperFactory;
-import org.opengroup.osdu.core.aws.dynamodb.DynamoDBQueryHelperV2;
-import org.opengroup.osdu.core.aws.dynamodb.QueryPageResult;
+import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
+import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFactory;
+import org.opengroup.osdu.core.aws.v2.dynamodb.model.GsiQueryRequest;
+import org.opengroup.osdu.core.aws.v2.dynamodb.model.QueryPageResult;
+import org.opengroup.osdu.core.aws.v2.dynamodb.util.RequestBuilderUtil;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
@@ -38,93 +38,111 @@ import org.opengroup.osdu.workflow.exception.WorkflowRunNotFoundException;
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
+
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 @Repository
 @RequestScope
 @Slf4j
 public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
-    @Inject
-    private AwsServiceConfig config;
+    private static final String WORKFLOWRUN_HASHKEY = "runId";
+    private static final String GSI_INDEX_NAME = "workflowName-tenant-index";
 
-    @Inject
-    DpsHeaders headers;
+    private final AwsServiceConfig config;
+    private final DpsHeaders headers;
+    private final DynamoDBQueryHelper<WorkflowRunDoc> queryHelper;
 
-    @Inject
-    private DynamoDBQueryHelperFactory dynamoDBQueryHelperFactory;
-
-    private DynamoDBQueryHelperV2 queryHelper;
-
-    @Value("${aws.dynamodb.workflowRunTable.ssm.relativePath}")
-    String workflowRunTableParameterRelativePath;
-
-    private static final String WORKFLOWRUNHASKEY = "runId";
-
-    @PostConstruct
-    public void init() {
-        queryHelper = dynamoDBQueryHelperFactory.getQueryHelperForPartition(headers, workflowRunTableParameterRelativePath);
+    @Autowired
+    public AwsWorkflowRunRepository(
+            IDynamoDBQueryHelperFactory queryHelperFactory,
+            @Value("${aws.dynamodb.workflowRunTable.ssm.relativePath}") String workflowRunTableParameterRelativePath,
+            DpsHeaders headers, AwsServiceConfig config) {
+        this.headers = headers;
+        this.queryHelper = queryHelperFactory.createQueryHelper(
+                headers,
+                workflowRunTableParameterRelativePath,
+                WorkflowRunDoc.class);
+        this.config = config;
     }
 
     @Override
     public WorkflowRun saveWorkflowRun(WorkflowRun workflowRun) {
-
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
-
         WorkflowRunDoc doc = WorkflowRunDoc.create(workflowRun, dataPartitionId);
 
         try {
-            queryHelper.saveWithHashCondition(doc, WORKFLOWRUNHASKEY);
+            PutItemEnhancedRequest<WorkflowRunDoc> request = PutItemEnhancedRequest.builder(WorkflowRunDoc.class)
+                    .item(doc)
+                    .conditionExpression(Expression.builder()
+                            .expression(String.format("attribute_not_exists(%s)", WORKFLOWRUN_HASHKEY))
+                            .build())
+                    .build();
+            
+            queryHelper.putItem(request);
+            return workflowRun;
         } catch (ConditionalCheckFailedException e) {
             throw new AppException(HttpStatus.BAD_REQUEST.value(),
                     HttpStatus.BAD_REQUEST.getReasonPhrase(), "Cannot save duplicate runId");
-        } catch (Exception e) {
-          throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-              HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Failed to save workflowRun to db");
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Failed to save workflowRun to db");
         }
-
-      return workflowRun;
-
     }
 
     @Override
     public WorkflowRun getWorkflowRun(String workflowName, String runId) {
-
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
 
-        if(!isValidWorkflowRun(runId, workflowName, dataPartitionId)){
+        if (!isValidWorkflowRun(runId, workflowName, dataPartitionId)) {
             throw new AppException(HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Run id's workflow/data-partition-id doesn't match workflow/data-partition-id in request");
+                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                    "Run id's workflow/data-partition-id doesn't match workflow/data-partition-id in request");
         }
 
-        WorkflowRunDoc doc = queryHelper.loadByPrimaryKey(WorkflowRunDoc.class, runId, dataPartitionId);
+        Optional<WorkflowRunDoc> docOptional = queryHelper.getItem(runId, dataPartitionId);
 
-        if (doc == null) {
+        if (docOptional.isEmpty()) {
             throw new WorkflowRunNotFoundException(
                     String.format("Workflow Run: '%s' for Workflow '%s' not found", runId, workflowName));
         }
 
-        return doc.convertToWorkflowRun();
-
+        return docOptional.get().convertToWorkflowRun();
     }
+
 
     @Override
     public WorkflowRunsPage getWorkflowRunsByWorkflowName(String workflowName, Integer limit, String cursor) {
-
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
 
-        WorkflowRunDoc queryDoc = WorkflowRunDoc.builder().workflowName(workflowName).dataPartitionId(dataPartitionId)
-                .build();
+        WorkflowRunDoc queryDoc = WorkflowRunDoc.builder()
+                                                .workflowName(workflowName)
+                                                .dataPartitionId(dataPartitionId)
+                                                .build();
 
-        QueryPageResult<WorkflowRunDoc> docs;
+        List<WorkflowRunDoc> docs;
+
         try {
-            docs = queryHelper.queryByGSI(WorkflowRunDoc.class, queryDoc, "dataPartitionId", dataPartitionId, limit, cursor);
-        } catch (IllegalArgumentException | UnsupportedEncodingException e) {
-            log.error("Failed to query workflow runs.", e);
+            // Build QueryEnhancedRequest with RequestBuilderUtil
+            GsiQueryRequest<WorkflowRunDoc> queryRequest =
+                RequestBuilderUtil.QueryRequestBuilder.forQuery(queryDoc, GSI_INDEX_NAME, WorkflowRunDoc.class)
+                    .limit(limit)
+                    .cursor(cursor)
+                    .buildGsiRequest();
+
+            docs = queryHelper.queryByGSI(queryRequest);
+
+        } catch (IllegalArgumentException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                                    "Failed to query workflow runs by name");
@@ -132,105 +150,91 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         }
 
         List<WorkflowRun> items;
-        String docsCursor = null;
 
-        if (docs != null && docs.results != null && (!docs.results.isEmpty())) {
-            items = docs.results.stream().map(x -> x.convertToWorkflowRun()).collect(Collectors.toList());
-            docsCursor = docs.cursor;
+        if (docs != null &&  (!docs.isEmpty())) {
+            items = docs.stream()
+                        .map(WorkflowRunDoc::convertToWorkflowRun)
+                        .toList();
         }
         else {
             items = new ArrayList<>();
         }
 
         return WorkflowRunsPage.builder()
-                        .cursor(docsCursor)
-                        .items(items)
-                        .build();
+                               .cursor(cursor)
+                               .items(items)
+                               .build();
     }
 
     @Override
     public void deleteWorkflowRuns(String workflowName, List<String> runIds) {
-
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
 
-        for (String runId : runIds) {
-
-            queryHelper.deleteByPrimaryKey(WorkflowRunDoc.class, runId, dataPartitionId);
-
+        try {
+            for (String runId : runIds) {
+                queryHelper.deleteItem(runId, dataPartitionId);
+            }
+        } catch (DynamoDbException e) {
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                    "Failed to delete workflow runs");
         }
-
     }
 
     @Override
     public WorkflowRun updateWorkflowRun(WorkflowRun workflowRun) {
-
         String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
-
-        if (!workflowRunExists(workflowRun.getRunId(), dataPartitionId)) {
-            throw new AppException(HttpStatus.NOT_FOUND.value(),
-                                   HttpStatus.NOT_FOUND.getReasonPhrase(),
-                                   "WorkflowRun not found, cannot update");
-        }
-
         WorkflowRunDoc doc = WorkflowRunDoc.create(workflowRun, dataPartitionId);
 
         try {
-            queryHelper.save(doc);
-          }
-          catch(Exception e) {
+            PutItemEnhancedRequest<WorkflowRunDoc> request = PutItemEnhancedRequest.builder(WorkflowRunDoc.class)
+                    .item(doc)
+                    .conditionExpression(Expression.builder()
+                            .expression(String.format("attribute_exists(%s)", WORKFLOWRUN_HASHKEY))
+                            .build())
+                    .build();
+            
+            queryHelper.putItem(request);
+            return workflowRun;
+        } catch (ConditionalCheckFailedException e) {
+            throw new AppException(HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.NOT_FOUND.getReasonPhrase(),
+                    "WorkflowRun not found, cannot update");
+        } catch (DynamoDbException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                  HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                                  "Failed to save workflowRun to db");
-          }
-
-        return workflowRun;
+                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                    "Failed to save workflowRun to db");
+        }
     }
 
     @Override
     public List<WorkflowRun> getAllRunInstancesOfWorkflow(String workflowName, Map<String, Object> params) {
-
         String cursor = null;
-
         List<WorkflowRun> runs = new ArrayList<>();
 
         do {
-
             WorkflowRunsPage page = getWorkflowRunsByWorkflowName(workflowName, 100, cursor);
             runs.addAll(page.getItems());
             cursor = page.getCursor();
-        }
-        while (cursor != null);
+        } while (cursor != null);
 
         return runs;
-
     }
 
-    public boolean runExists(String runId){
-        WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
-        workflowRunDoc.setRunId(runId);
-        return queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc);
+    public boolean runExists(String runId) {
+        String dataPartitionId = headers.getPartitionIdWithFallbackToAccountId();
+        return queryHelper.getItem(runId, dataPartitionId).isPresent();
     }
 
     private boolean isValidWorkflowRun(String runId, String workflowName, String dataPartitionId) {
+        Optional<WorkflowRunDoc> docOptional = queryHelper.getItem(runId, dataPartitionId);
 
-        boolean valid = true;
-
-        WorkflowRunDoc workflowRunDoc = queryHelper.loadByPrimaryKey(WorkflowRunDoc.class, runId, dataPartitionId);
-
-        if(workflowRunDoc != null){
-            valid = workflowRunDoc.getWorkflowName().equals(workflowName) && workflowRunDoc.getDataPartitionId().equals(dataPartitionId);
+        if (docOptional.isPresent()) {
+            WorkflowRunDoc doc = docOptional.get();
+            return doc.getWorkflowName().equals(workflowName) && 
+                   doc.getDataPartitionId().equals(dataPartitionId);
         }
-
-        return valid;
-
-    }
-
-    private boolean workflowRunExists(String runId, String dataPartitionId) {
-        // Set GSI hash key
-        WorkflowRunDoc workflowRunDoc = new WorkflowRunDoc();
-        workflowRunDoc.setRunId(runId);
-
-        // Check if the tenant exists in the table by name
-        return queryHelper.keyExistsInTable(WorkflowRunDoc.class, workflowRunDoc, "dataPartitionId", dataPartitionId);
+        
+        return true;
     }
 }

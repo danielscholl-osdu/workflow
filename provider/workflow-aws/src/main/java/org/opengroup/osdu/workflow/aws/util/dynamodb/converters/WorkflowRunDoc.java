@@ -16,14 +16,12 @@
 
 package org.opengroup.osdu.workflow.aws.util.dynamodb.converters;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperFieldModel.DynamoDBAttributeType;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 
 import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
@@ -37,39 +35,67 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@DynamoDBTable(tableName = "WorkflowRunRepository")
+@DynamoDbBean
 public class WorkflowRunDoc {
 
-    @DynamoDBHashKey(attributeName = "runId")
     private String runId;
-
-    @DynamoDBRangeKey(attributeName = "dataPartitionId")
-    @DynamoDBIndexRangeKey(attributeName = "dataPartitionId", globalSecondaryIndexName = "workflowName-tenant-index")
     private String dataPartitionId;
-
-    @DynamoDBAttribute(attributeName = "workflowId")
     private String workflowId;
-
-    @DynamoDBAttribute(attributeName = "workflowName")
-    @DynamoDBIndexHashKey(attributeName = "workflowName",  globalSecondaryIndexName = "workflowName-tenant-index")
     private String workflowName;
-
-    @DynamoDBAttribute(attributeName = "startTimeStamp")    
     private Long startTimeStamp;
-    
-    @DynamoDBAttribute(attributeName = "endTimeStamp")
     private Long endTimeStamp;
-
-    @DynamoDBAttribute(attributeName = "status")
-    @DynamoDBTyped(DynamoDBAttributeType.S)
     private WorkflowStatusType status;
-
-    @DynamoDBAttribute(attributeName = "submittedBy")
     private String submittedBy;
-
-    @DynamoDBAttribute(attributeName = "workflowEngineExecutionDate")
     private String workflowEngineExecutionDate;
 
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute("runId")
+    public String getRunId() {
+        return runId;
+    }
+
+    @DynamoDbSortKey
+    @DynamoDbSecondarySortKey(indexNames = "workflowName-tenant-index")
+    @DynamoDbAttribute("dataPartitionId")
+    public String getDataPartitionId() {
+        return dataPartitionId;
+    }
+
+    @DynamoDbAttribute("workflowId")
+    public String getWorkflowId() {
+        return workflowId;
+    }
+
+    @DynamoDbSecondaryPartitionKey(indexNames = "workflowName-tenant-index")
+    @DynamoDbAttribute("workflowName")
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    @DynamoDbAttribute("startTimeStamp")
+    public Long getStartTimeStamp() {
+        return startTimeStamp;
+    }
+    
+    @DynamoDbAttribute("endTimeStamp")
+    public Long getEndTimeStamp() {
+        return endTimeStamp;
+    }
+
+    @DynamoDbAttribute("status")
+    public WorkflowStatusType getStatus() {
+        return status;
+    }
+
+    @DynamoDbAttribute("submittedBy")
+    public String getSubmittedBy() {
+        return submittedBy;
+    }
+
+    @DynamoDbAttribute("workflowEngineExecutionDate")
+    public String getWorkflowEngineExecutionDate() {
+        return workflowEngineExecutionDate;
+    }
 
     public static WorkflowRunDoc create(WorkflowRun workflowRun, String dataPartitionId) {
         return WorkflowRunDoc.builder()
@@ -98,6 +124,4 @@ public class WorkflowRunDoc {
             .workflowEngineExecutionDate(workflowEngineExecutionDate)
             .build();
     }
-
-
 }

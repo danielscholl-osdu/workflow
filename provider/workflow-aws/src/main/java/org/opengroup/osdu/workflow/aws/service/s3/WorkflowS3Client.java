@@ -16,25 +16,32 @@
 
 package org.opengroup.osdu.workflow.aws.service.s3;
 
-import jakarta.inject.Inject;
 import org.apache.http.HttpStatus;
-import org.opengroup.osdu.core.aws.s3.IS3ClientFactory;
-import org.opengroup.osdu.core.aws.s3.S3ClientWithBucket;
+import org.opengroup.osdu.core.aws.v2.s3.IS3ClientFactory;
+import org.opengroup.osdu.core.aws.v2.s3.S3ClientWithBucket;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import com.amazonaws.services.s3.AmazonS3;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.nio.charset.StandardCharsets;
 
 @Component
 @Slf4j
-public class S3Client {
+public class WorkflowS3Client {
 
-  @Inject
-  private IS3ClientFactory s3ClientFactory;
+  private final IS3ClientFactory s3ClientFactory;
+  private final String s3RecordsBucketParameterRelativePath;
 
-  @Value("${aws.s3.recordsBucket.ssm.relativePath}")
-  private String s3RecordsBucketParameterRelativePath;
+
+  public WorkflowS3Client(IS3ClientFactory s3ClientFactory,
+                          @Value("${aws.s3.recordsBucket.ssm.relativePath}") String s3RecordsBucketParameterRelativePath) {
+    this.s3ClientFactory = s3ClientFactory;
+    this.s3RecordsBucketParameterRelativePath = s3RecordsBucketParameterRelativePath;
+  }
 
   private S3ClientWithBucket getS3ClientWithBucket(String dataPartition) {
       return s3ClientFactory.getS3ClientForPartition(dataPartition, s3RecordsBucketParameterRelativePath);
@@ -43,15 +50,19 @@ public class S3Client {
   public String save(String runId, String content, String dataPartition){
       log.info(String.format("Saving %s content to s3 for data partition: %s", runId, content));
 
-    String s3Url = "";
+      String s3Url = "";
 
       try {
           String keyName = java.util.UUID.randomUUID().toString();
 
           S3ClientWithBucket s3ClientWithBucket = getS3ClientWithBucket(dataPartition);
-          AmazonS3 s3 = s3ClientWithBucket.getS3Client();
+          S3Client s3 = s3ClientWithBucket.getS3Client();
           String workflowBucketName = s3ClientWithBucket.getBucketName();
-          s3.putObject(workflowBucketName, keyName, content);
+          PutObjectRequest putRequest = PutObjectRequest.builder()
+                                                   .bucket(workflowBucketName)
+                                                   .key(keyName)
+                                                   .build();
+          s3.putObject(putRequest, RequestBody.fromString(content, StandardCharsets.UTF_8));
           s3Url = String.format("s3://%s/%s", workflowBucketName, keyName);
       } catch(Exception e){
           log.error(String.format("Couldn't save content to s3: %s", e.getMessage()), e);

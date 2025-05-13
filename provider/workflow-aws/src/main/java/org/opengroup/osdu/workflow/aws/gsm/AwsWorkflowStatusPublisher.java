@@ -16,19 +16,19 @@
 
 package org.opengroup.osdu.workflow.aws.gsm;
 
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
 import lombok.RequiredArgsConstructor;
-import org.opengroup.osdu.core.aws.sns.AmazonSNSConfig;
-import org.opengroup.osdu.core.aws.sns.PublishRequestBuilder;
-import org.opengroup.osdu.core.aws.ssm.K8sLocalParameterProvider;
+import org.opengroup.osdu.core.aws.v2.sns.AmazonSNSConfig;
+import org.opengroup.osdu.core.aws.v2.sns.PublishRequestBuilder;
+import org.opengroup.osdu.core.aws.v2.ssm.K8sLocalParameterProvider;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
 import org.opengroup.osdu.core.common.status.IEventPublisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
     @Value("${aws.sns.region}")
     private String amazonSNSRegion;
 
-    private AmazonSNS snsClient;
+    private SnsClient snsClient;
     private String amazonSnsTopic;
 
     @PostConstruct
@@ -62,18 +62,22 @@ public class AwsWorkflowStatusPublisher implements IEventPublisher {
             amazonSnsTopic,
             Arrays.asList(messages),
             createMessageMap(attributesMap)
-            );
+        );
         snsClient.publish(publishRequest);
     }
 
     private HashMap<String, MessageAttributeValue> createMessageMap(Map<String, String> attributesMap) {
         HashMap<String, MessageAttributeValue> messageAttributes = new HashMap<>();
-        messageAttributes.put(DpsHeaders.DATA_PARTITION_ID, new MessageAttributeValue()
-            .withDataType("String")
-            .withStringValue(attributesMap.get(DpsHeaders.DATA_PARTITION_ID)));
-        messageAttributes.put(DpsHeaders.CORRELATION_ID, new MessageAttributeValue()
-            .withDataType("String")
-            .withStringValue(attributesMap.get(DpsHeaders.CORRELATION_ID)));
+        messageAttributes.put(DpsHeaders.DATA_PARTITION_ID, MessageAttributeValue
+            .builder()
+            .dataType("String")
+            .stringValue(attributesMap.get(DpsHeaders.DATA_PARTITION_ID))
+            .build());
+        messageAttributes.put(DpsHeaders.CORRELATION_ID, MessageAttributeValue
+            .builder()
+            .dataType("String")
+            .stringValue(attributesMap.get(DpsHeaders.CORRELATION_ID))
+            .build());
         return messageAttributes;
     }
 

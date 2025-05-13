@@ -17,7 +17,6 @@
 package org.opengroup.osdu.workflow.aws.gsm;
 
 
-
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -30,15 +29,15 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opengroup.osdu.core.aws.sns.AmazonSNSConfig;
-import org.opengroup.osdu.core.aws.sns.PublishRequestBuilder;
-import org.opengroup.osdu.core.aws.ssm.K8sLocalParameterProvider;
+import org.opengroup.osdu.core.aws.v2.sns.AmazonSNSConfig;
+import org.opengroup.osdu.core.aws.v2.sns.PublishRequestBuilder;
+import org.opengroup.osdu.core.aws.v2.ssm.K8sLocalParameterProvider;
 import org.opengroup.osdu.core.common.exception.CoreException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.status.Message;
 
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,12 +49,11 @@ public class AwsWorkflowStatusPublisherTest {
     private AwsWorkflowStatusPublisher publisher = new AwsWorkflowStatusPublisher();
 
     @Mock
-    AmazonSNS snsClient;
+    SnsClient snsClient;
 
     @Test
     public void testPublish()
     {
-
         Message[] messages = new Message[1];
         messages[0] = Mockito.mock(Message.class);
 
@@ -89,7 +87,6 @@ public class AwsWorkflowStatusPublisherTest {
     @Test (expected = CoreException.class)
     public void testPublishNoMsg()
     {
-
         Message[] messages = new Message[0];
 
         Map<String, String> attributeMap = new HashMap<String, String>();
@@ -111,7 +108,6 @@ public class AwsWorkflowStatusPublisherTest {
     @Test (expected = CoreException.class)
     public void testPublishEmptyMap()
     {
-
         Message[] messages = new Message[1];
         messages[0] = Mockito.mock(Message.class);
 
@@ -133,7 +129,6 @@ public class AwsWorkflowStatusPublisherTest {
     @Test (expected = CoreException.class)
     public void testPublishNoPartition()
     {
-
         Message[] messages = new Message[1];
         messages[0] = Mockito.mock(Message.class);
 
