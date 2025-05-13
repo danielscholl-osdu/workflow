@@ -16,31 +16,32 @@
 
 package org.opengroup.osdu.aws.workflow.util;
 
-import com.google.common.base.Strings;
 import org.opengroup.osdu.workflow.util.HTTPClient;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HTTPClientAWS extends HTTPClient {
-  private static AWSCognitoClient awsCognitoClient = null;
+  private static final String TOKEN_PREFIX = "Bearer ";
+
+  private final AtomicReference<String> cachedAccessToken = new AtomicReference<>();
+  private final AtomicReference<String> cachedNoAccessToken = new AtomicReference<>();
 
   @Override
-	public synchronized String getAccessToken() throws Exception {
-    if (Strings.isNullOrEmpty(accessToken)) {
-      accessToken = getAwsCognitoClient().getTokenForUserWithAccess();
+  public synchronized String getAccessToken() throws Exception {
+    String currentToken = cachedAccessToken.get();
+    if (currentToken == null) {
+      currentToken = TOKEN_PREFIX + JwtTokenUtilV2.getAccessToken();
+      cachedAccessToken.set(currentToken);
     }
-    return "Bearer " + accessToken;
-	}
+    return currentToken;
+  }
 
-	@Override
-	public synchronized String getNoDataAccessToken() throws Exception {
-    if (Strings.isNullOrEmpty(noDataAccessToken)) {
-      noDataAccessToken = getAwsCognitoClient().getTokenForUserWithNoAccess();
+  @Override
+  public synchronized String getNoDataAccessToken() throws Exception {
+    String currentToken = cachedNoAccessToken.get();
+    if (currentToken == null) {
+      currentToken = TOKEN_PREFIX + JwtTokenUtilV2.getNoAccessToken();
+      cachedNoAccessToken.set(currentToken);
     }
-    return "Bearer " + noDataAccessToken;
-	}
-
-  private AWSCognitoClient getAwsCognitoClient() {
-    if(awsCognitoClient == null)
-      awsCognitoClient = new AWSCognitoClient();
-    return	awsCognitoClient;
+    return currentToken;
   }
 }

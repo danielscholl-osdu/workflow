@@ -36,7 +36,7 @@ import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.repository.AwsWorkflowRunRepository;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
-import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
+import org.opengroup.osdu.workflow.aws.service.s3.WorkflowS3Client;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
@@ -78,7 +78,7 @@ public class AwsWorkflowEngineServiceImpl implements IWorkflowEngineService {
   WorkflowSqsClient sqsClient;
 
   @Inject
-  S3Client s3Client;
+  WorkflowS3Client s3Client;
 
   @Inject
   private WorkflowRequestBodyFactory workflowRequestBodyFactory;

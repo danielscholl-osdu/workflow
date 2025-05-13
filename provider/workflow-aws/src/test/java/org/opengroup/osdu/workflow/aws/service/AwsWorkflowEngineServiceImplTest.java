@@ -33,7 +33,7 @@ import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowRequestBodyFactory;
 import org.opengroup.osdu.workflow.aws.service.airflow.sqs.WorkflowSqsClient;
-import org.opengroup.osdu.workflow.aws.service.s3.S3Client;
+import org.opengroup.osdu.workflow.aws.service.s3.WorkflowS3Client;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.opengroup.osdu.workflow.aws.config.AwsAirflowApiMode;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(classes={S3Client.class})
+@SpringBootTest(classes={WorkflowS3Client.class})
 public class AwsWorkflowEngineServiceImplTest {
     @InjectMocks
     AwsWorkflowEngineServiceImpl CUT = new AwsWorkflowEngineServiceImpl();
@@ -73,7 +73,7 @@ public class AwsWorkflowEngineServiceImplTest {
     WorkflowSqsClient sqsClient;
 
     @Mock
-    S3Client s3Client;
+    WorkflowS3Client s3Client;
 
     @Mock
     private WorkflowRequestBodyFactory workflowRequestBodyFactory;
