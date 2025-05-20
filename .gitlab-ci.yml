@@ -75,7 +75,7 @@ include:
 
 .maven:
   image: maven:3.9.3-eclipse-temurin-17
-  tags: ['osdu-medium']
+  tags: ["osdu-medium"]
   variables:
     MAVEN_REPO_PATH: "$CI_PROJECT_DIR/.m2/repository"
     MAVEN_CLI_OPTS: "--batch-mode --settings=$CI_PROJECT_DIR/.mvn/community-maven.settings.xml"
@@ -137,7 +137,6 @@ include:
               sys.stdout.write(dir + '\0')
       EOF
     - xargs -0rn 1 echo < $ALL_MAVEN_BUILD_DIRS_Z
-
     # This creates a script for running maven, capturing output to a file.
     # - First argument is the directory to build from
     # - Second argument is the name to use for the logfile
@@ -193,7 +192,6 @@ download_plugins:
   only:
     variables:
       - $CIMPL == '1'
-
 
 gemnasium-maven-dependency_scanning:
   variables:
