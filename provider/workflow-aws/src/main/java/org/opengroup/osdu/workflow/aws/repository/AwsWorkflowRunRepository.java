@@ -17,13 +17,10 @@
 package org.opengroup.osdu.workflow.aws.repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFactory;
@@ -46,8 +43,6 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
@@ -130,7 +125,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
                                                 .dataPartitionId(dataPartitionId)
                                                 .build();
 
-        List<WorkflowRunDoc> docs;
+        QueryPageResult<WorkflowRunDoc> result;
 
         try {
             // Build QueryEnhancedRequest with RequestBuilderUtil
@@ -140,7 +135,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
                     .cursor(cursor)
                     .buildGsiRequest();
 
-            docs = queryHelper.queryByGSI(queryRequest);
+            result = queryHelper.queryByGSI(queryRequest);
 
         } catch (IllegalArgumentException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -151,8 +146,8 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
 
         List<WorkflowRun> items;
 
-        if (docs != null &&  (!docs.isEmpty())) {
-            items = docs.stream()
+        if (result.getItems() != null &&  (!result.getItems().isEmpty())) {
+            items = result.getItems().stream()
                         .map(WorkflowRunDoc::convertToWorkflowRun)
                         .toList();
         }
@@ -161,7 +156,7 @@ public class AwsWorkflowRunRepository implements IWorkflowRunRepository {
         }
 
         return WorkflowRunsPage.builder()
-                               .cursor(cursor)
+                               .cursor(result.getNextCursor())
                                .items(items)
                                .build();
     }

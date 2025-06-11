@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.opengroup.osdu.core.aws</groupId>
       <artifactId>os-core-lib-aws</artifactId>
-      <version>5.3.0</version>
+      <version>6.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>

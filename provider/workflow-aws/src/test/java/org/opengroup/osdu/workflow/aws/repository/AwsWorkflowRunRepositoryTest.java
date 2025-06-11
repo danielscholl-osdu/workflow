@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
 import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFactory;
 import org.opengroup.osdu.core.aws.v2.dynamodb.model.GsiQueryRequest;
+import org.opengroup.osdu.core.aws.v2.dynamodb.model.QueryPageResult;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
@@ -171,29 +172,33 @@ class AwsWorkflowRunRepositoryTest {
 
     @Test
     void testGetWorkflowRunsByWorkflowName() {
-        List<WorkflowRunDoc> results = new ArrayList<>();
+        QueryPageResult<WorkflowRunDoc> result = mock(QueryPageResult.class);
+        List<WorkflowRunDoc> resultItems = new ArrayList<>();
         WorkflowRunDoc doc = mock(WorkflowRunDoc.class);
-        results.add(doc);
+        resultItems.add(doc);
+        when(result.getItems()).thenReturn(resultItems);
 
-        when(queryHelper.queryByGSI(any(GsiQueryRequest.class))).thenReturn(results);
+        when(queryHelper.queryByGSI(any(GsiQueryRequest.class))).thenReturn(result);
 
-        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
+        WorkflowRunsPage resultPage = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.getItems().size());
+        Assertions.assertNotNull(resultPage);
+        Assertions.assertEquals(1, resultPage.getItems().size());
     }
 
 
     @Test
     void testGetWorkflowRunsByWorkflowNameNullDocs() {
-        
+
+        QueryPageResult<WorkflowRunDoc> result = mock(QueryPageResult.class);
+        when(result.getItems()).thenReturn(List.of());
         when(queryHelper.queryByGSI(any(GsiQueryRequest.class)))
-               .thenReturn(List.of());
+               .thenReturn(result);
 
-        WorkflowRunsPage result = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
+        WorkflowRunsPage resultPage = repo.getWorkflowRunsByWorkflowName(WORKFLOWNAME, 1, CURSOR);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getItems().isEmpty());
+        Assertions.assertNotNull(resultPage);
+        Assertions.assertTrue(resultPage.getItems().isEmpty());
     }
 
     @Test
@@ -262,17 +267,19 @@ class AwsWorkflowRunRepositoryTest {
     @Test
     void testGetAllRunInstancesOfWorkflow() {
         // Setup for first call
-        List<WorkflowRunDoc> firstResults = new ArrayList<>();
+        QueryPageResult<WorkflowRunDoc> firstResult = mock(QueryPageResult.class);
+        List<WorkflowRunDoc> firstResultItems = new ArrayList<>();
         WorkflowRunDoc doc1 = Mockito.mock(WorkflowRunDoc.class);
-        firstResults.add(doc1);
+        firstResultItems.add(doc1);
+        when(firstResult.getItems()).thenReturn(firstResultItems);
         
         // Setup for second call (no more results)
-        List<WorkflowRunDoc> secondPageResult = List.of();
+        QueryPageResult<WorkflowRunDoc> secondResult = mock(QueryPageResult.class);
 
         
         when(queryHelper.queryByGSI(Mockito.any(GsiQueryRequest.class)))
-               .thenReturn(firstResults)
-               .thenReturn(secondPageResult);
+               .thenReturn(firstResult)
+               .thenReturn(secondResult);
 
         List<WorkflowRun> result = repo.getAllRunInstancesOfWorkflow(WORKFLOWNAME, null);
 
