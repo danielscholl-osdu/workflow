@@ -198,7 +198,7 @@ class AwsWorkflowMetadataRepositoryTest {
         when(doc.convertToWorkflowMetadata()).thenReturn(metadata);
         
         QueryPageResult<WorkflowMetadataDoc> pageResult = new QueryPageResult<>(
-                Collections.singletonList(doc), null);
+                Collections.singletonList(doc), null, null);
         when(queryHelper.scanPage(any(ScanEnhancedRequest.class))).thenReturn(pageResult);
 
         // Act
@@ -214,7 +214,7 @@ class AwsWorkflowMetadataRepositoryTest {
     void testGetAllWorkflowForTenant_EmptyResult() {
         // Arrange
         QueryPageResult<WorkflowMetadataDoc> pageResult = new QueryPageResult<>(
-                Collections.emptyList(), null);
+                Collections.emptyList(), null, null);
         when(queryHelper.scanPage(any(ScanEnhancedRequest.class))).thenReturn(pageResult);
 
         // Act

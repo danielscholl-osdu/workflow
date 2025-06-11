@@ -93,7 +93,7 @@ The following software have components provided under the terms of this license:
 - AutoValue Annotations (from https://github.com/google/auto/tree/main/value, https://github.com/google/auto/tree/master/value, https://repo1.maven.org/maven2/com/google/auto/value/auto-value-annotations)
 - Awaitility (from http://awaitility.org)
 - BSON (from http://bsonspec.org, https://bsonspec.org)
-- BSON Record Codec (from <https://www.mongodb.com/>, https://www.mongodb.com/)
+- BSON Record Codec (from <https://www.mongodb.com/>, https://bsonspec.org, https://www.mongodb.com/)
 - Bean Validation API (from http://beanvalidation.org)
 - Byte Buddy (without dependencies) (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy)
 - Byte Buddy Java agent (from https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent)
