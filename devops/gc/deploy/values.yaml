@@ -1,0 +1,69 @@
+# Default values for workflow-deploy.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  domain: ""
+  limitsEnabled: true
+  dataPartitionId: ""
+  tier: ""
+  autoscaling: true
+
+data:
+  #Configmap variables
+  logLevel: "ERROR"
+  partitionHost: "http://partition"
+  entitlementsHost: "http://entitlements"
+  schemaHost: "http://schema"
+  legalHost: "http://legal"
+  osduAirflowUrl: "http://airflow:8080"
+  workflowHost: "http://workflow"
+  dagNames:
+    - csv_ingestion
+    - Energistics_xml_ingest
+    - manifest_ingestion
+    - Osdu_ingest
+    - Segy_to_vds_conversion_sdms
+    - Segy_to_zgy_conversion
+    - Osdu_ingest_by_reference
+    - segy_to_mdio_conversion
+  # Deployment variables
+  requestsCpu: "5m"
+  requestsMemory: "650Mi"
+  limitsCpu: "1"
+  limitsMemory: "3G"
+  serviceAccountName: "workflow"
+  bootstrapImage: ""
+  bootstrapServiceAccountName: ""
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+
+conf:
+  configmap: "workflow-config"
+  appName: "workflow"
+  replicas: 2
+
+istio:
+  proxyCPU: "5m"
+  proxyCPULimit: "200m"
+  proxyMemory: "50Mi"
+  proxyMemoryLimit: "256Mi"
+  bootstrapProxyCPU: "5m"
+  bootstrapProxyCPULimit: "50m"
+
+hpa:
+  minReplicas: 6
+  maxReplicas: 15
+  targetType: "AverageValue"
+  targetValue: 140 # 80*0.86*2
+  behaviorScaleUpStabilizationWindowSeconds: 10
+  behaviorScaleUpPoliciesValue: 50
+  behaviorScaleUpPoliciesPeriodSeconds: 15
+  behaviorScaleDownStabilizationWindowSeconds: 60
+  behaviorScaleDownPoliciesValue: 25
+  behaviorScaleDownPoliciesPeriodSeconds: 60
+
+limits:
+  maxTokens: 80
+  tokensPerFill: 80
+  fillInterval: "1s"
