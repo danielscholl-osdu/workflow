@@ -4,10 +4,10 @@
 
 global:
   domain: ""
-  limitsEnabled: true
   dataPartitionId: ""
+  limitsEnabled: true
   tier: ""
-  autoscaling: true
+  autoscalingMode: "cpu"
 
 data:
   #Configmap variables
@@ -28,20 +28,25 @@ data:
     - Osdu_ingest_by_reference
     - segy_to_mdio_conversion
   # Deployment variables
-  requestsCpu: "5m"
+  requestsCpu: "60m"
   requestsMemory: "650Mi"
   limitsCpu: "1"
   limitsMemory: "3G"
   serviceAccountName: "workflow"
   bootstrapImage: ""
-  bootstrapServiceAccountName: ""
+  bootstrapServiceAccountName: "datafier"
   image: ""
   imagePullPolicy: "IfNotPresent"
+  affinityLabelsSpot:
+    cloud.google.com/gke-provisioning:
+      - spot
+  affinityLabelsStandard:
+    cloud.google.com/gke-provisioning:
+      - standard
 
 conf:
   configmap: "workflow-config"
   appName: "workflow"
-  replicas: 2
 
 istio:
   proxyCPU: "5m"
@@ -52,16 +57,25 @@ istio:
   bootstrapProxyCPULimit: "50m"
 
 hpa:
-  minReplicas: 6
-  maxReplicas: 15
-  targetType: "AverageValue"
-  targetValue: 140 # 80*0.86*2
-  behaviorScaleUpStabilizationWindowSeconds: 10
-  behaviorScaleUpPoliciesValue: 50
-  behaviorScaleUpPoliciesPeriodSeconds: 15
-  behaviorScaleDownStabilizationWindowSeconds: 60
-  behaviorScaleDownPoliciesValue: 25
-  behaviorScaleDownPoliciesPeriodSeconds: 60
+  minReplicas: 1
+  maxReplicas: 6
+  cpu:
+    utilization: 200
+    scaleUpStabilizationWindowSeconds: 30
+    scaleUpValue: 200
+    scaleUpPeriod: 15
+    scaleDownStabilizationWindowSeconds: 150
+    scaleDownValue: 100
+    scaleDownPeriod: 15
+  requests:
+    targetType: "AverageValue"
+    targetValue: 140
+    scaleUpStabilizationWindowSeconds: 10
+    scaleUpValue: 50
+    scaleUpPeriod: 15
+    scaleDownStabilizationWindowSeconds: 60
+    scaleDownValue: 25
+    scaleDownPeriod: 60
 
 limits:
   maxTokens: 80
