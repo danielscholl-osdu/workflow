@@ -45,7 +45,7 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            {{- range $key, $valuesList := .Values.data.affinityLabelsStandard }}
+            {{- range $key, $valuesList := .Values.data.affinityLabelsSpot }}
             - matchExpressions:
               - key: {{ $key }}
                 operator: In
