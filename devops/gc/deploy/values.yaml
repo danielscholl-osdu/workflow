@@ -33,7 +33,7 @@ data:
     - eds_scheduler
   # Deployment variables
   requestsCpu: "60m"
-  requestsMemory: "650Mi"
+  requestsMemory: "350Mi"
   limitsCpu: "1"
   limitsMemory: "3G"
   serviceAccountName: "workflow"
