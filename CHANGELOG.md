@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/danielscholl-osdu/workflow/compare/v1.0.0...v1.0.1) (2025-08-06)
+
+
+### 🔧 Miscellaneous
+
+* Update license notices and deployment configuration ([550246e](https://github.com/danielscholl-osdu/workflow/commit/550246efd7fc3c83b7f9eae690595b48ceb85703))
+
 ## 1.0.0 (2025-07-21)
 
 
