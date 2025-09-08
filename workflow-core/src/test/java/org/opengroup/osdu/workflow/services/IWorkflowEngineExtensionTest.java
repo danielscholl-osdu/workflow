@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2023 Google LLC
- *  Copyright 2020-2023 EPAM Systems, Inc
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,35 +17,38 @@
 
 package org.opengroup.osdu.workflow.services;
 
+import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.GET_RUN_TASKS_ERROR_MESSAGE;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.GET_TASKS_XCOM_ERROR_MESSAGE;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.GET_XCOM_VALUES_ERROR_MESSAGE;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.TASK_INSTANCES;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.XCOM_ENTRIES;
+import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.XCOM_VALUES;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.jersey.api.client.Client;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.model.ClientResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension;
-
-import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import javax.ws.rs.HttpMethod;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.config.AirflowConfig;
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowApiClient;
+import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension;
 
-import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IWorkflowEngineExtensionTest {
 
   public static final String WORKFLOW_NAME = "test_workflow";
@@ -70,13 +73,9 @@ public class IWorkflowEngineExtensionTest {
 
   @Mock private DpsHeaders dpsHeaders;
 
-  private MockAirflowEngine engineExtension;
+  @Mock IAirflowApiClient airflowApiClient;
 
-  @Before
-  public void setUp() {
-    MockAirflowEngine mockEngine = new MockAirflowEngine(client, airflowConfig, dpsHeaders);
-    engineExtension = Mockito.spy(mockEngine);
-  }
+  @InjectMocks AirflowV2WorkflowEngineExtension engineExtension;
 
   @Test
   public void testGetLastDetails() throws JsonProcessingException {
@@ -89,7 +88,7 @@ public class IWorkflowEngineExtensionTest {
     String tasksErrMsg = format(GET_RUN_TASKS_ERROR_MESSAGE, DAG_RUN_ID, WORKFLOW_NAME);
 
     doReturn(tasksResponse)
-        .when(engineExtension)
+        .when(airflowApiClient)
         .callAirflow(HttpMethod.GET, endpoint, null, null, tasksErrMsg);
 
     String taskXcomEntriesEndpoint = format(XCOM_ENTRIES, WORKFLOW_NAME, DAG_RUN_ID, LAST_TASK_ID);
@@ -101,7 +100,7 @@ public class IWorkflowEngineExtensionTest {
             .build();
 
     doReturn(xcomKeysResponse)
-        .when(engineExtension)
+        .when(airflowApiClient)
         .callAirflow(HttpMethod.GET, taskXcomEntriesEndpoint, null, null, xcomEntriesErrMsg);
 
     String savedRecordIds =
@@ -114,7 +113,7 @@ public class IWorkflowEngineExtensionTest {
             .build();
 
     doReturn(xcomValSavedRecordEndpoint)
-        .when(engineExtension)
+        .when(airflowApiClient)
         .callAirflow(HttpMethod.GET, savedRecordIds, null, null, xcomValErrMsg);
 
     String skippedRecordIds =
@@ -126,7 +125,7 @@ public class IWorkflowEngineExtensionTest {
             .build();
 
     doReturn(xcomValSkippedRecordEndpoint)
-        .when(engineExtension)
+        .when(airflowApiClient)
         .callAirflow(HttpMethod.GET, skippedRecordIds, null, null, xcomValErrMsg);
 
     Object lastDetails = engineExtension.getLatestTaskDetails(WORKFLOW_NAME, DAG_RUN_ID);
@@ -154,23 +153,5 @@ public class IWorkflowEngineExtensionTest {
       throw new RuntimeException(e);
     }
     return stringBuilder.toString();
-  }
-
-  class MockAirflowEngine extends AirflowV2WorkflowEngineExtension {
-
-    protected MockAirflowEngine(
-        Client restClient, AirflowConfig airflowConfig, DpsHeaders dpsHeaders) {
-      super(restClient, airflowConfig, dpsHeaders);
-    }
-
-    @Override
-    public ClientResponse callAirflow(
-        String httpMethod,
-        String apiEndpoint,
-        String body,
-        WorkflowEngineRequest rq,
-        String errorMessage) {
-      return super.callAirflow(httpMethod, apiEndpoint, body, rq, errorMessage);
-    }
   }
 }
