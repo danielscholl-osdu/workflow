@@ -17,6 +17,6 @@
 
 package org.opengroup.osdu.workflow.provider.interfaces;
 
-public interface IWorkflowEngineExtension {
-  Object getLatestTaskDetails(String dagName, String runId);
+public interface IWorkflowRunExtension {
+  Object getLatestTaskDetails(String workflowName, String runId);
 }

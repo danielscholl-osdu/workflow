@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2023 Google LLC
- *  Copyright 2020-2023 EPAM Systems, Inc
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,41 +21,36 @@ import static java.lang.String.format;
 
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.config.AirflowConfig;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.provider.gcp.config.condition.ComposerAirflowV2Condition;
-import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineExtension;
-import org.springframework.context.annotation.Conditional;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowApiClient;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @Primary
-@Conditional(ComposerAirflowV2Condition.class)
-public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngineExtension {
+public class GcpComposerAirflowApiClient implements IAirflowApiClient {
 
   private final AirflowConfig airflowConfig;
   private final ComposerClient iapClient;
-  private final DpsHeaders dpsHeaders;
 
-  public GcpComposerAirflowV2EngineServiceImpl(AirflowConfig airflowConfig,
-      ComposerClient iapClient,DpsHeaders dpsHeaders ) {
-    super(null, airflowConfig, dpsHeaders);
+  public GcpComposerAirflowApiClient(AirflowConfig airflowConfig, ComposerClient iapClient) {
     this.airflowConfig = airflowConfig;
     this.iapClient = iapClient;
-    this.dpsHeaders = dpsHeaders;
     log.info(
-            "Initialized Airflow with stable API and enabled {} authentication.",
-            iapClient.getClass().getSimpleName()
-    );
+        "Initialized Composer Airflow client and enabled {} authentication.",
+        iapClient.getClass().getSimpleName());
   }
 
   @Override
-  protected ClientResponse callAirflow(String httpMethod, String apiEndpoint, String body,
-      WorkflowEngineRequest rq, String errorMessage) {
+  public ClientResponse callAirflow(
+      String httpMethod,
+      String apiEndpoint,
+      String body,
+      WorkflowEngineRequest rq,
+      String errorMessage) {
     String url = format("%s/%s", airflowConfig.getUrl(), apiEndpoint);
     log.info("Calling airflow endpoint {} with method {}", url, httpMethod);
 
@@ -67,5 +62,4 @@ public class GcpComposerAirflowV2EngineServiceImpl extends AirflowV2WorkflowEngi
     }
     return response;
   }
-
 }

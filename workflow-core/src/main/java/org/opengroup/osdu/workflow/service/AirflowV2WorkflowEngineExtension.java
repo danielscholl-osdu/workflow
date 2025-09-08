@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2023 Google LLC
- *  Copyright 2020-2023 EPAM Systems, Inc
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,38 +17,35 @@
 
 package org.opengroup.osdu.workflow.service;
 
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sun.jersey.api.client.Client;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.ws.rs.HttpMethod;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.config.AirflowConfig;
-import org.opengroup.osdu.workflow.config.BasicAuthAirflowClientCondition;
 import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowApiClient;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineExtension;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.HttpMethod;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
-import static java.lang.String.format;
-
 @Slf4j
 @Service
-@Primary
-@Conditional(BasicAuthAirflowClientCondition.class)
-public class AirflowV2WorkflowEngineExtension extends AirflowV2WorkflowEngineServiceImpl
-    implements IWorkflowEngineExtension {
-
+@RequiredArgsConstructor
+public class AirflowV2WorkflowEngineExtension implements IWorkflowEngineExtension {
   public static final String GET_RUN_TASKS_ERROR_MESSAGE =
       "Failed to fetch run tasks with id %s and name %s";
   public static final String GET_TASKS_XCOM_ERROR_MESSAGE =
@@ -67,29 +64,25 @@ public class AirflowV2WorkflowEngineExtension extends AirflowV2WorkflowEngineSer
   public static final String XCOM_RESP = "xcom";
 
   private final ObjectMapper om = new ObjectMapper();
-
-  protected AirflowV2WorkflowEngineExtension(
-      Client restClient, AirflowConfig airflowConfig, DpsHeaders dpsHeaders) {
-    super(restClient, airflowConfig, dpsHeaders);
-  }
+  private final IAirflowApiClient airflowApiClient;
 
   @Override
-  public Object getLatestTaskDetails(String workflowName, String runId) {
+  public Object getLatestTaskDetails(String dagName, String runId) {
     try {
-      List<Map<String, String>> tasksMap = getDagRunTasks(workflowName, runId);
+      List<Map<String, String>> tasksMap = getDagRunTasks(dagName, runId);
 
       Map<String, String> latestTask = findLatestTask(tasksMap);
 
       if (Objects.isNull(latestTask) || latestTask.isEmpty()) {
-        log.info("Task instances not found for DAG: {} with runId: {}", workflowName, runId);
+        log.info("Task instances not found for DAG: {} with runId: {}", dagName, runId);
         throw new AppException(HttpStatus.NOT_FOUND.value(), "Tasks not found", "Empty response.");
       }
       String latestTaskId = latestTask.get(TASK_ID_ELEMENT);
 
-      List<String> xcomKeys = getTaskXcomKeys(workflowName, runId, latestTaskId);
+      List<String> xcomKeys = getTaskXcomKeys(dagName, runId, latestTaskId);
 
       Map<String, String> xcomKeyVal =
-          getXcomKeyValues(workflowName, runId, latestTaskId, xcomKeys);
+          getXcomKeyValues(dagName, runId, latestTaskId, xcomKeys);
       ObjectNode xcomKeyValJson = om.convertValue(xcomKeyVal, ObjectNode.class);
       ObjectNode taskJson = om.convertValue(latestTask, ObjectNode.class);
       taskJson.set(XCOM_RESP, xcomKeyValJson);
@@ -101,13 +94,14 @@ public class AirflowV2WorkflowEngineExtension extends AirflowV2WorkflowEngineSer
     }
   }
 
-  private List<Map<String, String>> getDagRunTasks(String workflowName, String runId)
+  private List<Map<String, String>> getDagRunTasks(String dagName, String runId)
       throws JsonProcessingException {
-    String taskInstancesEndpoint = format(TASK_INSTANCES, workflowName, runId);
-    String tasksErrMsg = format(GET_RUN_TASKS_ERROR_MESSAGE, runId, workflowName);
+    String taskInstancesEndpoint = format(TASK_INSTANCES, dagName, runId);
+    String tasksErrMsg = format(GET_RUN_TASKS_ERROR_MESSAGE, runId, dagName);
 
     ClientResponse taskListResponse =
-        this.callAirflow(HttpMethod.GET, taskInstancesEndpoint, null, null, tasksErrMsg);
+        airflowApiClient.callAirflow(
+            HttpMethod.GET, taskInstancesEndpoint, null, null, tasksErrMsg);
 
     JsonNode taskInstancesJson =
         om.readValue(taskListResponse.getResponseBody().toString(), JsonNode.class)
@@ -126,13 +120,14 @@ public class AirflowV2WorkflowEngineExtension extends AirflowV2WorkflowEngineSer
     return tasksMap;
   }
 
-  private List<String> getTaskXcomKeys(String workflowName, String runId, String latestTaskId)
+  private List<String> getTaskXcomKeys(String dagName, String runId, String latestTaskId)
       throws JsonProcessingException {
-    String taskXcomEntriesEndpoint = format(XCOM_ENTRIES, workflowName, runId, latestTaskId);
+    String taskXcomEntriesEndpoint = format(XCOM_ENTRIES, dagName, runId, latestTaskId);
     String xcomEntriesErrMsg = format(GET_TASKS_XCOM_ERROR_MESSAGE, latestTaskId);
 
     ClientResponse entriesResponse =
-        this.callAirflow(HttpMethod.GET, taskXcomEntriesEndpoint, null, null, xcomEntriesErrMsg);
+        airflowApiClient.callAirflow(
+            HttpMethod.GET, taskXcomEntriesEndpoint, null, null, xcomEntriesErrMsg);
 
     JsonNode entriesNode =
         om.readValue(entriesResponse.getResponseBody().toString(), JsonNode.class);
@@ -152,14 +147,14 @@ public class AirflowV2WorkflowEngineExtension extends AirflowV2WorkflowEngineSer
   }
 
   private Map<String, String> getXcomKeyValues(
-      String workflowName, String runId, String latestTaskId, List<String> xcomKeys)
+      String dagName, String runId, String latestTaskId, List<String> xcomKeys)
       throws JsonProcessingException {
     String xcomValErrMsg = format(GET_XCOM_VALUES_ERROR_MESSAGE, latestTaskId);
     Map<String, String> xcomKeyVal = new HashMap<>();
     for (String xcomKey : xcomKeys) {
-      String xcomValueEndpoint = format(XCOM_VALUES, workflowName, runId, latestTaskId, xcomKey);
+      String xcomValueEndpoint = format(XCOM_VALUES, dagName, runId, latestTaskId, xcomKey);
       ClientResponse xcomValueResponse =
-          callAirflow(HttpMethod.GET, xcomValueEndpoint, null, null, xcomValErrMsg);
+          airflowApiClient.callAirflow(HttpMethod.GET, xcomValueEndpoint, null, null, xcomValErrMsg);
       JsonNode xcomValue =
           om.readValue(xcomValueResponse.getResponseBody().toString(), JsonNode.class);
 

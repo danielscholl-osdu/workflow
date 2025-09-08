@@ -17,6 +17,15 @@
 
 package org.opengroup.osdu.workflow.provider.interfaces;
 
-public interface IWorkflowEngineExtension {
-  Object getLatestTaskDetails(String dagName, String runId);
+import org.opengroup.osdu.workflow.model.ClientResponse;
+import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
+
+public interface IAirflowApiClient {
+
+  ClientResponse callAirflow(
+      String httpMethod,
+      String apiEndpoint,
+      String body,
+      WorkflowEngineRequest workflowEngineRequest,
+      String errorMessage);
 }

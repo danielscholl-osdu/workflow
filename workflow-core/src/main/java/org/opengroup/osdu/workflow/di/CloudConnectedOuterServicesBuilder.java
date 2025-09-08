@@ -1,33 +1,48 @@
+/*
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.opengroup.osdu.workflow.di;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.info.ConnectedOuterServicesBuilder;
 import org.opengroup.osdu.core.common.model.info.ConnectedOuterService;
-import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineServiceImpl;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "osdu.airflow.version2", havingValue = "true", matchIfMissing = false)
 @Schema(description = "Connected outer service information.")
 public class CloudConnectedOuterServicesBuilder implements ConnectedOuterServicesBuilder {
 
   public static final String AIRFLOW = "Airflow";
-  private final AirflowV2WorkflowEngineServiceImpl airflowV2WorkflowEngineService;
+  private final IWorkflowEngineService workflowEngineService;
 
   @Override
   public List<ConnectedOuterService> buildConnectedOuterServices() {
-    String airflowVersion = airflowV2WorkflowEngineService.getAirflowVersion();
-    return ImmutableList.of(
-        ConnectedOuterService.builder()
-            .name(AIRFLOW)
-            .version(airflowVersion)
-            .build()
-    );
+    List<ConnectedOuterService> connectedOuterServices = new ArrayList<>();
+    workflowEngineService
+        .getVersion()
+        .ifPresent(
+            airflowVersion ->
+                connectedOuterServices.add(
+                    ConnectedOuterService.builder().name(AIRFLOW).version(airflowVersion).build()));
+    return connectedOuterServices;
   }
 }

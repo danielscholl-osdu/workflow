@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2023 Google LLC
- *  Copyright 2020-2023 EPAM Systems, Inc
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,14 +23,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.model.http.AppError;
-import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineExtension;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
+import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunExtension;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,8 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnProperty(name = "osdu.airflow.version2", havingValue = "true", matchIfMissing = false)
 public class RunDetailsApi {
 
-  private final IWorkflowEngineExtension IWorkflowEngineExtension;
-  private final IWorkflowManagerService managerService;
+  private final IWorkflowRunExtension workflowRunExtension;
 
   @Operation(
       summary = "${workflowRunApi.latestInfo.summary}",
@@ -102,15 +97,6 @@ public class RunDetailsApi {
   public Object getWorkflowRunDetails(
       @PathVariable("workflow_name") final String workflowName,
       @PathVariable("runId") final String runId) {
-    WorkflowMetadata workflowMetadata = managerService.getWorkflowByName(workflowName);
-    String dagName = null;
-    Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
-    if (Objects.nonNull(instructions)) {
-      dagName = (String) instructions.get("dagName");
-    }
-    if (Objects.isNull(dagName)) {
-      dagName = workflowMetadata.getWorkflowName();
-    }
-    return IWorkflowEngineExtension.getLatestTaskDetails(dagName, runId);
+    return workflowRunExtension.getLatestTaskDetails(workflowName, runId);
   }
 }

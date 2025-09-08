@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.opengroup.osdu.workflow.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +46,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
@@ -80,30 +96,30 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowName);
     final String workflowId = workflowMetadata.getWorkflowId();
     final String runId = request.getRunId() != null ? request.getRunId() : UUID.randomUUID().toString();
-    String dagName = null;
-    Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
-    if (Objects.nonNull(instructions)) {
-      dagName = (String) instructions.get(KEY_DAG_NAME);
-    }
-    if (Objects.isNull(dagName)) {
-      dagName = workflowMetadata.getWorkflowName();
-    }
 
     final WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
         .runId(runId)
         .workflowId(workflowId)
         .workflowName(workflowName)
-        .dagName(dagName)
+        .dagName(getDagName(workflowMetadata))
         .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
         .build();
-    final Map<String, Object> context = createWorkflowPayload(workflowName, runId, dpsHeaders.getCorrelationId(), request);
-    TriggerWorkflowResponse rs = workflowEngineService.triggerWorkflow(rq, context);
+    TriggerWorkflowResponse rs = triggerWorkflowEngine(rq, request, workflowMetadata);
     final WorkflowRun workflowRun = buildWorkflowRun(rq, rs);
     auditLogger.workflowRunEvent(Collections.singletonList(getTruncatedData(request.toString())));
     final WorkflowRunResponse workflowRunResponse = buildWorkflowRunResponse(workflowRunRepository.saveWorkflowRun(workflowRun));
     statusPublisher.publishStatusWithNoErrors(runId, dpsHeaders, WORKFLOW_SUBMITTED, SUBMITTED);
 
     return workflowRunResponse;
+  }
+
+  protected TriggerWorkflowResponse triggerWorkflowEngine(
+      WorkflowEngineRequest rq, TriggerWorkflowRequest request, WorkflowMetadata workflowMetadata) {
+    final Map<String, Object> context =
+        createWorkflowPayload(
+            rq.getWorkflowName(), rq.getRunId(), dpsHeaders.getCorrelationId(), request);
+
+    return getWorkflowEngineService(workflowMetadata).triggerWorkflow(rq, context);
   }
 
   @Override
@@ -242,18 +258,8 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     List<WorkflowStatusType> activeStatusTypes = WorkflowStatusType.getActiveStatusTypes();
     if (activeStatusTypes.contains(workflowRun.getStatus())) {
       final WorkflowMetadata workflowMetadata = getWorkflowByName(workflowRun.getWorkflowName());
-      final String workflowName = workflowMetadata.getWorkflowName();
 
-      final WorkflowEngineRequest rq = WorkflowEngineRequest.builder()
-    	  .runId(workflowRun.getRunId())
-          .workflowName(workflowName)
-          .executionTimeStamp(workflowRun.getStartTimeStamp())
-          .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
-          .dagName(getDagName(workflowMetadata))
-          .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
-          .build();
-
-      final WorkflowStatusType currentStatusType = workflowEngineService.getWorkflowRunStatus(rq);
+      final WorkflowStatusType currentStatusType = getWorkflowStatusType(workflowRun, workflowMetadata);
       if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
         if (getCompletedStatusTypes().contains(currentStatusType)) {
           // Setting EndTimeStamp with the timestamp of Instant when this API is called.
@@ -270,14 +276,40 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     return workflowRun;
   }
 
-  private String getDagName(WorkflowMetadata workflowMetadata) {
+  /**
+   * Get the workflow engine service
+   *
+   * @param workflowMetadata WorkflowMetadata with registration instructions for extensibility
+   * @return IWorkflowEngineService
+   */
+  protected IWorkflowEngineService getWorkflowEngineService(WorkflowMetadata workflowMetadata) {
+    return workflowEngineService;
+  }
+
+  protected WorkflowStatusType getWorkflowStatusType(
+      WorkflowRun workflowRun, WorkflowMetadata workflowMetadata) {
+    final String workflowName = workflowMetadata.getWorkflowName();
+    final WorkflowEngineRequest rq =
+        WorkflowEngineRequest.builder()
+            .runId(workflowRun.getRunId())
+            .workflowName(workflowName)
+            .executionTimeStamp(workflowRun.getStartTimeStamp())
+            .workflowEngineExecutionDate(workflowRun.getWorkflowEngineExecutionDate())
+            .dagName(getDagName(workflowMetadata))
+            .isSystemWorkflow(workflowMetadata.isSystemWorkflow())
+            .build();
+
+    return getWorkflowEngineService(workflowMetadata).getWorkflowRunStatus(rq);
+  }
+
+  protected String getDagName(WorkflowMetadata workflowMetadata) {
     Map<String, Object> instructions = workflowMetadata.getRegistrationInstructions();
     return instructions != null && instructions.get(KEY_DAG_NAME) != null
         ? instructions.get(KEY_DAG_NAME).toString()
         : workflowMetadata.getWorkflowName();
   }
 
-  private WorkflowRun buildWorkflowRun(final WorkflowEngineRequest rq,
+  protected WorkflowRun buildWorkflowRun(final WorkflowEngineRequest rq,
                                        final TriggerWorkflowResponse rs) {
     return WorkflowRun.builder()
         .runId(rq.getRunId())
@@ -290,7 +322,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
         .build();
   }
 
-  private WorkflowRunResponse buildWorkflowRunResponse(final WorkflowRun workflowRun) {
+  protected WorkflowRunResponse buildWorkflowRunResponse(final WorkflowRun workflowRun) {
     if(workflowRun == null) {
       return null;
     }
@@ -304,7 +336,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
         .build();
   }
 
-  private WorkflowRun buildUpdatedWorkflowRun(final WorkflowRun workflowRun,
+  protected WorkflowRun buildUpdatedWorkflowRun(final WorkflowRun workflowRun,
       final WorkflowStatusType workflowStatusType,
       final Long workflowRunEndTimeStamp) {
     return WorkflowRun.builder()
