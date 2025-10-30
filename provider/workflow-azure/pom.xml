@@ -32,9 +32,9 @@
 
   <properties>
     <core-lib-azure.version>2.0.7</core-lib-azure.version>
-    <json.version>20240303</json.version>
+    <json.version>20250517</json.version>
     <!-- Plugin Versions -->
-    <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
+    <jacoco-plugin.version>0.8.14</jacoco-plugin.version>
   </properties>
 
   <dependencyManagement>
