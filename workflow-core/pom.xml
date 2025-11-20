@@ -36,7 +36,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-bom</artifactId>
-      <version>4.1.118.Final</version>
+      <version>4.2.7.Final</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <version>6.0.0</version>
+      <version>6.1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -79,7 +79,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>0.8.14</version>
         <configuration>
           <excludes>
             <exclude>org/opengroup/osdu/workflow/config/*</exclude>
