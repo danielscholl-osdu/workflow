@@ -6,6 +6,7 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_SYSTEM_WOR
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithIncorrectWorkflowName;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithNoWorkflowName;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowPayloadWithOnlyWorkflowName;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
 
 import java.util.ArrayList;
@@ -74,6 +75,13 @@ public final class PostCreateSystemWorkflowV3IntegrationTests extends TestBase {
 	public void should_returnBadRequest_when_givenInvalidRequestWithNoWorkflowName() throws Exception {
 		ClientResponse response = client.send(HttpMethod.POST, CREATE_SYSTEM_WORKFLOW_URL,
 				buildCreateWorkflowPayloadWithNoWorkflowName(), headers, client.getAccessToken());
+		assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+	}
+
+	@Test
+	public void should_returnBadRequest_when_givenInvalidRequestWithOnlyWorkflowName() throws Exception {
+		ClientResponse response = client.send(HttpMethod.POST, CREATE_SYSTEM_WORKFLOW_URL,
+				buildCreateWorkflowPayloadWithOnlyWorkflowName(), headers, client.getAccessToken());
 		assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
 	}
 

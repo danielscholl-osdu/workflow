@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.opengroup.osdu.core.common.model.http.AppError;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
@@ -49,7 +50,7 @@ public class WorkflowSystemManagerApi {
   })
   @PostMapping
   @PreAuthorize("@authorizationFilter.hasRootPermission()")
-  public WorkflowMetadata createSystemWorkflow(@RequestBody final CreateWorkflowRequest request) {
+  public WorkflowMetadata createSystemWorkflow(@RequestBody @Valid final  CreateWorkflowRequest request) {
     return workflowManagerService.createSystemWorkflow(request);
   }
 
