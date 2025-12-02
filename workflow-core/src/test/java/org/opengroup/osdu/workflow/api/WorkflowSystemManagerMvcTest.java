@@ -70,7 +70,12 @@ class WorkflowSystemManagerMvcTest {
       "}";
   private static final String WORKFLOW_REQUEST = "{\n" +
       "  \"workflowName\": \"HelloWorld\",\n" +
-      "  \"description\": \"This is a test workflow\"\n" +
+      "  \"description\": \"This is a test workflow\",\n" +
+      "  \"registrationInstructions\": {\n" +
+      "          \"active\": true,\n" +
+      "          \"concurrentWorkflowRun\": 5,\n" +
+      "          \"concurrentTaskRun\": 5\n" +
+      "      }\n" +
       "}";
   private static final String SYSTEM_WORKFLOW_ENDPOINT = "/v1/workflow/system";
   private static final String EXISTING_WORKFLOW_ID = "existing-id";

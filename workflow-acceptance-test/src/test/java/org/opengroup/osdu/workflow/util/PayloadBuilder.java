@@ -107,6 +107,12 @@ public class PayloadBuilder {
 		return new Gson().toJson(payload);
 	}
 
+	public static String buildCreateWorkflowPayloadWithOnlyWorkflowName() {
+		Map<String, Object> payload = new HashMap<>();
+		payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
+		return new Gson().toJson(payload);
+	}
+
 	public static String buildCreateWorkflowRunValidPayload() {
 		Map<String, Object> requestBody = new HashMap<>();
 		Map<String, Object> executionContext = new HashMap<>();
