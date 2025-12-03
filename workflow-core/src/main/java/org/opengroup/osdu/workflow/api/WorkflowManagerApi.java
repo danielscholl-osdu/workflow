@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.api;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,7 +58,7 @@ public class WorkflowManagerApi {
   })
   @PostMapping
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
-  public WorkflowMetadata create(@RequestBody final CreateWorkflowRequest request) {
+  public WorkflowMetadata create(@RequestBody @Valid final CreateWorkflowRequest request) {
     return workflowManagerService.createWorkflow(request);
   }
 
