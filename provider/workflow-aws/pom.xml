@@ -34,7 +34,7 @@
     <aws.sdk.version>2.25.11</aws.sdk.version>
     <log4j2.version>2.17.1</log4j2.version>
     <netty.version>4.1.128.Final</netty.version>
-    <tomcat.version>10.1.44</tomcat.version>
+    <tomcat.version>10.1.48</tomcat.version>
     <spring-core.version>6.2.11</spring-core.version>
   </properties>
 
