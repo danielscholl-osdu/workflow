@@ -18,6 +18,8 @@ data:
   legalHost: "http://legal"
   osduAirflowUrl: "http://airflow:8080"
   workflowHost: "http://workflow"
+  otelJavaagentEnabled: "true"
+  otelExporterEndpoint: "http://opentelemetry-collector.opentelemetry.svc.cluster.local:4318"
   dagNames:
     - csv_ingestion
     - manifest_ingestion

@@ -1,7 +1,11 @@
-FROM azul/zulu-openjdk:17
+FROM community.opengroup.org:5555/osdu/platform/deployment-and-operations/base-containers-gcp/gc-osdu-java-image/gc-osdu-java-17-base-master:latest
 WORKDIR /app
+
 ARG PROVIDER_NAME
 ENV PROVIDER_NAME $PROVIDER_NAME
+
+ARG PORT
+ENV PORT $PORT
 
 ENV LOADER_PATH="gc/"
 
@@ -11,21 +15,10 @@ COPY tmp-gc/gc-oqm-pubsub-*.jar gc/oqm-pubsub.jar
 # Copy the jar to the production image from the builder stage.
 COPY provider/workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*-spring-boot.jar workflow-${PROVIDER_NAME}.jar
 
-# Add a non-root user
-RUN groupadd -g 10001 -r nonroot \
-  && useradd -g 10001 -r -u 10001 nonroot
-# Run as non-root user
-USER 10001:10001
+# Set Java options using COMMON_JAVA_FLAGS from base image plus service-specific options
+# Base image entrypoint will inject telemetry if OTEL_JAVAAGENT_ENABLED=true
+ENV JAVA_OPTS="${COMMON_JAVA_FLAGS} -Dserver.port=${PORT} -Dloader.main=org.opengroup.osdu.workflow.provider.gcp.WorkflowGcpDatastoreApplication"
 
 # Run the web service on container startup.
-#--add-opens args used to open modules and allow illegal(reflection\private classes and fields) access from the code.
-CMD java --add-opens java.base/java.lang=ALL-UNNAMED \
-         --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
-         -Djava.security.egd=file:/dev/./urandom \
-         -Dserver.port=${PORT} \
-         -Dlog4j.formatMsgNoLookups=true \
-         -XX:+UseG1GC \
-         -XX:+UseStringDeduplication \
-         -XX:InitiatingHeapOccupancyPercent=45 \
-         -Dloader.main=org.opengroup.osdu.workflow.provider.gcp.WorkflowGcpDatastoreApplication \
-         -jar /app/workflow-${PROVIDER_NAME}.jar
+# Base image entrypoint will intercept 'java' command and inject JAVA_OPTS automatically
+CMD java $JAVA_OPTS -jar /app/workflow-${PROVIDER_NAME}.jar
