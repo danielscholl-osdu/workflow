@@ -1,12 +1,12 @@
 /**
 * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *      http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,6 @@ import org.opengroup.osdu.core.aws.v2.dynamodb.interfaces.IDynamoDBQueryHelperFa
 import org.opengroup.osdu.core.aws.v2.dynamodb.model.QueryPageResult;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
@@ -56,7 +55,6 @@ class AwsWorkflowMetadataRepositoryTest {
 
     private static final String WORKFLOW_NAME = "workflowName";
     private static final String PREFIX = "prefix";
-    private static final String DATA_PARTITION_ID = "test:partition";
     private static final String TABLE_PARAM_PATH = "test/path";
 
     private AwsWorkflowMetadataRepository repository;
@@ -70,15 +68,12 @@ class AwsWorkflowMetadataRepositoryTest {
     @Mock
     private DpsHeaders headers;
 
-    @Mock
-    private AwsServiceConfig awsServiceConfig;
-
     @BeforeEach
     void setup() {
 
         when(queryHelperFactory.createQueryHelper(headers, TABLE_PARAM_PATH, WorkflowMetadataDoc.class)).thenReturn(queryHelper);
-        
-        repository = new AwsWorkflowMetadataRepository(queryHelperFactory, TABLE_PARAM_PATH, headers, awsServiceConfig);
+
+        repository = new AwsWorkflowMetadataRepository(queryHelperFactory, TABLE_PARAM_PATH, headers);
     }
 
     @Test
@@ -86,7 +81,7 @@ class AwsWorkflowMetadataRepositoryTest {
         //Arrange
         WorkflowMetadata workflowMetadata = new WorkflowMetadata();
         workflowMetadata.setWorkflowName(WORKFLOW_NAME);
-        
+
         // Act
         repository.createWorkflow(workflowMetadata);
 
@@ -133,7 +128,7 @@ class AwsWorkflowMetadataRepositoryTest {
         WorkflowMetadataDoc doc = mock(WorkflowMetadataDoc.class);
         WorkflowMetadata metadata = new WorkflowMetadata();
         when(doc.convertToWorkflowMetadata()).thenReturn(metadata);
-        
+
         // Use anyString() matchers for both parameters
         when(queryHelper.getItem(any(), any())).thenReturn(Optional.of(doc));
 
@@ -196,7 +191,7 @@ class AwsWorkflowMetadataRepositoryTest {
         WorkflowMetadataDoc doc = mock(WorkflowMetadataDoc.class);
         WorkflowMetadata metadata = new WorkflowMetadata();
         when(doc.convertToWorkflowMetadata()).thenReturn(metadata);
-        
+
         QueryPageResult<WorkflowMetadataDoc> pageResult = new QueryPageResult<>(
                 Collections.singletonList(doc), null, null);
         when(queryHelper.scanPage(any(ScanEnhancedRequest.class))).thenReturn(pageResult);
