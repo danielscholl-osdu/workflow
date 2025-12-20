@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -31,7 +30,6 @@ import org.opengroup.osdu.core.aws.v2.dynamodb.model.QueryPageResult;
 import org.opengroup.osdu.core.aws.v2.dynamodb.util.RequestBuilderUtil;
 import org.opengroup.osdu.core.common.model.http.AppException;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.aws.config.AwsServiceConfig;
 import org.opengroup.osdu.workflow.aws.util.dynamodb.converters.WorkflowMetadataDoc;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
@@ -55,8 +53,7 @@ import software.amazon.awssdk.services.dynamodb.model.InternalServerErrorExcepti
 public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepository {
 
 
-    private final AwsServiceConfig config;
-    private final IDynamoDBQueryHelperFactory queryHelperFactory;
+  private final IDynamoDBQueryHelperFactory queryHelperFactory;
     private final DpsHeaders headers;
     private final String workflowMetadataTableParameterRelativePath;
     private final DynamoDBQueryHelper<WorkflowMetadataDoc> queryHelper;
@@ -64,12 +61,11 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
     @Autowired
     public AwsWorkflowMetadataRepository(IDynamoDBQueryHelperFactory queryHelperFactory,
             @Value("${aws.dynamodb.workflowMetadataTable.ssm.relativePath}") String workflowMetadataTableParameterRelativePath,
-            DpsHeaders headers, AwsServiceConfig config) {
+            DpsHeaders headers) {
         this.queryHelperFactory = queryHelperFactory;
         this.headers = headers;
         this.workflowMetadataTableParameterRelativePath = workflowMetadataTableParameterRelativePath;
-        this.config = config;
-        this.queryHelper = getWorkflowMetadataRepositoryQueryHelper();
+      this.queryHelper = getWorkflowMetadataRepositoryQueryHelper();
     }
 
     private DynamoDBQueryHelper<WorkflowMetadataDoc> getWorkflowMetadataRepositoryQueryHelper() {
@@ -99,7 +95,7 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
             queryHelper.putItem(request);
             return doc.convertToWorkflowMetadata();
         } catch (ConditionalCheckFailedException e) {
-            throw new ResourceConflictException(workflowMetadata.getWorkflowName(), 
+            throw new ResourceConflictException(workflowMetadata.getWorkflowName(),
                     "Workflow with same name already exists");
         } catch (DynamoDbException e) {
             throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error creating workflow",
@@ -118,12 +114,10 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
             if (docOptional.isEmpty()) {
                 throw new WorkflowNotFoundException(String.format("Workflow: '%s' not found", workflowName));
             }
-            
+
             return docOptional.get().convertToWorkflowMetadata();
-        } catch (WorkflowNotFoundException e) {
-            throw e;
         } catch (DynamoDbException e) {
-            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error retrieving workflow", 
+            throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error retrieving workflow",
                     e.getMessage());
         }
     }
@@ -153,7 +147,7 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
             return docs.stream()
                     .map(WorkflowMetadataDoc::convertToWorkflowMetadata)
-                       .collect(Collectors.toList());
+                       .toList();
         } catch (DynamoDbException e) {
             throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error listing workflows",
                     e.getMessage());
