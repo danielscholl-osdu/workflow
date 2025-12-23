@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.opengroup.osdu.core.aws.v2.dynamodb.DynamoDBQueryHelper;
@@ -147,7 +147,7 @@ public class AwsWorkflowMetadataRepository implements IWorkflowMetadataRepositor
 
             return docs.stream()
                     .map(WorkflowMetadataDoc::convertToWorkflowMetadata)
-                       .toList();
+                       .collect(Collectors.toList()); //NOSONAR - mutable list required by calling code
         } catch (DynamoDbException e) {
             throw new AppException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error listing workflows",
                     e.getMessage());
