@@ -1,6 +1,6 @@
 /*
- *  Copyright 2020-2023 Google LLC
- *  Copyright 2020-2023 EPAM Systems, Inc
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,21 +21,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.WORKFLOW_HOST;
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-import static org.opengroup.osdu.workflow.util.WorkflowUpdateRunStatusHelper.getWorkflowRuns;
-import static org.opengroup.osdu.workflow.util.WorkflowUpdateRunStatusHelper.sendWorkflowRunFinishedUpdateRequest;
+import static org.opengroup.osdu.workflow.consts.TestConstants.EXTERNAL_AIRFLOW_TESTS_ENABLED;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_NAME_EXTERNAL_AIRFLOW;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.deleteCreatedWorkflows;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.sendWorkflowRunFinishedUpdateRequestToCreatedWorkflowRuns;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.waitForCreatedWorkflowRunsToComplete;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.HttpMethod;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.opengroup.osdu.workflow.util.TestExternalAirflow;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,22 +51,29 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 			+ "v1/workflow/%s/workflowRun/%s/latestInfo";
 	public static final String XCOM_FIELD = "xcom";
 
+  @BeforeAll
+  static void beforeAll() throws Exception {
+    HTTPClient httpClient = new HTTPClient();
+    Map<String, String> headers = httpClient.getCommonHeader();
+    deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns(CREATE_WORKFLOW_WORKFLOW_NAME, httpClient, headers);
+    if (EXTERNAL_AIRFLOW_TESTS_ENABLED) {
+      deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns(WORKFLOW_NAME_EXTERNAL_AIRFLOW, httpClient, headers);
+    }
+  }
+
 	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		this.client = new HTTPClient();
 		this.headers = this.client.getCommonHeader();
-		try {
-			deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
-		} catch (Exception e) {
-			throw e;
-		}
-	}
+  }
 
 	@AfterEach
 	@Override
-	public void tearDown() {
-		deleteAllTestWorkflowRecords();
+	public void tearDown() throws Exception {
+    waitForCreatedWorkflowRunsToComplete(createdWorkflowRuns, client, headers);
+    sendWorkflowRunFinishedUpdateRequestToCreatedWorkflowRuns(createdWorkflowRuns, client, headers);
+    deleteCreatedWorkflows(createdWorkflowsWorkflowNames, client, headers);
 		this.client = null;
 		this.headers = null;
 	}
@@ -82,6 +93,21 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 				latestDetailsResponse.toString());
 	}
 
+  @TestExternalAirflow
+  void testGetLatestTaskDetailsOfWorkflowRunOnExternalAirflow() throws Exception {
+    String latestRunDetailsUrl = getLatestRunDetailsUrlExternalAirflow();
+
+    ClientResponse latestDetailsResponse = client.send(HttpMethod.GET, latestRunDetailsUrl, null, headers,
+        client.getAccessToken());
+
+    Map<String, String> latestRunDetails = new ObjectMapper()
+        .readValue(latestDetailsResponse.getEntity(String.class), HashMap.class);
+
+    assertNotNull(latestRunDetails.get(XCOM_FIELD));
+    assertEquals(org.apache.http.HttpStatus.SC_OK, latestDetailsResponse.getStatus(),
+        latestDetailsResponse.toString());
+  }
+
 	@Test
 	public void testGetLatestTaskDetailsOfNotExistingWorkflow() throws Exception {
 
@@ -95,9 +121,7 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 
 	@Test
 	public void testGetLatestTaskDetailsOfNotExistingWorkflowRun() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		String existingWorkflowNotExistingRunUrl = String.format(GET_LATEST_DETAILS_BY_ID_API_ENDPOINT,
 				CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID);
@@ -107,7 +131,19 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
 	}
 
-	@Test
+  @TestExternalAirflow
+  void testGetLatestTaskDetailsOfNotExistingWorkflowRunOnExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+
+    String existingWorkflowNotExistingRunUrl = String.format(GET_LATEST_DETAILS_BY_ID_API_ENDPOINT,
+        WORKFLOW_NAME_EXTERNAL_AIRFLOW, INVALID_WORKFLOW_RUN_ID);
+
+    ClientResponse response = client.send(HttpMethod.GET, existingWorkflowNotExistingRunUrl, null, headers,
+        client.getAccessToken());
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
+  @Test
 	public void testGetLatestTaskDetailsWithoutAccess() throws Exception {
 		String latestRunDetailsUrl = getLatestRunDetailsUrl();
 
@@ -117,35 +153,9 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 		assertEquals(401, latestDetailsResponse.getStatus());
 	}
 
-	protected void deleteAllTestWorkflowRecords() {
-		createdWorkflows.stream().forEach(c -> {
-			try {
-				deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
-	}
-
-	@Override
-	protected void deleteTestWorkflows(String workflowName) throws Exception {
-		List<String> runIds = getWorkflowRuns(this.client, workflowName, this.headers);
-		for (String runId : runIds) {
-			sendWorkflowRunFinishedUpdateRequest(this.client, workflowName, runId, this.headers);
-		}
-		String url = CREATE_WORKFLOW_URL + "/" + workflowName;
-		sendDeleteRequest(url);
-	}
-
 	protected String getLatestRunDetailsUrl() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String runId = workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD);
 
@@ -155,4 +165,18 @@ public final class GetWorkflowRunLatestTaskInfoTest extends TestBase {
 		Thread.sleep(5000);
 		return latestRunDetailsUrl;
 	}
+
+  private String getLatestRunDetailsUrlExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    String runId = workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD);
+
+    String latestRunDetailsUrl = String.format(GET_LATEST_DETAILS_BY_ID_API_ENDPOINT, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+        runId);
+
+    Thread.sleep(5000);
+    return latestRunDetailsUrl;
+  }
+
 }

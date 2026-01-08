@@ -46,13 +46,13 @@ public final class PostCreateSystemWorkflowV3IntegrationTests extends TestBase {
 		deleteAllTestWorkflowRecords();
 		this.client = null;
 		this.headers = null;
-		this.createdWorkflows = new ArrayList<>();
+		this.createdWorkflowsWorkflowNames = new ArrayList<>();
 	}
 
 	private void deleteAllTestWorkflowRecords() {
-		createdWorkflows.stream().forEach(c -> {
+		createdWorkflowsWorkflowNames.stream().forEach(workflowName -> {
 			try {
-				deleteTestSystemWorkflows(c.get(WORKFLOW_NAME_FIELD));
+				deleteTestSystemWorkflows(workflowName);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
@@ -63,7 +63,7 @@ public final class PostCreateSystemWorkflowV3IntegrationTests extends TestBase {
 	public void should_returnWorkflowExists_when_givenDuplicateCreateWorkflowRequest() throws Exception {
 		String responseBody = createSystemWorkflow();
 		Map<String, String> workflowInfo = getWorkflowInfoFromCreateWorkflowResponseBody(responseBody);
-		createdWorkflows.add(workflowInfo);
+		createdWorkflowsWorkflowNames.add(workflowInfo.get(WORKFLOW_NAME_FIELD));
 
 		ClientResponse duplicateResponse = client.send(HttpMethod.POST, CREATE_SYSTEM_WORKFLOW_URL,
 				buildCreateWorkflowValidPayload(), headers, client.getAccessToken());

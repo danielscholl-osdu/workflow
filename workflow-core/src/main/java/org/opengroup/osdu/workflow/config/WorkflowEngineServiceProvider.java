@@ -19,11 +19,9 @@ package org.opengroup.osdu.workflow.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.workflow.provider.interfaces.IAirflowApiClient;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
-import org.opengroup.osdu.workflow.service.AirflowV2WorkflowEngineServiceImpl;
-import org.opengroup.osdu.workflow.service.AirflowWorkflowEngineServiceImpl;
+import org.opengroup.osdu.workflow.service.factory.WorkflowEngineServiceFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,18 +31,25 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class WorkflowEngineServiceProvider {
 
+  private static final String V1 = "v1";
+  private static final String V2 = "v2";
+
   private final IAirflowApiClient airflowApiClient;
-  private final DpsHeaders dpsHeaders;
+  private final WorkflowEngineServiceFactory workflowEngineServiceFactory;
 
   @Value("${osdu.airflow.version2:#{null}}")
   private Boolean airflowVersion2;
 
   @Bean
   IWorkflowEngineService workflowEngineService() {
+    String airflowVersion;
     if (Boolean.TRUE.equals(airflowVersion2)) {
-      return new AirflowV2WorkflowEngineServiceImpl(airflowApiClient, dpsHeaders);
+      airflowVersion = V2;
     } else {
-      return new AirflowWorkflowEngineServiceImpl(airflowApiClient);
+      airflowVersion = V1;
     }
+    log.info("Creating workflow engine for airflow version: {}", airflowVersion);
+    return workflowEngineServiceFactory.createWorkflowEngineService(
+        airflowVersion, airflowApiClient);
   }
 }

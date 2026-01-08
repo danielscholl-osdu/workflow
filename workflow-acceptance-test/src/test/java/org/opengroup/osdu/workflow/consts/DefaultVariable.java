@@ -9,6 +9,10 @@ public enum DefaultVariable {
 
 	FINISHED_WORKFLOW_ID(""),
 
+  EXTERNAL_AIRFLOW_SECRET(""),
+  WORKFLOW_NAME_EXTERNAL_AIRFLOW("test_workflow_external_airflow"),
+  TEST_DAG_NAME_EXTERNAL_AIRFLOW(""),
+
 	TEST_DAG_NAME(""), DEFAULT_DATA_PARTITION_ID_TENANT("");
 
 	public static String getEnvironmentVariableOrDefaultKey(DefaultVariable key) {
@@ -31,7 +35,7 @@ public enum DefaultVariable {
 		return defaultValue;
 	}
 
-	public String getVariableKey(DefaultVariable var) {
-		return var.name();
+	public String getVariableKey(DefaultVariable variable) {
+		return variable.name();
 	}
 }

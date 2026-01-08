@@ -357,6 +357,48 @@ as per airflow community, airflow experimnetal API will be discontinued. with he
 * override and disable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId()` in provider level.
 * override and enable integration test case `org.opengroup.osdu.workflow.workflow.v3.WorkflowRunV3IntegrationTests.triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()` in provider level
 
+## External Airflow support
+
+The Workflow service supports integration with external Airflow instances. To run DAGs in external Airflow, `externalAirflowSecret` property must be set in the `registrationInstructions` when creating a workflow.
+If the `externalAirflowSecret` is set in the workflow, all the requests to Airflow will use the connection properties specified in the secret.
+
+The secret specified in `externalAirflowSecret` should contain JSON with Airflow connection properties:
+
+```json
+{
+  "version": "v2",
+  "airflowApiClientType": "BasicAuth",
+  "url": "https://external-airflow-host:port",
+  "username": "airflow-username",
+  "password": "airflow-password"
+}
+```
+
+The properties `version` and `airflowApiClientType` are mandatory. The `url`, `username`, `password` and other properties are optional and may vary depending on the `version` and `airflowApiClientType`.
+
+Example of creating a secret with Airflow connection properties:
+
+```sh
+curl --location --request POST 'https://{path}/api/secret/v2/secrets' \
+    --header 'Authorization: Bearer {token}' \
+    --header 'data-partition-id: osdu' \
+    --header 'Content-Type: application/json'\
+    --data-raw '{
+        "id": "external-airflow",
+        "key": "external-airflow",
+        "value": "{\"airflowApiClientType\": \"BasicAuth\",\"password\": \"airflow\",\"url\": \"http://airflow:8080\",\"username\": \"airflow\",\"version\": \"v2\"}",
+        "secretAcls": {
+            "viewers": [
+                "workflow.secret.viewers@osdu.group"
+            ],
+            "owners": [
+                "workflow.secret.owners@osdu.group"
+            ]
+        },
+        "enabled": true
+    }'
+```
+
 ## Workflow Service Provider Interfaces
 
 The Workflow service has several Service Provider Interfaces that the classes need to implement.
@@ -383,7 +425,7 @@ All the Swagger and OpenAPI related common properties are managed here [swagger.
 - `api.server.fullUrl.enabled=true` It will generate full server url in the OpenAPI swagger
 - `api.server.fullUrl.enabled=false` It will generate only the contextPath only
 - default value is false (Currently only in Azure it is enabled)
-[Reference]:(https://springdoc.org/faq.html#_how_is_server_url_generated) 
+[Reference]:(https://springdoc.org/faq.html#_how_is_server_url_generated)
 
 ## Google Cloud implementation
 

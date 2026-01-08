@@ -41,7 +41,9 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_R
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_QUEUED;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_RUNNING;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUCCESS;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayloadWithGivenRunId;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidPayloadStatus;
@@ -464,7 +466,18 @@ public abstract class WorkflowRunV3IntegrationTests extends TestBase {
 
     String obtainedWorkflowRunStatus = getWorkflowRunStatus(CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
 
-    assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
+    // Check not only for 'running' but also for 'success' and 'queued' as Airflow may return either
+    List<String> expectedStatuses =
+        List.of(
+            WORKFLOW_STATUS_TYPE_RUNNING,
+            WORKFLOW_STATUS_TYPE_SUCCESS,
+            WORKFLOW_STATUS_TYPE_QUEUED);
+    assertTrue(
+        expectedStatuses.contains(obtainedWorkflowRunStatus),
+        "Expected status to be one of "
+            + expectedStatuses
+            + ", but got: "
+            + obtainedWorkflowRunStatus);
   }
 
   @Test

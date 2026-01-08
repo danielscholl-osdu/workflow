@@ -37,6 +37,7 @@ data:
 conf:
   configmap: "workflow-config"
   appName: "workflow"
+  workflowKeycloakSecretName: "workflow-keycloak-secret"
   workflowAirflowSecretName: "workflow-airflow-secret"
   workflowPostgresSecretName: "workflow-postgres-secret"
   rabbitmqSecretName: "rabbitmq-secret"

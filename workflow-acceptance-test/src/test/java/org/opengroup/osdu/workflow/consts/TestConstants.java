@@ -79,6 +79,12 @@ public class TestConstants {
 	public static final String DATA_PARTITION_ID_TENANT = getEnvironmentVariableOrDefaultKey(
 			DEFAULT_DATA_PARTITION_ID_TENANT);
 
+  private static final String EXTERNAL_AIRFLOW_TESTS_ENABLED_ENV_VAR = "EXTERNAL_AIRFLOW_TESTS_ENABLED";
+  public static final boolean EXTERNAL_AIRFLOW_TESTS_ENABLED = Boolean.parseBoolean(System.getenv(EXTERNAL_AIRFLOW_TESTS_ENABLED_ENV_VAR));
+  public static final String EXTERNAL_AIRFLOW_SECRET = getEnvironmentVariableOrDefaultKey(DefaultVariable.EXTERNAL_AIRFLOW_SECRET);
+  public static final String WORKFLOW_NAME_EXTERNAL_AIRFLOW = getEnvironmentVariableOrDefaultKey(DefaultVariable.WORKFLOW_NAME_EXTERNAL_AIRFLOW);
+  public static final String TEST_DAG_NAME_EXTERNAL_AIRFLOW = getEnvironmentVariableOrDefaultKey(DefaultVariable.TEST_DAG_NAME_EXTERNAL_AIRFLOW);
+
 	public static String getValidWorkflowPayload() {
 		return buildStartWorkflow(buildContext(), WORKFLOW_TYPE_INGEST);
 	}

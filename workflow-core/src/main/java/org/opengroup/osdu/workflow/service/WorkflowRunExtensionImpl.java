@@ -20,6 +20,7 @@ package org.opengroup.osdu.workflow.service;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineExtension;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunExtension;
@@ -30,8 +31,8 @@ import org.springframework.stereotype.Service;
 public class WorkflowRunExtensionImpl implements IWorkflowRunExtension {
   protected static final String DAG_NAME = "dagName";
 
-  private final IWorkflowEngineExtension workflowEngineExtension;
   private final IWorkflowManagerService managerService;
+  private final IAirflowResolver airflowResolver;
 
   @Override
   public Object getLatestTaskDetails(String workflowName, String runId) {
@@ -51,6 +52,6 @@ public class WorkflowRunExtensionImpl implements IWorkflowRunExtension {
    * @return IWorkflowEngineExtension
    */
   protected IWorkflowEngineExtension getWorkflowEngineExtension(WorkflowMetadata workflowMetadata) {
-    return workflowEngineExtension;
+    return airflowResolver.getWorkflowEngineExtension(workflowMetadata);
   }
 }

@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.opengroup.osdu.core.common.model.http.AppException;
+import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
 import org.opengroup.osdu.workflow.model.ClientResponse;
 import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
@@ -102,9 +103,7 @@ public abstract class AbstractAirflowWorkflowEngineService implements IWorkflowE
   @Override
   public WorkflowStatusType getWorkflowRunStatus(WorkflowEngineRequest rq) {
     log.info(
-        "getting status of WorkflowRun of Workflow {}(runId: {}) executed on {}",
         rq.getWorkflowName(),
-        rq.getRunId(),
         rq.getExecutionTimeStamp());
     final ClientResponse response =
         airflowApiClient.callAirflow(

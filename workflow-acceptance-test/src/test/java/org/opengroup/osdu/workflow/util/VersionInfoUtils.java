@@ -1,6 +1,6 @@
 /*
- * Copyright 2021 Google LLC
- * Copyright 2021 EPAM Systems, Inc
+ *  Copyright 2021-2025 Google LLC
+ *  Copyright 2021-2025 EPAM Systems, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.ClientResponse;
+import java.util.List;
 
 public class VersionInfoUtils {
 
@@ -39,5 +40,11 @@ public class VersionInfoUtils {
 		public String branch;
 		public String commitId;
 		public String commitMessage;
+    public List<ConnectedOuterService> connectedOuterServices;
 	}
+
+  public static class ConnectedOuterService {
+    public String name;
+    public String version;
+  }
 }

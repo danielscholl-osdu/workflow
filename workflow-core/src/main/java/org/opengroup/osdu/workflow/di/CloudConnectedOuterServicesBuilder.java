@@ -18,12 +18,11 @@
 package org.opengroup.osdu.workflow.di;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opengroup.osdu.core.common.info.ConnectedOuterServicesBuilder;
 import org.opengroup.osdu.core.common.model.info.ConnectedOuterService;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,18 +30,10 @@ import org.springframework.stereotype.Component;
 @Schema(description = "Connected outer service information.")
 public class CloudConnectedOuterServicesBuilder implements ConnectedOuterServicesBuilder {
 
-  public static final String AIRFLOW = "Airflow";
-  private final IWorkflowEngineService workflowEngineService;
+  private final IAirflowResolver airflowResolver;
 
   @Override
   public List<ConnectedOuterService> buildConnectedOuterServices() {
-    List<ConnectedOuterService> connectedOuterServices = new ArrayList<>();
-    workflowEngineService
-        .getVersion()
-        .ifPresent(
-            airflowVersion ->
-                connectedOuterServices.add(
-                    ConnectedOuterService.builder().name(AIRFLOW).version(airflowVersion).build()));
-    return connectedOuterServices;
+    return airflowResolver.getConnectedWorkflowEngineServicesVersions();
   }
 }

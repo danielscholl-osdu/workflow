@@ -6,7 +6,6 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_W
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_SYSTEM_WORKFLOW_BY_ID_URL;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import javax.ws.rs.HttpMethod;
 
@@ -42,13 +41,13 @@ public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 		deleteAllTestWorkflowRecords();
 		this.client = null;
 		this.headers = null;
-		this.createdWorkflows = new ArrayList<>();
+		this.createdWorkflowsWorkflowNames = new ArrayList<>();
 	}
 
 	private void deleteAllTestWorkflowRecords() {
-		createdWorkflows.stream().forEach(c -> {
+		createdWorkflowsWorkflowNames.stream().forEach(workflowName -> {
 			try {
-				deleteTestSystemWorkflows(c.get(WORKFLOW_NAME_FIELD));
+				deleteTestSystemWorkflows(workflowName);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
@@ -57,11 +56,9 @@ public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 
 	@Test
 	public void should_delete_when_givenValidWorkflowName() throws Exception {
-		String responseBody = createSystemWorkflow();
-		Map<String, String> workflowInfo = getWorkflowInfoFromCreateWorkflowResponseBody(responseBody);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackSystemWorkflow();
 
-		ClientResponse deleteResponse = client.send(HttpMethod.DELETE,
+    ClientResponse deleteResponse = client.send(HttpMethod.DELETE,
 				String.format(GET_SYSTEM_WORKFLOW_BY_ID_URL, CREATE_WORKFLOW_WORKFLOW_NAME), null, headers,
 				client.getAccessToken());
 		assertEquals(HttpStatus.SC_NO_CONTENT, deleteResponse.getStatus());
@@ -69,11 +66,9 @@ public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 
 	@Test
 	public void should_ReturnNotFound_when_givenInvalidWorkflowName() throws Exception {
-		String responseBody = createSystemWorkflow();
-		Map<String, String> workflowInfo = getWorkflowInfoFromCreateWorkflowResponseBody(responseBody);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackSystemWorkflow();
 
-		ClientResponse deleteResponse = client.send(HttpMethod.DELETE,
+    ClientResponse deleteResponse = client.send(HttpMethod.DELETE,
 				String.format(GET_SYSTEM_WORKFLOW_BY_ID_URL, INVALID_WORKFLOW_NAME), null, headers,
 				client.getAccessToken());
 
@@ -82,14 +77,16 @@ public final class DeleteSystemWorkflowV3IntegrationTests extends TestBase {
 
 	@Test
 	public void should_returnForbidden_when_notGivenAccessToken() throws Exception {
+    createAndTrackSystemWorkflow();
 
-		String responseBody = createSystemWorkflow();
-		Map<String, String> workflowInfo = getWorkflowInfoFromCreateWorkflowResponseBody(responseBody);
-		createdWorkflows.add(workflowInfo);
-
-		ClientResponse response = client.send(HttpMethod.DELETE,
+    ClientResponse response = client.send(HttpMethod.DELETE,
 				String.format(GET_SYSTEM_WORKFLOW_BY_ID_URL, CREATE_WORKFLOW_WORKFLOW_NAME), null, headers, null);
 		assertTrue(
 				HttpStatus.SC_FORBIDDEN == response.getStatus() || HttpStatus.SC_UNAUTHORIZED == response.getStatus());
 	}
+
+  private void createAndTrackSystemWorkflow() throws Exception {
+    String responseBody = createSystemWorkflow();
+    trackWorkflow(responseBody);
+  }
 }

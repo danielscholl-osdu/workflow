@@ -11,7 +11,7 @@ import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
-import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
@@ -30,7 +30,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
 
   private final IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
 
-  private final IWorkflowEngineService workflowEngineService;
+  private final IAirflowResolver airflowResolver;
 
   private final IWorkflowRunService workflowRunService;
 
@@ -111,7 +111,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
             .workflowName(workflowMetadata.getWorkflowName())
             .isSystemWorkflow(isSystemWorkflow)
             .build();
-    workflowEngineService.createWorkflow(rq, request.getRegistrationInstructions());
+    airflowResolver.getWorkflowEngineService(workflowMetadata).createWorkflow(rq, request.getRegistrationInstructions());
     auditLogger.workflowCreateEvent(Collections.singletonList(savedMetadata.toString()));
     return savedMetadata;
   }
@@ -129,7 +129,7 @@ public class WorkflowManagerServiceImpl implements IWorkflowManagerService {
         .isDeployedThroughWorkflowService(workflowMetadata.isDeployedThroughWorkflowService())
         .isSystemWorkflow(isSystemWorkflow)
         .build();
-    workflowEngineService.deleteWorkflow(rq);
+    airflowResolver.getWorkflowEngineService(workflowMetadata).deleteWorkflow(rq);
     if (!isSystemWorkflow) {
       workflowMetadataRepository.deleteWorkflow(workflowName);
     } else {
