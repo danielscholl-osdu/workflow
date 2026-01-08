@@ -5,6 +5,7 @@ ENV PROVIDER_NAME core-plus
 
 COPY tmp/os-oqm-rabbitmq-*.jar plugins/oqm-rabbitmq.jar
 COPY tmp/os-osm-postgres-*.jar plugins/osm-postgres.jar
+COPY tmp/apd-openid-*.jar plugins/apd-openid.jar
 
 # Copy the jar to the production image from the builder stage.
 COPY workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*-spring-boot.jar workflow-${PROVIDER_NAME}.jar

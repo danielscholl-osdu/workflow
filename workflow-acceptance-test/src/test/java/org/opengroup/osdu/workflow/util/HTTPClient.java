@@ -6,47 +6,38 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_CORRELATIO
 import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_DATA_PARTITION_ID;
 import static org.opengroup.osdu.workflow.consts.TestConstants.HEADER_USER;
 
+import com.google.api.client.util.Strings;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.api.client.util.Strings;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-
 import lombok.ToString;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 @Log
 @ToString
 public class HTTPClient {
 
-	private final int MAX_ID_SIZE = 50;
-
-	protected static String accessToken;
-	protected static String noDataAccessToken;
-
 	private OpenIDTokenProvider openIDTokenProvider;
 	public static final String INTEGRATION_TESTER_TOKEN = "PRIVILEGED_USER_TOKEN";
-	public static final String INTEGRATION_TESTER_NOACCESS_TOKEN = "NO_ACCESS_USER_TOKEN";
+	public static final String INTEGRATION_TESTER_NO_ACCESS_TOKEN = "NO_ACCESS_USER_TOKEN";
 
 	protected static String token = null;
 	protected static String noAccessToken = null;
 
 	public HTTPClient() {
 		token = System.getProperty(INTEGRATION_TESTER_TOKEN, System.getenv(INTEGRATION_TESTER_TOKEN));
-		noAccessToken = System.getProperty(INTEGRATION_TESTER_NOACCESS_TOKEN,
-				System.getenv(INTEGRATION_TESTER_NOACCESS_TOKEN));
+		noAccessToken = System.getProperty(INTEGRATION_TESTER_NO_ACCESS_TOKEN,
+				System.getenv(INTEGRATION_TESTER_NO_ACCESS_TOKEN));
 
 		if (Strings.isNullOrEmpty(token) || Strings.isNullOrEmpty(noAccessToken)) {
 			openIDTokenProvider = new OpenIDTokenProvider();
@@ -59,11 +50,11 @@ public class HTTPClient {
 		}
 	}
 
-	public String getAccessToken() throws Exception {
+	public String getAccessToken() {
 		return "Bearer " + token;
 	}
 
-	public String getNoDataAccessToken() throws Exception {
+	public String getNoDataAccessToken() {
 		return "Bearer " + noAccessToken;
 	}
 
@@ -105,10 +96,9 @@ public class HTTPClient {
 			client.setReadTimeout(180000);
 			client.setConnectTimeout(10000);
 			WebResource webResource = client.resource(url);
-			log.info("URL = " + url);
+			log.info("[%s] URL = %s".formatted(httpMethod, url));
 			response = this.getClientResponse(httpMethod, payLoad, webResource, headers, token);
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new AssertionError("Error: Send request error", e);
 		}
 		log.info("waiting on response");
@@ -120,7 +110,7 @@ public class HTTPClient {
 		final WebResource.Builder builder = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON).header("Authorization", token);
 		headers.forEach(builder::header);
-		log.info("making request to datalake api");
+		log.info("making request to workflow api");
 		return builder.method(httpMethod, ClientResponse.class, requestBody);
 	}
 

@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineExtension;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowManagerService;
 
@@ -45,6 +46,8 @@ class WorkflowRunExtensionImplTest {
   @Mock private IWorkflowEngineExtension workflowEngineExtension;
 
   @Mock private IWorkflowManagerService managerService;
+
+  @Mock private IAirflowResolver airflowResolver;
 
   @InjectMocks private WorkflowRunExtensionImpl workflowRunExtension;
 
@@ -120,6 +123,7 @@ class WorkflowRunExtensionImplTest {
 
   void mocksForInstructions(Map<String, Object> instructions) {
     when(managerService.getWorkflowByName(WORKFLOW_NAME)).thenReturn(workflowMetadata);
+    when(airflowResolver.getWorkflowEngineExtension(workflowMetadata)).thenReturn(workflowEngineExtension);
     when(workflowMetadata.getRegistrationInstructions()).thenReturn(instructions);
   }
 }

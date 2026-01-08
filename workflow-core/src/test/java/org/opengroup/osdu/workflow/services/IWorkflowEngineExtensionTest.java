@@ -78,7 +78,7 @@ public class IWorkflowEngineExtensionTest {
   @InjectMocks AirflowV2WorkflowEngineExtension engineExtension;
 
   @Test
-  public void testGetLastDetails() throws JsonProcessingException {
+  void testGetLastDetails() throws JsonProcessingException {
     ClientResponse tasksResponse =
         ClientResponse.builder()
             .responseBody(readRespBodyFromFile(AIRFLOW_RESPONSES_TASK_INSTANCES_JSON))

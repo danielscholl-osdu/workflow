@@ -152,9 +152,9 @@ public class AirflowV2WorkflowEngineServiceImpl extends AbstractAirflowWorkflowE
               rq.getWorkflowName());
       throw new AppException(400, "Failed to trigger workflow run", errorMessage);
     }
-    log.debug(
-        String.format("putting user email: %s in execution context", dpsHeaders.getUserEmail()));
+    log.debug("putting user email: {} in execution context", dpsHeaders.getUserEmail());
     executionContext.put(KEY_USER_ID, dpsHeaders.getUserEmail());
     inputData.put(KEY_EXECUTION_CONTEXT, executionContext);
   }
 }
+

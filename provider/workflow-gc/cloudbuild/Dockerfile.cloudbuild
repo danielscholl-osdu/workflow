@@ -11,6 +11,7 @@ ENV LOADER_PATH="gc/"
 
 COPY tmp-gc/gc-osm-datastore-*.jar gc/osm-datastore.jar
 COPY tmp-gc/gc-oqm-pubsub-*.jar gc/oqm-pubsub.jar
+COPY tmp-gc/gc-apd-acc-*.jar gc/apd-acc.jar
 
 # Copy the jar to the production image from the builder stage.
 COPY provider/workflow-${PROVIDER_NAME}/target/workflow-${PROVIDER_NAME}-*-spring-boot.jar workflow-${PROVIDER_NAME}.jar

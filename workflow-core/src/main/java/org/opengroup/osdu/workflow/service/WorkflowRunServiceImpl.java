@@ -17,7 +17,27 @@
 
 package org.opengroup.osdu.workflow.service;
 
+import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
+import static org.opengroup.osdu.core.common.model.status.Status.IN_PROGRESS;
+import static org.opengroup.osdu.core.common.model.status.Status.SUBMITTED;
+import static org.opengroup.osdu.core.common.model.status.Status.SUCCESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.USER_MADE_CHANGE;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FAILED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FINISHED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_IN_PROGRESS;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUBMITTED;
+import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUCCESS;
+import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
+import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
+import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opengroup.osdu.core.common.model.http.AppException;
@@ -34,33 +54,13 @@ import org.opengroup.osdu.workflow.model.WorkflowRun;
 import org.opengroup.osdu.workflow.model.WorkflowRunResponse;
 import org.opengroup.osdu.workflow.model.WorkflowRunsPage;
 import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.opengroup.osdu.core.common.model.status.Status.FAILED;
-import static org.opengroup.osdu.core.common.model.status.Status.IN_PROGRESS;
-import static org.opengroup.osdu.core.common.model.status.Status.SUBMITTED;
-import static org.opengroup.osdu.core.common.model.status.Status.SUCCESS;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.USER_MADE_CHANGE;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FAILED;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_FINISHED;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_IN_PROGRESS;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUBMITTED;
-import static org.opengroup.osdu.workflow.gsm.WorkflowStatusPublisher.WORKFLOW_SUCCESS;
-import static org.opengroup.osdu.workflow.logging.LoggerUtils.getTruncatedData;
-import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getActiveStatusTypes;
-import static org.opengroup.osdu.workflow.model.WorkflowStatusType.getCompletedStatusTypes;
 
 @Slf4j
 @Service
@@ -74,7 +74,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
   private static final String KEY_AUTH_TOKEN = "authToken";
   private static final String KEY_DAG_NAME = "dagName";
   private static final Integer WORKFLOW_RUN_LIMIT = 100;
-  private static final String KEY_USER_ID = "userId";
+
   private final IWorkflowMetadataRepository workflowMetadataRepository;
 
   private final IWorkflowSystemMetadataRepository workflowSystemMetadataRepository;
@@ -83,11 +83,11 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
 
   private final DpsHeaders dpsHeaders;
 
-  private final IWorkflowEngineService workflowEngineService;
-
   private final AuditLogger auditLogger;
 
   private final WorkflowStatusPublisher statusPublisher;
+
+  private final IAirflowResolver airflowResolver;
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -162,7 +162,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
     if (getCompletedStatusTypes().contains(oldStatus)) {
       throw new WorkflowRunCompletedException(workflowName, runId);
     } else {
-      WorkflowRunResponse result = null;
+      WorkflowRunResponse result;
       if (getActiveStatusTypes().contains(status)) {
         result = buildWorkflowRunResponse(workflowRunRepository.updateWorkflowRun(
             buildUpdatedWorkflowRun(workflowRun, status, null)));
@@ -263,7 +263,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
       if (currentStatusType != workflowRun.getStatus() && currentStatusType != null) {
         if (getCompletedStatusTypes().contains(currentStatusType)) {
           // Setting EndTimeStamp with the timestamp of Instant when this API is called.
-          // Currently no EndTimeStamp is returned in the response from Workflow engine.
+          // Currently, no EndTimeStamp is returned in the response from Workflow engine.
           // Going forward with the endTimeStamp response from airflow the value can be changed.
           return workflowRunRepository.updateWorkflowRun(buildUpdatedWorkflowRun(workflowRun,
               currentStatusType, System.currentTimeMillis()));
@@ -283,7 +283,7 @@ public class WorkflowRunServiceImpl implements IWorkflowRunService {
    * @return IWorkflowEngineService
    */
   protected IWorkflowEngineService getWorkflowEngineService(WorkflowMetadata workflowMetadata) {
-    return workflowEngineService;
+    return airflowResolver.getWorkflowEngineService(workflowMetadata);
   }
 
   protected WorkflowStatusType getWorkflowStatusType(

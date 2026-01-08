@@ -1,6 +1,19 @@
 package org.opengroup.osdu.workflow.services;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,31 +31,16 @@ import org.opengroup.osdu.workflow.logging.AuditLogger;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
+import org.opengroup.osdu.workflow.provider.interfaces.IAirflowResolver;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowEngineService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowMetadataRepository;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowRunService;
 import org.opengroup.osdu.workflow.provider.interfaces.IWorkflowSystemMetadataRepository;
 import org.opengroup.osdu.workflow.service.WorkflowManagerServiceImpl;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * Tests for {@link WorkflowManagerServiceImpl}
- */
+/** Tests for {@link WorkflowManagerServiceImpl} */
 @ExtendWith(MockitoExtension.class)
-public class WorkflowManagerServiceTest {
+class WorkflowManagerServiceTest {
 
   private static final String WORKFLOW_NAME = "test_dag_name";
   private static final String INVALID_WORKFLOW_NAME = "invalid-workflow-name";
@@ -91,6 +89,9 @@ public class WorkflowManagerServiceTest {
   private IWorkflowEngineService workflowEngineService;
 
   @Mock
+  private IAirflowResolver airflowResolver;
+
+  @Mock
   private IWorkflowRunService workflowRunService;
 
   @Mock
@@ -112,6 +113,8 @@ public class WorkflowManagerServiceTest {
         .thenReturn(responseMetadata);
     final ArgumentCaptor<WorkflowEngineRequest> workflowEngineRequestArgumentCaptor =
         ArgumentCaptor.forClass(WorkflowEngineRequest.class);
+    when(airflowResolver.getWorkflowEngineService(workflowMetadataCaptor.capture()))
+        .thenReturn(workflowEngineService);
     doNothing().when(workflowEngineService)
         .createWorkflow(workflowEngineRequestArgumentCaptor.capture(),
             eq(request.getRegistrationInstructions()));
@@ -133,6 +136,8 @@ public class WorkflowManagerServiceTest {
         equalTo(request.getDescription()));
     assertThat(workflowMetadataCaptor.getValue().getCreatedBy(), equalTo(USER_EMAIL));
     assertThat(workflowMetadataCaptor.getValue().getVersion(), equalTo(SEED_VERSION));
+    assertThat(workflowMetadataCaptor.getAllValues().size(), equalTo(2));
+    assertThat(workflowMetadataCaptor.getAllValues().get(0), equalTo(workflowMetadataCaptor.getAllValues().get(1)));
   }
 
   @Test
@@ -148,6 +153,8 @@ public class WorkflowManagerServiceTest {
         .thenReturn(responseMetadata);
     final ArgumentCaptor<WorkflowEngineRequest> workflowEngineRequestArgumentCaptor =
         ArgumentCaptor.forClass(WorkflowEngineRequest.class);
+    when(airflowResolver.getWorkflowEngineService(workflowMetadataCaptor.capture()))
+        .thenReturn(workflowEngineService);
     doNothing().when(workflowEngineService)
         .createWorkflow(workflowEngineRequestArgumentCaptor.capture(),
             eq(request.getRegistrationInstructions()));
@@ -171,6 +178,8 @@ public class WorkflowManagerServiceTest {
         equalTo(request.getDescription()));
     assertThat(workflowMetadataCaptor.getValue().getCreatedBy(), equalTo(USER_EMAIL));
     assertThat(workflowMetadataCaptor.getValue().getVersion(), equalTo(SEED_VERSION));
+    assertThat(workflowMetadataCaptor.getAllValues().size(), equalTo(2));
+    assertThat(workflowMetadataCaptor.getAllValues().get(0), equalTo(workflowMetadataCaptor.getAllValues().get(1)));
   }
 
   @Test
@@ -322,6 +331,7 @@ public class WorkflowManagerServiceTest {
     doNothing().when(workflowMetadataRepository).deleteWorkflow(WORKFLOW_NAME);
     final ArgumentCaptor<WorkflowEngineRequest> workflowEngineRequestCaptor =
         ArgumentCaptor.forClass(WorkflowEngineRequest.class);
+    when(airflowResolver.getWorkflowEngineService(workflowMetadata)).thenReturn(workflowEngineService);
     doNothing().when(workflowEngineService).deleteWorkflow(workflowEngineRequestCaptor.capture());
 
     //when

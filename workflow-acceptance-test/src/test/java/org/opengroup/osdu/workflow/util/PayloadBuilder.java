@@ -8,6 +8,7 @@ import static org.opengroup.osdu.workflow.consts.DefaultVariable.OTHER_RELEVANT_
 import static org.opengroup.osdu.workflow.consts.DefaultVariable.getEnvironmentVariableOrDefaultKey;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
 import static org.opengroup.osdu.workflow.consts.TestConstants.DATA_PARTITION_ID_TENANT;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_NAME_EXTERNAL_AIRFLOW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +16,14 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.opengroup.osdu.workflow.consts.TestConstants;
 
 public class PayloadBuilder {
 
-	public static String buildWorkflowIdPayload(String workflowId) {
+  private static final String EXTERNAL_AIRFLOW_SECRET_REGISTRATION_INSTRUCTIONS_KEY = "externalAirflowSecret";
+  private static final String DAG_NAME = "dagName";
+
+  public static String buildWorkflowIdPayload(String workflowId) {
 		Map<String, Object> payload = new HashMap<>();
 
 		payload.put("WorkflowID", workflowId);
@@ -80,10 +85,24 @@ public class PayloadBuilder {
 		return new Gson().toJson(payload);
 	}
 
+  public static String buildCreateWorkflowValidPayloadExternalAirflow() {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("workflowName", WORKFLOW_NAME_EXTERNAL_AIRFLOW);
+    payload.put(
+        "registrationInstructions",
+        Map.of(
+            DAG_NAME, TestConstants.TEST_DAG_NAME_EXTERNAL_AIRFLOW,
+            EXTERNAL_AIRFLOW_SECRET_REGISTRATION_INSTRUCTIONS_KEY,
+                TestConstants.EXTERNAL_AIRFLOW_SECRET));
+    payload.put("description", "Test workflow record for integration tests(external Airflow).");
+
+    return new Gson().toJson(payload);
+  }
+
 	public static String buildCreateWorkflowPayloadWithIncorrectDag() {
 		Map<String, Object> payload = new HashMap<>();
 		Map<String, String> registrationInstructions = new HashMap<>();
-		registrationInstructions.put("dagName", "incorrectDagName");
+		registrationInstructions.put(DAG_NAME, "incorrectDagName");
 		payload.put("workflowName", CREATE_WORKFLOW_WORKFLOW_NAME);
 		payload.put("description", "Test workflow record for integration tests.");
 		payload.put("registrationInstructions", registrationInstructions);

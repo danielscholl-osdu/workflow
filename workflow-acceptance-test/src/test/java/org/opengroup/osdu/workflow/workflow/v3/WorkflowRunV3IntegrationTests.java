@@ -1,40 +1,44 @@
 /*
-  Copyright 2020 Google LLC
-  Copyright 2020 EPAM Systems, Inc
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+ *  Copyright 2020-2025 Google LLC
+ *  Copyright 2020-2025 EPAM Systems, Inc
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
 package org.opengroup.osdu.workflow.workflow.v3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
-import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-import static org.opengroup.osdu.workflow.consts.TestConstants.GET_DETAILS_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.EXTERNAL_AIRFLOW_TESTS_ENABLED;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_NAME_EXTERNAL_AIRFLOW;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_FINISHED;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_QUEUED;
 import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_RUNNING;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_STATUS_TYPE_SUCCESS;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayloadWithGivenRunId;
-import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidPayloadStatus;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunInvalidRequestPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildUpdateWorkflowRunValidPayloadWithGivenStatus;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.deleteCreatedWorkflows;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.sendWorkflowRunFinishedUpdateRequestToCreatedWorkflowRuns;
+import static org.opengroup.osdu.workflow.util.WorkflowApiHelper.waitForCreatedWorkflowRunsToComplete;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,117 +48,62 @@ import java.util.Optional;
 import javax.ws.rs.HttpMethod;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.opengroup.osdu.workflow.util.TestExternalAirflow;
 import org.opengroup.osdu.workflow.util.v3.TestBase;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.ClientResponse;
 
 public final class WorkflowRunV3IntegrationTests extends TestBase {
-	private static final String INVALID_PREFIX = "backfill";
-	private static final Integer INVALID_LIMIT = 1000;
 
-	/** Old methods. Needs to be removed **/
-	private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-	private final List<String> activeWorkflowStatusTypes = Arrays.asList("submitted", "running");
+	private static final String FINISHED = "finished";
+
+	@BeforeAll
+  static void beforeAll() throws Exception {
+    HTTPClient httpClient = new HTTPClient();
+    Map<String, String> headers = httpClient.getCommonHeader();
+    deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns(CREATE_WORKFLOW_WORKFLOW_NAME, httpClient, headers);
+    if (EXTERNAL_AIRFLOW_TESTS_ENABLED) {
+      deleteWorkflowAndSendFinishedUpdateRequestToWorkflowRuns(WORKFLOW_NAME_EXTERNAL_AIRFLOW, httpClient, headers);
+    }
+  }
 
 	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		this.client = new HTTPClient();
 		this.headers = client.getCommonHeader();
-
-		try {
-			deleteTestWorkflows(CREATE_WORKFLOW_WORKFLOW_NAME);
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 	@AfterEach
 	@Override
 	public void tearDown() throws Exception {
-		waitForWorkflowRunsToComplete();
-		deleteAllTestWorkflowRecords();
+    this.headers = client.getCommonHeader();
+    waitForCreatedWorkflowRunsToComplete(createdWorkflowRuns, client, headers);
+    sendWorkflowRunFinishedUpdateRequestToCreatedWorkflowRuns(createdWorkflowRuns, client, headers);
+    deleteCreatedWorkflows(createdWorkflowsWorkflowNames, client, headers);
 		this.client = null;
 		this.headers = null;
 	}
 
-	private void deleteAllTestWorkflowRecords() {
-		createdWorkflows.stream().forEach(c -> {
-			try {
-				deleteTestWorkflows(c.get(WORKFLOW_NAME_FIELD));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
-	}
-
-	@Override
-	protected void deleteTestWorkflows(String workflowName) throws Exception {
-
-		List<String> runIds = getWorkflowRuns(workflowName);
-
-		for (String runId : runIds) {
-			sendWorkflowRunFinishedUpdateRequest(workflowName, runId);
-		}
-
-		String url = CREATE_WORKFLOW_URL + "/" + workflowName;
-		sendDeleteRequest(url);
-	}
-
 	@Test
 	public void triggerWorkflowRun_should_returnSuccessAndCompleteExecutionWithImpersonationFlow() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		headers.put("on-behalf-of", "impersonatetestmember@test.com");
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		assertTrue(Objects.nonNull(workflowRunInfo.get("submittedBy")));
 
 		Optional<String> userFromEntitlements = getUserFromEntitlements(headers);
 		assertEquals(userFromEntitlements.get(), workflowRunInfo.get("submittedBy"));
-		createdWorkflowRuns.add(workflowRunInfo);
-	}
-
-	protected ClientResponse sendWorkflowRunFinishedUpdateRequest(String workflowName, String runId) throws Exception {
-		return client.send(HttpMethod.PUT, String.format(GET_DETAILS_WORKFLOW_RUN_URL, workflowName, runId),
-				buildUpdateWorkflowPayload(), headers, client.getAccessToken());
-	}
-
-	private List<String> getWorkflowRuns(String workflowName) throws Exception {
-		ClientResponse response = client.send(HttpMethod.GET, String.format(CREATE_WORKFLOW_RUN_URL, workflowName),
-				null, headers, client.getAccessToken());
-
-		String respBody = response.getEntity(String.class);
-
-		JsonElement responseDataArr = gson.fromJson(respBody, JsonElement.class);
-		ArrayList<String> runIds = new ArrayList<>();
-
-		if (responseDataArr instanceof JsonArray) {
-
-			for (JsonElement responseData : (JsonArray) responseDataArr) {
-				String workflowStatus = responseData.getAsJsonObject().get("status").getAsString();
-
-				if (activeWorkflowStatusTypes.contains(workflowStatus)) {
-					runIds.add(responseData.getAsJsonObject().get("runId").getAsString());
-				}
-			}
-		}
-
-		return runIds;
 	}
 
 	protected Optional<String> getUserFromEntitlements(Map<String, String> headers) throws Exception {
@@ -195,16 +144,24 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getWorkflowRunById_should_returnSuccess_when_givenValidRequest() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET, String.format(GET_WORKFLOW_RUN_URL,
 				CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)), null, headers,
+				client.getAccessToken());
+
+		assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
+	}
+
+  @TestExternalAirflow
+  void getWorkflowRunById_should_returnSuccess_when_givenValidRequestOnExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+		ClientResponse response = client.send(HttpMethod.GET, String.format(GET_WORKFLOW_RUN_URL,
+				WORKFLOW_NAME_EXTERNAL_AIRFLOW, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)), null, headers,
 				client.getAccessToken());
 
 		assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
@@ -220,9 +177,7 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		ClientResponse response = client.send(HttpMethod.GET,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID), null,
@@ -231,15 +186,22 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
 	}
 
+  @TestExternalAirflow
+  public void getWorkflowRunById_should_returnNotFound_when_givenInvalidWorkflowRunIdOnExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+
+    ClientResponse response = client.send(HttpMethod.GET,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW, INVALID_WORKFLOW_RUN_ID), null,
+        headers, client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
 	@Test
 	public void getWorkflowRunById_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET, String.format(GET_WORKFLOW_RUN_URL,
 				CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)), null, headers, null);
@@ -249,13 +211,9 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getWorkflowRunById_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		ClientResponse response = client
 				.send(HttpMethod.GET,
@@ -268,13 +226,9 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getWorkflowRunById_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
@@ -295,14 +249,18 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 	@Test
 	public void triggerWorkflowRun_should_returnSuccessAndCompleteExecution_when_givenValidTriggerRequest()
 			throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
-	}
+    createAndTrackWorkflowRun();
+  }
+
+  @TestExternalAirflow
+  public void triggerWorkflowRun_should_returnSuccessAndCompleteExecution_when_givenValidTriggerRequestOnExternalAirflow()
+      throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    createAndTrackWorkflowRunExternalAirflow();
+  }
+
 
 	/*
 	 * after switch to airflow 2.0 stable API, this has to be marked as ignore or
@@ -312,13 +270,9 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 	@Test
 	@EnabledIfEnvironmentVariable(named = "OSDU_AIRFLOW_VERSION2", matches = "false")
 	public void triggerWorkflowRun_should_returnBadRequest_when_givenDuplicateRunId() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(
 				workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
@@ -339,13 +293,9 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 	@EnabledIfEnvironmentVariable(named = "OSDU_AIRFLOW_VERSION2", matches = "true")
 	public void triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunId_with_airflow2_stable_API()
 			throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(
 				workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
@@ -356,6 +306,23 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 		assertEquals(org.apache.http.HttpStatus.SC_CONFLICT, duplicateRunIdResponse.getStatus());
 	}
+
+  @TestExternalAirflow
+  public void triggerWorkflowRun_should_returnConflict_when_givenDuplicateRunIdOnExternalAirflow()
+      throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    String duplicateRunIdPayload = buildCreateWorkflowRunValidPayloadWithGivenRunId(
+        workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    ClientResponse duplicateRunIdResponse = client.send(HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW), duplicateRunIdPayload, headers,
+        client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_CONFLICT, duplicateRunIdResponse.getStatus());
+  }
 
 	@Test
 	public void triggerWorkflowRun_should_return_WorkflowNotFound_when_givenInvalidWorkflowName() throws Exception {
@@ -368,9 +335,7 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void triggerWorkflowRun_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		ClientResponse response = client.send(HttpMethod.POST,
 				String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
@@ -381,9 +346,7 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void triggerWorkflowRun_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		ClientResponse response = client.send(HttpMethod.POST,
 				String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME),
@@ -393,9 +356,7 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void triggerWorkflowRun_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
 		Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
@@ -413,33 +374,40 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getAllRunInstances_should_returnSuccess_when_givenValidRequest() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET,
 				String.format(CREATE_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME), null, headers,
 				client.getAccessToken());
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-		workflowResponseBody = response.getEntity(String.class);
+		String workflowResponseBody = response.getEntity(String.class);
 		List<Object> list = new ObjectMapper().readValue(workflowResponseBody, ArrayList.class);
 		assertTrue(!list.isEmpty());
 	}
 
+  @TestExternalAirflow
+  public void getAllRunInstances_should_returnSuccess_when_givenValidRequestOnExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    createAndTrackWorkflowRunExternalAirflow();
+
+    ClientResponse response = client.send(HttpMethod.GET,
+        String.format(CREATE_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW), null, headers,
+        client.getAccessToken());
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+    String workflowResponseBody = response.getEntity(String.class);
+    List<Object> list = new ObjectMapper().readValue(workflowResponseBody, ArrayList.class);
+    assertTrue(!list.isEmpty());
+  }
+
+
 	@Test
 	public void getAllRunInstances_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET,
 				String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME), null, headers, client.getAccessToken());
@@ -448,13 +416,8 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getAllRunInstances_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET,
 				String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME), null, headers,
@@ -464,13 +427,8 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getAllRunInstances_should_returnForbidden_when_notGivenAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.GET,
 				String.format(CREATE_WORKFLOW_RUN_URL, INVALID_WORKFLOW_NAME), null, headers, null);
@@ -481,13 +439,8 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void getAllRunInstances_should_returnForbidden_when_givenInvalidPartition() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    createAndTrackWorkflowRun();
 
 		Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
@@ -505,13 +458,8 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusRunning() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String workflowRunStatus = WORKFLOW_STATUS_TYPE_RUNNING;
 
@@ -530,18 +478,60 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		String obtainedWorkflowRunStatus = getWorkflowRunStatus(CREATE_WORKFLOW_WORKFLOW_NAME,
 				workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
 
-		assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
+    // Check not only for 'running' but also for 'success' and 'queued' as Airflow may return either
+    List<String> expectedStatuses =
+        List.of(
+            WORKFLOW_STATUS_TYPE_RUNNING,
+            WORKFLOW_STATUS_TYPE_SUCCESS,
+            WORKFLOW_STATUS_TYPE_QUEUED);
+    assertTrue(
+        expectedStatuses.contains(obtainedWorkflowRunStatus),
+        "Expected status to be one of "
+            + expectedStatuses
+            + ", but got: "
+            + obtainedWorkflowRunStatus);
 	}
+
+  @TestExternalAirflow
+  void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusRunning_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_RUNNING;
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus), headers, client.getAccessToken());
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class),
+        HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD), WORKFLOW_STATUS_TYPE_RUNNING);
+
+    String obtainedWorkflowRunStatus = getWorkflowRunStatus(WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+        workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    // Check not only for 'running' but also for 'success' and 'queued' as Airflow may return either
+    List<String> expectedStatuses =
+        List.of(
+            WORKFLOW_STATUS_TYPE_RUNNING,
+            WORKFLOW_STATUS_TYPE_SUCCESS,
+            WORKFLOW_STATUS_TYPE_QUEUED);
+    assertTrue(
+        expectedStatuses.contains(obtainedWorkflowRunStatus),
+        "Expected status to be one of "
+            + expectedStatuses
+            + ", but got: "
+            + obtainedWorkflowRunStatus);
+  }
 
 	@Test
 	public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusFinished() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
 
@@ -563,15 +553,35 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
 	}
 
+  @TestExternalAirflow
+  public void updateWorkflowRunStatus_should_returnSuccess_when_givenValidRequest_StatusFinished_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus), headers, client.getAccessToken());
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class),
+        HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
+    assertEquals(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(WORKFLOW_STATUS_TYPE_FINISHED, updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD));
+
+    String obtainedWorkflowRunStatus = getWorkflowRunStatus(WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+        workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+
+    assertEquals(workflowRunStatus, obtainedWorkflowRunStatus);
+  }
+
 	@Test
 	public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidStatus() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.PUT,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME,
@@ -581,15 +591,23 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
 	}
 
+  @TestExternalAirflow
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidStatus_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunInvalidPayloadStatus(), headers, client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
 	@Test
 	public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidRequestPayload() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		ClientResponse response = client.send(HttpMethod.PUT,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME,
@@ -599,15 +617,23 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
 	}
 
+  @TestExternalAirflow
+  public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenInvalidRequestPayload_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunInvalidRequestPayload(), headers, client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
 	@Test
 	public void updateWorkflowRunStatus_should_returnBadRequest_when_GivenCompletedWorkflowRun() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
 
@@ -631,15 +657,37 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
 	}
 
+  @TestExternalAirflow
+  void updateWorkflowRunStatus_should_returnBadRequest_when_GivenCompletedWorkflowRun_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRunExternalAirflow();
+
+    String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus), headers, client.getAccessToken());
+
+    Map<String, String> updateWorkflowRunInfo = new ObjectMapper().readValue(response.getEntity(String.class),
+        HashMap.class);
+
+    assertEquals(org.apache.http.HttpStatus.SC_OK, response.getStatus(), response.toString());
+    assertEquals(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD), updateWorkflowRunInfo.get(WORKFLOW_RUN_ID_FIELD));
+    assertEquals(WORKFLOW_STATUS_TYPE_FINISHED, updateWorkflowRunInfo.get(WORKFLOW_RUN_STATUS_FIELD));
+
+    response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW,
+            workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD)),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus), headers, client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_BAD_REQUEST, response.getStatus());
+  }
+
 	@Test
 	public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowName() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
-
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
 		String workflowRunStatus = WORKFLOW_STATUS_TYPE_FINISHED;
 
@@ -652,15 +700,10 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowRunId() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
+    createAndTrackWorkflowRun();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
-
-		String workflowRunStatus = "finished";
+		String workflowRunStatus = FINISHED;
 
 		ClientResponse response = client.send(HttpMethod.PUT,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME, INVALID_WORKFLOW_RUN_ID),
@@ -669,17 +712,26 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 		assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
 	}
 
+  @TestExternalAirflow
+  void updateWorkflowRunStatus_should_returnNotFound_when_givenInvalidWorkflowRunId_onExternalAirflow() throws Exception {
+    createAndTrackWorkflowExternalAirflow();
+    createAndTrackWorkflowRunExternalAirflow();
+
+    String workflowRunStatus = FINISHED;
+
+    ClientResponse response = client.send(HttpMethod.PUT,
+        String.format(GET_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW, INVALID_WORKFLOW_RUN_ID),
+        buildUpdateWorkflowRunValidPayloadWithGivenStatus(workflowRunStatus), headers, client.getAccessToken());
+
+    assertEquals(org.apache.http.HttpStatus.SC_NOT_FOUND, response.getStatus());
+  }
+
 	@Test
 	public void updateWorkflowRunStatus_should_returnUnauthorized_when_notGivenAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
-
-		String workflowRunStatus = "finished";
+		String workflowRunStatus = FINISHED;
 
 		ClientResponse response = client.send(HttpMethod.PUT,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME,
@@ -692,15 +744,10 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void updateWorkflowRunStatus_should_returnUnauthorized_when_givenNoDataAccessToken() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
-
-		String workflowRunStatus = "finished";
+		String workflowRunStatus = FINISHED;
 
 		ClientResponse response = client.send(HttpMethod.PUT,
 				String.format(GET_WORKFLOW_RUN_URL, CREATE_WORKFLOW_WORKFLOW_NAME,
@@ -713,15 +760,10 @@ public final class WorkflowRunV3IntegrationTests extends TestBase {
 
 	@Test
 	public void updateWorkflowRunStatus_should_returnUnauthorized_when_givenInvalidPartition() throws Exception {
-		String workflowResponseBody = createWorkflow();
-		Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
-		createdWorkflows.add(workflowInfo);
+    createAndTrackWorkflow();
+    Map<String, String> workflowRunInfo = createAndTrackWorkflowRun();
 
-		String workflowRunResponseBody = createWorkflowRun();
-		Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
-		createdWorkflowRuns.add(workflowRunInfo);
-
-		String workflowRunStatus = "finished";
+		String workflowRunStatus = FINISHED;
 		Map<String, String> headersWithInvalidPartition = new HashMap<>(headers);
 
 		ClientResponse response = client.send(HttpMethod.PUT,

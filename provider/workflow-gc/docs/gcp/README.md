@@ -27,6 +27,8 @@ Defined in default application property file but possible to override:
 | `MANAGEMENT_ENDPOINTS_WEB_BASE`    | ex `/`                                        | Web base for Actuator                                                                                                                                  | no         | -                                                            |
 | `MANAGEMENT_SERVER_PORT`           | ex `8081`                                     | Port for Actuator                                                                                                                                      | no         | -                                                            |
 | `DESTINATION_RESOLVER`             | ex `partition`                                | Destination resolver is getting product properties from the Partition Service                                                                          | no         | -                                                            |
+| `SECRET_API`                       | ex `http://secret/api/secret/v2`              | Secret service API endpoint                                                                                                                            | no         | output of infrastructure deployment                          |
+| `GROUP_ID`                         | ex `group`                                    | The id of the groups is created. The default (and recommended for `jdbc`) value is `group`                                                             | no         | -                                                            |
 | `OTEL_JAVAAGENT_ENABLED`           | ex `true` or `false`                          | `true` - OpenTelemetry Java agent enabled, `false` - disabled                                                                                          | no         |                                                              |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`      | ex `http://127.0.0.1:4318`                    | OpenTelemetry collector endpoint                                                                                                                       | no         |                                                              |
 
@@ -90,9 +92,11 @@ It can be overridden by:
 
 TBD
 
-| Required roles |
-|----------------|
-| -              |
+| Required roles            |
+|---------------------------|
+| service.entitlements.user |
+| service.secret.viewer     |
+| workflow.secret.viewers   |
 
 ## Monitoring
 ### OpenTelemetry Integration

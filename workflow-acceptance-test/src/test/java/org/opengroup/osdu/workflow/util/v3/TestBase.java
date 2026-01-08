@@ -1,6 +1,6 @@
 /*
-  Copyright 2020 Google LLC
-  Copyright 2020 EPAM Systems, Inc
+  Copyright 2020-2025 Google LLC
+  Copyright 2020-2025 EPAM Systems, Inc
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,37 +22,30 @@ import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_SYSTEM_WOR
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_RUN_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_URL;
 import static org.opengroup.osdu.workflow.consts.TestConstants.CREATE_WORKFLOW_WORKFLOW_NAME;
-import static org.opengroup.osdu.workflow.consts.TestConstants.FINISHED_WORKFLOW_RUN_STATUSES;
 import static org.opengroup.osdu.workflow.consts.TestConstants.GET_WORKFLOW_RUN_URL;
+import static org.opengroup.osdu.workflow.consts.TestConstants.WORKFLOW_NAME_EXTERNAL_AIRFLOW;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowRunValidPayload;
 import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayload;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.HttpMethod;
-
-import org.opengroup.osdu.workflow.util.HTTPClient;
-import org.springframework.http.HttpStatus;
+import static org.opengroup.osdu.workflow.util.PayloadBuilder.buildCreateWorkflowValidPayloadExternalAirflow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.ClientResponse;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
+import org.opengroup.osdu.workflow.util.HTTPClient;
+import org.springframework.http.HttpStatus;
 
 @Slf4j
 public abstract class TestBase {
 	protected HTTPClient client;
 	protected Map<String, String> headers;
-	protected List<Map<String, String>> createdWorkflows = new ArrayList<>();
-	protected List<Map<String, String>> createdWorkflowRuns = new ArrayList<>();
+	protected List<String> createdWorkflowsWorkflowNames = new ArrayList<>();
+  protected List<CreatedWorkflowRun> createdWorkflowRuns = new ArrayList<>();
 	protected static final String WORKFLOW_NAME_FIELD = "workflowName";
 	protected static final String WORKFLOW_ID_FIELD = "workflowId";
 	protected static final String WORKFLOW_RUN_ID_FIELD = "runId";
@@ -72,6 +65,13 @@ public abstract class TestBase {
 		return response.getEntity(String.class);
 	}
 
+  protected String createWorkflowExternalAirflow() throws Exception {
+    ClientResponse response = client.send(HttpMethod.POST, CREATE_WORKFLOW_URL,
+        buildCreateWorkflowValidPayloadExternalAirflow(), headers, client.getAccessToken());
+    assertEquals(HttpStatus.OK.value(), response.getStatus(), response.toString());
+    return response.getEntity(String.class);
+  }
+
 	protected String createSystemWorkflow() throws Exception {
 		ClientResponse response = client.send(HttpMethod.POST, CREATE_SYSTEM_WORKFLOW_URL,
 				buildCreateWorkflowValidPayload(), headers, client.getAccessToken());
@@ -87,75 +87,21 @@ public abstract class TestBase {
 		return response.getEntity(String.class);
 	}
 
+  protected String createWorkflowRunExternalAirflow() throws Exception {
+    ClientResponse response = client.send(HttpMethod.POST,
+        String.format(CREATE_WORKFLOW_RUN_URL, WORKFLOW_NAME_EXTERNAL_AIRFLOW),
+        buildCreateWorkflowRunValidPayload(), headers, client.getAccessToken());
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    return response.getEntity(String.class);
+  }
+
 	protected ClientResponse sendDeleteRequest(String url) throws Exception {
 		return client.send(HttpMethod.DELETE, url, null, headers, client.getAccessToken());
-	}
-
-	protected void deleteTestWorkflows(String workflowName) throws Exception {
-		String url = CREATE_WORKFLOW_URL + "/" + workflowName;
-		sendDeleteRequest(url);
 	}
 
 	protected void deleteTestSystemWorkflows(String workflowName) throws Exception {
 		String url = CREATE_SYSTEM_WORKFLOW_URL + "/" + workflowName;
 		sendDeleteRequest(url);
-	}
-
-	protected void waitForWorkflowRunsToComplete(List<Map<String, String>> createdWorkflowRuns,
-			Set<String> completedWorkflowRunIds) throws Exception {
-		for (Map<String, String> createdWorkflow : createdWorkflowRuns) {
-			String workflowName = CREATE_WORKFLOW_WORKFLOW_NAME;
-			String workflowRunId = createdWorkflow.get(WORKFLOW_RUN_ID_FIELD);
-			if (!completedWorkflowRunIds.contains(workflowRunId)) {
-				String workflowRunStatus;
-				try {
-					workflowRunStatus = getWorkflowRunStatus(workflowName, workflowRunId);
-				} catch (Exception e) {
-					throw new RetryException(e.getMessage());
-				}
-				if (FINISHED_WORKFLOW_RUN_STATUSES.contains(workflowRunStatus)) {
-					completedWorkflowRunIds.add(workflowRunId);
-				} else {
-					throw new RetryException(String.format("Unexpected status %s received for workflow run id %s",
-							workflowRunStatus, workflowRunId));
-				}
-			}
-		}
-	}
-
-	public <T> T executeWithWaitAndRetry(Callable<T> callable, int noOfRetries, long timeToWait, TimeUnit timeUnit)
-			throws Exception {
-		long totalTimeToWaitInMillis = timeUnit.toMillis(timeToWait * noOfRetries);
-		if (totalTimeToWaitInMillis < 1000) {
-			throw new RuntimeException("Minimum wait time should be at least 1 second");
-		}
-		long waitTimeToAdd = totalTimeToWaitInMillis / noOfRetries;
-
-		long elapsedTime = 0;
-		long nextRetryTime = elapsedTime + waitTimeToAdd;
-		while (elapsedTime < totalTimeToWaitInMillis) {
-			long startTime = System.currentTimeMillis();
-			try {
-				return callable.call();
-			} catch (RetryException e) {
-				log.info("Received RetryException: {}. Will wait and retry", e.getMessage());
-			} catch (Exception e) {
-				log.error("Error calling callable", e);
-				throw e;
-			}
-			long completedTime = System.currentTimeMillis();
-
-			elapsedTime += (completedTime - startTime);
-			if (elapsedTime > nextRetryTime) {
-				nextRetryTime = (elapsedTime + waitTimeToAdd);
-			} else {
-				log.info("Waiting for {} seconds", (nextRetryTime - elapsedTime) / 1000);
-				Thread.sleep(nextRetryTime - elapsedTime);
-				elapsedTime = nextRetryTime;
-				nextRetryTime += waitTimeToAdd;
-			}
-		}
-		throw new Exception("Execution failed even after retries");
 	}
 
 	public String getWorkflowRunStatus(String workflowName, String workflowRunId) throws Exception {
@@ -174,23 +120,43 @@ public abstract class TestBase {
 		}
 	}
 
-	protected void waitForWorkflowRunsToComplete() throws Exception {
-		try {
-			Set<String> completedWorkflowRunIds = new HashSet<>();
-			if (createdWorkflowRuns.size() != completedWorkflowRunIds.size()) {
-				executeWithWaitAndRetry(() -> {
-					waitForWorkflowRunsToComplete(createdWorkflowRuns, completedWorkflowRunIds);
-					return null;
-				}, 20, 15, TimeUnit.SECONDS);
-			}
-		} finally {
-			Long integrationTestEndTime = System.currentTimeMillis();
-			log.info("Completed integration test at {}", integrationTestEndTime);
-		}
-	}
-
 	protected Map<String, String> getWorkflowInfoFromCreateWorkflowResponseBody(String responseBody)
 			throws JsonProcessingException {
 		return new ObjectMapper().readValue(responseBody, HashMap.class);
 	}
+
+  protected void createAndTrackWorkflow() throws Exception {
+    String workflowResponseBody = createWorkflow();
+    trackWorkflow(workflowResponseBody);
+  }
+
+  protected void createAndTrackWorkflowExternalAirflow() throws Exception {
+    String workflowResponseBody = createWorkflowExternalAirflow();
+    trackWorkflow(workflowResponseBody);
+  }
+
+  protected void trackWorkflow(String workflowResponseBody) throws Exception {
+    Map<String, String> workflowInfo = new ObjectMapper().readValue(workflowResponseBody, HashMap.class);
+    createdWorkflowsWorkflowNames.add(workflowInfo.get(WORKFLOW_NAME_FIELD));
+  }
+
+  protected Map<String, String> createAndTrackWorkflowRun() throws Exception {
+    String workflowRunResponseBody = createWorkflowRun();
+    return trackWorkflowRun(CREATE_WORKFLOW_WORKFLOW_NAME, workflowRunResponseBody);
+  }
+
+  protected Map<String, String> createAndTrackWorkflowRunExternalAirflow() throws Exception {
+    String workflowRunResponseBody = createWorkflowRunExternalAirflow();
+    return trackWorkflowRun(WORKFLOW_NAME_EXTERNAL_AIRFLOW, workflowRunResponseBody);
+  }
+
+  private Map<String, String> trackWorkflowRun(String workflowName, String workflowRunResponseBody) throws JsonProcessingException {
+    Map<String, String> workflowRunInfo = new ObjectMapper().readValue(workflowRunResponseBody, HashMap.class);
+    createdWorkflowRuns.add(
+        CreatedWorkflowRun.builder()
+            .workflowName(workflowName)
+            .workflowRunId(workflowRunInfo.get(WORKFLOW_RUN_ID_FIELD))
+            .build());
+    return workflowRunInfo;
+  }
 }

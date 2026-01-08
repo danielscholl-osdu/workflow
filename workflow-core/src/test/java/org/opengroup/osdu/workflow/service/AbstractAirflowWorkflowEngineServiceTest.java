@@ -32,15 +32,10 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opengroup.osdu.core.common.model.http.AppException;
-import org.opengroup.osdu.workflow.model.AirflowGetDAGRunStatus;
-import org.opengroup.osdu.workflow.model.ClientResponse;
-import org.opengroup.osdu.workflow.model.TriggerWorkflowResponse;
-import org.opengroup.osdu.workflow.model.WorkflowEngineRequest;
-import org.opengroup.osdu.workflow.model.WorkflowStatusType;
+import org.opengroup.osdu.workflow.model.*;
 import org.opengroup.osdu.workflow.provider.interfaces.IAirflowApiClient;
 import org.springframework.http.HttpStatus;
 
