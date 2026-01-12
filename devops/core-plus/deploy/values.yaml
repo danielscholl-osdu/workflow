@@ -1,0 +1,53 @@
+global:
+  domain: ""
+  useHttps: true
+  limitsEnabled: true
+  dataPartitionId: ""
+
+data:
+  #Configmap variables
+  logLevel: "ERROR"
+  partitionHost: "http://partition"
+  entitlementsHost: "http://entitlements"
+  schemaHost: "http://schema"
+  legalHost: "http://legal"
+  osduAirflowUrl: "http://airflow:8080"
+  sharedTenantName: ""
+  composerClient: "IAAP"
+  workflowHost: "http://workflow"
+  dagNames:
+    - csv_ingestion
+    - Energistics_xml_ingest
+    - manifest_ingestion
+    - Osdu_ingest
+    - Segy_to_vds_conversion_sdms
+    - Segy_to_zgy_conversion
+    - Osdu_ingest_by_reference
+  # Deployment variables
+  requestsCpu: "5m"
+  requestsMemory: "650Mi"
+  limitsCpu: "1"
+  limitsMemory: "3G"
+  serviceAccountName: "workflow"
+  bootstrapImage: ""
+  bootstrapServiceAccountName: ""
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+
+conf:
+  configmap: "workflow-config"
+  appName: "workflow"
+  workflowKeycloakSecretName: "workflow-keycloak-secret"
+  workflowAirflowSecretName: "workflow-airflow-secret"
+  workflowPostgresSecretName: "workflow-postgres-secret"
+  rabbitmqSecretName: "rabbitmq-secret"
+  bootstrapSecretName: "datafier-secret"
+  replicas: 1
+
+istio:
+  proxyCPU: "5m"
+  proxyCPULimit: "200m"
+  proxyMemory: "50Mi"
+  proxyMemoryLimit: "256Mi"
+  bootstrapProxyCPU: "5m"
+  bootstrapProxyCPULimit: "50m"
