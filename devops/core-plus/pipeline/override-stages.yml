@@ -1,14 +1,17 @@
 variables:
   CIMPL_SERVICE: workflow
   CIMPL_ENABLE_BOOTSTRAP: "true"
-
-cimpl-test:
-  variables:
-    TEST_DAG_NAME: "airflow_monitoring"
-    FINISHED_WORKFLOW_ID: "79447ca3-e313-41e0-b8a5-2ea0cbec24c5"
-    WORKFLOW_HOST: "https://osdu.dev1.osdu-cimpl.opengroup.org/api/workflow/"
+  DISABLE_INTEGRATION_TEST: true
 
 cimpl-acceptance-test:
+  variables:
+    EXTERNAL_AIRFLOW_TESTS_ENABLED: "true"
+    TEST_DAG_NAME_EXTERNAL_AIRFLOW: "airflow_monitoring"
+    EXTERNAL_AIRFLOW_SECRET: "airflow-workflow-tests"
+
+#dev2 jobs
+
+cimpl-dev2-acceptance-test:
   variables:
     EXTERNAL_AIRFLOW_TESTS_ENABLED: "true"
     TEST_DAG_NAME_EXTERNAL_AIRFLOW: "airflow_monitoring"
