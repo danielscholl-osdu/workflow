@@ -1,5 +1,6 @@
 package org.opengroup.osdu.workflow.api;
 
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -57,6 +58,12 @@ public class WorkflowManagerApi {
       @ApiResponse(responseCode = "503", description = "Service Unavailable",  content = {@Content(schema = @Schema(implementation = AppError.class ))})
   })
   @PostMapping
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = CreateWorkflowRequest.class),
+          examples = @ExampleObject(name = "ExternalWorkflowExample", ref = "#/components/examples/ExternalWorkflowExample")
+      ))
   @PreAuthorize("@authorizationFilter.hasPermission('" + WorkflowRole.ADMIN + "')")
   public WorkflowMetadata create(@RequestBody @Valid final CreateWorkflowRequest request) {
     return workflowManagerService.createWorkflow(request);

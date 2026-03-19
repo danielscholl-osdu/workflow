@@ -3,6 +3,7 @@ package org.opengroup.osdu.workflow.swagger;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import java.util.Map;
 import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,6 @@ public class SwaggerConfiguration {
 
     @Bean
     public OpenAPI customOpenAPI() {
-
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
@@ -39,7 +40,23 @@ public class SwaggerConfiguration {
                 .name("Authorization");
         final String securitySchemeName = "Authorization";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(securitySchemeName);
-        Components components = new Components().addSecuritySchemes(securitySchemeName, securityScheme);
+
+        Example externalWorkflowExample = new Example().value(
+            java.util.Map.of(
+                "workflowName", "external_airflow_example",
+                "description",
+                "This is an example of creating a workflow that executes on external Airflow. "
+                    + "Configuration should be provided via Secret service. "
+                    + "Details in the README: https://community.opengroup.org/osdu/platform/data-flow/ingestion/ingestion-workflow/-/tree/master#external-airflow-support",
+                "registrationInstructions", Map.of(
+                    "dagName", "airflow_monitoring",
+                    "externalAirflowSecret", "external_airflow_secret")
+            )
+        );
+
+        Components components = new Components()
+            .addExamples("ExternalWorkflowExample", externalWorkflowExample)
+            .addSecuritySchemes(securitySchemeName, securityScheme);
 
         OpenAPI openAPI = new OpenAPI()
                 .addSecurityItem(securityRequirement)
