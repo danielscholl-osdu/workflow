@@ -415,6 +415,33 @@
           </generateGitPropertiesFilename>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.2</version>
+        <dependencies>
+          <!-- dependencies to artifact contains rule implementation -->
+          <dependency>
+            <groupId>org.opengroup.osdu</groupId>
+            <artifactId>osdu-enforcer-rules</artifactId>
+            <version>trusted-test-enforce-rule-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <phase>install</phase>
+            <configuration>
+              <rules>
+                <enforceTestExecution></enforceTestExecution>
+              </rules>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
