@@ -430,10 +430,12 @@
         <executions>
           <execution>
             <id>enforce</id>
-            <phase>install</phase>
+            <phase>verify</phase>
             <configuration>
               <rules>
-                <enforceTestExecution></enforceTestExecution>
+                <enforceTestExecution/>
+                <banDuplicatePomDependencyVersions/>
+                <reactorModuleConvergence/>
               </rules>
             </configuration>
             <goals>
@@ -451,6 +453,13 @@
       <url>${repo.releases.url}</url>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>${repo.releases.id}</id>
+      <url>${repo.releases.url}</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <distributionManagement>
     <repository>
