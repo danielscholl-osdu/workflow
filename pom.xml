@@ -420,11 +420,10 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.6.2</version>
         <dependencies>
-          <!-- dependencies to artifact contains rule implementation -->
           <dependency>
             <groupId>org.opengroup.osdu</groupId>
             <artifactId>osdu-enforcer-rules</artifactId>
-            <version>support-disabled-class-SNAPSHOT</version>
+            <version>1.0.1</version>
           </dependency>
         </dependencies>
         <executions>
