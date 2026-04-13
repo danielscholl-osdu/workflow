@@ -46,6 +46,7 @@ import org.opengroup.osdu.core.common.model.http.DpsHeaders;
 import org.opengroup.osdu.core.common.provider.interfaces.IAuthorizationService;
 import org.opengroup.osdu.workflow.exception.ResourceConflictException;
 import org.opengroup.osdu.workflow.exception.WorkflowNotFoundException;
+import org.opengroup.osdu.workflow.exception.handler.ConflictApiError;
 import org.opengroup.osdu.workflow.model.CreateWorkflowRequest;
 import org.opengroup.osdu.workflow.model.WorkflowMetadata;
 import org.opengroup.osdu.workflow.model.WorkflowRole;
@@ -210,9 +211,9 @@ public class WorkflowManagerMvcTest {
     verify(authorizationService, times(1)).authorizeAny(any(), eq(WorkflowRole.ADMIN));
     verify(dpsHeaders).getAuthorization();
     verify(dpsHeaders).getPartitionId();
-    final JsonNode response =
-        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), JsonNode.class);
-    Assertions.assertEquals(EXISTING_WORKFLOW_ID, response.get("conflictId").asText());
+    final ConflictApiError response =
+        mapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ConflictApiError.class);
+    Assertions.assertEquals(EXISTING_WORKFLOW_ID, response.getConflictId());
   }
 
   @Test
