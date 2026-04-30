@@ -17,12 +17,16 @@
 package org.opengroup.osdu.workflow.exception.handler;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiError {
 
   private HttpStatus status;

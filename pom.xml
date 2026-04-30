@@ -415,6 +415,49 @@
           </generateGitPropertiesFilename>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.opengroup.osdu</groupId>
+            <artifactId>osdu-enforcer-rules</artifactId>
+            <version>1.0.1</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <phase>verify</phase>
+            <configuration>
+              <rules>
+                <enforceTestExecution/>
+                <banDuplicatePomDependencyVersions/>
+                <reactorModuleConvergence/>
+                <requireSameVersions>
+                  <plugins>
+                    <plugin>org.apache.maven.plugins:maven-surefire-plugin</plugin>
+                    <plugin>org.apache.maven.plugins:maven-failsafe-plugin</plugin>
+                    <plugin>org.apache.maven.plugins:maven-surefire-report-plugin</plugin>
+                  </plugins>
+                </requireSameVersions>
+                <requireReleaseDeps>
+                  <message>No Snapshots Allowed!</message>
+                  <excludes>
+                    <exclude>org.opengroup.osdu:os-workflow</exclude>
+                    <exclude>org.opengroup.osdu:workflow-core</exclude>
+                    <exclude>org.opengroup.osdu:workflow-core-plus</exclude>
+                  </excludes>
+                </requireReleaseDeps>
+              </rules>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -424,6 +467,13 @@
       <url>${repo.releases.url}</url>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>${repo.releases.id}</id>
+      <url>${repo.releases.url}</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <distributionManagement>
     <repository>

@@ -1,23 +1,21 @@
+/*
+ *  Copyright 2020-2026 Google LLC
+ *  Copyright 2020-2026 EPAM Systems, Inc
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.opengroup.osdu.workflow.provider.azure.repository;
-
-import com.azure.storage.blob.sas.BlobContainerSasPermission;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.opengroup.osdu.azure.blobstorage.BlobStore;
-import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
-import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
-import org.opengroup.osdu.core.common.model.http.DpsHeaders;
-import org.opengroup.osdu.workflow.provider.azure.WorkflowAzureApplication;
-import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
-import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +25,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(classes = {WorkflowAzureApplication.class})
+import com.azure.storage.blob.sas.BlobContainerSasPermission;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opengroup.osdu.azure.blobstorage.BlobStore;
+import org.opengroup.osdu.azure.cosmosdb.CosmosStore;
+import org.opengroup.osdu.core.common.logging.JaxRsDpsLog;
+import org.opengroup.osdu.core.common.model.http.DpsHeaders;
+import org.opengroup.osdu.workflow.provider.azure.api.CustomOperatorApi;
+import org.opengroup.osdu.workflow.provider.azure.config.CosmosConfig;
+import org.opengroup.osdu.workflow.provider.azure.model.WorkflowTasksSharingDoc;
+
+@ExtendWith(MockitoExtension.class)
 public class WorkflowTasksSharingRepositoryTest {
 
   private static final String TEST_WORKFLOW_NAME = "test-workflow-name";
@@ -53,12 +67,14 @@ public class WorkflowTasksSharingRepositoryTest {
   @Mock
   private JaxRsDpsLog logger;
 
+  @Mock
+  private CustomOperatorApi customOperatorApi;
+
   @InjectMocks
   private WorkflowTasksSharingRepository sut;
 
-  @Before
+  @BeforeEach
   public void init() {
-    doReturn(PARTITION_ID).when(dpsHeaders).getPartitionId();
     doReturn(DATABASE_NAME).when(cosmosConfig).getDatabase();
     doReturn(WORKFLOW_TASKS_SHARING_COLLECTION_NAME).when(cosmosConfig).getWorkflowTasksSharingCollection();
   }
@@ -66,7 +82,7 @@ public class WorkflowTasksSharingRepositoryTest {
   @Test
   public void testGetSignedUrl_whenContainerExists_thenReturnsSignedUrlForExistingContainer() {
     WorkflowTasksSharingDoc workflowTasksSharingDoc = mock(WorkflowTasksSharingDoc.class);
-
+    doReturn(PARTITION_ID).when(dpsHeaders).getPartitionId();
     doReturn(CONTAINER_ID).when(workflowTasksSharingDoc).getContainerId();
     doReturn(Optional.of(workflowTasksSharingDoc)).when(cosmosStore).findItem(
         eq(PARTITION_ID),
@@ -92,6 +108,7 @@ public class WorkflowTasksSharingRepositoryTest {
 
   @Test
   public void testGetSignedUrl_whenContainerDoesNotExist_thenCreateContainerAndReturnSignedUrl() {
+    doReturn(PARTITION_ID).when(dpsHeaders).getPartitionId();
     sut.getSignedUrl(TEST_WORKFLOW_NAME, TEST_RUN_ID);
 
     ArgumentCaptor<String> containerIdCaptor = ArgumentCaptor.forClass(String.class);
