@@ -121,6 +121,96 @@ recommended to use the latest stable version.
 Official Download Page:
 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases
 
+## External Composer Airflow support
+
+The Workflow service supports integration with external Airflow instances on GCP Composer. To run DAGs in external Airflow, the `externalAirflowSecret` property must be set in the `registrationInstructions` when creating a workflow.
+If the `externalAirflowSecret` is set in the workflow, all the requests to Airflow will use the connection properties specified in the secret.
+
+The secret specified in `externalAirflowSecret` should contain JSON with Airflow connection properties:
+
+```json
+{
+ "airflowApiClientType": "gcpComposer",
+ "url": "https://airflow.composer.host.example",
+ "version": "v2"
+}
+```
+
+- `version` is the Airflow API version (e.g., "v2").
+- `airflowApiClientType` should be exactly `gcpComposer` for GCP Composer support, or `BasicAuth` if using basic authentication (username/password).
+- `url` property is mandatory to specify the Airflow composer host.
+
+> **Note:** The workflow service account should have the groups mentioned in the secret ACL (`secretAcls`) to be able to access that secret. Additionally, the Workflow Google Service account must have the appropriate IAM permissions to access the target Composer Airflow instance. 
+> 
+> **Important Airflow Configuration:** The Workflow service **will not** provide configurations for external Airflow instances. It is entirely the **user's responsibility** to configure the targeted external Airflow instance so it can operate with OSDU. This includes ensuring:
+> - Proper access to the OSDU Entitlements service.
+> - All required PyPi packages and environment variables are present.
+> - All necessary DAGs are deployed.
+> 
+> For details and scripts on what a typical OSDU Airflow configuration looks like, please refer to the [Airflow Bootstrap Repository](https://community.opengroup.org/osdu/platform/deployment-and-operations/base-containers-gcp/airflow-bootstrap).
+
+Example of creating a secret with Airflow connection properties using the Secret Service:
+
+```shell
+curl --request POST \
+  --url https://{path}/api/secret/v2/secrets \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu' \
+  --data '{
+	"id": "external_airflow_secret",
+	"value": "{\"airflowApiClientType\": \"gcpComposer\",\"url\": \"https://airflow.composer.host.example\",\"version\": \"v2\"}",
+	"secretAcls": {
+		"viewers": [
+			"workflow.secret.viewers@osdu.group"
+		],
+		"owners": [
+			"workflow.secret.owners@osdu.group"
+		]
+	},
+	"enabled": true
+}'
+```
+
+When we create a workflow via a POST request, we should pass the `dagName` present in that external Airflow instance and the secret ID (`externalAirflowSecret`) we just created:
+
+```shell
+curl --request POST \
+  --url https://{path}/api/workflow/v1/workflow \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu' \
+  --data '{
+	"workflowName": "external_airflow_example",
+	"description": "This is an example of creating a workflow that executes on external Airflow.",
+	"registrationInstructions": {
+		"dagName": "airflow_monitoring",
+		"externalAirflowSecret": "external_airflow_secret"
+	}
+}'
+```
+
+Then we can trigger a workflow run via POST request using the earlier chosen workflow name as usual:
+
+```shell
+curl --request POST \
+  --url https://{path}/api/workflow/v1/workflow/external_airflow_example/workflowRun \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu' \
+  --data '{}'
+```
+
+Then we can get the workflow run status via GET requests, as usual:
+
+```shell
+curl --request GET \
+  --url https://{path}/api/workflow/v1/workflow/external_airflow_example/workflowRun/{runId} \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu'
+```
+
 ## License
 
 Copyright © Google LLC

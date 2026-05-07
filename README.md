@@ -374,9 +374,20 @@ The secret specified in `externalAirflowSecret` should contain JSON with Airflow
 }
 ```
 
-The properties `version` and `airflowApiClientType` are mandatory. The `url`, `username`, `password` and other properties are optional and may vary depending on the `version` and `airflowApiClientType`.
+- `version` is the Airflow API version (e.g., "v2").
+- `airflowApiClientType` should be exactly `BasicAuth`, which means that `username` and `password` should be used. Core API supports only `BasicAuth` by default, but CSPs (Cloud Service Providers) might add their own implementations.
+- `url`, `username`, and `password` properties are mandatory only for the `BasicAuth` client type.
 
-Example of creating a secret with Airflow connection properties:
+> **Note:** The workflow service account should have the groups mentioned in the secret ACL (`secretAcls`) to be able to access that secret.
+> 
+> **Important Airflow Configuration:** The Workflow service **will not** provide configurations for external Airflow instances. It is entirely the **user's responsibility** to configure the targeted external Airflow instance so it can operate with OSDU. This includes ensuring:
+> - Proper access to the OSDU Entitlements service.
+> - All required PyPi packages and environment variables are present.
+> - All necessary DAGs are deployed.
+> 
+> For details and scripts on what a typical OSDU Airflow configuration looks like, please refer to the [Airflow Bootstrap Repository](https://community.opengroup.org/osdu/platform/deployment-and-operations/base-containers-cimpl/airflow-infra-bootstrap).
+
+Example of creating a secret with Airflow connection properties using the Secret Service:
 
 ```sh
 curl --location --request POST 'https://{path}/api/secret/v2/secrets' \
@@ -384,8 +395,7 @@ curl --location --request POST 'https://{path}/api/secret/v2/secrets' \
     --header 'data-partition-id: osdu' \
     --header 'Content-Type: application/json'\
     --data-raw '{
-        "id": "external-airflow",
-        "key": "external-airflow",
+        "id": "external_airflow_secret",
         "value": "{\"airflowApiClientType\": \"BasicAuth\",\"password\": \"airflow\",\"url\": \"http://airflow:8080\",\"username\": \"airflow\",\"version\": \"v2\"}",
         "secretAcls": {
             "viewers": [
@@ -397,6 +407,45 @@ curl --location --request POST 'https://{path}/api/secret/v2/secrets' \
         },
         "enabled": true
     }'
+```
+
+When we create a workflow via a POST request, we should pass the `dagName` present in that external Airflow instance and the secret ID (`externalAirflowSecret`) we just created:
+
+```shell
+curl --request POST \
+  --url https://{path}/api/workflow/v1/workflow \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu' \
+  --data '{
+	"workflowName": "external_airflow_example",
+	"description": "This is an example of creating a workflow that executes on external Airflow.",
+	"registrationInstructions": {
+		"dagName": "airflow_monitoring",
+		"externalAirflowSecret": "external_airflow_secret"
+	}
+}'
+```
+
+Then we can trigger a workflow run via POST request using the earlier chosen workflow name as usual:
+
+```shell
+curl --request POST \
+  --url https://{path}/api/workflow/v1/workflow/external_airflow_example/workflowRun \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu' \
+  --data '{}'
+```
+
+Then we can get the workflow run status via GET requests, as usual:
+
+```shell
+curl --request GET \
+  --url https://{path}/api/workflow/v1/workflow/external_airflow_example/workflowRun/{runId} \
+  --header 'Authorization: Bearer {token}' \
+  --header 'Content-Type: application/json' \
+  --header 'data-partition-id: osdu'
 ```
 
 ## Workflow Service Provider Interfaces
